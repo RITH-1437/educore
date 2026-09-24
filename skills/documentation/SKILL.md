@@ -50,6 +50,14 @@ behavior.
 
 - Markdown, tables for reference data (ports, env vars), fenced code for
   commands.
+- Use **Mermaid** diagrams for graphs, workflows, architecture, sequences, and
+  ERD-level relationships — they render on GitHub and make docs meaningful and
+  easy to understand:
+  - `flowchart` / `graph` — architecture, module maps, approval flows.
+  - `erDiagram` — entity relationships (use `skills/academic-domain` terms).
+  - `sequenceDiagram` — API/notification flows.
+  - Wrap in a fenced block ```mermaid ... ``` and keep node labels short.
+  - Prefer Mermaid over ASCII art or pasted images for anything procedural.
 - Keep docs concise and actionable; avoid duplicating content between files.
 - When you change architecture or major behavior, update the docs **in the same
   change** (don't leave docs stale).
@@ -67,7 +75,8 @@ behavior.
 2. `docs/` numbers are sequential (`1_`, `2_`, …).
 3. Terminology matches `skills/academic-domain` and `skills/api`.
 4. No secrets/credentials in any doc.
-5. Related skills respected: `architecture`, `api`, `git-workflow`.
+5. Diagrams use Mermaid (no ASCII art for workflows/architecture).
+6. Related skills respected: `architecture`, `api`, `git-workflow`.
 
 ## Agent behavior (mandatory everywhere)
 

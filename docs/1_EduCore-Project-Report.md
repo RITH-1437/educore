@@ -1,1938 +1,954 @@
-# EduCore
+# EduCore — Project & Design Report
 
-## University Digital Administration Platform
+| | |
+|---|---|
+| **Project** | EduCore — University Digital Administration Platform |
+| **Target market** | Designed for Cambodian university environments |
+| **Architecture** | Modular Monolith (MVC backend) |
+| **Development team** | Rin Nairith & Lyhor |
+| **Status** | In development — foundation [Implemented], modules [Planned] |
+| **Report version** | 2.0 (rewritten; modernized formal baseline) |
 
-**Project Type:** Real-World University Information & Administration Platform
-**Target Market:** Cambodian Universities
-**Architecture:** MVC / Modular Monolith
-**Development Team:** Rin Nairith & Lyhor
-**Primary Stack:** Laravel + Vue.js
-**Database:** PostgreSQL
-**Deployment:** Docker + Laravel Cloud
-**Project Scope:** MVP → Production-Ready Platform → Advanced Extensions
-
----
-
-# 1. Executive Summary
-
-UniCore is a centralized digital administration platform designed to modernize university academic and administrative operations in Cambodia.
-
-Many university activities still depend on disconnected systems, spreadsheets, paper documents, messaging applications, and manual administrative processes. This creates difficulties for students, lecturers, departments, and university administrators when managing academic information, schedules, attendance, grades, documents, announcements, and student services.
-
-UniCore aims to provide one centralized platform where students, lecturers, departments, and university administrators can access the information and services relevant to their responsibilities.
-
-The platform will initially focus on academic and administrative workflows rather than attempting to replace every university system.
-
-The first version will provide:
-
-* Student management
-* Lecturer management
-* Faculty and department management
-* Program management
-* Course management
-* Academic year and semester management
-* Class and section management
-* Course registration
-* Timetable management
-* Attendance management
-* Assignment management
-* Examination management
-* Grade management
-* GPA calculation
-* Announcement management
-* Notification management
-* Document requests
-* Digital invoices and payment records
-* Internship management
-* Dashboard analytics
-* QR-based document verification
-* Email and Telegram notifications
-
-The platform will be developed using Laravel and Vue.js with an MVC-oriented backend architecture and a modular monolithic structure.
+> **Reading notes**
+> - **Status labels** are used throughout: `[Implemented]`, `[Planned]`,
+>   `[Future]`, `[Out of Scope]`. Planned functionality is never described as if
+>   it already exists.
+> - This report is the technical/product companion to the business proposal
+>   `docs/3_business-overview.md`.
 
 ---
 
-# 2. Project Vision
+## 1. Executive Summary
 
-The vision of UniCore is:
+EduCore is a centralized digital administration platform for universities, designed
+initially for Cambodian university environments. It consolidates academic and
+administrative workflows — student and lecturer management, academic structure,
+course enrollment, the assessment cycle, documents, financial records,
+communication, internships, and reporting — into one secure web platform.
 
-> **To create a modern, secure, centralized digital platform that simplifies university academic and administrative operations while providing students and staff with a consistent digital experience.**
+Many institutions operate with spreadsheets, paper documents, disconnected systems,
+and manual approval processes. EduCore proposes to reduce fragmentation by giving each
+role a single, secure place to access the information and services they need.
 
-Instead of having information distributed across:
+The system is built around five roles and one central academic workflow:
 
-* Paper documents
-* Excel files
-* Messaging applications
-* Separate administrative systems
-* Manual approval processes
+```mermaid
+flowchart LR
+    A[University] --> B[Faculty]
+    B --> C[Department]
+    C --> D[Program]
+    A --> E[Academic Year]
+    E --> F[Semester]
+    D --> G[Course]
+    G --> H[Course Offering]
+    H --> I[Section]
+    I --> J[Lecturer]
+    I --> K[Student]
+    K --> L[Enrollment]
+    I --> M[Attendance]
+    I --> N[Assignment]
+    I --> O[Exam]
+    O --> P[Grade]
+    P --> Q[GPA]
+    Q --> R[Transcript / Document]
+```
 
-UniCore brings the major academic workflows into one platform.
+**Major capabilities (initial release):** authentication & RBAC, student/lecturer
+management, academic structure, courses & sections, enrollment, timetable, attendance,
+assignments, examinations, grades & GPA, documents with QR verification, invoice &
+payment records, announcements, email & Telegram notifications, internship management,
+analytics, and audit logs.
 
-### Current Concept
+**Implementation status:** the **foundation is implemented** — Laravel 12 backend
+scaffold with Sanctum authentication and health endpoint, Vue 3 + TypeScript frontend
+scaffold with an API client, a complete Docker development environment, and CI/CD
+workflows. **All business modules are planned** for the initial release.
 
-Student → Department → Administration → Lecturer → Separate systems
+---
 
-### UniCore Concept
+## 2. Project Vision
 
-```text
-                    UNICORE
-                       │
-        ┌──────────────┼──────────────┐
-        │              │              │
-     Student        Lecturer      Administration
-        │              │              │
-        └──────────────┼──────────────┘
-                       │
-              Centralized Platform
-                       │
-        ┌──────────────┼──────────────┐
-        │              │              │
-     Academic       Documents      Analytics
-     Services        Services       & Reports
+EduCore aims to provide a centralized digital environment where a university's academic
+and administrative activities can be managed through one secure platform.
+
+```mermaid
+flowchart TB
+    subgraph Users
+        S[Student]
+        L[Lecturer]
+        A[Administrators]
+        M[Management]
+    end
+    subgraph EduCore[EduCore Platform]
+        Academic[Academic Services]
+        Docs[Document Services]
+        Comm[Communication]
+        Report[Analytics & Reports]
+    end
+    subgraph Data
+        P[(PostgreSQL)]
+        R[(Redis)]
+        MO[(MinIO)]
+    end
+    S --> Academic
+    L --> Academic
+    A --> Docs
+    A --> Comm
+    M --> Report
+    Academic --> P
+    Docs --> MO
+    Comm --> R
+    Report --> P
+```
+
+### Current pattern vs. proposed pattern
+
+```mermaid
+flowchart LR
+    subgraph Today[Today]
+        T1[Paper documents] 
+        T2[Spreadsheets] 
+        T3[Messaging apps] 
+        T4[Separate systems]
+    end
+    subgraph EduCore[EduCore]
+        E1[One secure platform] 
+        E2[Students / Lecturers / Admins]
+    end
+    T1 -. fragmented .-> X[manual work, limited visibility]
+    T2 -. fragmented .-> X
+    T3 -. fragmented .-> X
+    T4 -. fragmented .-> X
+    X -.->|replaces| E1
+    E1 --> E2
+```
+
+The vision is deliberately practical: it does not promise to replace every university
+system; it consolidates the most important workflows first.
+
+---
+
+## 3. Problem Statement
+
+Universities manage large amounts of academic and administrative information. Common
+problems include:
+
+| Problem area | Current challenge | Operational consequence |
+|---|---|---|
+| **Information fragmentation** | Student, course, attendance, grade, and document data live in different systems/files | Inconsistent records and repeated re-entry |
+| **Manual processes** | Students visit offices for documents, registration, approvals | Slow turnaround, heavy staff workload |
+| **Limited visibility** | Management lacks timely enrolment/attendance/performance views | Decisions rely on delayed information |
+| **Communication** | Announcements spread across informal channels | Some students/staff miss important information |
+| **Document management** | Documents prepared and verified manually | Slow, hard-to-verify documents |
+| **Scheduling conflicts** | Manual timetable creation | Lecturer/room/section conflicts |
+| **Fragmented student services** | Students use several channels for courses, schedules, grades, documents | Poor student experience |
+
+EduCore addresses these through centralized data, structured workflows, role-based
+access, and integrated communication.
+
+---
+
+## 4. Project Objectives
+
+### 4.1 General Objective
+
+Develop a centralized digital university administration platform that improves academic
+management, administrative workflows, communication, and student services.
+
+### 4.2 Specific Objectives
+
+1. Centralize university academic information. [Planned]
+2. Digitize student and lecturer management. [Planned]
+3. Manage faculties, departments, programs, courses, and sections. [Planned]
+4. Provide students with a centralized academic portal. [Planned]
+5. Provide lecturers with tools for attendance, assignments, exams, and grades. [Planned]
+6. Provide administrators with centralized management tools. [Planned]
+7. Digitize document request workflows with QR verification. [Planned]
+8. Provide invoice and payment-record management. [Planned]
+9. Improve communication through email and Telegram notifications. [Planned]
+10. Provide academic analytics and reporting. [Planned]
+11. Support the internship workflow. [Planned]
+12. Build a modular-monolith architecture that supports future expansion. [Implemented]
+
+---
+
+## 5. Target Users and Roles
+
+EduCore uses **role-based access control** with five system roles.
+
+```mermaid
+flowchart TB
+    R[System Roles — RBAC]
+    R --> SA[Super Admin]
+    R --> UA[University Admin]
+    R --> FA[Faculty / Department Admin]
+    R --> LE[Lecturer]
+    R --> ST[Student]
+```
+
+| Role | Responsibility | Typical capabilities |
+|---|---|---|
+| **Super Admin** | Platform owner | User/role/permission management, university configuration, audit logs, monitoring |
+| **University Admin** | University-level administration | Faculties, departments, programs, students, lecturers, courses, semesters, announcements, documents, payment records, reports |
+| **Faculty / Department Admin** | Unit-level academic operations | Their unit's students, lecturers, courses, sections, schedules; monitor attendance/performance; review requests |
+| **Lecturer** | Teaching management | View assigned sections, take attendance, create assignments, manage exams, submit grades, publish course announcements, upload materials |
+| **Student** | Own academic life | View profile/academic info, register courses, view timetable/attendance/assignments/exams/grades/GPA, request documents, view invoices/payments, receive announcements |
+
+**Isolation rules:** students see only their own records; lecturers only their assigned
+sections; unit admins only their unit. Authorization is enforced server-side.
+
+> There is **no Finance Officer role** in the initial system. Invoices and payment
+> records are managed by University Admins.
+
+---
+
+## 6. Academic Structure
+
+The platform models the university hierarchy precisely, with canonical terms used
+consistently across code, docs, and skills.
+
+```mermaid
+flowchart TB
+    U[University]
+    U --> FA[Faculty]
+    FA --> DE[Department]
+    DE --> PR[Program]
+    U --> AY[Academic Year]
+    AY --> SE[Semester]
+    PR --> CO[Course]
+    CO --> OF[Course Offering]
+    OF --> SEC[Section]
+    DE --> CO
+    SE --> OF
+```
+
+**Example instance:**
+
+```mermaid
+flowchart TB
+    U[University]
+    U --> FE[Faculty of Engineering]
+    FE --> CS[Department of Computer Science]
+    CS --> BCS[Bachelor of Computer Science]
+    AY[Academic Year 2026-2027] --> S1[Semester 1]
+    BCS --> DB[Database Systems]
+    BCS --> WD[Web Development]
+    BCS --> SE[Software Engineering]
+    DB --> DBA[Section A]
+    DB --> DBB[Section B]
+    S1 --> DBA
 ```
 
 ---
 
-# 3. Problem Statement
+## 7. Core Database Entities
 
-Universities manage large amounts of academic and administrative information.
+The database is organized around the academic model. A simplified ERD:
 
-Common problems include:
+```mermaid
+erDiagram
+    USERS ||--o{ STUDENTS : "is a"
+    USERS ||--o{ LECTURERS : "is a"
+    USERS ||--o{ AUDIT_LOGS : "performs"
+    ROLES ||--o{ USERS : "assigns"
 
-### 3.1 Information fragmentation
+    FACULTIES ||--o{ DEPARTMENTS : "has"
+    DEPARTMENTS ||--o{ PROGRAMS : "offers"
+    PROGRAMS ||--o{ COURSES : "includes"
+    COURSES ||--o{ COURSE_PREREQUISITES : "has requirements"
+    COURSES ||--o{ COURSE_OFFERINGS : "is offered as"
+    COURSE_OFFERINGS ||--o{ SECTIONS : "contains"
+    LECTURERS ||--o{ SECTION_LECTURERS : "teaches"
+    SECTIONS ||--o{ SECTION_LECTURERS : "staffed by"
+    SECTIONS ||--o{ ENROLLMENTS : "enrolls"
+    STUDENTS ||--o{ ENROLLMENTS : "enroll into"
+    SECTIONS ||--o{ SCHEDULES : "scheduled on"
+    ROOMS ||--o{ SCHEDULES : "hosts"
+    SECTIONS ||--o{ ATTENDANCE : "records"
+    SECTIONS ||--o{ ASSIGNMENTS : "has"
+    ASSIGNMENTS ||--o{ ASSIGNMENT_SUBMISSIONS : "receives"
+    SECTIONS ||--o{ EXAMS : "schedules"
+    EXAMS ||--o{ EXAM_RESULTS : "produces"
+    SECTIONS ||--o{ GRADES : "issues"
+    STUDENTS ||--o{ GRADES : "receives"
 
-Student information, course information, attendance, grades, and documents may be stored in different systems or files.
+    STUDENTS ||--o{ DOCUMENT_REQUESTS : "requests"
+    DOCUMENT_REQUESTS ||--o{ DOCUMENTS : "generates"
+    DOCUMENTS ||--o{ DOCUMENT_VERIFICATIONS : "verified via"
+    STUDENTS ||--o{ INVOICES : "owes"
+    INVOICES ||--o{ PAYMENTS : "paid by"
 
-### 3.2 Manual processes
+    STUDENTS ||--o{ INTERNSHIPS : "applies to"
+    INTERNSHIPS ||--o{ INTERNSHIP_REPORTS : "produces"
+    INTERNSHIPS ||--o{ INTERNSHIP_EVALUATIONS : "evaluated by"
 
-Students may need to physically contact departments for:
-
-* Academic documents
-* Registration
-* Approvals
-* Requests
-* Information
-
-### 3.3 Limited visibility
-
-University management may have difficulty obtaining real-time information about:
-
-* Enrollment
-* Attendance
-* Academic performance
-* Course performance
-* Student activity
-
-### 3.4 Communication problems
-
-Important announcements may be distributed through different communication channels.
-
-### 3.5 Document management
-
-Academic documents can require manual preparation, verification, and distribution.
-
-### 3.6 Scheduling conflicts
-
-Manual timetable creation can result in:
-
-* Teacher conflicts
-* Room conflicts
-* Class conflicts
-
-### 3.7 Lack of centralized student services
-
-Students may need to use multiple channels to access:
-
-* Courses
-* Timetables
-* Grades
-* Attendance
-* Documents
-* Announcements
-* Internship information
-
-UniCore addresses these problems through a centralized platform.
-
----
-
-# 4. Project Objectives
-
-## 4.1 General Objective
-
-To develop a centralized digital university administration platform that improves academic management, administrative workflows, communication, and student services.
-
-## 4.2 Specific Objectives
-
-1. Centralize university academic information.
-2. Digitize student and lecturer management.
-3. Manage faculties, departments, programs, courses, and classes.
-4. Provide students with a centralized academic portal.
-5. Provide lecturers with tools for attendance, assignments, exams, and grades.
-6. Provide administrators with centralized management tools.
-7. Digitize document request workflows.
-8. Provide invoice and payment-record management.
-9. Improve university communication through email and Telegram notifications.
-10. Provide academic analytics and reporting.
-11. Provide QR-based document verification.
-12. Build a scalable architecture that can support future expansion.
-
----
-
-# 5. Target Users
-
-UniCore will use role-based access control.
-
-## 5.1 Super Administrator
-
-Responsible for the overall platform.
-
-Capabilities include:
-
-* User management
-* Role management
-* Permission management
-* University configuration
-* System settings
-* Audit logs
-* Platform monitoring
-
----
-
-## 5.2 University Administrator
-
-Responsible for university-level administration.
-
-Capabilities:
-
-* Manage faculties
-* Manage departments
-* Manage academic programs
-* Manage students
-* Manage lecturers
-* Manage courses
-* Manage semesters
-* Manage academic years
-* Manage announcements
-* Review requests
-* Manage documents
-* Manage payment records
-* View reports
-
----
-
-## 5.3 Faculty / Department Administrator
-
-Responsible for academic operations within their assigned area.
-
-Capabilities:
-
-* Manage students
-* Manage lecturers
-* Manage courses
-* Manage classes
-* Manage schedules
-* Review student requests
-* Monitor attendance
-* Monitor academic performance
-
----
-
-## 5.4 Lecturer
-
-Capabilities:
-
-* View assigned courses
-* View enrolled students
-* Manage attendance
-* Create assignments
-* Manage exams
-* Submit grades
-* Publish course announcements
-* Upload course materials
-
----
-
-## 5.5 Student
-
-Capabilities:
-
-* View profile
-* View academic information
-* Register for courses
-* View timetable
-* View attendance
-* View assignments
-* View examination information
-* View grades
-* View GPA
-* Request documents
-* View invoices
-* View payment records
-* Receive announcements
-* Receive notifications
-* Manage internship information
-
----
-
-# 6. Academic Structure
-
-UniCore will support the following hierarchy:
-
-```text
-University
-    │
-    ├── Faculty
-    │      │
-    │      └── Department
-    │              │
-    │              └── Program
-    │                      │
-    │                      └── Courses
-    │
-    └── Academic Years
-            │
-            └── Semesters
-                    │
-                    └── Sections / Classes
+    USERS ||--o{ ANNOUNCEMENTS : "publishes"
+    USERS ||--o{ NOTIFICATIONS : "receives"
 ```
 
-Example:
+The canonical relationship rules (see `skills/database/SKILL.md`):
 
-```text
-University
-└── Faculty of Engineering
-    └── Department of Computer Science
-        └── Bachelor of Computer Science
-            ├── Database Systems
-            ├── Web Development
-            ├── Software Engineering
-            └── Computer Networks
-```
+- A course offering = a course × a semester.
+- A section = a concrete class instance of an offering (lecturer, room, capacity, schedule).
+- A student can enroll in a section only if prerequisites are satisfied and capacity allows.
+- No duplicate enrollment in the same offering/semester.
 
 ---
 
-# 7. Major System Modules
+## 8. System Modules (Overview)
 
-## Module 1 — Authentication & Authorization
+```mermaid
+flowchart TB
+    subgraph Access[Access Layer]
+        Auth[Authentication & RBAC]
+    end
+    subgraph Academic[Academic Core]
+        SM[Student Management]
+        LM[Lecturer Management]
+        FD[Faculty & Department]
+        PM[Program Management]
+        AYS[Academic Year & Semester]
+        CM[Course Management]
+        SEC[Section Management]
+        ENR[Enrollment]
+        TT[Timetable]
+        AT[Attendance]
+        ASN[Assignments]
+        EX[Examinations]
+        GR[Grades & GPA]
+        DASH[Student Academic Dashboard]
+    end
+    subgraph AdminAdmin[Administration]
+        DOC[Document Management]
+        VER[QR Document Verification]
+        INV[Invoices & Payments]
+        AMP[Announcements]
+        NTF[Email & Telegram Notifications]
+        INT[Internship Management]
+        ANL[Analytics & Reporting]
+        AUD[Audit Logs]
+    end
+    Auth --> Academic
+    Auth --> AdminAdmin
+```
 
-Authentication will use:
-
-**Student ID + Password**
-
-The system will support role-based authorization.
-
-Core features:
-
-* Login
-* Logout
-* Password change
-* Password reset
-* Session management
-* Role-based access
-* Permission management
-* Account activation/deactivation
-
-Laravel Sanctum can be used for API authentication.
+All modules are `[Planned]` unless marked otherwise; the foundation beneath them is
+`[Implemented]`.
 
 ---
 
-# 8. Student Management
+## 9. Module Details
 
-Administrators can manage:
+### 9.1 Authentication & Authorization [Planned]
 
-* Student ID
-* Name
-* Gender
-* Date of birth
-* Contact information
-* Address
-* Profile photo
-* Program
-* Department
-* Faculty
-* Academic year
-* Enrollment status
-* Student status
+- **Login** with student ID / staff ID + password.
+- **Logout, password change, password reset, session/account management.**
+- **RBAC** with role and permission management.
+- **Implementation:** Laravel Sanctum for API token authentication; permissions
+  enforced server-side (`skills/authentication`, `skills/authorization`).
 
-Possible statuses:
-
-```text
-Active
-Inactive
-Suspended
-Graduated
-Withdrawn
+```mermaid
+sequenceDiagram
+    participant U as User
+    participant A as Frontend (Vue)
+    participant B as API (Laravel)
+    participant P as PostgreSQL
+    U->>A: Enter ID + password
+    A->>B: POST /api/login
+    B->>P: Verify credentials
+    P-->>B: User + roles
+    B-->>A: Sanctum token
+    A->>U: Signed in (token stored)
+    A->>B: GET /api/user (Bearer token)
 ```
+
+### 9.2 Student Management [Planned]
+
+Manages: student ID, name, gender, DOB, contact, address, photo, program, department,
+faculty, academic year, enrollment status.
+
+```mermaid
+flowchart LR
+    ST[Student status] --> A[Active]
+    ST --> I[Inactive]
+    ST --> S[Suspended]
+    ST --> G[Graduated]
+    ST --> W[Withdrawn]
+```
+
+### 9.3 Lecturer Management [Planned]
+
+Manages: profile, employee info, department, academic position, assigned courses,
+teaching schedules, contact, status.
+
+### 9.4 Faculty & Department Management [Planned]
+
+Manages faculties, departments, programs, and program structures (see §6).
+
+### 9.5 Course Management [Planned]
+
+Per course: code, name, description, credits, department, program, semester,
+prerequisites, sections, schedule.
+
+Example: `CS301 Software Engineering — 3 credits — Prerequisites: CS201, CS202`.
+
+### 9.6 Academic Year & Semester Management [Planned]
+
+Supports academic years, semesters, and enrollment/registration/examination periods.
+
+```mermaid
+flowchart TB
+    AY[2026-2027] --> S1[Semester 1]
+    AY --> S2[Semester 2]
+    S1 --> E1[Enrollment period]
+    S1 --> R1[Registration period]
+    S1 --> X1[Examination period]
+```
+
+### 9.7 Section Management [Planned]
+
+A course offering can have multiple sections (A, B, C…) each with lecturer, students,
+room, schedule, capacity, and semester. Capacity is enforced at enrollment.
+
+### 9.8 Course Registration / Enrollment [Planned]
+
+```mermaid
+flowchart TB
+    Student[Student] --> View[View available sections]
+    View --> Select[Select sections]
+    Select --> Submit[Submit registration]
+    Submit --> Val[Validation]
+    Val -->|passes| Ok[Registration confirmed]
+    Val -->|fails| Reject[Reason returned: prerequisite / duplicate / capacity / status]
+```
+
+Validation checks: course availability, prerequisites, duplicate registration,
+semester, maximum credits, student status.
+
+### 9.9 Timetable Management [Planned]
+
+```mermaid
+flowchart LR
+    subgraph Conflicts[Conflict detection]
+        C1[Lecturer conflict]
+        C2[Room conflict]
+        C3[Student-group / section conflict]
+    end
+    TT[Timetable builder] --> Conflicts
+```
+
+### 9.10 Attendance Management [Planned]
+
+```mermaid
+flowchart LR
+    L[Lecturer] --> Mark[Mark session]
+    Mark --> P2[Present / Absent / Late / Excused]
+    P2 --> Calc[Percentages calculated]
+    Calc --> Stu[Student views: e.g. 92%]
+```
+
+### 9.11 Assignment Management [Planned]
+
+- Lecturer: create assignments, set deadlines, upload files, view and grade submissions.
+- Student: view assignments, download materials, submit work, view results.
+
+### 9.12 Examination Management [Planned]
+
+Supports midterm, final, quizzes; exam schedules and results. Grading weights are
+configurable by the university.
+
+```mermaid
+pie
+    title Example weighting — Database Systems
+    "Midterm" : 30
+    "Final" : 40
+    "Assignments" : 20
+    "Attendance" : 10
+```
+
+### 9.13 Grades & GPA [Planned]
+
+```mermaid
+flowchart LR
+    Score[Score] --> LG[Letter Grade]
+    LG --> GP[Grade Point]
+    GP --> SGPA[Semester GPA]
+    SGPA --> CGPA[Cumulative GPA]
+```
+
+Example scale (configurable): `A=4.0, B+=3.5, B=3.0, C+=2.5, C=2.0, D=1.0, F=0.0`.
+
+### 9.14 Student Academic Dashboard [Planned]
+
+A single-page academic summary:
+
+```mermaid
+flowchart TB
+    subgraph Dashboard[Student Dashboard]
+        Cards[GPA · Attendance · Credits]
+        Today[Today's classes]
+        Up[R][Upcoming assignments]
+        Ann[Announcements]
+        Recent[Recent grades]
+    end
+```
+
+### 9.15 Document Management [Planned]
+
+Students request documents digitally (enrollment certificate, student certificate,
+academic transcript, academic result, internship letter, others).
+
+```mermaid
+flowchart TB
+    S[Student] --> Req[Document request]
+    Req --> Rev[Administrator review]
+    Rev -->|rejected| Back[Request returned with reason]
+    Rev -->|approved| Gen[Document generated with QR]
+    Gen --> DL[Student downloads]
+```
+
+### 9.16 Digital Document Verification [Planned]
+
+Generated documents carry a unique QR code linking to a verification page.
+
+```mermaid
+flowchart LR
+    Doc[Document] --> QR[QR Code]
+    QR --> URL[Verification URL]
+    URL --> Check[EduCore verification]
+    Check --> V[Valid / Invalid]
+```
+
+### 9.17 Invoice & Payment Records [Planned]
+
+```mermaid
+flowchart LR
+    Stu[Student] --> Inv[Invoice]
+    Inv --> Amt[Amount]
+    Inv --> Due[Due date]
+    Inv --> Stats[Status: Pending / Partially Paid / Paid / Overdue / Cancelled]
+    Pay[Payment record: amount, date, method, reference] --> Inv
+```
+
+> **Boundary:** this records payments; it does **not** include an online payment
+> gateway in the initial scope. (`skills/invoices-payments/SKILL.md`)
+
+### 9.18 Announcement Management [Planned]
+
+Targets: all students, faculty, department, program, class, course.
+
+```mermaid
+flowchart LR
+    Auth[Authorized user] --> Pub[Publish announcement]
+    Pub --> Target[Target audience]
+    Target --> NTF[Email / Telegram]
+```
+
+### 9.19 Notification System [Planned]
+
+- **Email:** announcements, document status, registration confirmation, password-related,
+  administrative notifications.
+- **Telegram:** announcements, class reminders, assignment reminders, important
+  academic notifications.
+- Designed so additional channels can be added later.
+
+### 9.20 Internship Management [Planned]
+
+```mermaid
+flowchart TB
+    Stu[Student] --> App[Internship application]
+    App --> Cmp[Company information]
+    App --> Rev[University review]
+    Rev --> Appr[Approval]
+    Appr --> Int[Internship]
+    Int --> Rep[Reports]
+    Rep --> Eval[Supervisor evaluation]
+    Eval --> Fin[Final evaluation]
+```
+
+### 9.21 Analytics & Reporting [Planned]
+
+- Student analytics: total/active/graduated/withdrawn.
+- Academic analytics: GPA distribution, course pass rate, attendance, course performance.
+- Enrollment analytics: per program/department/semester.
+- Administrative analytics: pending requests, documents generated, outstanding invoices,
+  announcements.
+
+Derived from centralized data. No predictive analytics in the initial scope.
+
+### 9.22 Audit Logs [Planned]
+
+Append-only record of important actions (grade changes, document approvals, payment
+records, authorization changes, login failures). Never logs secrets.
+(`skills/audit-logging/SKILL.md`)
 
 ---
 
-# 9. Lecturer Management
+## 10. System Architecture
 
-The system will manage:
+EduCore is a **modular monolith**: one application organized into clear modules,
+deployed simply.
 
-* Lecturer profile
-* Employee information
-* Department
-* Academic position
-* Assigned courses
-* Teaching schedules
-* Contact information
-* Status
+```mermaid
+flowchart TB
+    Client[Browser] --> Nginx[Nginx — single entry point]
+    Nginx --> FE[Vue 3 + TypeScript frontend]
+    FE -->|REST API| BE[Laravel backend]
+    BE --> PG[(PostgreSQL)]
+    BE --> RD[(Redis — cache/queue/session)]
+    BE --> MO[(MinIO — document/image storage)]
+    BE --> NTF[Email / Telegram notifications]
+    DevOps[GitHub · GitHub Actions · Docker · Laravel Cloud] -.-> Nginx
+```
+
+### 10.1 Backend layers
+
+```mermaid
+flowchart TB
+    C[Controller] --> S[Service]
+    S --> Repo[Repository]
+    S --> Req[Form Request validation]
+    Repo --> M[Model]
+    M --> PG[(PostgreSQL)]
+    Auth[Policies / RBAC] -. enforces .-> C
+```
+
+**Laravel MVC responsibilities:**
+
+- **Model:** relationships, business entities, data representation.
+- **Controller:** receive requests, call services, return responses.
+- **View:** handled by Vue (frontend); Laravel exposes an API rather than Blade views.
+
+### 10.2 Frontend organization
+
+```mermaid
+flowchart TB
+    SRC["src/"] --> FE2["components/ · layouts/ · pages/ · views/"]
+    SRC --> ST["stores/ (Pinia)"]
+    SRC --> SV["services/ (Axios api.ts)"]
+    SRC --> ROUTER["router/ (Vue Router)"]
+    SRC --> UX["composables/ · types/ · utils/"]
+    SRC --> UI["styling (Tailwind CSS)"]
+```
+
+Organized by feature; never a single huge component collection.
 
 ---
 
-# 10. Faculty & Department Management
+## 11. Technology Stack
 
-Administrators can create and manage:
+| Layer | Technology | Purpose |
+|---|---|---|
+| Backend | Laravel 12 (PHP 8.4) | API, services, validation, authorization |
+| API auth | Laravel Sanctum | Token-based authentication |
+| Frontend | Vue 3 + TypeScript + Vite | User interface |
+| Styling | Tailwind CSS | Styling system |
+| State | Pinia | Client state |
+| Routing | Vue Router | Navigation |
+| HTTP | Axios | API requests |
+| Charts | Chart.js | Dashboards |
+| Database | PostgreSQL | Primary data store |
+| Cache/queue/session | Redis | Performance, background work |
+| Object storage | MinIO (S3) | Files and documents |
+| Web server | Nginx | Single entry point |
+| Containers | Docker / Docker Compose | Consistent environment |
+| CI/CD | GitHub Actions | Lint, tests, build, notifications |
+| Deployment | Laravel Cloud | Production target |
+| Notifications | Email provider + Telegram Bot API | Communication |
 
-* Faculties
-* Departments
-* Programs
-* Program structures
-
-Example:
-
-```text
-Faculty
-  ↓
-Department
-  ↓
-Program
-  ↓
-Course
-```
-
----
-
-# 11. Course Management
-
-Each course can contain:
-
-* Course code
-* Course name
-* Description
-* Credits
-* Department
-* Program
-* Semester
-* Prerequisites
-* Lecturer
-* Sections
-* Schedule
-
-Example:
-
-```text
-CS301
-Software Engineering
-3 Credits
-
-Prerequisites:
-CS201
-CS202
-```
+[Implemented] base: Laravel 12 scaffold, Sanctum, Vue scaffold, Docker stack (7
+services healthy), CI/CD workflows.
 
 ---
 
-# 12. Academic Year & Semester Management
-
-The system will support:
-
-* Academic years
-* Semesters
-* Enrollment periods
-* Registration periods
-* Examination periods
-
-Example:
-
-```text
-2026–2027
-│
-├── Semester 1
-│
-└── Semester 2
-```
-
----
-
-# 13. Class / Section Management
-
-A course can contain multiple sections.
-
-Example:
-
-```text
-Database Systems
-
-Section A
-Section B
-Section C
-```
-
-Each section may have:
-
-* Lecturer
-* Students
-* Room
-* Schedule
-* Capacity
-* Semester
-
----
-
-# 14. Course Registration
-
-Students can register for available courses.
-
-Workflow:
-
-```text
-Student
-   ↓
-View Available Courses
-   ↓
-Select Courses
-   ↓
-Submit Registration
-   ↓
-Validation
-   ↓
-Registration Confirmed
-```
-
-The system should check:
-
-* Course availability
-* Prerequisites
-* Duplicate registration
-* Semester
-* Maximum credits
-* Student status
-
----
-
-# 15. Timetable Management
-
-The timetable system manages:
-
-* Courses
-* Lecturers
-* Rooms
-* Days
-* Time slots
-* Sections
-
-The system should detect:
-
-### Lecturer conflict
-
-```text
-Teacher A
-10:00
-Course A
-
-Teacher A
-10:00
-Course B
-
-❌ Conflict
-```
-
-### Room conflict
-
-```text
-Room 301
-10:00
-Course A
-
-Room 301
-10:00
-Course B
-
-❌ Conflict
-```
-
-### Section conflict
-
-The same student group should not have two classes at the same time.
-
----
-
-# 16. Attendance Management
-
-Lecturers can record attendance.
-
-Possible statuses:
-
-```text
-Present
-Absent
-Late
-Excused
-```
-
-Students can view:
-
-```text
-Database Systems
-Attendance: 92%
-
-Present: 11
-Absent: 1
-Late: 0
-```
-
-The platform can calculate attendance percentages automatically.
-
----
-
-# 17. Assignment Management
-
-Lecturers can:
-
-* Create assignments
-* Set deadlines
-* Upload files
-* Add descriptions
-* View submissions
-* Grade submissions
-
-Students can:
-
-* View assignments
-* Download materials
-* Submit work
-* View results
-
----
-
-# 18. Examination Management
-
-The system will support:
-
-* Midterm exams
-* Final exams
-* Quizzes
-* Exam schedules
-* Exam results
-
-Example:
-
-```text
-Database Systems
-
-Midterm       30%
-Final         40%
-Assignments   20%
-Attendance    10%
-```
-
-The exact grading configuration should be configurable by the university.
-
----
-
-# 19. Grade Management
-
-Lecturers submit grades through their course dashboard.
-
-The system calculates:
-
-```text
-Score
-   ↓
-Letter Grade
-   ↓
-Grade Point
-   ↓
-Semester GPA
-   ↓
-Cumulative GPA
-```
-
-Example:
-
-```text
-A  = 4.0
-B+ = 3.5
-B  = 3.0
-C+ = 2.5
-C  = 2.0
-D  = 1.0
-F  = 0.0
-```
-
-The actual grading scale should be configurable.
-
----
-
-# 20. Student Academic Dashboard
-
-Students should have a centralized dashboard containing:
-
-```text
-┌────────────────────────────────────┐
-│ Welcome, Student                   │
-├────────────────────────────────────┤
-│ GPA        Attendance    Credits   │
-│ 3.62       94%           96        │
-├────────────────────────────────────┤
-│ Today's Classes                    │
-├────────────────────────────────────┤
-│ Upcoming Assignments               │
-├────────────────────────────────────┤
-│ Announcements                      │
-├────────────────────────────────────┤
-│ Recent Grades                      │
-└────────────────────────────────────┘
+## 12. Development Methodology
+
+EduCore follows an **Agile** approach with short iterations.
+
+```mermaid
+flowchart LR
+    Req[Requirement] --> US[User story]
+    US --> DB[Database]
+    DB --> API[API]
+    API --> FE[Frontend]
+    FE --> T[Tesing / review]
+    T --> M[Merge]
 ```
 
 ---
 
-# 21. Document Management
+## 13. Project Roadmap
 
-Students can request official documents digitally.
+The initial target is a **production-capable MVP in approximately 12 weeks**, continuing
+into V1/V2 rather than delaying the first usable release. The overall program is planned
+for approximately 4–6 months.
 
-Examples:
+```mermaid
+gantt
+    title EduCore initial roadmap (MVP ~12 weeks)
+    dateFormat  YYYY-MM-DD
+    section Foundation
+    Research, requirements, architecture   :a1, 2026-01-01, 7d
+    Database, UI, project foundation       :a2, after a1, 7d
+    section Structure
+    Authentication + RBAC                 :b1, after a2, 7d
+    University structure                   :b2, after b1, 7d
+    Students + lecturers                   :b3, after b2, 7d
+    section Academic core
+    Courses + sections                     :c1, after b3, 7d
+    Enrollment + timetable                  :c2, after c1, 7d
+    Attendance + assignments                :c3, after c2, 7d
+    Exams + grades + GPA                    :c4, after c3, 7d
+    section Administration
+    Documents + invoices + payments         :d1, after c4, 7d
+    Notifications + dashboards             :d2, after d1, 7d
+    Testing + deployment                    :d3, after d2, 7d
+```
 
-* Enrollment certificate
-* Student certificate
-* Academic transcript
-* Academic result
-* Internship letter
-* Other university documents
+**Month-by-month view (4–6 month program):**
 
-Workflow:
+| Month | Focus |
+|---|---|
+| Month 1 | Foundation & architecture |
+| Month 2 | University structure & people |
+| Month 3 | Academic core (sections, enrollment, timetable, attendance) |
+| Month 4 | Examinations, grades, documents, financial records |
+| Month 5 | Communication, analytics, internship, audit |
+| Month 6 | Testing, security, production hardening |
 
-```text
-Student
-   ↓
-Document Request
-   ↓
-Administrator Review
-   ↓
-Approved
-   ↓
-Document Generated
-   ↓
-Student Downloads
+---
+
+## 14. Git & GitHub Workflow
+
+- Branches: `main`, `develop`, `feature/<module>-<name>`, `fix/*`, `refactor/*`, `docs/*`, `chore/*`.
+- **Commit format: `[Tag]: description.`** — see `skills/git-commit-style/SKILL.md`
+  (tags: `[Build]`, `[Doc]`, `[Feature]`, `[Fix]`, `[Refactor]`, `[Test]`, `[Style]`, `[Chore]`).
+- Workflow:
+
+```mermaid
+flowchart LR
+    FB[Feature branch] --> Dev[Development]
+    Dev --> PR[Pull request]
+    PR --> CR[Code review]
+    CR --> Merge[Merge → develop]
+    Merge --> Test[Testing]
+    Test --> Rel[Release → main]
+```
+
+Two developers (Rin + Lyhor) review each other's work.
+
+**CI/CD:**
+
+```mermaid
+flowchart LR
+    Push[Push / PR] --> CI[GitHub Actions]
+    CI --> Pipeline[Backend: pint + phpunit · Frontend: vue-tsc + vite build]
+    Pipeline --> Notify[Telegram notification]
 ```
 
 ---
 
-# 22. Digital Document Verification
+## 15. Security Requirements
 
-Generated documents can contain a unique QR code.
+Security is a major requirement because EduCore handles academic records.
 
-Example:
+- Authentication (Sanctum), RBAC, permission-based authorization.
+- Password hashing; secrets only in environment config (never committed).
+- Input validation, file validation, rate limiting.
+- Audit logs; secure document access.
+- Database constraints and access policies.
+- Isolation: students see only own data; lecturers only own sections.
 
-```text
-Document
-    │
-    └── QR Code
-          ↓
-     Verification URL
-          ↓
-     UniCore Verification
-          ↓
-      Valid / Invalid
-```
-
-This can help organizations verify whether a document was generated by the university platform.
-
----
-
-# 23. Invoice & Payment Records
-
-There will be **no dedicated Finance Officer role** in the initial system.
-
-However, administrators can manage financial records.
-
-The system will support:
-
-### Invoices
-
-```text
-Student
-   ↓
-Invoice
-   ↓
-Amount
-   ↓
-Due Date
-   ↓
-Status
-```
-
-Statuses:
-
-```text
-Pending
-Partially Paid
-Paid
-Overdue
-Cancelled
-```
-
-### Payment records
-
-The system records:
-
-* Amount
-* Payment date
-* Payment method
-* Reference
-* Invoice
-* Student
-
-The MVP does **not** require an online payment gateway.
-
----
-
-# 24. Announcement Management
-
-Administrators and authorized lecturers can publish announcements.
-
-Examples:
-
-* University announcements
-* Department announcements
-* Course announcements
-* Examination announcements
-* Registration announcements
-
-Announcements can target:
-
-```text
-All Students
-Faculty
-Department
-Program
-Class
-Course
+```mermaid
+flowchart TB
+    Access[User request] --> Auth2[Authenticate]
+    Auth2 --> Authz[Authorize by role]
+    Authz --> Validate[Validate input]
+    Validate --> Execute[Execute — audit logged]
+    Audit[(audit_logs)]
+    Execute -. important action .-> Audit
 ```
 
 ---
 
-# 25. Notification System
+## 16. Scope Definitions
 
-The initial notification channels will be:
+### 16.1 In scope (initial release)
 
-### Email
+Authentication, RBAC, student/lecturer management, academic structure, courses,
+sections, enrollment, timetable, attendance, assignments, exams, grades, GPA,
+student dashboard, documents + QR verification, invoices + payment records,
+announcements, email + Telegram, internship, analytics, audit logs.
 
-Used for:
+### 16.2 Planned but deferred
 
-* Important announcements
-* Document status
-* Registration confirmation
-* Password-related messages
-* Administrative notifications
+Advanced timetable optimization, course prerequisite engine, digital signatures,
+advanced document workflows, scheduled announcements, advanced dashboards.
 
-### Telegram
+### 16.3 Out of scope
 
-Telegram notifications can be used for:
+AI assistant, mobile application, online payment gateway, predictive analytics,
+microservices, advanced chat system, OCR, large-scale external university
+integrations, complex ERP integrations, biometric attendance, advanced financial
+accounting, full LMS replacement.
 
-* Announcements
-* Class reminders
-* Assignment reminders
-* Important academic notifications
-
-The notification architecture should be designed so additional channels can be added later.
+The goal is a reliable core system first.
 
 ---
 
-# 26. Internship Management
+## 17. Deliverables
 
-UniCore will include a university internship workflow.
-
-```text
-Student
-   ↓
-Internship Application
-   ↓
-University Review
-   ↓
-Company Information
-   ↓
-Approval
-   ↓
-Internship
-   ↓
-Reports
-   ↓
-Supervisor Evaluation
-   ↓
-Final Evaluation
-```
-
-This can later integrate with a larger career platform.
+- Working web platform (Laravel API + Vue frontend).
+- Database schema and ERD.
+- Authentication and RBAC.
+- Academic and administrative modules.
+- Docker environment and CI/CD configuration.
+- Deployment configuration (Laravel Cloud).
+- Test suite (backend PHPUnit, Pint; frontend typecheck/build).
+- User documentation and technical documentation.
 
 ---
 
-# 27. Analytics & Reporting
+## 18. Testing Strategy
 
-Administrators will have dashboards showing:
+| Level | Coverage |
+|---|---|
+| Backend | Model, service, API feature, authorization tests |
+| Frontend | Component, form validation, navigation, permission-based UI |
+| Integration | Full academic workflow end-to-end |
 
-### Student analytics
-
-* Total students
-* Active students
-* Graduated students
-* Withdrawn students
-
-### Academic analytics
-
-* GPA distribution
-* Course pass rate
-* Attendance
-* Course performance
-
-### Enrollment analytics
-
-* Students per program
-* Students per department
-* Semester enrollment
-
-### Administrative analytics
-
-* Pending requests
-* Documents generated
-* Outstanding invoices
-* Announcements
-
----
-
-# 28. MVC Architecture
-
-UniCore will use a **Laravel MVC architecture** for the backend.
-
-```text
-                    Client
-                      │
-                      ↓
-                 Vue.js Frontend
-                      │
-                   REST API
-                      │
-                      ↓
-                 Laravel Backend
-                      │
-          ┌───────────┼───────────┐
-          ↓           ↓           ↓
-      Controller    Service     Request
-          │           │
-          ↓           ↓
-        Model ───── Repository
-          │
-          ↓
-      PostgreSQL
-```
-
-Laravel MVC responsibilities:
-
-### Model
-
-Responsible for:
-
-* Database relationships
-* Data representation
-* Business entities
-
-### Controller
-
-Responsible for:
-
-* Receiving requests
-* Calling application services
-* Returning responses
-
-### View
-
-Because the frontend uses Vue, the traditional Laravel Blade view layer will not be the primary UI.
-
-Vue will act as the application interface while Laravel provides the API.
-
-This gives us:
-
-```text
-Vue
-  ↓
-REST API
-  ↓
-Laravel MVC
-  ↓
-PostgreSQL
+```mermaid
+flowchart LR
+    Login[Student login] --> Reg[Course registration]
+    Reg --> Enr[Enrollment]
+    Enr --> Att[Attendance]
+    Att --> Grade[Grade]
+    Grade --> GPA[GPA]
 ```
 
 ---
 
-# 29. Recommended Technology Stack
+## 19. Deployment
 
-## Frontend
-
-* Vue 3
-* TypeScript
-* Tailwind CSS
-* Pinia
-* Vue Router
-* Axios
-* Chart.js
-
-## Backend
-
-* Laravel 12
-* PHP
-* Laravel Sanctum
-* REST API
-* Laravel Validation
-* Laravel Notifications
-* Laravel Queues
-* Laravel Scheduler
-
-## Database
-
-* PostgreSQL
-
-## Infrastructure
-
-* Docker
-* Laravel Cloud
-* GitHub
-
-## External services
-
-* Email provider
-* Telegram Bot API
-* Object/file storage
-
----
-
-# 30. Frontend Architecture
-
-Recommended Vue structure:
-
-```text
-resources/
-└── js/
-    ├── components/
-    ├── layouts/
-    ├── pages/
-    ├── views/
-    ├── stores/
-    ├── services/
-    ├── composables/
-    ├── router/
-    ├── types/
-    └── utils/
+```mermaid
+flowchart LR
+    Dev[Development] --> Docker[Docker stack: Laravel · Vue · PostgreSQL · Redis · MinIO · Nginx · pgAdmin]
+    Prod[Production] --> GH[GitHub]
+    GH --> CI[CI/CD]
+    CI --> LC[Laravel Cloud]
+    LC --> App[Production application]
 ```
 
-The frontend should be organized by feature rather than becoming one huge collection of components.
+Docker ensures consistent development environments between both developers.
 
 ---
 
-# 31. Laravel Backend Structure
+## 20. Expected Outcomes
 
-Recommended structure:
+1. Centralized student and lecturer management.
+2. University academic structure management.
+3. Course and section management with enrollment.
+4. Timetable and attendance management.
+5. Assignment and examination management.
+6. Grade and GPA management.
+7. Digital document requests and QR verification.
+8. Invoice and payment records.
+9. Announcements, email, and Telegram notifications.
+10. Academic dashboards.
+11. Role-based access control.
+12. Secure API architecture.
+13. Production deployment.
 
-```text
-app/
-├── Models/
-├── Http/
-│   ├── Controllers/
-│   ├── Requests/
-│   └── Resources/
-│
-├── Services/
-├── Repositories/
-├── Policies/
-├── Notifications/
-├── Jobs/
-├── Events/
-├── Listeners/
-└── Enums/
+---
+
+## 21. Success Criteria
+
+The MVP is successful when a complete academic workflow can be performed digitally:
+
+```mermaid
+flowchart TB
+    Admin[Admin creates] --> RCA[Faculty → Department → Program]
+    RCA --> AY2[Academic Year → Semester]
+    AY2 --> CO2[Course → Section → Lecturer → Student]
+    CO2 --> E2[Enrollment → Timetable → Attendance]
+    E2 --> A2[Assignment → Exam → Grade → GPA]
+    A2 --> Portal[Student accesses results via their portal]
 ```
 
-Example:
+- Core workflows function correctly.
+- Users authenticate securely; RBAC works.
+- Records managed consistently; enrollment validated.
+- Documents requested, generated, and QR-verified.
+- Notifications, reports, and audit logs function.
+- System passes the defined test suite; Docker works reproducibly.
 
-```text
-StudentController
-      ↓
-StudentService
-      ↓
-StudentRepository
-      ↓
-Student Model
-      ↓
-PostgreSQL
+---
+
+## 22. Future Expansion [Future]
+
+```mermaid
+flowchart LR
+    MVP[MVP: modular monolith] --> V1[V1: advanced docs, deeper analytics]
+    V1 --> V2[V2: mobile app, online payments, integrations]
+    V2 --> ADV[Advanced: services split only if scale justifies]
 ```
 
-This keeps controllers thin and business logic organized.
+Beyond MVP:
+
+- **V1:** advanced timetable management, prerequisite engine, graduation eligibility,
+  more document types, digital signatures, richer reports, Telegram automation,
+  scheduled announcements.
+- **V2:** mobile application/PWA, online payment integration, library & student ID
+  integration, QR attendance, external verification API, advanced reporting.
+- **Advanced architecture:** if scale justifies, modules could be extracted into
+  services (identity, academic, student, document, notification, payment, analytics).
+  The MVP remains a modular monolith.
 
 ---
 
-# 32. Core Database Entities
+## 23. Recommended First Milestone Artifacts
 
-The initial database should include entities such as:
+Before the first feature, produce:
 
-```text
-users
-roles
-permissions
+1. **PRD** — exactly what EduCore must do.
+2. **User stories** — e.g. "As a student, I want to view my timetable so I know when and
+   where my classes occur."
+3. **Use-case diagram** — Student, Lecturer, Administrator, Super Admin interactions.
+4. **ERD** — the complete database structure.
+5. **System architecture** — Vue → Laravel API → Services → Models → PostgreSQL.
+6. **UI design system** — colors, typography, components, tables, forms, dashboards,
+   navigation, responsive behavior.
 
-students
-lecturers
-
-faculties
-departments
-programs
-
-academic_years
-semesters
-
-courses
-course_prerequisites
-sections
-class_enrollments
-
-rooms
-schedules
-
-attendance
-assignments
-assignment_submissions
-
-exams
-exam_results
-grades
-
-announcements
-notifications
-
-document_requests
-documents
-document_verifications
-
-invoices
-payments
-
-internships
-internship_reports
-internship_evaluations
-
-audit_logs
-```
-
-The final ERD should be designed before implementation begins.
+Only after these are approved should implementation proceed.
 
 ---
 
-# 33. Security Requirements
+## 24. Project Summary
 
-Security is a major requirement because UniCore handles academic records.
-
-The platform should implement:
-
-* Authentication
-* Role-based access control
-* Permission-based authorization
-* Password hashing
-* API authentication
-* CSRF protection where applicable
-* Input validation
-* File validation
-* Rate limiting
-* Audit logs
-* Secure document access
-* Database constraints
-* Access policies
-* Secure environment variables
-
-Students must only be able to access their own academic information.
-
-Lecturers must only access courses and students they are authorized to manage.
-
----
-
-# 34. MVP Definition
-
-MVP means:
-
-> **Minimum Viable Product**
-
-The MVP is not the complete UniCore platform.
-
-Its purpose is to prove that the core university workflow works end-to-end.
-
-## MVP Modules
-
-### Authentication
-
-* Student ID login
-* Admin login
-* Lecturer login
-* Password management
-* RBAC
-
-### University Structure
-
-* Faculties
-* Departments
-* Programs
-* Academic years
-* Semesters
-
-### People
-
-* Students
-* Lecturers
-
-### Academic
-
-* Courses
-* Sections
-* Enrollment
-* Timetable
-* Attendance
-* Grades
-* GPA
-
-### Communication
-
-* Announcements
-* Email notifications
-
-### Administration
-
-* Document requests
-* Invoice records
-* Payment records
-
-### Dashboard
-
-* Student dashboard
-* Lecturer dashboard
-* Administrator dashboard
+| Item | Decision |
+|---|---|
+| Project | EduCore |
+| Type | University Digital Administration Platform |
+| Target | Designed for Cambodian universities |
+| Team | Rin Nairith + Lyhor |
+| Architecture | Modular Monolith (MVC backend) |
+| Backend | Laravel 12 (PHP 8.4) |
+| Frontend | Vue 3 + TypeScript |
+| Styling | Tailwind CSS |
+| State | Pinia |
+| Database | PostgreSQL |
+| Cache/queue | Redis |
+| Storage | MinIO (S3) |
+| API | REST (Sanctum auth) |
+| Authorization | RBAC (5 roles) |
+| Notifications | Email + Telegram |
+| Payments | Invoice + payment records (no online gateway in MVP) |
+| Deployment | Docker + Laravel Cloud |
+| CI/CD | GitHub Actions |
+| Development | Agile |
+| MVP target | ~12 weeks (program 4–6 months) |
+| Status | Foundation [Implemented]; modules [Planned] |
 
 ---
 
-# 35. What Is NOT in MVP
-
-To control scope, the following should initially be postponed:
-
-* AI assistant
-* Mobile application
-* Online payment gateway
-* Advanced timetable optimization
-* Advanced predictive analytics
-* Microservices
-* Complex integrations
-* Advanced chat system
-* Automated document OCR
-* Large-scale external university integrations
-
-This is important.
-
-The goal is to **finish a reliable core system first**.
-
----
-
-# 36. Development Phases
-
-## Phase 0 — Research & Planning
-
-Duration: **1 week**
-
-Tasks:
-
-* Requirements analysis
-* User stories
-* Use cases
-* ERD
-* Architecture
-* UI wireframes
-* Git repository setup
-* Docker setup
-* Development conventions
-
-Deliverables:
-
-* PRD
-* ERD
-* Architecture diagram
-* UI design direction
-* Development roadmap
-
----
-
-# Phase 1 — Foundation
-
-Duration: **1–2 weeks**
-
-Build:
-
-* Laravel project
-* Vue project
-* PostgreSQL
-* Docker
-* Authentication
-* RBAC
-* User management
-* Base layouts
-* Navigation
-* API structure
-* Error handling
-
-Deliverable:
-
-> Working authentication and application foundation.
-
----
-
-# Phase 2 — University Structure
-
-Duration: **1–2 weeks**
-
-Build:
-
-* Faculties
-* Departments
-* Programs
-* Academic years
-* Semesters
-* Courses
-* Rooms
-
-Deliverable:
-
-> Complete university academic structure.
-
----
-
-# Phase 3 — Student & Lecturer Management
-
-Duration: **1–2 weeks**
-
-Build:
-
-* Student management
-* Lecturer management
-* Student profiles
-* Lecturer profiles
-* Program assignment
-* Course assignment
-
-Deliverable:
-
-> Students and lecturers are connected to the academic structure.
-
----
-
-# Phase 4 — Academic Operations
-
-Duration: **2–3 weeks**
-
-Build:
-
-* Course sections
-* Enrollment
-* Timetable
-* Attendance
-* Assignments
-* Exams
-* Grades
-* GPA calculation
-
-This is the **core academic engine**.
-
----
-
-# Phase 5 — Administration
-
-Duration: **1–2 weeks**
-
-Build:
-
-* Document requests
-* Document generation
-* QR verification
-* Invoice records
-* Payment records
-* Approval workflows
-
----
-
-# Phase 6 — Communication
-
-Duration: **1 week**
-
-Build:
-
-* Announcements
-* Email notifications
-* Telegram notifications
-* Notification preferences
-
----
-
-# Phase 7 — Analytics & Dashboard
-
-Duration: **1–2 weeks**
-
-Build:
-
-* Student dashboard
-* Lecturer dashboard
-* Admin dashboard
-* Academic statistics
-* Enrollment statistics
-* Attendance statistics
-* GPA statistics
-* Reports
-
----
-
-# Phase 8 — Testing & Production
-
-Duration: **1–2 weeks**
-
-Tasks:
-
-* Unit testing
-* Feature testing
-* API testing
-* Permission testing
-* UI testing
-* Security testing
-* Database testing
-* Performance testing
-* Docker production configuration
-* Laravel Cloud deployment
-* Production monitoring
-
----
-
-# 37. Overall Development Roadmap
-
-A realistic initial roadmap is approximately:
-
-```text
-Week 01
-Research + Requirements + Architecture
-
-Week 02
-Database + UI + Project Foundation
-
-Week 03
-Authentication + RBAC
-
-Week 04
-University Structure
-
-Week 05
-Students + Lecturers
-
-Week 06
-Courses + Sections
-
-Week 07
-Enrollment + Timetable
-
-Week 08
-Attendance + Assignments
-
-Week 09
-Exams + Grades + GPA
-
-Week 10
-Documents + Invoices + Payments
-
-Week 11
-Notifications + Dashboards
-
-Week 12
-Testing + Deployment
-```
-
-This gives you a **12-week MVP target**.
-
-After that, continue with V1/V2 rather than delaying the first usable release.
-
----
-
-# 38. Post-MVP — Version 1
-
-After MVP:
-
-### Academic
-
-* Advanced timetable management
-* Course prerequisite engine
-* Academic progression tracking
-* Graduation eligibility
-
-### Administration
-
-* Advanced document workflows
-* More document types
-* Digital signatures
-* More reporting
-
-### Communication
-
-* Telegram automation
-* Notification preferences
-* Scheduled announcements
-
-### Analytics
-
-* Advanced dashboards
-* Department reports
-* Course performance reports
-* Student performance trends
-
----
-
-# 39. Version 2
-
-Possible future features:
-
-* Mobile application
-* PWA
-* Online payment integration
-* Library integration
-* Student ID integration
-* QR attendance
-* More university integrations
-* Advanced reporting
-* External verification API
-
----
-
-# 40. Advanced Future Architecture
-
-The MVP should remain a modular monolith.
-
-However, if UniCore becomes a large production platform, modules can eventually be extracted into services.
-
-Initial architecture:
-
-```text
-Vue
- ↓
-Laravel
- ↓
-PostgreSQL
-```
-
-Future architecture:
-
-```text
-                    API Gateway
-                         │
-       ┌─────────────────┼─────────────────┐
-       ↓                 ↓                 ↓
- Identity           Academic          Administration
- Service             Service             Service
-       │                 │                 │
-       └─────────────────┼─────────────────┘
-                         ↓
-                   Event / Queue
-                         ↓
-             Notification Service
-```
-
-Possible future services:
-
-* Identity Service
-* Academic Service
-* Student Service
-* Document Service
-* Notification Service
-* Payment Service
-* Analytics Service
-
-But these should only be introduced when scale actually justifies them.
-
----
-
-# 41. Development Methodology
-
-The project will use an Agile approach.
-
-Development cycles can be organized into short iterations.
-
-Each feature should follow:
-
-```text
-Requirement
-    ↓
-User Story
-    ↓
-Database
-    ↓
-API
-    ↓
-Frontend
-    ↓
-Testing
-    ↓
-Review
-    ↓
-Merge
-```
-
----
-
-# 42. Git & GitHub Workflow
-
-Recommended branches:
-
-```text
-main
-develop
-
-feature/authentication
-feature/student-management
-feature/course-management
-feature/attendance
-feature/grades
-feature/documents
-```
-
-Workflow:
-
-```text
-Feature Branch
-      ↓
-Development
-      ↓
-Pull Request
-      ↓
-Code Review
-      ↓
-Merge → develop
-      ↓
-Testing
-      ↓
-Release → main
-```
-
-Since there are two developers, **Rin + Lyhor**, this workflow will help prevent both of you from stepping on the same code.
-
----
-
-# 43. Suggested Team Responsibilities
-
-## Rin
-
-Possible focus:
-
-* System architecture
-* Laravel backend
-* Database
-* API
-* Authentication
-* Core business logic
-* DevOps
-
-## Lyhor
-
-Possible focus:
-
-* Vue frontend
-* UI/UX implementation
-* Dashboard
-* Components
-* Forms
-* Frontend state management
-
-However, both developers should review each other's work rather than completely separating the codebase.
-
----
-
-# 44. Testing Strategy
-
-Testing should cover:
-
-### Backend
-
-* Model tests
-* Service tests
-* API feature tests
-* Authorization tests
-
-### Frontend
-
-* Component tests
-* Form validation
-* Navigation
-* Permission-based UI
-
-### Integration
-
-Example:
-
-```text
-Student Login
-      ↓
-Course Registration
-      ↓
-Enrollment
-      ↓
-Attendance
-      ↓
-Grade
-      ↓
-GPA
-```
-
-This complete workflow should be tested before MVP release.
-
----
-
-# 45. Deployment
-
-Development:
-
-```text
-Docker
-├── Laravel
-├── Vue
-├── PostgreSQL
-└── Redis
-```
-
-Production:
-
-```text
-GitHub
-   ↓
-CI/CD
-   ↓
-Laravel Cloud
-   ↓
-Production Application
-```
-
-Docker should ensure development environments are consistent between Rin and Lyhor.
-
----
-
-# 46. Expected Outcomes
-
-At the completion of the MVP, UniCore should provide:
-
-1. Centralized student management.
-2. Centralized lecturer management.
-3. University academic structure management.
-4. Course and section management.
-5. Student enrollment.
-6. Timetable management.
-7. Attendance management.
-8. Assignment management.
-9. Examination management.
-10. Grade and GPA management.
-11. Digital document requests.
-12. QR document verification.
-13. Invoice and payment records.
-14. Announcements.
-15. Email notifications.
-16. Telegram notification capability.
-17. Academic dashboards.
-18. Role-based access control.
-19. Secure API architecture.
-20. Production deployment.
-
----
-
-# 47. Success Criteria
-
-The MVP can be considered successful when a complete academic workflow can be performed digitally.
-
-For example:
-
-```text
-Admin creates
-    ↓
-Faculty
-    ↓
-Department
-    ↓
-Program
-    ↓
-Academic Year
-    ↓
-Semester
-    ↓
-Course
-    ↓
-Section
-    ↓
-Lecturer
-    ↓
-Student
-    ↓
-Enrollment
-    ↓
-Timetable
-    ↓
-Attendance
-    ↓
-Assignment
-    ↓
-Exam
-    ↓
-Grade
-    ↓
-GPA
-```
-
-And the student can access the result through their own portal.
-
-That end-to-end workflow is the heart of UniCore.
-
----
-
-# 48. Final Product Positioning
-
-UniCore should not be presented simply as:
-
-> "A Student Management System."
-
-Instead:
-
-> **UniCore is a centralized University Digital Administration Platform designed for Cambodian universities to manage academic operations, student services, administrative workflows, communication, documents, and institutional information through a single secure platform.**
-
-The product focuses on connecting the university's major stakeholders through one digital ecosystem.
-
----
-
-# 49. Future Vision
-
-The long-term vision is to evolve UniCore into a complete university operating platform.
-
-```text
-                    UNICORE
-                       │
-       ┌───────────────┼────────────────┐
-       ↓               ↓                ↓
-   Academic       Administration     Student
-   Management       Management        Services
-       │               │                │
-       └───────────────┼────────────────┘
-                       ↓
-                  Analytics
-                       │
-                       ↓
-              University Intelligence
-```
-
-Potential future integrations include:
-
-* Mobile applications
-* Digital student IDs
-* QR attendance
-* Online payments
-* Library systems
-* External verification
-* University APIs
-* Advanced analytics
-* AI-powered services
-
-The immediate goal, however, remains simple:
-
-> **Build a reliable core platform first. Expand only after the core workflow works.**
-
----
-
-# 50. Recommended First Milestone
-
-Before writing the first feature, the team should produce these six artifacts:
-
-### 1. Product Requirements Document
-
-Defines exactly what UniCore must do.
-
-### 2. User Stories
-
-Examples:
-
-> As a student, I want to view my timetable so that I know when and where my classes occur.
-
-> As a lecturer, I want to record attendance so that student attendance is automatically tracked.
-
-> As an administrator, I want to manage courses so that students can register for available courses.
-
-### 3. Use Case Diagram
-
-Shows interactions between:
-
-* Student
-* Lecturer
-* Administrator
-* Super Admin
-
-### 4. ERD
-
-Defines the complete database structure.
-
-### 5. System Architecture
-
-Defines:
-
-```text
-Vue
- ↓
-Laravel API
- ↓
-Services
- ↓
-Models
- ↓
-PostgreSQL
-```
-
-### 6. UI Design System
-
-Defines:
-
-* Colors
-* Typography
-* Components
-* Tables
-* Forms
-* Dashboards
-* Navigation
-* Responsive behavior
-
-Only after these are approved should implementation begin.
-
----
-
-# Project Summary
-
-| Item           | Decision                                   |
-| -------------- | ------------------------------------------ |
-| Project        | UniCore                                    |
-| Type           | University Digital Administration Platform |
-| Target         | Cambodian universities                     |
-| Team           | Rin Nairith + Lyhor                        |
-| Architecture   | MVC / Modular Monolith                     |
-| Backend        | Laravel 12                                 |
-| Frontend       | Vue 3 + TypeScript                         |
-| Styling        | Tailwind CSS                               |
-| State          | Pinia                                      |
-| Database       | PostgreSQL                                 |
-| API            | REST                                       |
-| Authentication | Student ID + Password                      |
-| Authorization  | RBAC                                       |
-| Notifications  | Email + Telegram                           |
-| Payment        | Invoice + Payment Records                  |
-| Online Payment | Not MVP                                    |
-| Mobile App     | Future                                     |
-| AI             | Future                                     |
-| Deployment     | Docker + Laravel Cloud                     |
-| Development    | Agile                                      |
-| MVP Target     | ~12 weeks                                  |
-| Initial Goal   | Production-capable MVP                     |
-| Long-term Goal | Complete university digital ecosystem      |
+*End of report.*

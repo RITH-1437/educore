@@ -1,0 +1,16 @@
+# Environment / secrets
+.env
+*.env.local
+
+# Docker
+.dockerignore.local
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+
+# Logs
+*.log

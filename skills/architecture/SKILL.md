@@ -21,15 +21,20 @@ must fit into that structure.
 - **Modular Monolith** — one Laravel application, one Vue application, one
   deployment. Modules are separated by conventions (directories, namespaces,
   route prefixes) inside the monolith, NOT as separate deployable services.
-- **MVC** — Laravel provides Model, Controller, (Vue as the View layer).
-- **API-first** — the Vue frontend talks only to the Laravel REST API.
-  Blade templates are NOT used for the application UI.
-- **Client → Nginx → (Vue dev server | Laravel PHP-FPM) → PostgreSQL/Redis/MinIO**
+- **MVC + Inertia** — Laravel provides Model, Controller, View. Vue components
+  are the View layer, rendered through Inertia.js: controllers return
+  `Inertia::render('Page', props)` and the SPA shell updates without full
+  reloads.
+- **Hybrid API-first** — the Vue frontend renders pages via Inertia; the JSON
+  REST API (`/api`) remains the contract for data mutations/queries (Axios
+  service modules).
+- **Client → Nginx → (Laravel PHP-FPM | Vite dev server) → PostgreSQL/Redis/MinIO**
 
 ## Stack (fixed — do not introduce others)
 
 - Backend: Laravel 12, PHP 8.4, Sanctum, PostgreSQL, Redis, MinIO (S3-compatible)
-- Frontend: Vue 3, TypeScript, Pinia, Vue Router, Axios, Tailwind CSS, Chart.js
+- Frontend: Vue 3 (JavaScript, no TypeScript), Inertia.js, Pinia, Axios,
+  Tailwind CSS, Chart.js
 - Infra: Docker Compose, Nginx, pgAdmin
 - External: GitHub Actions, Telegram, Email, Laravel Cloud (production)
 
@@ -100,9 +105,10 @@ Routes are grouped by module in `routes/api.php` with a module prefix and
 
 - The frontend never queries the database or Redis directly and never calls
   Laravel internal classes.
-- The backend never renders Vue UI.
-- Contract between them: the REST API + JSON structure defined in
-  `skills/api/SKILL.md`.
+- The backend renders the Vue UI through Inertia (page components live in
+  `frontend/src/pages`, served by `Inertia::render()`).
+- Contract between them: page components via Inertia props, plus the JSON REST
+  API + JSON structure defined in `skills/api/SKILL.md`.
 
 ## Validation checklist
 

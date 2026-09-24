@@ -5,8 +5,11 @@ description: EduCore REST API conventions - URL naming, methods, status codes, p
 
 # EduCore REST API Conventions
 
-The Vue frontend and Laravel backend communicate exclusively through a
-JSON REST API, prefixed `/api`. Consistency across modules is required.
+The Vue frontend and Laravel backend communicate through a JSON REST API
+(prefixed `/api`) for data mutations/queries. Page navigation itself flows
+through **Inertia.js** (`Inertia::render()` in `routes/web.php`); the REST API
+is the contract for everything data-related. Consistency across modules is
+required.
 
 ## When to use
 
@@ -115,7 +118,7 @@ Resources. Keep the same key names across modules for the same concepts
 - Endpoints requiring a session/token → `auth:sanctum`.
 - Unauthenticated: `401`.
 - Authorized but not permitted: `403` via Policy.
-- The frontend's `api.ts` already clears the token on `401` — keep that
+- The frontend's `services/api.js` already clears the token on `401` — keep that
   behavior.
 
 ## Headers & conventions

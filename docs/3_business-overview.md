@@ -1122,7 +1122,7 @@ codebase, with the option to split out later if scale ever justifies it. [Archit
 | Backend framework | **Laravel 12** | Application logic, API, validation, authorization, queues, notifications |
 | Backend language | **PHP** | Server-side implementation language supported by Laravel |
 | Frontend framework | **Vue 3** | Interactive user interface |
-| Frontend language | **TypeScript** | Typed, safer frontend code |
+| Frontend language | **JavaScript** | Inertia.js + Vue 3; typed, safer backend contracts through the API |
 | Styling | **Tailwind CSS** | Consistent, efficient styling |
 | Frontend state | **Pinia** | Organized client-side state management |
 | Frontend routing | **Vue Router** | Page navigation in the SPA |

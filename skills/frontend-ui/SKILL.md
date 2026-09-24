@@ -16,7 +16,7 @@ cluttered.
 
 ## Stack
 
-- Tailwind CSS 4 (via `@tailwindcss/vite`), Vue 3, Chart.js for charts.
+- Tailwind CSS 4 (via `@tailwindcss/vite`), Vue 3, Inertia.js, Chart.js.
 - Avoid adding another CSS framework or component library unless explicitly
   approved.
 
@@ -53,7 +53,7 @@ Keep in `frontend/src/components` and reuse everywhere:
 
 - Add components when a pattern repeats; do not create a component for a single
   usage.
-- Props down / events up; explicit `emits` + typed props in `<script setup>`.
+- Props down / events up; explicit `emits` + props in `<script setup>`.
 
 ## Forms
 

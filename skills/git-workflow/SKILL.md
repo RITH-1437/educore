@@ -58,8 +58,7 @@ the same repository — a disciplined workflow prevents conflicts.
   - Runs on push + pull_request + workflow_dispatch.
   - `backend`: PHP 8.4 + PostgreSQL 16 service → `composer install`,
     `key:generate`, `vendor/bin/pint --test`, `php artisan test`.
-  - `frontend`: Node 22 → `npm ci`, `npm run build` (`vue-tsc` typecheck +
-    Vite build).
+  - `frontend`: Node 22 → `npm ci`, `npm run build` (plain JavaScript, Vite).
   - Nothing runs `migrate` toward your local Docker stack — it tests against
     the ephemeral GitHub Postgres service.
 - `.github/workflows/telegram-notification.yml`:

@@ -25,4 +25,7 @@ fi
 # Link storage so /storage/ URLs work.
 php artisan storage:link --force 2>/dev/null || true
 
+# Warm the application cache (including bootstrap/cache/packages.php for auto-discovery).
+php artisan optimize 2>/dev/null || true
+
 exec "$@"

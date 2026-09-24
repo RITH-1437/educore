@@ -87,8 +87,8 @@ Cover the OWASP Top 10, especially:
 
 - Read secrets only via `config(...)` ← `.env`.
 - Use GitHub Secrets for CI/workflows (Telegram, etc.).
-- `.env.docker.example` may contain **dev placeholder** values only — clearly
-  non-real, documented as such.
+- `docker/.env.docker.example` may contain **dev placeholder** values only —
+  clearly non-real, documented as such.
 
 ## API security
 

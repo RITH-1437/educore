@@ -1,0 +1,10 @@
+# Ignore rules for builds whose context is the `docker/` directory.
+# (Service builds use `php/.dockerignore` and `frontend/.dockerignore`.)
+.git
+.github
+docs
+.env
+.env.docker.example
+*.md
+Makefile
+docker-compose.yml

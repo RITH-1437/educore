@@ -2,7 +2,10 @@
 # Usage: make up  |  make migrate  |  ...
 # Requires Docker + Docker Compose.
 
-COMPOSE := docker compose
+# `--project-directory .` keeps the repository root as the compose project
+# directory so `${VAR}` interpolation reads the root `.env`; the compose file
+# lives at docker/docker-compose.yml.
+COMPOSE := docker compose --project-directory . -f docker/docker-compose.yml
 EXEC_BACKEND := $(COMPOSE) exec backend
 EXEC_FRONTEND := $(COMPOSE) exec frontend
 

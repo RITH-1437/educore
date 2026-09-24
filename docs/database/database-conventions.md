@@ -90,13 +90,14 @@ conflict exists, the skill wins.
 ## 8. Soft delete
 
 - Add `deleted_at` **only** where history must survive a delete and the skill
-  allows it (enrollments, grades, documents, invoices).
+  allows it (users, faculties, enrollments, grades, documents, invoices).
 - Never soft-delete lookup/reference data (roles, rooms, grading scales,
   document types) — correct mistakes instead.
 - High-value records use an audit trail instead of soft delete
   (`skills/audit-logging`): audit_logs, attendance, payments.
-- Append-only tables (audit_logs, attendance_records, document_verifications)
-  have **no** `updated_at`.
+- Append-only tables (audit_logs, document_verifications) have **no**
+  `updated_at`. `attendance_records` is insert-mostly but does keep
+  `updated_at` per `schema-tables.sql`.
 
 ## 9. Uniqueness
 

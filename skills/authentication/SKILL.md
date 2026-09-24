@@ -27,7 +27,7 @@ can do) is separate — see `skills/authorization/SKILL.md`.
 - Use `laravel/sanctum` (pinned in `composer.json`).
 - Protect API routes with `Route::middleware('auth:sanctum')`.
 - On login, issue a personal access token; the frontend stores it in
-  `localStorage` as `auth_token` (already wired in `frontend/src/services/api.ts`).
+  `localStorage` as `auth_token` (already wired in `frontend/src/services/api.js`).
 - Tokens are revocable: `revoke` on logout and `delete` old tokens when a
   password is changed.
 
@@ -50,9 +50,9 @@ can do) is separate — see `skills/authorization/SKILL.md`.
 
 ## Session / token handling (frontend)
 
-- Store only the token (already done in `api.ts`).
-- On any `401`, `api.ts` clears the token automatically; the router guard then
-  redirects to `/login`. Do not store passwords, do not store PII beyond the
+- Store only the token (already done in `api.js`).
+- On any `401`, `api.js` clears the token automatically; the app then
+  redirects to `/login` (Inertia route or REST-driven navigation). Do not store passwords, do not store PII beyond the
   minimal user object needed for display/permissions.
 
 ## Rate limiting

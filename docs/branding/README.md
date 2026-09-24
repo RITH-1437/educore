@@ -42,7 +42,7 @@ component rules.
 ## Related Skills
 
 - `skills/frontend-ui/SKILL.md` — UI implementation conventions.
-- `skills/vue/SKILL.md` — Vue 3 + TypeScript structure and rules.
+- `skills/vue/SKILL.md` — Vue 3 + Inertia (JavaScript) structure and rules.
 - `skills/authorization/SKILL.md` — permission-aware UI.
 
 ## AI Agent Usage Rule (mandatory)
@@ -67,7 +67,7 @@ silently creating an inconsistent pattern.
 
 ## Project Notes / Inventory (as of this design system)
 
-- **Frontend:** Vue 3 + TypeScript + Vite, Tailwind CSS 4
+- **Frontend:** Vue 3 + Inertia (JavaScript) + Vite, Tailwind CSS 4
   (`@tailwindcss/vite`), Pinia, Vue Router, Axios, Chart.js.
 - **Current styling:** `frontend/src/style.css` currently contains only
   `@import "tailwindcss";` — no custom tokens defined yet. The Tailwind `@theme`

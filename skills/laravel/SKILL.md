@@ -139,9 +139,9 @@ skill.
 
 - Config lives in `config/*.php`; read via `config(...)`, never `env(...)` in
   app code.
-- `.env` values already defined in `.env.docker.example` map into config
+- `.env` values already defined in `docker/.env.docker.example` map into config
   (database, redis, aws, mail, telegram). Add new vars to BOTH
-  `.env.docker.example` (committed template) and `backend/.env` (local,
+  `docker/.env.docker.example` (committed template) and `backend/.env` (local,
   git-ignored).
 - Never hardcode credentials anywhere.
 

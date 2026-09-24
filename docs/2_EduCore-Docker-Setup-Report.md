@@ -80,10 +80,10 @@ another service.
 
 | Path | Purpose |
 | --- | --- |
-| `docker-compose.yml` | Defines all 8 services, network, volumes, healthchecks |
-| `.env.docker.example` | Committed environment template (git-ignored copy: `.env`) |
+| `docker/docker-compose.yml` | Defines all 8 services, network, volumes, healthchecks |
+| `docker/.env.docker.example` | Committed environment template (git-ignored copy: `.env`) |
 | `.gitignore` | Ignores `.env`, OS/editor files, etc. |
-| `.dockerignore` | Root ignore rules for Docker contexts |
+| `docker/.dockerignore` | Ignore rules for builds rooted at `docker/` |
 | `Makefile` | Development helpers (`make up`, `make migrate`, …) |
 | `docker/php/Dockerfile` | PHP 8.4-FPM + extensions + Composer |
 | `docker/php/entrypoint.sh` | First-boot provisioning for the backend |
@@ -98,7 +98,7 @@ another service.
 
 | Path | Change |
 | --- | --- |
-| `frontend/vite.config.ts` | Dev proxy target is now configurable via env |
+| `frontend/vite.config.js` | Inertia + `laravel-vite-plugin` wiring; asset output into Laravel `public/build` |
 | `backend/composer.json` | Added `league/flysystem-aws-s3-v3` (S3/MinIO storage) |
 | `backend/composer.lock` | Lock file updated for the new package |
 
@@ -126,7 +126,7 @@ Documentation now lives in a single root `README.md`.
 | minio | `educore-minio` | `9100` (API) / `9101` (console) | Configurable (`MINIO_API_PORT`/`MINIO_CONSOLE_PORT`) |
 | minio-init | `educore-minio-init` | — | One-shot bucket creation |
 
-> The default ports in the versioned `docker-compose.yml` are the standard ones
+> The default ports in the versioned `docker/docker-compose.yml` are the standard ones
 > (`5432`, `6379`, `5050`, `9000`, `9001`). The `.env` file used during this
 > run remaps the host ports to `5433`, `6380`, `5051`, `9100`, `9101` because a
 > separate system already occupies the standard ports. All Remapped values live
@@ -145,13 +145,13 @@ Documentation now lives in a single root `README.md`.
 # 6. Environment File
 
 All configuration lives in a single root `.env` (git-ignored). The committed
-template is `.env.docker.example`.
+template is `docker/.env.docker.example`.
 
 Copy it once:
 
 ```sh
-copy .env.docker.example .env     # Windows
-cp .env.docker.example .env       # macOS / Linux
+copy docker\.env.docker.example .env     # Windows
+cp docker/.env.docker.example .env       # macOS / Linux
 ```
 
 ### Key variables
@@ -166,13 +166,13 @@ cp .env.docker.example .env       # macOS / Linux
 | Laravel drivers | `SESSION_DRIVER=redis`, `CACHE_STORE=redis`, `QUEUE_CONNECTION=redis` |
 | MinIO / S3 | `FILESYSTEM_DISK=s3`, `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`, `MINIO_API_PORT`, `MINIO_CONSOLE_PORT` |
 | S3 client | `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_DEFAULT_REGION`, `AWS_BUCKET=educore`, `AWS_ENDPOINT`, `AWS_USE_PATH_STYLE_ENDPOINT=true` |
-| Frontend | `VITE_API_URL=/api`, `VITE_API_PROXY_TARGET`, `FRONTEND_PORT` |
+| Frontend | `VITE_API_URL=/api`, `BACKEND_PUBLIC_DIR`, `FRONTEND_PORT` |
 | Nginx | `NGINX_PORT` |
 | Mail | `MAIL_MAILER=log` (dev only) |
 
 ### `APP_KEY` strategy
 
-`APP_KEY` is intentionally omitted from `.env` and `.env.docker.example`. On
+`APP_KEY` is intentionally omitted from `.env` and `docker/.env.docker.example`. On
 first backend start the entrypoint generates a stable `base64:` key into
 `backend/.env` and keeps it there, so sessions/crypto stay valid across
 container restarts.
@@ -434,9 +434,33 @@ bind-mounts them and Laravel/Vite pick changes up immediately.
 4. **CI parity** — `.github/workflows` (already present) can reuse the same
    service healthchecks/drivers so tests run against the same shape as local
    dev.
-5. **Production Docker config** — a future `docker-compose.prod.yml` /
+5. **Production Docker config** — a future `docker/docker-compose.prod.yml` /
    Dockerfile for Laravel Cloud (already planned; dev and prod diverge on
    purpose).
+
+---
+
+# Relocation addendum (2026-09-24)
+
+Docker config was consolidated under `docker/` for a cleaner repo root:
+
+- `docker-compose.yml` → `docker/docker-compose.yml`
+- `.env.docker.example` → `docker/.env.docker.example`
+
+The root `.env` stays put. All Compose invocations now use
+
+```sh
+docker compose --project-directory . -f docker/docker-compose.yml up -d
+docker compose --project-directory . -f docker/docker-compose.yml exec backend php artisan migrate
+```
+
+(`--project-directory .` keeps interpolation reading the root `.env`. Compose
+resolves this file's relative paths against the **project directory**, so all
+bind mounts are repository-root relative: `./backend`, `./frontend`,
+`./docker/nginx/default.conf`. Invoking without `--project-directory .` makes
+the base fall back to `docker/` and paths double-prefix, e.g.
+`docker/docker/nginx/default.conf` — always use `make` targets or the exact
+command above.) The Makefile wraps these.
 
 ---
 

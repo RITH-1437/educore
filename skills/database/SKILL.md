@@ -23,6 +23,27 @@ migrations. Agents never modify the database by hand.
 - Think in the academic domain: see `skills/academic-domain/SKILL.md` before
   touching academic entities and relationships.
 
+## Approved doc/vs-migration equivalences (do NOT "fix")
+
+Verified 2026-09-25 against `docs/database/schema-tables.sql` (49 tables,
+70 FK, 57 CHECK, 54 plain + 3 partial-unique indexes match exactly):
+
+- **PKs are `bigserial`** (`$table->id()`) in migrations vs `IDENTITY` in the
+  SQL doc — approved, auto-increment in both.
+- **Timestamps are `timestamp(0)` + `CURRENT_TIMESTAMP`** (Laravel default) vs
+  doc's `TIMESTAMPTZ` precision 6 + `now()` — approved; app never writes
+  microseconds.
+- **`uq_gpa_records`** (`UNIQUE NULLS NOT DISTINCT` on student/year/semester)
+  is a table constraint in the doc but a unique INDEX in the migration —
+  identical enforcement.
+- **`users.email`** unique is `users_email_unique` (scaffold) in migrations vs
+  `uq_users_email` in the doc.
+- Numeric/smallint defaults differ only in catalog notation.
+
+If any new migration does NOT match the doc's field surface, or a *new* table
+diverges in types/nullability/defaults, fix it — but leave the equivalence
+list above alone.
+
 ## Migrations
 
 - One migration per logical change; run `php artisan make:migration`.

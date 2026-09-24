@@ -30,7 +30,7 @@ server (with HMR), plus PostgreSQL, pgAdmin, Redis, and MinIO.
 ## 2. Environment setup
 
 All configuration lives in a single root-level `.env` file. It is git-ignored
-and never committed. The template is `.env.docker.example`.
+and never committed. The template is `docker/.env.docker.example`.
 
 Variables group by responsibility:
 
@@ -39,19 +39,19 @@ Variables group by responsibility:
 - `REDIS_*` — Redis host ports.
 - `MINIO_*` / `AWS_*` — object storage credentials, bucket name, API/console ports.
 - `NGINX_PORT` / `FRONTEND_PORT` — host ports for the web entry point.
-- `VITE_API_URL` / `VITE_API_PROXY_TARGET` — frontend API base path and proxy target.
+- `VITE_API_URL` — frontend REST API base path (`/api`).
 
 > Note: `APP_KEY` is intentionally omitted. It is auto-generated into
 > `backend/.env` on the first container start and persists thereafter.
 
-## 3. Copy `.env.docker.example` to `.env`
+## 3. Copy the env template to `.env`
 
 ```sh
 # Windows (PowerShell)
-copy .env.docker.example .env
+copy docker\.env.docker.example .env
 
 # macOS / Linux
-cp .env.docker.example .env
+cp docker/.env.docker.example .env
 ```
 
 Adjust the placeholder credentials (PostgreSQL password, MinIO keys, pgAdmin
@@ -59,18 +59,21 @@ login) to your liking before the first `up`.
 
 ## 4. Start the containers
 
+The Compose file lives at `docker/docker-compose.yml`. Run it from the repo
+root with `--project-directory .` so it reads the root `.env`:
+
 ```sh
-docker compose up -d
+docker compose --project-directory . -f docker/docker-compose.yml up -d
 ```
 
-First run builds the `backend` and `frontend` images, installs Composer
+(`make up` does exactly this.) First run builds the `backend` and `frontend` images, installs Composer
 dependencies and `npm` dependencies inside the containers, creates the MinIO
 bucket, and starts everything. Subsequent starts are fast.
 
 ## 5. Check status
 
 ```sh
-docker compose ps
+docker compose --project-directory . -f docker/docker-compose.yml ps
 ```
 
 All services should show `healthy` (`/healthy` for minio-init). See `make ps`.
@@ -78,7 +81,7 @@ All services should show `healthy` (`/healthy` for minio-init). See `make ps`.
 ## 6. Run database migrations
 
 ```sh
-docker compose exec backend php artisan migrate
+docker compose --project-directory . -f docker/docker-compose.yml exec backend php artisan migrate
 ```
 
 Or via Make: `make migrate`.
@@ -86,7 +89,7 @@ Or via Make: `make migrate`.
 ## 7. Seed the database
 
 ```sh
-docker compose exec backend php artisan db:seed
+docker compose --project-directory . -f docker/docker-compose.yml exec backend php artisan db:seed
 ```
 
 Or via Make: `make seed`. To drop and re-seed in one step: `make migrate-fresh`.
@@ -95,11 +98,13 @@ Or via Make: `make seed`. To drop and re-seed in one step: `make migrate-fresh`.
 
 | URL                          | Purpose                                    |
 | ---------------------------- | ------------------------------------------ |
-| `http://localhost`           | EduCore web app (Nginx → Vite → Vue)       |
+| `http://localhost`           | EduCore web app (Nginx → Laravel/Inertia → Vue) |
+| `http://localhost:5173`      | Vite dev server (HMR, dev assets)          |
 | `http://localhost/api/health`| Backend health endpoint (Laravel)          |
 
-The Vue app talks to `/api/*`; Nginx forwards API and `storage` traffic to the
-Laravel PHP-FPM container and everything else to the Vite dev server.
+Pages are rendered by Laravel through Inertia.js. Nginx forwards `/api`,
+`/storage`, and non-existing paths to the Laravel PHP-FPM container, and serves
+built assets (`.`/`/build`) statically from the backend `public/`.
 
 ## 9. Access pgAdmin
 
@@ -128,17 +133,18 @@ first run by the one-shot `minio-init` service.
 ## 11. Stop the containers
 
 ```sh
-docker compose down        # stops and removes containers; named volumes persist
-docker compose down -v     # also deletes volumes (DB data, MinIO data, cache)
+# (assumed: docker compose --project-directory . -f docker/docker-compose.yml)
+docker compose --project-directory . -f docker/docker-compose.yml down        # stops and removes containers; named volumes persist
+docker compose --project-directory . -f docker/docker-compose.yml down -v     # also deletes volumes (DB data, MinIO data, cache)
 ```
 
 ## 12. View logs
 
 ```sh
-docker compose logs -f                    # all services
-docker compose logs -f backend            # Laravel only
-docker compose logs -f frontend           # Vite only
-docker compose logs minio-init            # one-shot bucket creation
+docker compose --project-directory . -f docker/docker-compose.yml logs -f                    # all services
+docker compose --project-directory . -f docker/docker-compose.yml logs -f backend            # Laravel only
+docker compose --project-directory . -f docker/docker-compose.yml logs -f frontend           # Vite only
+docker compose --project-directory . -f docker/docker-compose.yml logs minio-init            # one-shot bucket creation
 ```
 
 ## 13. Troubleshooting
@@ -162,7 +168,7 @@ docker compose logs minio-init            # one-shot bucket creation
 | ------------ | ----------------------------- | ---------------------------- | -------------------------------------- |
 | nginx        | `educore-nginx`               | `${NGINX_PORT:-80}`          | Single entry point                     |
 | backend      | `educore-backend`             | — (internal `9000` php-fpm)  | Laravel, bound to `backend:9000`       |
-| frontend     | `educore-frontend`            | `${FRONTEND_PORT:-5173}`     | Vite dev server + HMR (via nginx too)  |
+| frontend     | `educore-frontend`            | `${FRONTEND_PORT:-5173}`     | Vite dev server + HMR                |
 | postgres     | `educore-postgres`            | `${DB_HOST_PORT:-5432}`      | PostgreSQL 16, volume `pgdata`         |
 | pgadmin      | `educore-pgadmin`             | `${PGADMIN_PORT:-5050}`      | Web UI binds container port `80`       |
 | redis        | `educore-redis`               | `${REDIS_HOST_PORT:-6379}`   | Redis 7, AOF enabled                   |
@@ -192,11 +198,10 @@ make npm cmd="run build"   # run an npm command in the frontend container
 
 ```
 backend/            Laravel 12 API (PHP 8.4)
-frontend/           Vue 3 + Vite + TypeScript
-docker/             Docker images & config (php, frontend, nginx, postgres)
+frontend/           Vue 3 + Inertia + Vite (JavaScript)
+docker/             Docker config (docker-compose.yml, env template, php/frontend/nginx/postgres images)
 docs/               Project documentation
-docker-compose.yml  Local dev environment
-.env.docker.example Environment template (copy to .env)
+.env                Local environment (git-ignored; copy of docker/.env.docker.example)
 Makefile            Dev helpers
 ```
 
@@ -215,15 +220,20 @@ The `backend/` folder is a standard Laravel 12 application.
 - Code style: Laravel Pint (`vendor/bin/pint`). Linted by CI.
 - Tests: PHPUnit (`php artisan test`). Linted and run by CI.
 
-## Frontend (Vue 3 + TypeScript + Vite)
+## Frontend (Vue 3 + Inertia + Vite)
 
-The `frontend/` folder is a Vue 3 `<script setup>` SFC project in TypeScript.
+The `frontend/` folder is a Vue 3 `<script setup>` SFC project in plain
+JavaScript, embedded via **Inertia.js**: Laravel controllers return
+`Inertia::render('Page')` and the matching component lives in
+`frontend/src/pages/`.
 
-- **Docs:** https://vuejs.org/guide/typescript/overview.html
-- **Script setup:** https://v3.vuejs.org/api/sfc-script-setup.html
-- Build tooling: Vite 8, `vue-tsc`, TypeScript strict checking (`npm run build`).
-- Stack: Vue 3, Vue Router 4, Pinia, Axios, Chart.js, Tailwind CSS 4.
-- API client lives in `frontend/src/services/api.ts` and talks to `/api`.
+- **Docs:** https://inertiajs.com, https://vuejs.org/guide/typescript/overview.html
+- **Routing:** Inertia (server-side) — no client `vue-router`.
+- Build tooling: Vite 8 (`npm run build`); assets + manifest are written to
+  `backend/public/build` (`laravel-vite-plugin`) and served to the page by
+  Laravel's `@vite`.
+- Stack: Vue 3, Inertia.js, Pinia, Axios, Chart.js, Tailwind CSS 4.
+- REST API client lives in `frontend/src/services/api.js` and talks to `/api`.
 
 ## Contributing / License
 

@@ -1,49 +1,69 @@
 ---
 name: educore-vue
-description: Vue 3 + TypeScript conventions for EduCore - Composition API, Pinia, Vue Router, Axios services, components, composables, loading/error states, forms. Consult for any frontend implementation.
+description: EduCore Vue conventions - Inertia.js + Vue 3 (JavaScript) + Pinia + Vue Router (none; Inertia handles routing) + Axios services, components, composables, loading/error states, forms. Consult for any frontend implementation.
 ---
 
 # EduCore Vue Conventions
 
-Frontend: **Vue 3 + TypeScript + Pinia + Vue Router + Axios + Tailwind CSS 4 + Chart.js**,
-running in the frontend Docker container (Node 22, Vite dev server). Naming for
-build: `vue-tsc -b && vite build` (strict TypeScript).
+Frontend: **Vue 3 + JavaScript (no TypeScript) + Inertia.js + Pinia + Axios +
+Tailwind CSS 4 + Chart.js**, running in the frontend Docker container (Node 22,
+Vite dev server). Naming for build: `npm run build` → `vite build` (plain
+JavaScript; no `vue-tsc`). Laravel renders Inertia page components from
+`routes/web.php`; the JSON REST API (`/api`) is still used for data
+mutations/queries via Axios.
 
 ## When to use
 
 - Writing or changing any frontend code: pages, components, composables,
-  stores, services, router.
+  stores, services.
 
 ## Before coding
 
 - Inspect existing frontend code (`frontend/src`) and match its patterns.
 - Do not rewrite working UI unnecessarily.
 - Keep the Vue 3 `<script setup>` SFC style already used in the project.
+- Pages are plain `.vue` with `<script setup>` (no `lang="ts"`).
 
 ## Structure
 
 ```
 frontend/src/
-├── pages/        # route-level views (HomePage.vue, ...)
-├── layouts/      # DefaultLayout.vue, auth layout, admin layout
+├── pages/        # Inertia page components (HomePage.vue, ...) named to match
+│                 # Inertia::render('Home') → pages/Home.vue
+├── layouts/      # DefaultLayout.vue (persistent layout), auth/admin layouts
 ├── components/   # reusable UI components
 ├── composables/  # shared logic (useAuth, useTable, useForm)
 ├── stores/       # Pinia stores
-├── services/     # Axios API modules (api.ts entry point)
-├── router/       # routes + guards
-└── types/        # TS types mirroring API resources
+├── services/     # Axios API modules (api.js entry point)
+└── app.js        # Inertia bootstrap (createInertiaApp)
 ```
+
+Routing is handled by Inertia on the server (`routes/web.php` +
+`Inertia::render()`); there is **no client-side `vue-router`**.
+
+## Page navigation (Inertia)
+
+- Routes are defined in `backend/routes/web.php`; controllers (or inline
+  closures) return `Inertia::render('PageName', $props)`.
+- Page component path mirrors the name: `Inertia::render('Home')` →
+  `frontend/src/pages/Home.vue`; nested with dots, e.g. `Admin.Users` →
+  `pages/Admin/Users.vue`.
+- Use `<Link href="...">` (from `@inertiajs/vue3`) for in-app navigation,
+  never `<a>`.
+- Server-side authorization is the source of truth; Inertia page props plus
+  `routes/web.php` middleware (`auth`, role policies) guard pages.
+- Shared props (e.g. `auth.user`, flash messages) come from
+  `App\Http\Middleware\HandleInertiaRequests`.
 
 ## API access
 
-- All HTTP goes through `services/api.ts` (the shared Axios instance) + one
-  service module per API domain.
-- `api.ts` already: base URL from `VITE_API_URL` (default `/api`), attaches
+- All HTTP for data goes through `services/api.js` (the shared Axios instance) +
+  one service module per API domain. This is used for REST mutations/queries;
+  page loads themselves are Inertia requests, not Axios.
+- `api.js` already: base URL from `VITE_API_URL` (default `/api`), attaches
   `Authorization: Bearer <auth_token>` from localStorage, and clears the token
   on 401. DO NOT duplicate this logic.
 - Pages MUST NOT call `axios` directly — always go through a service module.
-- Type the response data with TS interfaces from `src/types` (mirror API
-  resources).
 
 ## Components
 
@@ -52,7 +72,7 @@ frontend/src/
 - Avoid giant components: break pages into focused components; split at 200-300
   lines.
 - Prefer composition over heredity; props down, events up; define `emits`
-  explicitly in TypeScript.
+  explicitly.
 - Modal pattern: a single reusable `<BaseModal>` with slots, controlled by a
   `v-model` open state from the caller.
 
@@ -71,13 +91,12 @@ frontend/src/
   composable/`ref`).
 - Actions call services; state is read-only from components (use getters).
 
-## Router
+## Access control on pages
 
-- Route definitions in `src/router/index.ts`.
-- Route guards: `meta: { requiresAuth: true, roles: [...] }`; block
-  unauthorized navigation client-side (defense in depth — backend still
-  enforces everything).
-- 404 fallback route.
+- Server-side: `routes/web.php` middleware (`auth`, role checks) is the
+  enforcement. Inertia still renders the SPA shell; guards happen on the server.
+- Page props shared via `HandleInertiaRequests` (e.g. `auth.user`, `roles`) let
+  the UI hide what the user cannot do.
 
 ## Loading & error states
 
@@ -102,12 +121,12 @@ frontend/src/
   `skills/api/SKILL.md`.
 - Tables: `BaseTable` with slot columns, pagination footer, and empty state.
 
-## TypeScript
+## JavaScript (no TypeScript)
 
-- Strict mode enforced by `vue-tsc` build.
-- Type all props, emits, store state, API payloads, and API responses.
-- No `any` unless truly unavoidable and documented.
-- Use `generics`/`defineModel` where idiomatic.
+- Plain JavaScript only — no `lang="ts"`, no `.ts` files, no `vue-tsc`.
+- Build/type-enforcement happens server-side (Laravel validation, API
+  contracts). Keep client code simple, small, readable.
+- Prefer `defineModel`/`defineProps` from Vue where idiomatic.
 
 ## Frontend prohibitions
 
@@ -120,8 +139,9 @@ frontend/src/
 
 ## Validation checklist
 
-1. `npm run build` (vue-tsc) passes on `frontend`.
-2. API calls go through service modules; typed responses.
+1. `npm run build` (vite) passes on `frontend`; Laravel `@vite` resolves assets.
+2. Pages render via `Inertia::render()` from `routes/web.php`.
+3. REST calls go through service modules (`services/api.js`).
 3. No giant components introduced.
 4. Loading/error/empty states present for new views.
 5. Related skills respected: `frontend-ui`, `api`, `authorization` (UI guards).

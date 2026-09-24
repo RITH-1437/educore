@@ -53,20 +53,34 @@ the FKs they reference):
 | 16 | 16_internship | `internship_companies`, `internships`, `internship_reports`, `internship_evaluations` | students, files |
 | 17 | 17_audit | `audit_logs` | users |
 
-Total migrations ≈ 57 table files (+ index/seed support files). Each migration
-defines columns, named constraints, and indexes exactly as in
-`schema-reference.md`.
+Total: **53 migration files** = 4 framework scaffold (Laravel `0001_01_01_*`
+packages, `cache`, `jobs`, etc.) + **49 domain migrations**
+(`2026_09_24_130001`…`2026_09_24_130049`). Each migration defines columns,
+named constraints, and indexes exactly as in `schema-reference.md` /
+`schema-tables.sql`; all were applied by one `migrate:fresh` (single batch).
 
 > Note: `users` intentionally comes early (step 2) because lecturers and
-> students are profiles over the same `users` row.
+> students are profiles over the same `users` row. The scaffold `users` table
+> is extended in place by `…130005` (adds `role_id`, identity columns, and
+> converts scaffold `timestamp` columns to `timestamptz`).
+>
+> Implementation notes (see `docs/4_Database-Migration-Report.md` for the full
+> validation):
+> - Reserved word `settings.group` works under Laravel (quoted identifier);
+>   `schema-tables.sql` now quotes it (`"group"`) and executes as-is.
+> - Laravel emits `TIMESTAMP(0)` precision (seconds) — `schema-tables.sql`
+>   declares microsecond `TIMESTAMPTZ`; functionally equivalent for app data.
+> - `uq_gpa_records` (`NULLS NOT DISTINCT`) and the partial one-active
+>   uniqueness rules are unique **indexes** (created via `DB::statement`),
+>   matching the SQL file.
 
 ## 3. Down / rollback
 
 - All tables are `dropIfExists`-friendly **in reverse dependency order**;
   `migrate:rollback` walks batches backwards.
-- Soft-delete tables (`enrollments`, `grades`, `documents`, `invoices`) keep a
-  `deleted_at` column — rollback of a whole schema still requires `refresh`
-  since indexes/uniques must drop with tables.
+- Soft-delete tables (`users`, `faculties`, `enrollments`, `grades`,
+  `documents`, `invoices`) keep a `deleted_at` column — rollback of a whole
+  schema still requires `refresh` since indexes/uniques must drop with tables.
 
 ## 4. Status changes (forward-only migrations)
 

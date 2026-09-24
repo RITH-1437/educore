@@ -6,20 +6,34 @@ description: EduCore Docker Compose architecture - services, internal hostnames,
 # EduCore Docker
 
 Development runs entirely in Docker Compose. No local PHP/Node/Postgres
-required. Config lives in `docker-compose.yml`, `docker/`, and `.env`.
+required. Config lives in `docker/docker-compose.yml`, `docker/`, and the
+root `.env`.
 
 ## When to use
 
 - Changing containers, images, networks, volumes, healthchecks, env vars, or
   the build/entrypoint scripts.
 
+## Invoking compose
+
+The compose file lives at `docker/docker-compose.yml`. Always run it from the
+repository root so the project directory stays the repo and `${VAR}`
+interpolation reads the root `.env`:
+
+```sh
+docker compose --project-directory . -f docker/docker-compose.yml up -d
+```
+
+The `Makefile` wraps this (`COMPOSE := docker compose --project-directory . -f
+docker/docker-compose.yml`) — prefer `make up`, `make ps`, `make migrate`, etc.
+
 ## Services & internal hostnames
 
 | Service (compose) | Internal hostname | Internal port | Role |
 | --- | --- | --- | --- |
-| nginx | `nginx` | 80 | Single entry point / reverse proxy |
-| backend | `backend` | 9000 (php-fpm) | Laravel |
-| frontend | `frontend` | 5173 (Vite) | Vue dev server |
+| nginx | `nginx` | 80 | Single entry point / reverse proxy → Laravel (PHP-FPM) |
+| backend | `backend` | 9000 (php-fpm) | Laravel (serves Inertia pages + JSON API) |
+| frontend | `frontend` | 5173 (Vite dev/HMR) | Vue via Vite; builds assets into Laravel `public/build` |
 | postgres | `postgres` | 5432 | PostgreSQL 16 |
 | pgadmin | `pgadmin` | 80 | DB admin UI |
 | redis | `redis` | 6379 | Cache/queue/session |
@@ -36,9 +50,9 @@ Examples:
 - Backend → DB: `DB_HOST=postgres`
 - Backend → cache: `REDIS_HOST=redis`
 - Backend → S3: `AWS_ENDPOINT=http://minio:9000`
-- Vite proxy → API: `http://nginx:80`
+- Browser → pages: nginx `/` → PHP-FPM (Laravel renders Inertia)
+- Browser → dev assets: Vite dev server published on port 5173 (HMR)
 - Nginx → php-fpm: `fastcgi_pass backend:9000`
-- Nginx → Vite: `proxy_pass http://frontend:5173`
 
 ## Network
 
@@ -51,8 +65,19 @@ Examples:
 - `backend-vendor` → `/var/www/html/vendor`, `frontend-node-modules` →
   `/app/node_modules` — mounted over the bind mounts so host code edits are
   live but dependencies live in the container.
-- Bind mounts: `./backend`, `./frontend`, plus `docker/nginx/default.conf`.
-- `docker compose down` keeps volumes; `down -v` wipes data.
+- Bind mounts: `./backend`, `./frontend` to host code, plus
+  `./docker/nginx/default.conf`; the frontend container also mounts `./backend`
+  → `/backend` so Vite can write the manifest (`/backend/public/hot` in dev,
+  `/backend/public/build` in build) for Laravel `@vite`.
+- IMPORTANT — all paths in `docker/docker-compose.yml` are **repository-root
+  relative** because Compose resolves them against the project directory. You
+  MUST invoke with `--project-directory .` (Makefile wraps this). Invoking
+  without it makes the base fall back to `docker/` and paths double-prefix
+  (e.g. `docker/docker/nginx/default.conf`) — mount failures like
+  `not a directory` / `mount src=... not found`. Always use `make up` or the
+  exact `docker compose --project-directory .` command.
+- `docker compose --project-directory . -f docker/docker-compose.yml down`
+  keeps volumes; `down -v` wipes data.
 
 ## Healthchecks & startup order
 
@@ -67,30 +92,42 @@ Examples:
 
 ## Environment variables
 
-- All config in root `.env` (git-ignored; template `.env.docker.example`).
-- Compose reads it via `env_file` (backend) and `${VAR:-default}` substitution.
+- All config in root `.env` (git-ignored; template
+  `docker/.env.docker.example`).
+- Compose reads it via `env_file` (`../.env` from `docker/`) and `${VAR:-default}`
+  substitution (root `.env` via `--project-directory .`).
 - Backend container overrides: `DB_HOST`, `REDIS_HOST`, `AWS_ENDPOINT`,
   `FILESYSTEM_DISK=s3`, `SESSION_DRIVER/CACHE_STORE/QUEUE_CONNECTION=redis`.
-- `.env` is never committed; **never hardcode secrets** in `docker-compose.yml`
-  (use `${VAR:-default}` so real values stay in `.env`).
+- Frontend container: `BACKEND_PUBLIC_DIR=/backend/public` tells `laravel-vite-plugin`
+  where to write the manifest/hot file and built assets.
+- `.env` is never committed; **never hardcode secrets** in
+  `docker/docker-compose.yml` (use `${VAR:-default}` so real values stay in
+  `.env`).
 
 ## Development containers
 
 - `backend`: PHP 8.4-FPM; entrypoint runs `composer install`, copies
   `.env.example`→`.env`, `key:generate`, `storage:link` on first boot.
-- `frontend`: Node 22; entrypoint runs `npm install` on first boot; serves Vite
-  with `CHOKIDAR_USEPOLLING=true` (Windows bind mounts).
+- `frontend`: Node 22; entrypoint runs `npm install` on first boot; Vite dev
+  server for Inertia page components with HMR and
+  `CHOKIDAR_USEPOLLING=true` (Windows bind mounts). Serve the page from
+  `http://localhost` (nginx → Laravel); the Vite dev server is reachable at
+  `http://localhost:5173` for HMR.
+- After changing `frontend/package.json`, re-run `npm install` inside the
+  `frontend` container (the entrypoint skips install once `node_modules`
+  exists), e.g.
+  `docker compose --project-directory . -f docker/docker-compose.yml exec frontend npm install`.
 - Images: `educore/backend:dev`, `educore/frontend:dev`.
 
 ## Common commands
 
 ```sh
-docker compose up -d           # start
-docker compose ps              # status (expect "healthy")
-docker compose exec backend php artisan migrate
-docker compose logs -f backend
-docker compose down            # stop (keep data)
-docker compose build           # rebuild images
+docker compose --project-directory . -f docker/docker-compose.yml up -d   # start
+docker compose --project-directory . -f docker/docker-compose.yml ps      # status (expect "healthy")
+docker compose --project-directory . -f docker/docker-compose.yml exec backend php artisan migrate
+docker compose --project-directory . -f docker/docker-compose.yml logs -f backend
+docker compose --project-directory . -f docker/docker-compose.yml down    # stop (keep data)
+docker compose --project-directory . -f docker/docker-compose.yml build   # rebuild images
 ```
 
 (Or the equivalent `make` targets: `up`, `ps`, `migrate`, `logs`, `down`.)
@@ -100,8 +137,8 @@ docker compose build           # rebuild images
 - DO NOT use `localhost` for cross-container calls.
 - DO NOT hardcode credentials in compose/Dockerfiles.
 - DO NOT remove healthchecks or weaken `depends_on` conditions.
-- DO NOT edit `docker-compose.prod.yml` thinking it is the dev file (production
-  is Laravel Cloud + managed services).
+- DO NOT edit `docker/docker-compose.prod.yml` thinking it is the dev file
+  (production is Laravel Cloud + managed services; AWS files untouched).
 - DO NOT commit `.env`.
 
 ## Validation checklist

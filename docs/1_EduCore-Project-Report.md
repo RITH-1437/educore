@@ -60,9 +60,10 @@ payment records, announcements, email & Telegram notifications, internship manag
 analytics, and audit logs.
 
 **Implementation status:** the **foundation is implemented** — Laravel 12 backend
-scaffold with Sanctum authentication and health endpoint, Vue 3 + TypeScript frontend
-scaffold with an API client, a complete Docker development environment, and CI/CD
-workflows. **All business modules are planned** for the initial release.
+scaffold with Sanctum authentication and health endpoint, Vue 3 + Inertia
+(JavaScript) frontend scaffold with an API client, a complete Docker development
+environment, and CI/CD workflows. **All business modules are planned** for the
+initial release.
 
 ---
 
@@ -592,8 +593,8 @@ deployed simply.
 ```mermaid
 flowchart TB
     Client[Browser] --> Nginx[Nginx — single entry point]
-    Nginx --> FE[Vue 3 + TypeScript frontend]
-    FE -->|REST API| BE[Laravel backend]
+    Nginx --> BE[Laravel backend — Inertia pages + REST API]
+    BE -->|Inertia render| FE[Vue 3 + JavaScript frontend via Vite]
     BE --> PG[(PostgreSQL)]
     BE --> RD[(Redis — cache/queue/session)]
     BE --> MO[(MinIO — document/image storage)]
@@ -616,18 +617,19 @@ flowchart TB
 **Laravel MVC responsibilities:**
 
 - **Model:** relationships, business entities, data representation.
-- **Controller:** receive requests, call services, return responses.
-- **View:** handled by Vue (frontend); Laravel exposes an API rather than Blade views.
+- **Controller:** receive requests, call services, return responses — For
+  page views, `Inertia::render()` (Vue components); for data, JSON Resources.
+- **View:** Vue components rendered via Inertia (Laravel controls routing).
 
 ### 10.2 Frontend organization
 
 ```mermaid
 flowchart TB
-    SRC["src/"] --> FE2["components/ · layouts/ · pages/ · views/"]
+    SRC["frontend/src/"] --> FE2["components/ · layouts/ · pages/ · views/"]
     SRC --> ST["stores/ (Pinia)"]
-    SRC --> SV["services/ (Axios api.ts)"]
-    SRC --> ROUTER["router/ (Vue Router)"]
-    SRC --> UX["composables/ · types/ · utils/"]
+    SRC --> SV["services/ (Axios api.js)"]
+    SRC --> BOOT["app.js (Inertia createInertiaApp)"]
+    SRC --> UX["composables/ · utils/"]
     SRC --> UI["styling (Tailwind CSS)"]
 ```
 
@@ -641,7 +643,7 @@ Organized by feature; never a single huge component collection.
 |---|---|---|
 | Backend | Laravel 12 (PHP 8.4) | API, services, validation, authorization |
 | API auth | Laravel Sanctum | Token-based authentication |
-| Frontend | Vue 3 + TypeScript + Vite | User interface |
+| Frontend | Vue 3 + Inertia (JavaScript) + Vite | User interface |
 | Styling | Tailwind CSS | Styling system |
 | State | Pinia | Client state |
 | Routing | Vue Router | Navigation |
@@ -742,7 +744,7 @@ Two developers (Rin + Lyhor) review each other's work.
 ```mermaid
 flowchart LR
     Push[Push / PR] --> CI[GitHub Actions]
-    CI --> Pipeline[Backend: pint + phpunit · Frontend: vue-tsc + vite build]
+    CI --> Pipeline[Backend: pint + phpunit · Frontend: vite build]
     Pipeline --> Notify[Telegram notification]
 ```
 
@@ -933,7 +935,7 @@ Only after these are approved should implementation proceed.
 | Team | Rin Nairith + Lyhor |
 | Architecture | Modular Monolith (MVC backend) |
 | Backend | Laravel 12 (PHP 8.4) |
-| Frontend | Vue 3 + TypeScript |
+| Frontend | Vue 3 + Inertia (JavaScript) |
 | Styling | Tailwind CSS |
 | State | Pinia |
 | Database | PostgreSQL |

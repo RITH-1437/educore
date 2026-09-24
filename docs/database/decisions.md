@@ -1,0 +1,158 @@
+# EduCore Database Design Decisions
+
+Each decision states what we chose, why, and what we rejected. This is the
+authoritative rationale for the schema in `schema-reference.md`.
+
+## 1. Single monolith schema, 49 domain tables
+
+**Decision.** One PostgreSQL database, 49 domain + 8 framework tables, 14
+modules, tight `RESTRICT` FKs instead of database-per-service boundaries.
+
+**Why.** EduCore is a single Laravel application; a microservice split adds
+consistency/latency cost with zero current scaling pressure. One DB gives
+transactional integrity across enrollment, grading, and billing (a student's
+drop must atomically void grades and invoices).
+
+**Alternatives rejected.** Per-module databases; shared schemas with
+cross-schema FKs. Trade-off accepted: a future module split would partition
+`audit_logs`/`files` first (they are already polymorphic/loosely coupled).
+
+## 2. `bigint` auto-increment PKs, separate business keys
+
+**Decision.** Every table uses `id bigint GENERATED ALWAYS AS IDENTITY`.
+Business-facing identifiers (student_number, staff_number, invoice_number,
+verification_token, and human codes like `CSE101`) live in dedicated unique
+columns — never in the PK.
+
+**Why.** Surrogate PKs immune to business re-keying; business keys can be
+re-issued/formatted by country or policy without touching FKs. Identity vs
+natural-key debates (student number is a natural key in some institutions)
+are resolved by storing both.
+
+**Alternatives rejected.** UUID PKs (index bloat, opaque numbers for users,
+awkward numeric `invoice_number` ranges); natural keys as PK
+(`student_number` collides on legacy merges).
+
+## 3. Status as `varchar` + `CHECK`, never PG enum
+
+**Decision.** All status columns are `varchar(20)` backed by named `CHECK`
+constraints listing valid transitions-proof values (e.g.
+`enrollments.status IN ('draft','enrolled','completed','dropped','withdrawn')`).
+
+**Why.** Adding a status value requires only a constraint swap in a forward-only
+migration; PG enums make `ALTER TYPE ... ADD VALUE` awkward inside
+transactions and impossible to roll back cleanly in Laravel migrations.
+
+## 4. Relationship strategy: explicit FKs, no polymorphic core
+
+**Decision.** Core domain relationships are explicit, directional FKs
+(`students.id → users.id` as `is a`, `enrollments.student_id`, …). The only
+polymorphic pairs are genuinely shared services: `files`
+(`fileable_type`/`fileable_id`), `notifications` (Eloquent contract), and
+`audit_logs` (`auditable_type`/`auditable_id`).
+
+**Why.** Polymorphism everywhere (a common overuse) destroys FK integrity and
+makes reporting joins opaque. Files/notifications are legitimately owner-any
+(see `decisions.md` §8).
+
+## 5. Soft delete on exactly four tables
+
+**Decision.** `enrollments`, `grades`, `documents`, `invoices` carry
+`deleted_at` (soft). Everything else is hard-delete or `RESTRICT`-guarded.
+
+**Why.** These four carry legal/audit meaning: an enrollment with GPAs, a
+grade under appeal, a verified certificate, a reconciled invoice. The rest
+(announcements, schedule rows) are safely hard-deletable. Soft delete is not
+adopted globally because it hides referential garbage and complicates every
+unique index.
+
+## 6. RBAC: single `users.role_id`, pivot only for permissions
+
+**Decision.** `users.role_id` is a required FK to `roles` (one active role).
+`roles` ↔ `permissions` via `permission_role` pivot. No `role_user` pivot.
+
+**Why.** MVP actors are strongly typed (super-admin, admin, registrar,
+lecturer, student); a student can never be a lecturer (`users` profiles force
+one of `students`/`lecturers`). Keeping one role simplifies policy checks and
+`must('role')` authorization. Multi-role is a documented future change that
+costs only a pivot later.
+
+## 7. GPA computed, never stored live
+
+**Decision.** GPA is not a column on `students`. It is a materialized snapshot
+in `gpa_records` recomputed per semester/academic-year by the GPA service
+(`grading-gpa` skill). Weighted course GPA derives from points on `grades` and
+weights in `course_grading_configs`.
+
+**Why.** Live denormalized GPA goes stale the instant a grade, section, or
+enrollment changes and can't satisfy auditability of "what GPA was at time T".
+Snapshots satisfy both report needs and historical verification.
+
+## 8. File storage: polymorphic `files` + MinIO
+
+**Decision.** One `files` table keyed by `(fileable_type, fileable_id)`
+storing `storage_key`, `bucket`, `mime_type`, `size`, `visibility`. Storage
+backend is MinIO (S3 API) via the storage service (`file-storage` skill),
+mapped to Eloquent morphMany.
+
+**Why.** 1 attachment table instead of N `*_files` tables; MinIO mirrors S3 so
+production can switch to real S3 without schema change. Visibility
+(`private|public`) gates presigned URLs.
+
+## 9. Payments append-only with reversals
+
+**Decision.** `payments` inserts only. A refund/cancellation inserts a new row
+with `is_reversal = true` and `reversal_of → original payment id`.
+`invoices.amount_paid` is a running total recomputed transactionally.
+
+**Why.** Financial records must be immutable for reconciliation and audit.
+Correction-by-update hides history; this makes every ledger entry a fact.
+
+## 10. Lean internship model (no opportunity catalog)
+
+**Decision.** `internship_companies` holds only company contact info;
+`internships` links a student to a company placement. No per-opportunity
+posting/catalog tables for the MVP.
+
+**Why.** The business overview lists internships as a lightweight module;
+an ATS-style catalog is not requested. A catalog remains an additive future
+table (see Open Questions in the final report).
+
+## 11. No separate transcript/certificate tables
+
+**Decision.** Transcripts and certificates are generated documents, not stored
+rows; generation is a `document_types` → `document_requests` → `documents`
+flow, and the rendered artifact is stored under the document's own
+`file_key`/`file_name` + `checksum` (not a generic `files` upload), re-issued
+on demand.
+
+**Why.** Content is 100% derivable from `grades`/`gpa_records` snapshots;
+persisting a live transcript duplicates that data and risks divergence. The
+issued artifact (rendered PDF in files) is what a verification system checks.
+
+## 12. Single-instance tenants, no multi-tenancy
+
+**Decision.** No `tenant_id`/`institution_id` on every table. One
+`universities` row marked `is_current`; EduCore deploys per institution.
+
+**Why.** Product serves single institutions per installation; multi-tenant
+columns would tax every query and constrain future market decisions. Scoping
+is app-level (immutable `InstitutionContext`).
+
+## 13. JPEG/png/PDF via MinIO but content-agnostic `mime_type`
+
+**Decision.** `files.mime_type` stores whatever MinIO detects; app-level
+validators restrict uploads per business rule. Docs skill drives allowed
+extensions, not the schema.
+
+**Why.** The database stays honest about bytes served; policy lives in
+application code where it can evolve without migrations.
+
+## 14. Audit log is an application concern, not trigger-driven
+
+**Decision.** `audit_logs` is written by middleware/service on real business
+actions (and reused by `AUDITABLE_MODELS`); DB triggers are rejected.
+
+**Why.** Triggers fire on direct SQL too (noisy writes during seeding),
+don't know the acting user session, and can't capture domain context. PHP-side
+auditing is per `audit-logging` skill.

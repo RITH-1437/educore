@@ -1,0 +1,53 @@
+name: Telegram Notification
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: telegram-notification-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    environment: TELEGRAM_BOT_TOKEN
+    steps:
+      - name: Send Telegram notification
+        shell: bash
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          AUTHOR: ${{ github.actor }}
+          SHA: ${{ github.sha }}
+          COMMIT_MSG: ${{ github.event.head_commit.message }}
+          COMMIT_URL: ${{ github.event.head_commit.url }}
+          IS_MANUAL: ${{ github.event_name == 'workflow_dispatch' }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${TELEGRAM_BOT_TOKEN}" ] || [ -z "${TELEGRAM_CHAT_ID}" ]; then
+            echo "Telegram secrets are not configured in the TELEGRAM_BOT_TOKEN environment."
+            exit 1
+          fi
+
+          if [ "${IS_MANUAL}" = "true" ]; then
+            COMMIT_LINE="Trigger: Manual workflow dispatch"
+            URL_LINE=""
+          else
+            FIRST_LINE="$(printf '%s' "${COMMIT_MSG}" | tr '\n' ' ' | cut -c1-200)"
+            COMMIT_LINE="Commit: ${SHA:0:7} ${FIRST_LINE}"
+            URL_LINE="Link: ${COMMIT_URL}"
+          fi
+
+          MESSAGE="$(printf 'EduCore - Push Notification\nRepository: %s\nBranch: %s\nAuthor: %s\n%s\n%s' "${REPO}" "${BRANCH}" "${AUTHOR}" "${COMMIT_LINE}" "${URL_LINE}")"
+
+          curl -fsS -o /dev/null \
+            --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+            --data-urlencode "text=${MESSAGE}" \
+            "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage"

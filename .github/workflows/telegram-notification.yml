@@ -19,8 +19,8 @@ jobs:
       - name: Send Telegram notification
         shell: bash
         env:
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_BOT_TOKEN: ${{ vars.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ vars.TELEGRAM_CHAT_ID }}
           REPO: ${{ github.repository }}
           BRANCH: ${{ github.ref_name }}
           AUTHOR: ${{ github.actor }}
@@ -36,10 +36,13 @@ jobs:
           [ -z "${TELEGRAM_CHAT_ID}" ] && missing="${missing} TELEGRAM_CHAT_ID"
 
           if [ -n "${missing}" ]; then
-            echo "The following secrets were not found in the TELEGRAM_BOT_TOKEN environment:${missing}"
-            echo "Add them under Settings > Environments > TELEGRAM_BOT_TOKEN > Environment secrets."
+            echo "The following variables were not found in the TELEGRAM_BOT_TOKEN environment:${missing}"
+            echo "Add them under Settings > Environments > TELEGRAM_BOT_TOKEN > Environment variables."
             exit 1
           fi
+
+          echo "::add-mask::${TELEGRAM_BOT_TOKEN}"
+          echo "::add-mask::${TELEGRAM_CHAT_ID}"
 
           if [ "${IS_MANUAL}" = "true" ]; then
             COMMIT_LINE="Trigger: Manual workflow dispatch"

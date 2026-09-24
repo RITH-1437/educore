@@ -31,8 +31,13 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [ -z "${TELEGRAM_BOT_TOKEN}" ] || [ -z "${TELEGRAM_CHAT_ID}" ]; then
-            echo "Telegram secrets are not configured in the TELEGRAM_BOT_TOKEN environment."
+          missing=""
+          [ -z "${TELEGRAM_BOT_TOKEN}" ] && missing="${missing} TELEGRAM_BOT_TOKEN"
+          [ -z "${TELEGRAM_CHAT_ID}" ] && missing="${missing} TELEGRAM_CHAT_ID"
+
+          if [ -n "${missing}" ]; then
+            echo "The following secrets were not found in the TELEGRAM_BOT_TOKEN environment:${missing}"
+            echo "Add them under Settings > Environments > TELEGRAM_BOT_TOKEN > Environment secrets."
             exit 1
           fi
 

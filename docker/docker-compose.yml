@@ -1,12 +1,5 @@
 name: educore
 
-# Invoke from the repository root so the project directory stays the repo:
-#     docker compose --project-directory . -f docker/docker-compose.yml up -d
-# This keeps interpolation reading the root `.env` (backend env_file is ../.env).
-# Compose resolves THIS file's relative paths against the project directory, so
-# every path below is REPOSITORY-ROOT relative: `./backend`, `./frontend`,
-# `./docker/...`. Do not reintroduce `../backend`-style paths.
-# `make up` / `make ps` / ... wrap this automatically (see Makefile).
 
 networks:
   educore-network:

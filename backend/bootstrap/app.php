@@ -25,6 +25,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
+        // API clients such as Swagger UI may send `Accept: */*`. Keep API
+        // failures JSON instead of redirecting them to the Inertia login page.
+        $exceptions->shouldRenderJsonWhen(
+            fn ($request) => $request->is('api/*') || $request->expectsJson(),
+        );
+
         $exceptions->render(function (BusinessRuleException $exception, $request) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => $exception->getMessage()], 409);

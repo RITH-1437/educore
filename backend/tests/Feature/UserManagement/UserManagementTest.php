@@ -156,6 +156,14 @@ class UserManagementTest extends TestCase
             ]);
     }
 
+    public function test_unauthenticated_api_request_with_wildcard_accept_returns_json(): void
+    {
+        $this->get('/api/users', ['Accept' => '*/*'])
+            ->assertUnauthorized()
+            ->assertHeader('content-type', 'application/json')
+            ->assertExactJson(['message' => 'Unauthenticated.']);
+    }
+
     public function test_user_list_caps_per_page(): void
     {
         $this->actingAs($this->admin)

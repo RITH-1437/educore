@@ -32,6 +32,12 @@ class HandleInertiaRequests extends Middleware
                 'success' => session('success'),
                 'error' => session('error'),
             ],
+            'frontend' => [
+                'url' => config('frontend.url'),
+                'api_url' => config('frontend.api_url'),
+                'api_prefix' => config('frontend.api_prefix'),
+                'dev_server_url' => config('frontend.dev_server_url'),
+            ],
         ]);
     }
 }

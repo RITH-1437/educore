@@ -4,7 +4,9 @@ import tailwindcss from '@tailwindcss/vite'
 import laravel from 'laravel-vite-plugin'
 import path from 'node:path'
 
-const appUrl = process.env.APP_URL || 'http://localhost'
+const appUrl = process.env.APP_URL || process.env.FRONTEND_URL || 'http://localhost'
+const devServerUrl = process.env.VITE_DEV_SERVER_URL || 'http://localhost:5173'
+const devServer = new URL(devServerUrl)
 
 // Place the Vite manifest + built assets where Laravel can serve them.
 // In the Docker frontend container this is a bind-mounted /backend/public;
@@ -39,10 +41,10 @@ export default defineConfig({
   ],
   server: {
     host: '0.0.0.0',
-    port: 5173,
+    port: Number(devServer.port || 5173),
     hmr: {
-      host: 'localhost',
-      port: 5173,
+      host: devServer.hostname || 'localhost',
+      port: Number(devServer.port || 5173),
     },
   },
   build: {

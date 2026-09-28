@@ -5,7 +5,10 @@ import DefaultLayout from './layouts/DefaultLayout.vue'
 import './style.css'
 
 createInertiaApp({
-  title: (title) => (title ? `${title} — EduCore` : 'EduCore'),
+  title: (title) => {
+    if (!title) return 'EduCore'
+    return title.includes('EduCore') ? title : `${title} — EduCore`
+  },
   resolve: (name) => {
     const pages = import.meta.glob('./pages/**/*.vue', { eager: true })
     const page = pages[`./pages/${name}.vue`]

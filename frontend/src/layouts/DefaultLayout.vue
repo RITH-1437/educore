@@ -12,6 +12,14 @@
           <template v-if="user">
             <Link v-if="isAdmin" :href="'/users'" class="font-medium text-gray-700 hover:text-gray-900">Users</Link>
 
+            <Link
+              v-if="managesCalendar"
+              :href="'/academic-years'"
+              class="font-medium text-gray-700 hover:text-gray-900"
+            >
+              Academic years
+            </Link>
+
             <span class="flex items-center gap-2">
               <span>{{ user.name }}</span>
               <span class="rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-500">{{ user.role?.name }}</span>
@@ -40,6 +48,7 @@ import { computed } from 'vue'
 const page = usePage()
 const user = computed(() => page.props.auth?.user ?? null)
 const isAdmin = computed(() => user.value?.role?.slug === 'super-admin')
+const managesCalendar = computed(() => ['super-admin', 'university-admin'].includes(user.value?.role?.slug))
 
 const logout = () => router.post('/logout')
 </script>

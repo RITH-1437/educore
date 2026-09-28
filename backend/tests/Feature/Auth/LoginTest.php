@@ -75,6 +75,16 @@ class LoginTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_authenticated_user_gets_home_from_root(): void
+    {
+        $user = User::factory()->superAdmin()->create();
+
+        $this->actingAs($user)
+            ->get('/')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('Home'));
+    }
+
     public function test_user_can_logout(): void
     {
         $user = User::factory()->superAdmin()->create();

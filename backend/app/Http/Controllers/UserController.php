@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Dto\User\CreateUserData;
+use App\Dto\User\UpdateUserData;
+use App\Dto\User\UserListFilters;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -14,25 +18,23 @@ use Inertia\Response;
 
 class UserController extends Controller
 {
+    public function __construct(
+        private readonly UserService $users,
+    ) {}
+
     public function index(Request $request): Response
     {
         $this->authorize('viewAny', User::class);
 
-        $users = User::query()
-            ->with('role')
-            ->when($search = $request->string('search')->trim(), function ($query, $search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'ilike', "%{$search}%")
-                        ->orWhere('email', 'ilike', "%{$search}%");
-                });
-            })
-            ->orderByDesc('id')
-            ->paginate(15)
-            ->withQueryString();
+        $filters = UserListFilters::fromInput($request->query());
+
+        $users = $this->users->list($filters)
+            ->withQueryString()
+            ->appends($filters->toQueryString());
 
         return Inertia::render('Users/Index', [
             'users' => UserResource::collection($users),
-            'filters' => ['search' => $search ?? null],
+            'filters' => ['search' => $filters->search],
         ]);
     }
 
@@ -49,7 +51,7 @@ class UserController extends Controller
     {
         $this->authorize('create', User::class);
 
-        User::query()->create($request->validated());
+        $this->users->create(CreateUserData::fromValidated($request->validated()));
 
         return redirect()->route('users.index')->with('success', 'User created.');
     }
@@ -68,7 +70,7 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
-        $user->update($request->validated());
+        $this->users->update($user, UpdateUserData::fromValidated($request->validated()));
 
         return redirect()->back()->with('success', 'User updated.');
     }
@@ -77,11 +79,14 @@ class UserController extends Controller
     {
         $this->authorize('delete', $user);
 
-        $user->delete();
+        $this->users->delete($user);
 
         return redirect()->route('users.index')->with('success', 'User deleted.');
     }
 
+    /**
+     * @return list<array{id: int, name: string, slug: string}>
+     */
     private function rolesForSelect(): array
     {
         return Role::query()->orderBy('id')->get()

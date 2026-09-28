@@ -5,6 +5,7 @@ namespace Tests\Feature\UserManagement;
 use App\Enums\Role;
 use App\Models\Role as RoleModel;
 use App\Models\User;
+use App\Services\UserService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -153,5 +154,42 @@ class UserManagementTest extends TestCase
                 'data' => [['id', 'name', 'email', 'role']],
                 'meta' => ['current_page', 'per_page', 'total'],
             ]);
+    }
+
+    public function test_user_list_caps_per_page(): void
+    {
+        $this->actingAs($this->admin)
+            ->getJson('/api/users?per_page=500')
+            ->assertOk()
+            ->assertJsonPath('meta.per_page', 100);
+    }
+
+    public function test_api_delete_soft_deletes_user_and_revokes_tokens(): void
+    {
+        $adminToken = $this->postJson('/api/login', [
+            'email' => $this->admin->email,
+            'password' => 'password',
+        ])->json('data.token');
+
+        $this->student->createToken('api');
+
+        $this->deleteJson("/api/users/{$this->student->id}", ['Authorization' => "Bearer {$adminToken}"])
+            ->assertNoContent();
+
+        $this->assertSoftDeleted('users', ['id' => $this->student->id]);
+        $this->assertDatabaseMissing('personal_access_tokens', [
+            'tokenable_id' => $this->student->id,
+            'tokenable_type' => User::class,
+        ]);
+    }
+
+    public function test_revoked_token_can_no_longer_authenticate(): void
+    {
+        $token = $this->student->createToken('api')->plainTextToken;
+
+        app(UserService::class)->delete($this->student);
+
+        $this->getJson('/api/user', ['Authorization' => "Bearer {$token}"])
+            ->assertUnauthorized();
     }
 }

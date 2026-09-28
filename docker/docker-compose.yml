@@ -99,6 +99,8 @@ services:
     environment:
       BACKEND_PUBLIC_DIR: /backend/public
       VITE_API_URL: ${VITE_API_URL:-/api}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost}
+      VITE_DEV_SERVER_URL: ${VITE_DEV_SERVER_URL:-http://localhost:5173}
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
     volumes:

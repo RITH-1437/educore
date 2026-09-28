@@ -2,6 +2,8 @@
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseInput from '../../components/BaseInput.vue'
+import BaseSelect from '../../components/BaseSelect.vue'
+import BaseCard from '../../components/BaseCard.vue'
 
 const props = defineProps({
   roles: { type: Array, required: true },
@@ -21,52 +23,41 @@ const submit = () => form.post('/users', { preserveScroll: true })
 </script>
 
 <template>
-  <div class="max-w-2xl">
+  <div class="mx-auto max-w-3xl space-y-6">
     <Head title="New user" />
 
-    <div class="flex items-center justify-between">
+    <header class="flex items-end justify-between gap-4">
       <div>
-        <h2 class="text-2xl font-bold text-gray-900">New user</h2>
-        <p class="mt-1 text-sm text-gray-600">Create a portal account and assign its access role.</p>
+        <h2 class="text-h1 font-display font-semibold text-ink dark:text-dark-ink">New user</h2>
+        <p class="mt-2 text-small text-muted dark:text-dark-muted">Create a portal account and assign its access role.</p>
       </div>
-      <Link href="/users" class="text-sm font-medium text-gray-500 hover:text-gray-700">← Back to users</Link>
-    </div>
+      <Link href="/users" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">Back to users</Link>
+    </header>
 
-    <form class="mt-6 space-y-5 rounded-lg bg-white p-6 shadow-sm ring-1 ring-gray-200" @submit.prevent="submit">
-      <BaseInput v-model="form.name" label="Full name" :error="form.errors.name" autofocus />
-      <BaseInput v-model="form.email" label="Email" type="email" :error="form.errors.email" />
+    <BaseCard padding="lg">
+      <form class="space-y-5" @submit.prevent="submit">
+      <BaseInput v-model="form.name" name="name" label="Full name" :error="form.errors.name" autofocus required />
+      <BaseInput v-model="form.email" name="email" label="Email" type="email" :error="form.errors.email" required />
 
-      <div>
-        <label class="mb-1 block text-sm font-medium text-gray-700">Role</label>
-        <select
-          v-model="form.role_id"
-          class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-        >
-          <option v-for="role in roles" :key="role.id" :value="role.id">{{ role.name }}</option>
-        </select>
-        <p v-if="form.errors.role_id" class="mt-1 text-sm text-red-600">{{ form.errors.role_id }}</p>
-      </div>
+      <BaseSelect v-model="form.role_id" label="Role" :options="roles.map((role) => ({ value: role.id, label: role.name }))" placeholder="Select a role" :error="form.errors.role_id" required />
 
-      <BaseInput v-model="form.phone" label="Phone (optional)" :error="form.errors.phone" />
+      <BaseInput v-model="form.phone" name="phone" label="Phone (optional)" :error="form.errors.phone" />
 
       <div class="grid gap-5 sm:grid-cols-2">
-        <BaseInput v-model="form.password" label="Password" type="password" :error="form.errors.password" />
-        <BaseInput v-model="form.password_confirmation" label="Confirm password" type="password" />
+        <BaseInput v-model="form.password" name="password" label="Password" type="password" :error="form.errors.password" required />
+        <BaseInput v-model="form.password_confirmation" name="password_confirmation" label="Confirm password" type="password" required />
       </div>
 
-      <label class="flex items-center text-sm text-gray-600">
-        <input
-          v-model="form.is_active"
-          type="checkbox"
-          class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-        />
-        <span class="ml-2">Active (can sign in)</span>
+      <label class="flex min-h-11 items-center gap-3 text-small text-ink dark:text-dark-ink">
+        <input v-model="form.is_active" type="checkbox" class="h-4 w-4 rounded border-border-muted accent-primary focus-visible:outline-2 focus-visible:outline-primary" />
+        <span>Active (can sign in)</span>
       </label>
 
       <div class="flex items-center gap-3">
         <BaseButton type="submit" :loading="form.processing">Create user</BaseButton>
-        <Link href="/users" class="text-sm font-medium text-gray-500 hover:text-gray-700">Cancel</Link>
+        <Link href="/users"><BaseButton variant="ghost">Cancel</BaseButton></Link>
       </div>
-    </form>
+      </form>
+    </BaseCard>
   </div>
 </template>

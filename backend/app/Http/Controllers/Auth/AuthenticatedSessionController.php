@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Enums\Role;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
@@ -30,7 +31,13 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('users.index'));
+        if ($request->session()->has('url.intended')) {
+            return redirect()->intended(route('home'));
+        }
+
+        return $user->isRole(Role::SuperAdmin->value)
+            ? redirect()->route('admin.dashboard')
+            : redirect()->route('role-dashboard');
     }
 
     public function destroy(Request $request): RedirectResponse

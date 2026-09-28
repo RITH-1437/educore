@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
@@ -20,17 +21,71 @@ class LoginTest extends TestCase
                 ->component('Auth/Login'));
     }
 
-    public function test_user_can_authenticate_and_is_redirected_to_users(): void
+    public function test_super_admin_authenticates_and_is_redirected_to_admin_dashboard(): void
     {
         $user = User::factory()->superAdmin()->create(['email' => 'boss@test.test']);
 
         $this->post('/login', [
             'email' => 'boss@test.test',
             'password' => 'password',
-        ])->assertRedirect(route('users.index'));
+        ])->assertRedirect(route('admin.dashboard'));
 
         $this->assertAuthenticatedAs($user);
         $this->assertDatabaseHas('users', ['id' => $user->id, 'role_id' => $user->role_id]);
+    }
+
+    public function test_university_admin_is_redirected_to_role_dashboard(): void
+    {
+        $role = Role::factory()->withSlug('university-admin')->create();
+        $user = User::factory()->create([
+            'email' => 'university-admin@test.test',
+            'role_id' => $role->id,
+        ]);
+
+        $this->post('/login', [
+            'email' => $user->email,
+            'password' => 'password',
+        ])->assertRedirect(route('role-dashboard'));
+
+        $this->assertAuthenticatedAs($user);
+    }
+
+    public function test_other_role_can_view_a_sample_role_dashboard(): void
+    {
+        $role = Role::factory()->withSlug('lecturer')->create();
+        $user = User::factory()->create(['role_id' => $role->id]);
+
+        $this->actingAs($user)
+            ->get('/dashboard')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('RoleDashboard')
+                ->where('role', 'lecturer')
+                ->where('title', 'Lecturer Dashboard'));
+    }
+
+    public function test_non_super_admin_cannot_view_admin_dashboard(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('/admin/dashboard')
+            ->assertForbidden();
+    }
+
+    public function test_super_admin_can_view_admin_dashboard_with_management_summary(): void
+    {
+        $user = User::factory()->superAdmin()->create();
+
+        $this->actingAs($user)
+            ->get('/admin/dashboard')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Admin/Dashboard')
+                ->has('stats.total_users')
+                ->has('stats.total_academic_years')
+                ->has('roleCounts')
+                ->has('recentUsers'));
     }
 
     public function test_wrong_credentials_are_rejected_with_a_generic_message(): void
@@ -75,14 +130,13 @@ class LoginTest extends TestCase
         $this->assertGuest();
     }
 
-    public function test_authenticated_user_gets_home_from_root(): void
+    public function test_authenticated_super_admin_is_redirected_to_dashboard_from_root(): void
     {
         $user = User::factory()->superAdmin()->create();
 
         $this->actingAs($user)
             ->get('/')
-            ->assertOk()
-            ->assertInertia(fn (Assert $page) => $page->component('Home'));
+            ->assertRedirect(route('admin.dashboard'));
     }
 
     public function test_user_can_logout(): void

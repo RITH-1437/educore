@@ -3,6 +3,10 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseInput from '../../components/BaseInput.vue'
+import BaseSelect from '../../components/BaseSelect.vue'
+import BaseCard from '../../components/BaseCard.vue'
+import StatusBadge from '../../components/StatusBadge.vue'
+import BaseBadge from '../../components/BaseBadge.vue'
 
 const props = defineProps({
   academicYear: { type: Object, required: true },
@@ -25,20 +29,13 @@ const semesterForm = useForm({
   sequence: '',
   start_date: '',
   end_date: '',
+  status: 'planned',
 })
 
-const statusClasses = {
-  planned: 'bg-slate-100 text-slate-700',
-  open: 'bg-emerald-100 text-emerald-700',
-  closed: 'bg-amber-100 text-amber-700',
-  completed: 'bg-blue-100 text-blue-700',
-}
-
-const yearStatusClasses = {
-  planned: 'bg-slate-100 text-slate-700',
-  active: 'bg-emerald-100 text-emerald-700',
-  completed: 'bg-blue-100 text-blue-700',
-}
+const semesterStatuses = [
+  { value: 'planned', label: 'Planned' },
+  { value: 'open', label: 'Open' },
+]
 
 const submit = () => form.put(`/academic-years/${props.academicYear.id}`, { preserveScroll: true })
 
@@ -61,71 +58,52 @@ const deleteSemester = (semester) => {
 </script>
 
 <template>
-  <div>
+  <div class="space-y-6">
     <Head :title="`Edit ${academicYear.code}`" />
 
-    <div class="flex items-center justify-between">
+    <header class="flex items-end justify-between gap-4">
       <div>
-        <h2 class="text-2xl font-bold text-slate-900">{{ academicYear.name }}</h2>
-        <p class="mt-1 text-sm text-slate-600">
-          Code <span class="font-medium text-slate-900">{{ academicYear.code }}</span>
-          <span
-            class="ml-2 inline-flex rounded px-2 py-0.5 text-xs font-medium"
-            :class="yearStatusClasses[academicYear.status]"
-          >
-            {{ academicYear.status_label }}
-          </span>
-          <span
-            v-if="academicYear.is_current"
-            class="ml-2 inline-flex rounded bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700"
-          >
-            Current
-          </span>
+        <h2 class="text-h1 font-display font-semibold text-ink dark:text-dark-ink">{{ academicYear.name }}</h2>
+        <p class="mt-2 flex flex-wrap items-center gap-2 text-small text-muted dark:text-dark-muted">
+          Code <span class="font-medium text-ink dark:text-dark-ink">{{ academicYear.code }}</span>
+          <StatusBadge :status="academicYear.status" />
+          <BaseBadge v-if="academicYear.is_current" variant="primary">Current year</BaseBadge>
         </p>
       </div>
-      <Link href="/academic-years" class="text-sm font-medium text-slate-500 hover:text-slate-700">
-        ← Back to academic years
-      </Link>
-    </div>
+      <Link href="/academic-years" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">Back to calendar</Link>
+    </header>
 
-    <div v-if="flash?.success" class="mt-4 rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+    <div v-if="flash?.success" class="rounded-lg border border-success/20 bg-success/5 px-4 py-3 text-small text-success" role="status">
       {{ flash.success }}
     </div>
-    <div v-if="flash?.error" class="mt-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800">
+    <div v-if="flash?.error" class="rounded-lg border border-error/20 bg-error/5 px-4 py-3 text-small text-error" role="alert">
       {{ flash.error }}
     </div>
 
-    <div class="mt-6 grid gap-6 lg:grid-cols-2">
-      <form
-        class="space-y-5 rounded-lg bg-white p-6 shadow-sm ring-1 ring-slate-200"
-        @submit.prevent="submit"
-      >
-        <h3 class="text-lg font-semibold text-slate-900">Details</h3>
-
-        <BaseInput v-model="form.code" label="Code" :error="form.errors.code" />
-        <BaseInput v-model="form.name" label="Name" :error="form.errors.name" />
-
-        <div class="grid gap-5 sm:grid-cols-2">
-          <BaseInput v-model="form.start_date" label="Start date" type="date" :error="form.errors.start_date" />
-          <BaseInput v-model="form.end_date" label="End date" type="date" :error="form.errors.end_date" />
-        </div>
-
-        <p class="text-xs text-slate-500">
-          Status changes are made from the list (planned → active → completed) so the transition rules apply.
-        </p>
-
-        <BaseButton type="submit" :loading="form.processing">Save changes</BaseButton>
-      </form>
+    <div class="grid gap-6 xl:grid-cols-2">
+      <BaseCard title="Academic year details" padding="lg">
+        <form class="space-y-5" @submit.prevent="submit">
+          <BaseInput v-model="form.code" name="code" label="Code" :error="form.errors.code" required />
+          <BaseInput v-model="form.name" name="name" label="Name" :error="form.errors.name" required />
+          <div class="grid gap-5 sm:grid-cols-2">
+            <BaseInput v-model="form.start_date" name="start_date" label="Start date" type="date" :error="form.errors.start_date" required />
+            <BaseInput v-model="form.end_date" name="end_date" label="End date" type="date" :error="form.errors.end_date" required />
+          </div>
+          <p class="text-small text-muted dark:text-dark-muted">
+            Status changes are made from the list (planned → active → completed) so the transition rules apply.
+          </p>
+          <BaseButton type="submit" :loading="form.processing">Save changes</BaseButton>
+        </form>
+      </BaseCard>
 
       <div class="space-y-6">
-        <div class="rounded-lg bg-white p-6 shadow-sm ring-1 ring-slate-200">
-          <h3 class="text-lg font-semibold text-slate-900">Semesters</h3>
-          <p class="mt-1 text-sm text-slate-600">
+        <BaseCard title="Semesters" padding="lg">
+          <template #description>
             Ordered by sequence; every course offering hangs from a semester.
-          </p>
+          </template>
 
-          <table class="mt-4 min-w-full divide-y divide-slate-200 text-sm">
-            <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+          <table class="mt-4 min-w-full divide-y divide-border-default text-small dark:divide-dark-border">
+            <thead class="bg-background text-left text-caption font-semibold uppercase tracking-wide text-muted dark:bg-dark-surface-2 dark:text-dark-muted">
               <tr>
                 <th class="px-3 py-2">#</th>
                 <th class="px-3 py-2">Name</th>
@@ -134,26 +112,19 @@ const deleteSemester = (semester) => {
                 <th class="px-3 py-2 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-200">
+            <tbody class="divide-y divide-border-default dark:divide-dark-border">
               <tr v-for="semester in semesters" :key="semester.id">
-                <td class="px-3 py-2 text-slate-500">{{ semester.sequence }}</td>
-                <td class="px-3 py-2 font-medium text-slate-900">{{ semester.name }}</td>
-                <td class="px-3 py-2 text-slate-500">
+                <td class="px-3 py-3 text-muted dark:text-dark-muted">{{ semester.sequence }}</td>
+                <td class="px-3 py-3 font-medium text-ink dark:text-dark-ink">{{ semester.name }}</td>
+                <td class="px-3 py-3 text-muted dark:text-dark-muted">
                   {{ semester.start_date ?? '—' }} → {{ semester.end_date ?? '—' }}
                 </td>
-                <td class="px-3 py-2">
-                  <span
-                    class="inline-flex rounded px-2 py-0.5 text-xs font-medium"
-                    :class="statusClasses[semester.status]"
-                  >
-                    {{ semester.status_label }}
-                  </span>
-                </td>
-                <td class="px-3 py-2 text-right">
+                <td class="px-3 py-3"><StatusBadge :status="semester.status" /></td>
+                <td class="px-3 py-3 text-right">
                   <button
                     v-if="semester.status === 'planned'"
                     type="button"
-                    class="font-medium text-blue-600 hover:text-blue-500"
+                    class="font-medium text-primary hover:underline dark:text-dark-primary"
                     @click="changeSemesterStatus(semester, 'open')"
                   >
                     Open
@@ -161,14 +132,14 @@ const deleteSemester = (semester) => {
                   <button
                     v-else-if="semester.status === 'open'"
                     type="button"
-                    class="font-medium text-amber-600 hover:text-amber-500"
+                    class="font-medium text-warning hover:underline"
                     @click="changeSemesterStatus(semester, 'closed')"
                   >
                     Close
                   </button>
                   <button
                     type="button"
-                    class="ml-3 font-medium text-red-600 hover:text-red-500"
+                    class="ml-3 font-medium text-error hover:underline"
                     @click="deleteSemester(semester)"
                   >
                     Delete
@@ -176,35 +147,28 @@ const deleteSemester = (semester) => {
                 </td>
               </tr>
               <tr v-if="semesters.length === 0">
-                <td colspan="5" class="px-3 py-6 text-center text-slate-500">No semesters yet.</td>
+                <td colspan="5" class="px-3 py-6 text-center text-muted dark:text-dark-muted">No semesters yet.</td>
               </tr>
             </tbody>
           </table>
-        </div>
+        </BaseCard>
 
-        <form
-          class="space-y-4 rounded-lg bg-white p-6 shadow-sm ring-1 ring-slate-200"
-          @submit.prevent="addSemester"
-        >
-          <h3 class="text-lg font-semibold text-slate-900">Add a semester</h3>
-
-          <div class="grid gap-4 sm:grid-cols-3">
-            <BaseInput v-model="semesterForm.name" label="Name" placeholder="Semester 3" :error="semesterForm.errors.name" />
-            <BaseInput v-model="semesterForm.code" label="Code" placeholder="S3" :error="semesterForm.errors.code" />
-            <BaseInput v-model="semesterForm.sequence" label="Sequence" type="number" :error="semesterForm.errors.sequence" />
-          </div>
-
-          <div class="grid gap-4 sm:grid-cols-2">
-            <BaseInput v-model="semesterForm.start_date" label="Start date" type="date" :error="semesterForm.errors.start_date" />
-            <BaseInput v-model="semesterForm.end_date" label="End date" type="date" :error="semesterForm.errors.end_date" />
-          </div>
-
-          <p class="text-xs text-slate-500">
-            Dates must fall inside {{ academicYear.start_date }} → {{ academicYear.end_date }}.
-          </p>
-
-          <BaseButton type="submit" :loading="semesterForm.processing">Add semester</BaseButton>
-        </form>
+        <BaseCard title="Add a semester" padding="lg">
+          <form class="space-y-4" @submit.prevent="addSemester">
+            <div class="grid gap-4 sm:grid-cols-3">
+              <BaseInput v-model="semesterForm.name" name="semester_name" label="Name" placeholder="Semester 3" :error="semesterForm.errors.name" required />
+              <BaseInput v-model="semesterForm.code" name="semester_code" label="Code" placeholder="S3" :error="semesterForm.errors.code" required />
+              <BaseInput v-model="semesterForm.sequence" name="sequence" label="Sequence" type="number" :error="semesterForm.errors.sequence" required />
+            </div>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <BaseInput v-model="semesterForm.start_date" name="semester_start_date" label="Start date" type="date" :error="semesterForm.errors.start_date" />
+              <BaseInput v-model="semesterForm.end_date" name="semester_end_date" label="End date" type="date" :error="semesterForm.errors.end_date" />
+            </div>
+            <BaseSelect v-model="semesterForm.status" label="Initial status" :options="semesterStatuses" placeholder="Use planned" :error="semesterForm.errors.status" />
+            <p class="text-caption text-muted dark:text-dark-muted">Dates must fall inside {{ academicYear.start_date }} → {{ academicYear.end_date }}.</p>
+            <BaseButton type="submit" :loading="semesterForm.processing">Add semester</BaseButton>
+          </form>
+        </BaseCard>
       </div>
     </div>
   </div>

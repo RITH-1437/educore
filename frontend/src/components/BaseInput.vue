@@ -4,6 +4,7 @@ import { computed, useId } from 'vue'
 const props = defineProps({
   modelValue: { type: [String, Number], default: '' },
   label: { type: String, default: '' },
+  name: { type: String, default: '' },
   type: { type: String, default: 'text' },
   error: { type: String, default: '' },
   placeholder: { type: String, default: '' },
@@ -11,50 +12,56 @@ const props = defineProps({
   autocomplete: { type: String, default: '' },
   disabled: { type: Boolean, default: false },
   variant: { type: String, default: 'solid' },
+  required: { type: Boolean, default: false },
+  id: { type: String, default: '' },
+  hint: { type: String, default: '' },
 })
 
 defineEmits(['update:modelValue'])
+defineOptions({ inheritAttrs: false })
 
-const inputId = useId()
-const errorId = useId()
+const generatedId = useId()
+const inputId = computed(() => props.id || generatedId)
+const errorId = computed(() => `${inputId.value}-error`)
 
 const isGlass = computed(() => props.variant === 'glass')
 
 const field = computed(() =>
   isGlass.value
-    ? 'h-11 w-full rounded-lg border border-white/25 bg-white/10 px-3.5 text-white shadow-xs transition-colors duration-150 ease-out placeholder:text-white/50 hover:border-white/40 focus:border-blue-400 focus:bg-white/15 focus:outline-none focus:ring-2 focus:ring-blue-400/30 disabled:cursor-not-allowed disabled:bg-white/5 disabled:text-white/40'
-    : 'h-11 w-full rounded-lg border border-slate-200 bg-white px-3.5 text-slate-800 shadow-xs transition-colors duration-150 ease-out placeholder:text-slate-500 hover:border-slate-300 focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-600/20 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-50 dark:placeholder:text-slate-400 dark:hover:border-slate-600 dark:focus:border-blue-400 dark:focus:ring-blue-400/25',
+    ? 'h-11 w-full rounded-md border border-white/25 bg-white/10 px-3 text-body text-white shadow-sm transition-colors duration-150 ease-out placeholder:text-white/60 hover:border-white/40 focus:border-dark-primary focus:outline-none focus:ring-2 focus:ring-dark-primary/40 disabled:cursor-not-allowed disabled:opacity-50'
+    : 'h-11 w-full rounded-md border border-border-default bg-surface px-3 text-body text-ink shadow-sm transition-colors duration-150 ease-out placeholder:text-muted hover:border-border-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-border dark:bg-dark-surface dark:text-dark-ink dark:placeholder:text-dark-muted dark:focus:border-dark-primary dark:focus:ring-dark-primary/20'
 )
 
 const errorField = computed(() =>
   isGlass.value
-    ? 'border-red-400 bg-red-500/15 hover:border-red-400 focus:border-red-400 focus:ring-red-400/30'
-    : 'border-red-600 hover:border-red-600 focus:border-red-600 focus:ring-red-600/20 dark:border-red-500 dark:focus:border-red-400 dark:focus:ring-red-400/25',
+    ? 'border-error/80 bg-error/10 hover:border-error focus:border-error focus:ring-error/40'
+    : 'border-error hover:border-error focus:border-error focus:ring-error/20'
 )
 
 const labelClass = computed(() =>
   isGlass.value
-    ? 'mb-1.5 block text-sm font-medium text-white/90'
-    : 'mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-300',
+    ? 'mb-2 block text-label font-medium text-white'
+    : 'mb-2 block text-label font-medium text-ink dark:text-dark-ink'
 )
 
 const leadingIcon = computed(() =>
   isGlass.value
-    ? 'pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-white/60 transition-colors duration-150 group-focus-within:text-blue-300'
-    : 'pointer-events-none absolute inset-y-0 left-3.5 flex items-center text-slate-500 transition-colors duration-150 group-focus-within:text-blue-600 dark:text-slate-400',
+    ? 'pointer-events-none absolute inset-y-0 left-3 flex items-center text-white/75 transition-colors duration-150 group-focus-within:text-dark-primary'
+    : 'pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted transition-colors duration-150 group-focus-within:text-primary dark:text-dark-muted dark:group-focus-within:text-dark-primary'
 )
 
 const message = computed(() =>
   isGlass.value
-    ? 'mt-1.5 flex items-center gap-1.5 text-sm text-red-300'
-    : 'mt-1.5 flex items-center gap-1.5 text-sm text-red-600 dark:text-red-400',
+    ? 'mt-2 flex items-center gap-1.5 text-small text-red-100'
+    : 'mt-2 flex items-center gap-1.5 text-small text-error'
 )
 </script>
 
 <template>
   <div>
-    <label :for="inputId" :class="labelClass">
+    <label v-if="label" :for="inputId" :class="labelClass">
       {{ label }}
+      <span v-if="required" class="ml-1 text-error" aria-hidden="true">*</span>
     </label>
 
     <div class="group relative">
@@ -64,15 +71,19 @@ const message = computed(() =>
 
       <input
         :id="inputId"
+        :name="name || undefined"
         :type="type"
         :value="modelValue"
         :placeholder="placeholder"
         :autofocus="autofocus"
         :autocomplete="autocomplete || undefined"
         :disabled="disabled"
+        :required="required"
+        :aria-required="required || undefined"
         :aria-invalid="error ? 'true' : 'false'"
         :aria-describedby="error ? errorId : undefined"
         :class="[field, error ? errorField : '', { 'pl-10': $slots.leading, 'pr-10': $slots.trailing }]"
+        v-bind="$attrs"
         @input="$emit('update:modelValue', $event.target.value)"
       />
 
@@ -80,6 +91,8 @@ const message = computed(() =>
         <slot name="trailing" />
       </div>
     </div>
+
+    <p v-if="hint && !error" class="mt-2 text-small text-muted dark:text-dark-muted">{{ hint }}</p>
 
     <p v-if="error" :id="errorId" :class="message" role="alert">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4 shrink-0" aria-hidden="true">

@@ -1,8 +1,13 @@
 <script setup>
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
+import { Search, UserPlus } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
+import BaseCard from '../../components/BaseCard.vue'
+import BaseInput from '../../components/BaseInput.vue'
+import BaseTable from '../../components/BaseTable.vue'
 import Pagination from '../../components/Pagination.vue'
+import StatusBadge from '../../components/StatusBadge.vue'
 
 const props = defineProps({
   users: { type: Object, required: true },
@@ -10,98 +15,54 @@ const props = defineProps({
 })
 
 const page = usePage()
-const flash = computed(() => page.props.flash)
-
 const search = ref(props.filters.search ?? '')
+const flash = computed(() => page.props.flash)
+const columns = [
+  { key: 'name', label: 'Name' },
+  { key: 'email', label: 'Email' },
+  { key: 'role', label: 'Role' },
+  { key: 'status', label: 'Status' },
+  { key: 'created_at', label: 'Created' },
+  { key: 'actions', label: 'Actions', align: 'right' },
+]
 
-const doSearch = () => {
-  router.get('/users', { search: search.value || undefined }, { preserveState: true, replace: true })
-}
-
-function deleteUser(user) {
-  if (window.confirm(`Delete user "${user.name}"? This cannot be undone.`)) {
-    router.delete(`/users/${user.id}`)
-  }
+const doSearch = () => router.get('/users', { search: search.value || undefined }, { preserveState: true, replace: true })
+const deleteUser = (user) => {
+  if (window.confirm(`Delete user "${user.name}"? This cannot be undone.`)) router.delete(`/users/${user.id}`)
 }
 </script>
 
 <template>
-  <div>
-    <Head title="Users" />
-
-    <div class="flex items-center justify-between">
+  <Head title="Users & roles - EduCore" />
+  <div class="space-y-6">
+    <header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
       <div>
-        <h2 class="text-2xl font-bold text-gray-900">Users</h2>
-        <p class="mt-1 text-sm text-gray-600">Manage portal accounts and access rights.</p>
+        <p class="text-caption font-semibold uppercase tracking-widest text-primary">Platform management</p>
+        <h2 class="mt-2 text-h1 font-display font-semibold text-ink dark:text-dark-ink">Users & roles</h2>
+        <p class="mt-2 text-body text-muted dark:text-dark-muted">Manage platform accounts, access roles, and account status.</p>
       </div>
-      <Link href="/users/create">
-        <BaseButton type="button">+ New user</BaseButton>
-      </Link>
-    </div>
+      <Link href="/users/create"><BaseButton><UserPlus class="h-4 w-4" aria-hidden="true" /> New user</BaseButton></Link>
+    </header>
 
-    <div v-if="flash?.success" class="mt-4 rounded-md bg-green-50 px-4 py-3 text-sm text-green-800">
-      {{ flash.success }}
-    </div>
+    <div v-if="flash?.success" class="rounded-lg border border-success/20 bg-success/5 px-4 py-3 text-small text-success" role="status">{{ flash.success }}</div>
+    <BaseCard padding="sm">
+      <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="doSearch">
+        <BaseInput v-model="search" label="Search accounts" placeholder="Name or email" class="w-full sm:max-w-sm" />
+        <BaseButton type="submit" variant="secondary"><Search class="h-4 w-4" aria-hidden="true" /> Search</BaseButton>
+      </form>
+    </BaseCard>
 
-    <div class="mt-6 overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-200">
-      <div class="border-b border-gray-200 px-4 py-3">
-        <form @submit.prevent="doSearch">
-          <input
-            v-model="search"
-            type="search"
-            placeholder="Search by name or email…"
-            class="w-full max-w-sm rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-          />
-        </form>
-      </div>
-
-      <table class="min-w-full divide-y divide-gray-200 text-sm">
-        <thead class="bg-gray-50 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
-          <tr>
-            <th class="px-4 py-3">Name</th>
-            <th class="px-4 py-3">Email</th>
-            <th class="px-4 py-3">Role</th>
-            <th class="px-4 py-3">Status</th>
-            <th class="px-4 py-3">Created</th>
-            <th class="px-4 py-3 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-gray-200">
-          <tr v-for="user in users.data" :key="user.id" class="hover:bg-gray-50">
-            <td class="px-4 py-3 font-medium text-gray-900">{{ user.name }}</td>
-            <td class="px-4 py-3 text-gray-600">{{ user.email }}</td>
-            <td class="px-4 py-3">
-              <span class="inline-flex rounded bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
-                {{ user.role?.name ?? '—' }}
-              </span>
-            </td>
-            <td class="px-4 py-3">
-              <span
-                class="inline-flex rounded px-2 py-0.5 text-xs font-medium"
-                :class="user.is_active ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
-              >
-                {{ user.is_active ? 'Active' : 'Inactive' }}
-              </span>
-            </td>
-            <td class="px-4 py-3 text-gray-500">{{ new Date(user.created_at).toLocaleDateString() }}</td>
-            <td class="px-4 py-3 text-right">
-              <Link :href="`/users/${user.id}/edit`" class="font-medium text-indigo-600 hover:text-indigo-500">Edit</Link>
-              <button
-                type="button"
-                class="ml-4 font-medium text-red-600 hover:text-red-500"
-                @click="deleteUser(user)"
-              >
-                Delete
-              </button>
-            </td>
-          </tr>
-          <tr v-if="users.data.length === 0">
-            <td colspan="6" class="px-4 py-10 text-center text-gray-500">No users found.</td>
-          </tr>
-        </tbody>
-      </table>
-
-      <Pagination :links="users.links" />
-    </div>
+    <BaseTable :columns="columns" :rows="users.data" :row-clickable="false" empty-title="No users found" empty-description="Try changing your search or create a new account.">
+      <template #cell-role="{ row }"><span class="text-small text-muted dark:text-dark-muted">{{ row.role?.name ?? '—' }}</span></template>
+      <template #cell-status="{ row }"><StatusBadge :status="row.is_active ? 'active' : 'inactive'" /></template>
+      <template #cell-created_at="{ row }"><span class="text-muted dark:text-dark-muted">{{ row.created_at ? new Date(row.created_at).toLocaleDateString() : '—' }}</span></template>
+      <template #cell-actions="{ row }">
+        <div class="flex justify-end gap-3">
+          <Link :href="`/users/${row.id}/edit`" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">Edit</Link>
+          <button type="button" class="text-small font-semibold text-error hover:underline" @click="deleteUser(row)">Delete</button>
+        </div>
+      </template>
+    </BaseTable>
+    <Pagination :links="users.links" />
   </div>
 </template>

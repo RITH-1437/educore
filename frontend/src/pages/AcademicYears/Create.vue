@@ -2,6 +2,8 @@
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseInput from '../../components/BaseInput.vue'
+import BaseSelect from '../../components/BaseSelect.vue'
+import BaseCard from '../../components/BaseCard.vue'
 
 const STATUSES = [
   { value: 'planned', label: 'Planned' },
@@ -21,60 +23,47 @@ const submit = () => form.post('/academic-years', { preserveScroll: true })
 </script>
 
 <template>
-  <div class="max-w-2xl">
+  <div class="mx-auto max-w-3xl space-y-6">
     <Head title="New academic year" />
 
-    <div class="flex items-center justify-between">
+    <header class="flex items-end justify-between gap-4">
       <div>
-        <h2 class="text-2xl font-bold text-slate-900">New academic year</h2>
-        <p class="mt-1 text-sm text-slate-600">
+        <h2 class="text-h1 font-display font-semibold text-ink dark:text-dark-ink">New academic year</h2>
+        <p class="mt-2 text-small text-muted dark:text-dark-muted">
           The calendar span that owns every semester, offering and grade of that year.
         </p>
       </div>
-      <Link href="/academic-years" class="text-sm font-medium text-slate-500 hover:text-slate-700">
-        ← Back to academic years
+      <Link href="/academic-years" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">
+        Back to academic years
       </Link>
-    </div>
+    </header>
 
-    <form
-      class="mt-6 space-y-5 rounded-lg bg-white p-6 shadow-sm ring-1 ring-slate-200"
-      @submit.prevent="submit"
-    >
+    <BaseCard padding="lg">
+    <form class="space-y-5" @submit.prevent="submit">
       <div class="grid gap-5 sm:grid-cols-2">
-        <BaseInput v-model="form.code" label="Code" placeholder="2026-2027" :error="form.errors.code" autofocus />
-        <BaseInput v-model="form.name" label="Name" placeholder="Academic Year 2026-2027" :error="form.errors.name" />
+        <BaseInput v-model="form.code" name="code" label="Code" placeholder="2026-2027" :error="form.errors.code" autofocus required />
+        <BaseInput v-model="form.name" name="name" label="Name" placeholder="Academic Year 2026-2027" :error="form.errors.name" required />
       </div>
 
       <div class="grid gap-5 sm:grid-cols-2">
-        <BaseInput v-model="form.start_date" label="Start date" type="date" :error="form.errors.start_date" />
-        <BaseInput v-model="form.end_date" label="End date" type="date" :error="form.errors.end_date" />
+        <BaseInput v-model="form.start_date" name="start_date" label="Start date" type="date" :error="form.errors.start_date" required />
+        <BaseInput v-model="form.end_date" name="end_date" label="End date" type="date" :error="form.errors.end_date" required />
       </div>
 
-      <div>
-        <label class="mb-1 block text-sm font-medium text-slate-700">Status</label>
-        <select
-          v-model="form.status"
-          class="block w-full rounded-md border-slate-300 shadow-sm focus:border-blue-600 focus:ring-blue-600 sm:text-sm"
-        >
-          <option v-for="option in STATUSES" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
-        <p class="mt-1 text-sm text-slate-500">
+      <BaseSelect v-model="form.status" label="Initial status" :options="STATUSES" :error="form.errors.status" />
+      <p class="-mt-3 text-small text-muted dark:text-dark-muted">
           A year only moves forward: planned → active → completed.
-        </p>
-        <p v-if="form.errors.status" class="mt-1 text-sm text-red-600">{{ form.errors.status }}</p>
-      </div>
+      </p>
 
-      <label class="flex items-start text-sm text-slate-600">
+      <label class="flex min-h-11 items-start gap-3 text-small text-ink dark:text-dark-ink">
         <input
           v-model="form.is_current"
           type="checkbox"
-          class="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-600"
+          class="mt-1 h-4 w-4 rounded border-border-muted accent-primary focus-visible:outline-2 focus-visible:outline-primary"
         />
-        <span class="ml-2">
+        <span>
           Make this the current academic year
-          <span class="block text-xs text-slate-500">
+          <span class="mt-1 block text-caption text-muted dark:text-dark-muted">
             Only an active year can be current, and only one year at a time.
           </span>
         </span>
@@ -82,8 +71,9 @@ const submit = () => form.post('/academic-years', { preserveScroll: true })
 
       <div class="flex items-center gap-3">
         <BaseButton type="submit" :loading="form.processing">Create academic year</BaseButton>
-        <Link href="/academic-years" class="text-sm font-medium text-slate-500 hover:text-slate-700">Cancel</Link>
+        <Link href="/academic-years"><BaseButton variant="ghost">Cancel</BaseButton></Link>
       </div>
     </form>
+    </BaseCard>
   </div>
 </template>

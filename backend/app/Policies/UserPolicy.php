@@ -7,6 +7,11 @@ use App\Models\User;
 
 class UserPolicy
 {
+    public function viewAdminDashboard(User $user): bool
+    {
+        return $user->isRole(Role::SuperAdmin->value);
+    }
+
     public function viewAny(User $user): bool
     {
         return $this->manageUsers($user);

@@ -1,13 +1,21 @@
 <?php
 
+use App\Enums\Role;
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render(auth()->check() ? 'Home' : 'Landing');
+    if (! auth()->check()) {
+        return Inertia::render('Landing');
+    }
+
+    return auth()->user()->isRole(Role::SuperAdmin->value)
+        ? redirect()->route('admin.dashboard')
+        : redirect()->route('role-dashboard');
 })->name('home');
 
 Route::middleware('guest')->group(function () {
@@ -20,6 +28,7 @@ Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->name('logout');
 
 Route::middleware(['auth', 'role:super-admin'])->group(function () {
+    Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/users', [UserController::class, 'index'])->name('users.index');
     Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
     Route::post('/users', [UserController::class, 'store'])->name('users.store');
@@ -27,6 +36,10 @@ Route::middleware(['auth', 'role:super-admin'])->group(function () {
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });
+
+Route::middleware(['auth', 'role:university-admin,faculty-admin,lecturer,student'])
+    ->get('/dashboard', [DashboardController::class, 'roleDashboard'])
+    ->name('role-dashboard');
 
 // The academic calendar is university-wide data, so both admin roles reach it.
 Route::middleware(['auth', 'role:super-admin,university-admin'])

@@ -100,7 +100,7 @@ class UserController extends Controller
             new OA\Response(
                 response: 201,
                 description: 'User created.',
-                content: new OA\JsonContent(ref: '#/components/schemas/User')
+                content: new OA\JsonContent(ref: '#/components/schemas/UserResourceResponse')
             ),
             new OA\Response(
                 response: 401,
@@ -147,7 +147,7 @@ class UserController extends Controller
             new OA\Response(
                 response: 200,
                 description: 'The requested user.',
-                content: new OA\JsonContent(ref: '#/components/schemas/User')
+                content: new OA\JsonContent(ref: '#/components/schemas/UserResourceResponse')
             ),
             new OA\Response(
                 response: 401,
@@ -196,7 +196,7 @@ class UserController extends Controller
             new OA\Response(
                 response: 200,
                 description: 'The updated user.',
-                content: new OA\JsonContent(ref: '#/components/schemas/User')
+                content: new OA\JsonContent(ref: '#/components/schemas/UserResourceResponse')
             ),
             new OA\Response(
                 response: 401,
@@ -222,7 +222,8 @@ class UserController extends Controller
     )]
     #[OA\Patch(
         path: '/users/{user}',
-        summary: 'Partially update a user',
+        summary: 'Update a user (PATCH)',
+        description: 'Uses the same validation as PUT: `name`, `email`, and `role_id` remain required; password is optional.',
         operationId: 'patchUser',
         tags: ['Users'],
         security: [['sanctum' => []]],
@@ -243,7 +244,7 @@ class UserController extends Controller
             new OA\Response(
                 response: 200,
                 description: 'The updated user.',
-                content: new OA\JsonContent(ref: '#/components/schemas/User')
+                content: new OA\JsonContent(ref: '#/components/schemas/UserResourceResponse')
             ),
             new OA\Response(
                 response: 401,

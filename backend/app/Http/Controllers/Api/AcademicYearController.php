@@ -45,8 +45,8 @@ class AcademicYearController extends Controller
             ),
             new OA\QueryParameter(
                 name: 'filters[status]',
-                description: 'One of planned, active, completed.',
-                schema: new OA\Schema(type: 'string', enum: ['planned', 'active', 'completed']),
+                description: 'Filter by planned, active, or completed. An unrecognized value is not rejected as validation; it is applied as a filter and normally returns an empty collection.',
+                schema: new OA\Schema(type: 'string'),
             ),
             new OA\QueryParameter(
                 name: 'sort_by',
@@ -110,7 +110,7 @@ class AcademicYearController extends Controller
             new OA\Response(
                 response: 201,
                 description: 'Academic year created.',
-                content: new OA\JsonContent(ref: '#/components/schemas/AcademicYear')
+                content: new OA\JsonContent(ref: '#/components/schemas/AcademicYearResourceResponse')
             ),
             new OA\Response(
                 response: 401,
@@ -144,14 +144,14 @@ class AcademicYearController extends Controller
     }
 
     #[OA\Get(
-        path: '/academic-years/{academic_year}',
+        path: '/academic-years/{academicYear}',
         summary: 'Fetch an academic year',
         operationId: 'getAcademicYear',
         tags: ['Academic Years'],
         security: [['sanctum' => []]],
         parameters: [
             new OA\PathParameter(
-                name: 'academic_year',
+                name: 'academicYear',
                 description: 'Identifier of the academic year.',
                 required: true,
                 schema: new OA\Schema(type: 'integer', format: 'int64'),
@@ -162,7 +162,7 @@ class AcademicYearController extends Controller
             new OA\Response(
                 response: 200,
                 description: 'The requested academic year.',
-                content: new OA\JsonContent(ref: '#/components/schemas/AcademicYear')
+                content: new OA\JsonContent(ref: '#/components/schemas/AcademicYearResourceResponse')
             ),
             new OA\Response(
                 response: 401,
@@ -189,7 +189,7 @@ class AcademicYearController extends Controller
     }
 
     #[OA\Put(
-        path: '/academic-years/{academic_year}',
+        path: '/academic-years/{academicYear}',
         summary: 'Update an academic year',
         description: 'Status moves are validated: an academic year only advances planned -> active -> completed, and only one year can be current.',
         operationId: 'updateAcademicYear',
@@ -197,7 +197,7 @@ class AcademicYearController extends Controller
         security: [['sanctum' => []]],
         parameters: [
             new OA\PathParameter(
-                name: 'academic_year',
+                name: 'academicYear',
                 description: 'Identifier of the academic year.',
                 required: true,
                 schema: new OA\Schema(type: 'integer', format: 'int64'),
@@ -212,7 +212,7 @@ class AcademicYearController extends Controller
             new OA\Response(
                 response: 200,
                 description: 'The updated academic year.',
-                content: new OA\JsonContent(ref: '#/components/schemas/AcademicYear')
+                content: new OA\JsonContent(ref: '#/components/schemas/AcademicYearResourceResponse')
             ),
             new OA\Response(
                 response: 401,
@@ -242,14 +242,15 @@ class AcademicYearController extends Controller
         ]
     )]
     #[OA\Patch(
-        path: '/academic-years/{academic_year}',
-        summary: 'Partially update an academic year',
+        path: '/academic-years/{academicYear}',
+        summary: 'Update an academic year (PATCH)',
+        description: 'Uses the same validation as PUT: `code`, `name`, `start_date`, and `end_date` remain required.',
         operationId: 'patchAcademicYear',
         tags: ['Academic Years'],
         security: [['sanctum' => []]],
         parameters: [
             new OA\PathParameter(
-                name: 'academic_year',
+                name: 'academicYear',
                 description: 'Identifier of the academic year.',
                 required: true,
                 schema: new OA\Schema(type: 'integer', format: 'int64'),
@@ -264,7 +265,7 @@ class AcademicYearController extends Controller
             new OA\Response(
                 response: 200,
                 description: 'The updated academic year.',
-                content: new OA\JsonContent(ref: '#/components/schemas/AcademicYear')
+                content: new OA\JsonContent(ref: '#/components/schemas/AcademicYearResourceResponse')
             ),
             new OA\Response(
                 response: 401,
@@ -303,7 +304,7 @@ class AcademicYearController extends Controller
     }
 
     #[OA\Post(
-        path: '/academic-years/{academic_year}/status',
+        path: '/academic-years/{academicYear}/status',
         summary: 'Change an academic year status',
         description: 'Applies a status transition. Only planned -> active and active -> completed are accepted; anything else answers 409.',
         operationId: 'changeAcademicYearStatus',
@@ -311,7 +312,7 @@ class AcademicYearController extends Controller
         security: [['sanctum' => []]],
         parameters: [
             new OA\PathParameter(
-                name: 'academic_year',
+                name: 'academicYear',
                 description: 'Identifier of the academic year.',
                 required: true,
                 schema: new OA\Schema(type: 'integer', format: 'int64'),
@@ -326,7 +327,7 @@ class AcademicYearController extends Controller
             new OA\Response(
                 response: 200,
                 description: 'The academic year with its new status.',
-                content: new OA\JsonContent(ref: '#/components/schemas/AcademicYear')
+                content: new OA\JsonContent(ref: '#/components/schemas/AcademicYearResourceResponse')
             ),
             new OA\Response(
                 response: 401,
@@ -368,7 +369,7 @@ class AcademicYearController extends Controller
     }
 
     #[OA\Delete(
-        path: '/academic-years/{academic_year}',
+        path: '/academic-years/{academicYear}',
         summary: 'Delete an academic year',
         description: 'Hard delete. Refused with 409 while the year is current or still has semesters.',
         operationId: 'deleteAcademicYear',
@@ -376,7 +377,7 @@ class AcademicYearController extends Controller
         security: [['sanctum' => []]],
         parameters: [
             new OA\PathParameter(
-                name: 'academic_year',
+                name: 'academicYear',
                 description: 'Identifier of the academic year.',
                 required: true,
                 schema: new OA\Schema(type: 'integer', format: 'int64'),

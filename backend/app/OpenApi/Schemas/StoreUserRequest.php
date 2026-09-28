@@ -10,7 +10,7 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(
     schema: 'StoreUserRequest',
     type: 'object',
-    required: ['name', 'email', 'role_id', 'password'],
+    required: ['name', 'email', 'role_id', 'password', 'password_confirmation'],
     properties: [
         new OA\Property(property: 'name', type: 'string', example: 'Sokha Chan'),
         new OA\Property(property: 'email', type: 'string', format: 'email', example: 'sokha.chan@educore.kh'),

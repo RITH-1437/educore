@@ -19,7 +19,7 @@ class AuthController extends Controller
     #[OA\Post(
         path: '/login',
         summary: 'Authenticate and receive an API token',
-        description: 'Verifies the credentials, stamps `last_login_at`, and returns a new Sanctum personal access token. Throttled to 5 attempts per minute per e-mail address and IP address.',
+        description: 'Verifies credentials, stamps `last_login_at`, and returns a new Sanctum personal access token. Invalid credentials produce HTTP 422 with a field error. Throttled to 5 attempts per minute per e-mail address and IP address.',
         operationId: 'login',
         tags: ['Auth'],
         security: [],
@@ -28,8 +28,8 @@ class AuthController extends Controller
             content: new OA\JsonContent(
                 ref: '#/components/schemas/LoginRequest',
                 example: [
-                    'email' => 'admin@educore.kh',
-                    'password' => 'admin@123',
+                    'email' => 'user@example.edu',
+                    'password' => 'your-password',
                 ]
             )
         ),

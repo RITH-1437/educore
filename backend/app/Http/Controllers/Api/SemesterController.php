@@ -18,7 +18,7 @@ use OpenApi\Attributes as OA;
  * Semester endpoints, nested under their academic year.
  *
  * Semesters are a genuine child collection, so they hang off
- * `/api/academic-years/{academic_year}/semesters`.
+ * `/api/academic-years/{academicYear}/semesters`.
  */
 class SemesterController extends Controller
 {
@@ -27,14 +27,14 @@ class SemesterController extends Controller
     ) {}
 
     #[OA\Get(
-        path: '/academic-years/{academic_year}/semesters',
+        path: '/academic-years/{academicYear}/semesters',
         summary: 'List the semesters of an academic year',
         operationId: 'listSemesters',
         tags: ['Semesters'],
         security: [['sanctum' => []]],
         parameters: [
             new OA\PathParameter(
-                name: 'academic_year',
+                name: 'academicYear',
                 description: 'Identifier of the academic year.',
                 required: true,
                 schema: new OA\Schema(type: 'integer', format: 'int64'),
@@ -45,7 +45,7 @@ class SemesterController extends Controller
             new OA\Response(
                 response: 200,
                 description: 'Semesters ordered by sequence.',
-                content: new OA\JsonContent(type: 'array', items: new OA\Items(ref: '#/components/schemas/Semester'))
+                content: new OA\JsonContent(ref: '#/components/schemas/SemesterCollection')
             ),
             new OA\Response(
                 response: 401,
@@ -72,15 +72,15 @@ class SemesterController extends Controller
     }
 
     #[OA\Post(
-        path: '/academic-years/{academic_year}/semesters',
+        path: '/academic-years/{academicYear}/semesters',
         summary: 'Create a semester',
-        description: 'A semester cannot be created inside a completed academic year, and its dates must stay within that year.',
+        description: 'A semester cannot be created inside a completed academic year, with status completed, or with any supplied date outside its academic-year range. Those business-rule violations return 409.',
         operationId: 'createSemester',
         tags: ['Semesters'],
         security: [['sanctum' => []]],
         parameters: [
             new OA\PathParameter(
-                name: 'academic_year',
+                name: 'academicYear',
                 description: 'Identifier of the academic year.',
                 required: true,
                 schema: new OA\Schema(type: 'integer', format: 'int64'),
@@ -95,7 +95,7 @@ class SemesterController extends Controller
             new OA\Response(
                 response: 201,
                 description: 'Semester created.',
-                content: new OA\JsonContent(ref: '#/components/schemas/Semester')
+                content: new OA\JsonContent(ref: '#/components/schemas/SemesterResourceResponse')
             ),
             new OA\Response(
                 response: 401,
@@ -105,6 +105,11 @@ class SemesterController extends Controller
             new OA\Response(
                 response: 403,
                 description: 'Authenticated but not a Super Admin or University Admin.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 404,
+                description: 'Academic year not found.',
                 content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
             ),
             new OA\Response(
@@ -129,7 +134,7 @@ class SemesterController extends Controller
     }
 
     #[OA\Post(
-        path: '/academic-years/{academic_year}/semesters/{semester}/status',
+        path: '/academic-years/{academicYear}/semesters/{semester}/status',
         summary: 'Change a semester status',
         description: 'Applies a status transition. Only planned -> open -> closed -> completed is accepted; anything else answers 409.',
         operationId: 'changeSemesterStatus',
@@ -137,7 +142,7 @@ class SemesterController extends Controller
         security: [['sanctum' => []]],
         parameters: [
             new OA\PathParameter(
-                name: 'academic_year',
+                name: 'academicYear',
                 description: 'Identifier of the academic year.',
                 required: true,
                 schema: new OA\Schema(type: 'integer', format: 'int64'),
@@ -159,7 +164,7 @@ class SemesterController extends Controller
             new OA\Response(
                 response: 200,
                 description: 'The semester with its new status.',
-                content: new OA\JsonContent(ref: '#/components/schemas/Semester')
+                content: new OA\JsonContent(ref: '#/components/schemas/SemesterResourceResponse')
             ),
             new OA\Response(
                 response: 401,
@@ -200,7 +205,7 @@ class SemesterController extends Controller
     }
 
     #[OA\Delete(
-        path: '/academic-years/{academic_year}/semesters/{semester}',
+        path: '/academic-years/{academicYear}/semesters/{semester}',
         summary: 'Delete a semester',
         description: 'Refused with 409 once the semester has course offerings.',
         operationId: 'deleteSemester',
@@ -208,7 +213,7 @@ class SemesterController extends Controller
         security: [['sanctum' => []]],
         parameters: [
             new OA\PathParameter(
-                name: 'academic_year',
+                name: 'academicYear',
                 description: 'Identifier of the academic year.',
                 required: true,
                 schema: new OA\Schema(type: 'integer', format: 'int64'),

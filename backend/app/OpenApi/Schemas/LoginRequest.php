@@ -16,15 +16,21 @@ use OpenApi\Attributes as OA;
             property: 'email',
             type: 'string',
             format: 'email',
-            example: 'admin@educore.kh',
+            example: 'user@example.edu',
             description: 'E-mail address of the account.'
         ),
         new OA\Property(
             property: 'password',
             type: 'string',
             format: 'password',
-            example: 'admin@123',
+            example: 'your-password',
             description: 'Account password.'
+        ),
+        new OA\Property(
+            property: 'remember',
+            type: 'boolean',
+            description: 'Optional remember-me flag read by the shared login request.',
+            example: false
         ),
     ]
 )]

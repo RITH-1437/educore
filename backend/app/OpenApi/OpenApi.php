@@ -24,8 +24,10 @@ use OpenApi\Attributes as OA;
         request.
 
         ### Authorization
-        User management endpoints (`/api/users`) additionally require the
-        `super-admin` role. Other requests return `403 Forbidden`.
+        User management endpoints (`/api/users`) require the `super-admin`
+        role. Academic calendar endpoints (`/api/academic-years` and nested
+        semesters) require `super-admin` or `university-admin`. Each endpoint
+        documents its applicable authentication and role requirements.
 
         ### Rate limiting
         `POST /api/login` is throttled to 5 attempts per minute per
@@ -34,7 +36,7 @@ use OpenApi\Attributes as OA;
 
         ### Conventions
         * All request and response bodies are JSON.
-        * List endpoints are paginated and return `data` plus a `meta` object.
+        * Paginated list endpoints return `data` plus a `meta` object; non-paginated child collections return `data`.
         * Validation failures return `422` with a field-keyed `errors` object.
         TXT
 )]

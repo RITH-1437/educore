@@ -14,9 +14,13 @@ this repository, you MUST first read the relevant skill file(s) under
 
 The `skills/` directory holds one project-specific `SKILL.md` per domain
 (architecture, laravel, vue, database, api, authentication, authorization,
-docker, security, testing, frontend-ui, file-storage, notifications,
+branding, docker, security, testing, frontend-ui, file-storage, notifications,
 academic-domain, and each business module, plus git-workflow and
 documentation).
+
+`skills/branding/SKILL.md` routes to the brand/design system in
+`docs/branding/`, which is the single source of truth for UI. Any UI change
+must consult it.
 
 ## Documentation convention
 

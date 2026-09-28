@@ -9,6 +9,14 @@ EduCore should look and feel like a **professional university administration
 platform** — clean, consistent, information-dense where needed, and never
 cluttered.
 
+## Design system (read first)
+
+`skills/branding/SKILL.md` and `docs/branding/` are the source of truth for
+colors, typography, spacing, radii, status badges, and accessibility. Read them
+before writing UI. In short: use the documented tokens (`blue-600` primary,
+`slate-*` neutrals, `emerald`/`amber`/`red` semantics), never hardcode hex, and
+never substitute another Tailwind palette.
+
 ## When to use
 
 - Building or changing any Vue UI: pages, components, layouts, forms, tables,
@@ -31,9 +39,11 @@ cluttered.
 
 ## Typography & spacing
 
-- Use the Tailwind default font stack and spacing scale consistently.
+- Use the Inter font stack and the documented type scale
+  (`skills/branding/SKILL.md`).
 - Consistent heading scale (page title, section title, card title).
-- Consistent padding/gap rhythm (`p-4/p-6`, `gap-4`) across pages.
+- Consistent padding/gap rhythm (`p-4/p-6`, `gap-4`) across pages, restricted to
+  the 4px base spacing scale.
 - Define reusable spacing in components, not arbitrary values per page.
 
 ## Reusable components
@@ -101,8 +111,9 @@ Keep in `frontend/src/components` and reuse everywhere:
 
 ## Prohibitions
 
-- DO NOT scatter ad hoc purple/teal accent colors — stick to the Tailwind
-  palette consistently.
+- DO NOT scatter ad hoc accent colors or substitute another Tailwind palette —
+  stick to the documented tokens (`skills/branding/SKILL.md`).
+- DO NOT hardcode hex colors or arbitrary spacing/radius values.
 - DO NOT build one huge 800-line component; split into focused components
   (see `skills/vue/SKILL.md`).
 - DO NOT add CSS libraries/frameworks outside the stack.
@@ -114,7 +125,8 @@ Keep in `frontend/src/components` and reuse everywhere:
 2. Loading/empty/error states present on new data views.
 3. Consistent spacing/typography/status colors.
 4. Responsive — page usable on smaller screens.
-5. Related skills respected: `vue`, `api`, `authorization`.
+5. Branding/design system consulted (`skills/branding/SKILL.md`).
+6. Related skills respected: `vue`, `api`, `authorization`.
 
 ## Agent behavior (mandatory everywhere)
 

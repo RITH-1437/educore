@@ -40,6 +40,8 @@ Variables group by responsibility:
 - `MINIO_*` / `AWS_*` — object storage credentials, bucket name, API/console ports.
 - `NGINX_PORT` / `FRONTEND_PORT` — host ports for the web entry point.
 - `VITE_API_URL` — frontend REST API base path (`/api`).
+- `FRONTEND_URL` / `VITE_DEV_SERVER_URL` — front-end connection origins
+  (same-origin defaults; share via `config/frontend.php` and Inertia props).
 
 > Note: `APP_KEY` is intentionally omitted. It is auto-generated into
 > `backend/.env` on the first container start and persists thereafter.
@@ -101,10 +103,24 @@ Or via Make: `make seed`. To drop and re-seed in one step: `make migrate-fresh`.
 | `http://localhost`           | EduCore web app (Nginx → Laravel/Inertia → Vue) |
 | `http://localhost:5173`      | Vite dev server (HMR, dev assets)          |
 | `http://localhost/api/health`| Backend health endpoint (Laravel)          |
+| `http://localhost/api/documentation` | Swagger UI — interactive API reference |
+| `http://localhost/docs`      | Generated OpenAPI 3.0 document (JSON)      |
 
 Pages are rendered by Laravel through Inertia.js. Nginx forwards `/api`,
 `/storage`, and non-existing paths to the Laravel PHP-FPM container, and serves
 built assets (`.`/`/build`) statically from the backend `public/`.
+
+The API reference is generated from the code itself: OpenAPI attributes live in
+`backend/app/OpenApi/` and on the API controllers, and the document is rebuilt
+with:
+
+```bash
+docker compose --project-directory . -f docker/docker-compose.yml \
+  exec -T backend php artisan l5-swagger:generate
+```
+
+After changing any request validation, response shape, or endpoint, regenerate
+the document so `docs/` and Swagger stay in sync.
 
 ## 9. Access pgAdmin
 
@@ -214,11 +230,24 @@ The `backend/` folder is a standard Laravel 12 application.
 - **Videos:** https://laracasts.com
 - **Local runtime:** PHP 8.4 with `pgsql`, `pdo_pgsql`, `redis` extensions.
 - Installed packages: `laravel/sanctum` (API auth), `laravel/tinker`,
-  `league/flysystem-aws-s3-v3` (S3/MinIO storage), pinned via
+  `league/flysystem-aws-s3-v3` (S3/MinIO storage),
+  `darkaonline/l5-swagger` (OpenAPI document + Swagger UI), pinned via
   `backend/composer.json`.
 - API entry point: `backend/routes/api.php` (mounted at `/api`).
+- Layering (dependencies point downwards only):
+  `routes → controllers → services → repositories → models`.
+  - `app/Http/Controllers` — thin: authorize, map input, call a service, return
+    a resource.
+  - `app/Http/Requests` — validation; `app/Http/Resources` — JSON shape.
+  - `app/Dto` — typed input/response objects (`CreateUserData`, `UserListFilters`,
+    `UserData`, `LoginResult`) passed between HTTP and service layers.
+  - `app/Services` — business logic and transaction boundaries.
+  - `app/Repositories` — data access (query building, writes, token revocation).
+  - `app/Policies` — authorization.
 - Code style: Laravel Pint (`vendor/bin/pint`). Linted by CI.
-- Tests: PHPUnit (`php artisan test`). Linted and run by CI.
+- Tests: PHPUnit (`php artisan test`). Linted and run by CI. Note: the suite uses
+  `RefreshDatabase` against the configured database, so it **wipes local data** —
+  re-run `php artisan db:seed` afterwards if you need the demo admin account.
 
 ## Frontend (Vue 3 + Inertia + Vite)
 
@@ -237,5 +266,5 @@ JavaScript, embedded via **Inertia.js**: Laravel controllers return
 
 ## Contributing / License
 
-This project is developed by Rin Nairith & Lyhor. Releases and contribution
+This project is developed by Rin Nairith & Yong Lyhor. Releases and contribution
 guidelines will be tracked via GitHub issues and the `docs/` report.

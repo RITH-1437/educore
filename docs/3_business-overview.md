@@ -365,7 +365,7 @@ student's data.
 The following modules make up the proposed platform. Each is described by its purpose, primary
 users, main business activities, and expected outputs.
 
-### 9.1 Authentication & Authorization [Planned]
+### 9.1 Authentication & Authorization [Implemented]
 
 - **Purpose:** secure login and role-based access for all users.
 - **Primary users:** all roles.
@@ -400,12 +400,16 @@ users, main business activities, and expected outputs.
 - **Main business activities:** create/edit programs and program structures.
 - **Expected outputs:** an accurate list of offered programs.
 
-### 9.6 Academic Year & Semester Management [Planned]
+### 9.6 Academic Year & Semester Management [Implemented]
 
 - **Purpose:** define the academic calendar and periods.
 - **Primary users:** University Admin.
 - **Main business activities:** manage academic years, semesters, and enrollment/examination periods.
 - **Expected outputs:** a structured academic calendar.
+- **Delivered:** status lifecycles (year `planned → active → completed`, semester
+  `planned → open → closed → completed`), one current academic year, semester
+  dates constrained to their year, delete guards, web pages plus
+  `/api/academic-years` with nested semesters, seeded three-year calendar.
 
 ### 9.7 Course Management [Planned]
 

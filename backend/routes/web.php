@@ -1,12 +1,13 @@
 <?php
 
+use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::get('/', function () {
-    return Inertia::render('Home');
+    return Inertia::render(auth()->check() ? 'Home' : 'Landing');
 })->name('home');
 
 Route::middleware('guest')->group(function () {
@@ -26,3 +27,26 @@ Route::middleware(['auth', 'role:super-admin'])->group(function () {
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });
+
+// The academic calendar is university-wide data, so both admin roles reach it.
+Route::middleware(['auth', 'role:super-admin,university-admin'])
+    ->prefix('/academic-years')
+    ->name('academic-years.')
+    ->group(function () {
+        Route::get('/', [AcademicYearController::class, 'index'])->name('index');
+        Route::get('/create', [AcademicYearController::class, 'create'])->name('create');
+        Route::post('/', [AcademicYearController::class, 'store'])->name('store');
+        Route::get('/{academicYear}/edit', [AcademicYearController::class, 'edit'])->name('edit');
+        Route::put('/{academicYear}', [AcademicYearController::class, 'update'])->name('update');
+        Route::delete('/{academicYear}', [AcademicYearController::class, 'destroy'])->name('destroy');
+
+        Route::post('/{academicYear}/status', [AcademicYearController::class, 'changeStatus'])->name('status');
+        Route::post('/{academicYear}/current', [AcademicYearController::class, 'makeCurrent'])->name('current');
+
+        Route::post('/{academicYear}/semesters', [AcademicYearController::class, 'storeSemester'])
+            ->name('semesters.store');
+        Route::post('/{academicYear}/semesters/{semester}/status', [AcademicYearController::class, 'changeSemesterStatus'])
+            ->name('semesters.status');
+        Route::delete('/{academicYear}/semesters/{semester}', [AcademicYearController::class, 'destroySemester'])
+            ->name('semesters.destroy');
+    });

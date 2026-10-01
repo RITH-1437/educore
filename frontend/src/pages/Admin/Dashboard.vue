@@ -55,6 +55,7 @@ const areas = [
   { title: 'Programs', detail: 'Degree tracks offered by each department.', href: '/programs', icon: BookOpen },
   { title: 'Courses', detail: 'Catalog, prerequisites and program curricula.', href: '/courses', icon: GraduationCap },
   { title: 'Lecturers', detail: 'Teaching staff profiles and accounts.', href: '/lecturers', icon: Presentation },
+  { title: 'Students', detail: 'Profiles, status and program history.', href: '/students', icon: Users },
 ]
 
 const formatDate = (value) => (value ? new Date(value).toLocaleDateString() : '—')

@@ -67,6 +67,9 @@ Invariants it enforces and tests assert:
 - `LecturerSeeder` (needs the Lecturer role and departments) upserts 6 lecturer
   accounts by email (dev password `lecturer@123`) and their profiles by
   `staff_number`.
+- `StudentSeeder` upserts 10 student accounts by email (dev password
+  `student@123`) and profiles by `student_number`, opening an active program
+  period only when none exists.
 
 ## 3. Determinism utilities
 

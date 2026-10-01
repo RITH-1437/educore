@@ -99,7 +99,8 @@ Or via Make: `make seed`. To drop and re-seed in one step: `make migrate-fresh`.
 The seed is idempotent and produces: 1 current university (`ITC`), 3 faculties
 (`ENG`, `SCI`, `HSS`), 6 departments, 7 degree programs and 10 courses with prerequisites and curricula, plus roles and a super-admin
 (`admin@educore.kh` / `admin@123`), and 6 lecturer accounts (e.g.
-`dara.lim@educore.kh` / `lecturer@123`, development only). See
+`dara.lim@educore.kh` / `lecturer@123`) and 10 student accounts (e.g.
+`itc-2025-0001@student.educore.kh` / `student@123`), development only. See
 [`docs/database/seed-strategy.md`](docs/database/seed-strategy.md).
 
 ## 8. Access the application
@@ -126,11 +127,13 @@ The seed is idempotent and produces: 1 current university (`ITC`), 3 faculties
 | `/programs/{id}/edit`       | Edit program               | Super admin, University admin |
 | `/courses`                  | Course catalog             | Super admin, University admin (Faculty admin read-only) |
 | `/courses/{id}/edit`        | Edit course + prerequisites | Super admin, University admin |
+| `/students`                 | Student profiles, status, program | Super admin, University admin (Faculty admin read-only) |
+| `/students/{id}/edit`       | Manage student             | Super admin, University admin |
 | `/lecturers`                | Lecturer profiles + accounts | Super admin, University admin (Faculty admin read-only) |
 | `/lecturers/{id}/edit`      | Edit lecturer              | Super admin, University admin |
 | `/error-logs`                | System error logs (404/5xx, read-only) | Super admin only (no write) |
 
-Faculty Admin has **read-only** access to `/universities`, `/faculties`, `/programs`, `/courses` and `/lecturers`; the
+Faculty Admin has **read-only** access to `/universities`, `/faculties`, `/programs`, `/courses`, `/lecturers` and `/students`; the
 write controls are hidden in the UI and the routes still reject the request with
 `403`. Report:
 [`docs/7_Faculty-and-Department-Report.md`](docs/7_Faculty-and-Department-Report.md).

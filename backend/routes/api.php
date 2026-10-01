@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\FacultyController;
 use App\Http\Controllers\Api\LecturerController;
 use App\Http\Controllers\Api\ProgramController;
 use App\Http\Controllers\Api\SemesterController;
+use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\UniversityController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -49,6 +50,12 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::get('/courses/{course}', [CourseController::class, 'show'])->name('api.courses.show');
 
     Route::get('/lecturers', [LecturerController::class, 'index'])->name('api.lecturers.index');
+    Route::get('/students', [StudentController::class, 'index'])->name('api.students.index');
+});
+
+// A student may read their own profile; `StudentPolicy::view` limits them to it.
+Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-admin,student'])->group(function () {
+    Route::get('/students/{student}', [StudentController::class, 'show'])->name('api.students.show');
 });
 
 // A lecturer may read their own profile; `LecturerPolicy::view` limits them to it.
@@ -102,6 +109,16 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->group(
         ->name('api.programs.courses.update');
     Route::delete('/programs/{program}/courses/{course}', [ProgramController::class, 'removeCourse'])
         ->name('api.programs.courses.destroy');
+
+    Route::post('/students', [StudentController::class, 'store'])->name('api.students.store');
+    Route::match(['put', 'patch'], '/students/{student}', [StudentController::class, 'update'])
+        ->name('api.students.update');
+    Route::post('/students/{student}/status', [StudentController::class, 'changeStatus'])
+        ->name('api.students.status');
+    Route::post('/students/{student}/program', [StudentController::class, 'changeProgram'])
+        ->name('api.students.program');
+    Route::delete('/students/{student}', [StudentController::class, 'destroy'])
+        ->name('api.students.destroy');
 
     Route::post('/lecturers', [LecturerController::class, 'store'])->name('api.lecturers.store');
     Route::match(['put', 'patch'], '/lecturers/{lecturer}', [LecturerController::class, 'update'])

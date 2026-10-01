@@ -9,6 +9,7 @@ use App\Http\Controllers\ErrorLogController;
 use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\LecturerController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\StudentController;
 use App\Http\Controllers\UniversityController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -124,6 +125,27 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])
         Route::post('/{program}/courses', [ProgramController::class, 'addCourse'])->name('courses.store');
         Route::put('/{program}/courses/{course}', [ProgramController::class, 'updateCourse'])->name('courses.update');
         Route::delete('/{program}/courses/{course}', [ProgramController::class, 'removeCourse'])->name('courses.destroy');
+    });
+
+// Students: Faculty Admin reads, Super Admin / University Admin manage
+// (`StudentPolicy`).
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])
+    ->prefix('/students')
+    ->name('students.')
+    ->group(function () {
+        Route::get('/', [StudentController::class, 'index'])->name('index');
+    });
+
+Route::middleware(['auth', 'role:super-admin,university-admin'])
+    ->prefix('/students')
+    ->name('students.')
+    ->group(function () {
+        Route::post('/', [StudentController::class, 'store'])->name('store');
+        Route::get('/{student}/edit', [StudentController::class, 'edit'])->name('edit');
+        Route::put('/{student}', [StudentController::class, 'update'])->name('update');
+        Route::post('/{student}/status', [StudentController::class, 'changeStatus'])->name('status');
+        Route::post('/{student}/program', [StudentController::class, 'changeProgram'])->name('program');
+        Route::delete('/{student}', [StudentController::class, 'destroy'])->name('destroy');
     });
 
 // Lecturers: Faculty Admin reads, Super Admin / University Admin manage

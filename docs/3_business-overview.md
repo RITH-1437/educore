@@ -372,12 +372,18 @@ users, main business activities, and expected outputs.
 - **Main business activities:** login/logout, password management, session control, role and permission assignment.
 - **Expected outputs:** a secure environment where each user sees only what their role allows.
 
-### 9.2 Student Management [Planned]
+### 9.2 Student Management [Implemented]
 
 - **Purpose:** store and maintain student profiles and academic status.
 - **Primary users:** University Admin, Faculty/Department Admin.
 - **Main business activities:** create/update student records, assign programs, maintain status (active, inactive, suspended, graduated, withdrawn).
 - **Expected outputs:** a single, consistent student register.
+- **Delivered:** student profiles linked to Student-role accounts, status
+  lifecycle (active/inactive/suspended/graduated/withdrawn), program history
+  with transfers, guarded delete, `/api/students`, seeded students. See
+  [13_Student-Management-Report.md](13_Student-Management-Report.md).
+- **Not yet delivered `[Planned]`:** enrollment/grade/document views per student
+  and lecturer access via sections.
 
 ### 9.3 Lecturer Management [Implemented]
 

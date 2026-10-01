@@ -322,6 +322,13 @@ documented operations.
 | DELETE | `/api/lecturers/{lecturer}` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/lecturers/{lecturer}/deactivate` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/lecturers/{lecturer}/reactivate` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/students` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| POST | `/api/students` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/students/{student}` | Sanctum + super-admin, university-admin, faculty-admin, or the student themself | Documented |
+| PUT, PATCH | `/api/students/{student}` | Sanctum + super-admin or university-admin | Both documented |
+| DELETE | `/api/students/{student}` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/students/{student}/status` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/students/{student}/program` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/error-logs` | Sanctum + super-admin only | Documented |
 | GET | `/api/error-logs/{errorLog}` | Sanctum + super-admin only | Documented |
 

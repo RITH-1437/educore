@@ -32,7 +32,7 @@ const navForRole = (role) => {
         label: 'People',
         items: [
           { label: 'Users & roles', href: '/users', icon: Users },
-          { label: 'Students', href: '#students', icon: UserRound, future: true },
+          { label: 'Students', href: '/students', icon: UserRound },
           { label: 'Lecturers', href: '/lecturers', icon: Presentation },
         ],
       },
@@ -54,7 +54,7 @@ const navForRole = (role) => {
     return [
       { label: 'Overview', items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }] },
       { label: 'Academic structure', items: structure },
-      { label: 'People', items: [{ label: 'Lecturers', href: '/lecturers', icon: Presentation }] },
+      { label: 'People', items: [{ label: 'Students', href: '/students', icon: UserRound }, { label: 'Lecturers', href: '/lecturers', icon: Presentation }] },
     ]
   }
 
@@ -69,6 +69,7 @@ const SECTION_LABELS = {
   programs: 'Programs',
   courses: 'Courses',
   lecturers: 'Lecturers',
+  students: 'Students',
   'error-logs': 'Error logs',
 }
 

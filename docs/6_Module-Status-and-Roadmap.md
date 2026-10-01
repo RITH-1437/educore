@@ -17,7 +17,7 @@
 | — | Branding / design system + admin dashboard | `[Implemented]` |
 | — | API contract & OpenAPI audit | `[Implemented]` |
 | — | System Error Logs (9.25, extra operational diagnostics) | `[Implemented]` |
-| 9.2 | Student Management | `[Planned]` |
+| 9.2 | Student Management | `[Implemented]` |
 | 9.3 | Lecturer Management | `[Implemented]` (section assignment `[Planned]` with 9.8) |
 | 9.4 | Faculty & Department Management | `[Implemented]` |
 | 9.5 | Program Management | `[Implemented]` (curriculum editor delivered with 9.7) |
@@ -47,8 +47,8 @@
 ```mermaid
 pie showData
   title Module delivery status
-  "Implemented (incl. schema)" : 33
-  "Planned / In progress" : 17
+  "Implemented (incl. schema)" : 34
+  "Planned / In progress" : 16
 ```
 
 ---
@@ -315,5 +315,7 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` Sign-in refuses inactive accounts (`users.is_active`) with the
   generic error, web and API. `[Open]` sessions/tokens issued before a
   deactivation stay valid until logout or expiry.
-- `[Next]` 9.2 Student Management, then 9.8 Class/Section (needs lecturers) and
-  9.9 Enrollment (needs prerequisites, sections, students).
+- `[Done]` 9.2 Student Management (`students`, `student_programs`). Report:
+  `docs/13_Student-Management-Report.md`.
+- `[Next]` 9.8 Class/Section (offerings, sections, lecturer assignment), then
+  9.9 Enrollment.

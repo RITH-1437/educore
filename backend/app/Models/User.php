@@ -68,6 +68,14 @@ class User extends Authenticatable
         return $this->hasOne(Lecturer::class);
     }
 
+    /**
+     * The student profile of a Student-role account, if one exists.
+     */
+    public function student()
+    {
+        return $this->hasOne(Student::class);
+    }
+
     public function isRole(string $slug): bool
     {
         return $this->role?->slug === $slug;

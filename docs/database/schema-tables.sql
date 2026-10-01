@@ -138,6 +138,7 @@ CREATE TABLE faculties (
     updated_at    TIMESTAMPTZ  NOT NULL DEFAULT now(),
     deleted_at    TIMESTAMPTZ,
     CONSTRAINT uq_faculties_code UNIQUE (code),
+    CONSTRAINT uq_faculties_name UNIQUE (name),
     CONSTRAINT fk_faculties_university FOREIGN KEY (university_id)
         REFERENCES universities (id) ON DELETE RESTRICT
 );
@@ -154,7 +155,9 @@ CREATE TABLE departments (
     is_active   BOOLEAN NOT NULL DEFAULT TRUE,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+    deleted_at  TIMESTAMPTZ,
     CONSTRAINT uq_departments_code UNIQUE (code),
+    CONSTRAINT uq_departments_faculty_id_name UNIQUE (faculty_id, name),
     CONSTRAINT fk_departments_faculty FOREIGN KEY (faculty_id)
         REFERENCES faculties (id) ON DELETE RESTRICT
 );

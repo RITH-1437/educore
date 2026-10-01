@@ -90,6 +90,23 @@ class AcademicYearManagementTest extends TestCase
                 ->has('academicYears.data', 1));
     }
 
+    public function test_super_admin_can_view_the_academic_year_edit_screen(): void
+    {
+        $year = $this->makeYear(['code' => '2025-2026']);
+
+        // Guards against the single-resource nesting trap: a bare
+        // `JsonResource` prop is serialised under `data`, and the Vue page reads
+        // `props.academicYear.code`.
+        $this->actingAs($this->superAdmin)
+            ->get("/academic-years/{$year->id}/edit")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('AcademicYears/Edit')
+                ->where('academicYear.id', $year->id)
+                ->where('academicYear.code', '2025-2026')
+                ->has('semesters.data', 0));
+    }
+
     public function test_university_admin_can_manage_the_academic_calendar(): void
     {
         $this->actingAs($this->universityAdmin)

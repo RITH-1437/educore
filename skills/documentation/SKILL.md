@@ -38,6 +38,28 @@ behavior.
 - ADRs capture: context, decision, and consequences — concise, dated.
 - Never document credentials or secrets — use placeholders referencing `.env`.
 
+## Documentation is part of the change
+
+Documentation is not a follow-up task. Every implementation ships its docs in
+the **same commit**. If you cannot describe the change in `docs/`, the change is
+not finished.
+
+For each module or feature, these four deliverables are mandatory:
+
+| # | Deliverable | When |
+| --- | --- | --- |
+| 1 | New numbered report `docs/N_<Module>-Report.md` — scope, schema, models, endpoints, authorization matrix, UI, tests, decisions, Mermaid diagrams | every module |
+| 2 | `docs/6_Module-Status-and-Roadmap.md` — flip the status label, close resolved open items, add the per-module playbook entry | every module |
+| 3 | `docs/3_business-overview.md` §9 — flip `[Planned]` → `[Implemented]`/`[Future]` truthfully | every module |
+| 4 | `docs/api/api-audit.md` — inventory rows for new or changed endpoints | any endpoint change |
+
+Additionally: root `README.md` when ports, env vars, commands, or routes change;
+`docs/database/` when the schema changes; Mermaid (not ASCII) for any workflow,
+architecture, or ERD diagram.
+
+A report must not be published before the tests for that module pass — see the
+validation checklist below.
+
 ## What to document on major changes
 
 1. New module/entity → update ERD/architecture docs + the relevant numbered
@@ -68,6 +90,7 @@ behavior.
 - DO NOT create a second README inside subprojects.
 - DO NOT document features that don't exist.
 - DO NOT let docs drift — update alongside the code.
+- DO NOT merge an implementation whose documentation is missing or stale.
 
 ## Validation checklist
 
@@ -77,6 +100,10 @@ behavior.
 4. No secrets/credentials in any doc.
 5. Diagrams use Mermaid (no ASCII art for workflows/architecture).
 6. Related skills respected: `architecture`, `api`, `git-workflow`.
+7. Every new module has all four documentation deliverables from
+   "Documentation is part of the change" above.
+8. Status labels match reality: `[Implemented]` only with a report and a
+   passing test suite.
 
 ## Agent behavior (mandatory everywhere)
 

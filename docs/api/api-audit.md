@@ -13,9 +13,11 @@
 
 | Measure | Result |
 |---|---:|
-| Application API route definitions (`routes/api.php`) | 19 |
-| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 21 |
-| Swagger operations after documentation corrections | 21 |
+| Application API route definitions (`routes/api.php`) | 40 |
+| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 45 |
+| Swagger operations after documentation corrections | 45 |
+| Swagger document paths | 24 |
+| Swagger document schemas | 42 |
 | Undocumented application operations | 0 |
 | Extra Swagger operations not in the application API routes | 0 |
 | Swagger generation errors after corrections | 0 |
@@ -246,8 +248,11 @@ were **not changed** during this documentation-only audit.
 
 ## Endpoint Inventory
 
-Application endpoint counts below exclude the two L5-Swagger package routes.
-Each combined update route contributes one PUT and one PATCH operation.
+Application endpoint counts below exclude the four L5-Swagger/OAuth package
+routes (`api/documentation`, `api/documentation/asset/{asset}`,
+`api/documentation/ui`, `api/oauth2-callback`). Each combined update route
+contributes one PUT and one PATCH operation, so 40 route definitions yield 45
+documented operations.
 
 | Method | Path | Authentication / authorization | Documentation |
 |---|---|---|---|
@@ -270,6 +275,27 @@ Each combined update route contributes one PUT and one PATCH operation.
 | POST | `/api/academic-years/{academicYear}/semesters` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/academic-years/{academicYear}/semesters/{semester}/status` | Sanctum + super-admin or university-admin | Documented |
 | DELETE | `/api/academic-years/{academicYear}/semesters/{semester}` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/universities` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| POST | `/api/universities` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/universities/{university}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| PUT, PATCH | `/api/universities/{university}` | Sanctum + super-admin or university-admin | Both documented |
+| DELETE | `/api/universities/{university}` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/universities/{university}/current` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/faculties` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| POST | `/api/faculties` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/faculties/{faculty}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| PUT, PATCH | `/api/faculties/{faculty}` | Sanctum + super-admin or university-admin | Both documented |
+| DELETE | `/api/faculties/{faculty}` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/faculties/{faculty}/archive` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/faculties/{faculty}/reactivate` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/faculties-tree` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/departments` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| POST | `/api/departments` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/departments/{department}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| PUT, PATCH | `/api/departments/{department}` | Sanctum + super-admin or university-admin | Both documented |
+| DELETE | `/api/departments/{department}` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/departments/{department}/archive` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/departments/{department}/reactivate` | Sanctum + super-admin or university-admin | Documented |
 
 ## Authentication and Authorization Check
 

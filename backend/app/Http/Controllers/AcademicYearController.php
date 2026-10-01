@@ -73,7 +73,10 @@ class AcademicYearController extends Controller
         $this->authorize('update', $academicYear);
 
         return Inertia::render('AcademicYears/Edit', [
-            'academicYear' => new AcademicYearResource($academicYear),
+            // `resolve()` instead of the resource instance: Inertia treats a bare
+            // `JsonResource` as a `Responsable`, so it would nest the payload under
+            // `data` and the page would read `props.academicYear.data.code`.
+            'academicYear' => (new AcademicYearResource($academicYear))->resolve(),
             'semesters' => SemesterResource::collection(
                 $academicYear->semesters()->get()
             ),

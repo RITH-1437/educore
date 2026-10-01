@@ -386,12 +386,18 @@ users, main business activities, and expected outputs.
 - **Main business activities:** maintain lecturer records, departments, and positions; assign sections.
 - **Expected outputs:** a reliable staff register linked to teaching duties.
 
-### 9.4 Faculty & Department Management [Planned]
+### 9.4 Faculty & Department Management [Implemented]
 
 - **Purpose:** model the university's organizational structure.
-- **Primary users:** University Admin.
-- **Main business activities:** create/manage faculties, departments, and their relationships.
+- **Primary users:** University Admin (write), Super Admin (write), Faculty Admin (read-only).
+- **Main business activities:** create/manage universities, faculties, departments, and their relationships.
 - **Expected outputs:** a clear, reusable hierarchical structure.
+- **Delivered:** university record with a single `is_current` row, faculties and
+  departments with global/per-faculty name uniqueness, archive-vs-delete
+  semantics, delete guards that count soft-deleted children, nested department
+  management under the faculty screen, a `faculties-tree` read endpoint, and a
+  deterministic 1 university / 3 faculty / 6 department seed. See
+  [7_Faculty-and-Department-Report.md](7_Faculty-and-Department-Report.md).
 
 ### 9.5 Program Management [Planned]
 

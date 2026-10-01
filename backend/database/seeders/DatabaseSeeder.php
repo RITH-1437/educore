@@ -14,6 +14,9 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             UserSeeder::class,
+            // Faculties belong to a university, so the structure is seeded
+            // before the academic calendar that sits alongside it.
+            UniversityStructureSeeder::class,
             AcademicYearSeeder::class,
         ]);
     }

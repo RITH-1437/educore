@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ChevronRight,
   GraduationCap,
+  Landmark,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -27,6 +28,8 @@ const pageTitle = computed(() => {
   if (path === '/admin/dashboard') return 'Dashboard'
   if (path.startsWith('/users')) return 'User Management'
   if (path.startsWith('/academic-years')) return 'Academic Calendar'
+  if (path.startsWith('/universities')) return 'University'
+  if (path.startsWith('/faculties')) return 'Faculties & Departments'
   if (path === '/dashboard') return 'Dashboard'
   return 'Overview'
 })
@@ -43,9 +46,26 @@ const navGroups = computed(() => {
         items: [
           { label: 'Users & roles', href: '/users', icon: Users },
           { label: 'Academic years', href: '/academic-years', icon: CalendarDays },
-          { label: 'Faculties & departments', href: '#faculties', icon: GraduationCap, future: true },
+          { label: 'University structure', href: '/faculties', icon: GraduationCap },
           { label: 'Programs & courses', href: '#programs', icon: BookOpen, future: true },
           { label: 'Security & access', href: '#security', icon: ShieldCheck, future: true },
+        ],
+      },
+    ]
+  }
+
+  // University Admin owns the academic structure; Faculty Admin may read it.
+  if (['university-admin', 'faculty-admin'].includes(role.value)) {
+    return [
+      {
+        label: 'Overview',
+        items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }],
+      },
+      {
+        label: 'Academic structure',
+        items: [
+          { label: 'University', href: '/universities', icon: Landmark },
+          { label: 'Faculties & departments', href: '/faculties', icon: GraduationCap },
         ],
       },
     ]
@@ -130,10 +150,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown))
                 v-if="!item.future"
                 :href="item.href"
                 :class="[
-                  'group flex min-h-11 items-center gap-3 rounded-lg border-l-2 px-3 text-small font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
+                  'group flex min-h-11 items-center gap-3 rounded-lg px-3 text-small font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
                   isActive(item.href)
-                    ? 'border-primary bg-primary/5 text-primary dark:bg-dark-primary/10 dark:text-dark-primary'
-                    : 'border-transparent text-muted hover:bg-background hover:text-ink dark:text-dark-muted dark:hover:bg-dark-surface-2 dark:hover:text-dark-ink',
+                    ? 'bg-primary/5 text-primary dark:bg-dark-primary/10 dark:text-dark-primary'
+                    : 'text-muted hover:bg-background hover:text-ink dark:text-dark-muted dark:hover:bg-dark-surface-2 dark:hover:text-dark-ink',
                   collapsed ? 'lg:justify-center lg:px-0' : '',
                 ]"
                 :title="collapsed ? item.label : undefined"

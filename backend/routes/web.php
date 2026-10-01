@@ -4,6 +4,8 @@ use App\Enums\Role;
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\FacultyController;
+use App\Http\Controllers\UniversityController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -40,6 +42,59 @@ Route::middleware(['auth', 'role:super-admin'])->group(function () {
 Route::middleware(['auth', 'role:university-admin,faculty-admin,lecturer,student'])
     ->get('/dashboard', [DashboardController::class, 'roleDashboard'])
     ->name('role-dashboard');
+
+// Reading the university structure is open to Faculty Admin as well; changing
+// it is university-wide data and stays with Super Admin / University Admin.
+// `UniversityPolicy` and `FacultyPolicy` mirror this split.
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])
+    ->prefix('/universities')
+    ->name('universities.')
+    ->group(function () {
+        Route::get('/', [UniversityController::class, 'index'])->name('index');
+    });
+
+Route::middleware(['auth', 'role:super-admin,university-admin'])
+    ->prefix('/universities')
+    ->name('universities.')
+    ->group(function () {
+        Route::post('/', [UniversityController::class, 'store'])->name('store');
+        Route::get('/{university}/edit', [UniversityController::class, 'edit'])->name('edit');
+        Route::put('/{university}', [UniversityController::class, 'update'])->name('update');
+        Route::post('/{university}/current', [UniversityController::class, 'makeCurrent'])->name('current');
+        Route::delete('/{university}', [UniversityController::class, 'destroy'])->name('destroy');
+    });
+
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])
+    ->prefix('/faculties')
+    ->name('faculties.')
+    ->group(function () {
+        Route::get('/', [FacultyController::class, 'index'])->name('index');
+    });
+
+Route::middleware(['auth', 'role:super-admin,university-admin'])
+    ->prefix('/faculties')
+    ->name('faculties.')
+    ->group(function () {
+        Route::post('/', [FacultyController::class, 'store'])->name('store');
+        Route::get('/{faculty}/edit', [FacultyController::class, 'edit'])->name('edit');
+        Route::put('/{faculty}', [FacultyController::class, 'update'])->name('update');
+        Route::post('/{faculty}/archive', [FacultyController::class, 'archive'])->name('archive');
+        Route::post('/{faculty}/reactivate', [FacultyController::class, 'reactivate'])->name('reactivate');
+        Route::delete('/{faculty}', [FacultyController::class, 'destroy'])->name('destroy');
+
+        // Departments are a genuine child collection, so they nest under the
+        // faculty that owns them.
+        Route::post('/{faculty}/departments', [FacultyController::class, 'storeDepartment'])
+            ->name('departments.store');
+        Route::put('/{faculty}/departments/{department}', [FacultyController::class, 'updateDepartment'])
+            ->name('departments.update');
+        Route::post('/{faculty}/departments/{department}/archive', [FacultyController::class, 'archiveDepartment'])
+            ->name('departments.archive');
+        Route::post('/{faculty}/departments/{department}/reactivate', [FacultyController::class, 'reactivateDepartment'])
+            ->name('departments.reactivate');
+        Route::delete('/{faculty}/departments/{department}', [FacultyController::class, 'destroyDepartment'])
+            ->name('departments.destroy');
+    });
 
 // The academic calendar is university-wide data, so both admin roles reach it.
 Route::middleware(['auth', 'role:super-admin,university-admin'])

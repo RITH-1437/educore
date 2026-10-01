@@ -57,6 +57,23 @@ class UserManagementTest extends TestCase
                 ->has('users.data', 2));
     }
 
+    public function test_super_admin_can_view_the_user_edit_screen(): void
+    {
+        // `setUp()` already created a Student role, so reuse that user instead of
+        // trying to insert a duplicate role row.
+        // Guards against the single-resource nesting trap: a bare
+        // `JsonResource` prop is serialised under `data`, and the Vue page reads
+        // `props.user.name`.
+        $this->actingAs($this->admin)
+            ->get("/users/{$this->student->id}/edit")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Users/Edit')
+                ->where('user.id', $this->student->id)
+                ->where('user.email', $this->student->email)
+                ->has('roles'));
+    }
+
     public function test_super_admin_can_create_a_user(): void
     {
         $this->actingAs($this->admin)

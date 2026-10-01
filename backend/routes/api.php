@@ -2,7 +2,10 @@
 
 use App\Http\Controllers\Api\AcademicYearController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DepartmentController;
+use App\Http\Controllers\Api\FacultyController;
 use App\Http\Controllers\Api\SemesterController;
+use App\Http\Controllers\Api\UniversityController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -17,6 +20,53 @@ Route::post('/logout', [AuthController::class, 'logout'])
 
 Route::middleware(['auth:sanctum', 'role:super-admin'])->group(function () {
     Route::apiResource('users', UserController::class, ['names' => 'api.users']);
+});
+
+// Read routes also allow Faculty Admin; write routes are university-wide data
+// and stay with Super Admin / University Admin. `UniversityPolicy`,
+// `FacultyPolicy` and `DepartmentPolicy` mirror this split.
+Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-admin'])->group(function () {
+    // Registered before `/faculties/{faculty}` so the literal path wins.
+    Route::get('/faculties-tree', [DepartmentController::class, 'tree'])->name('api.faculties.tree');
+
+    Route::get('/universities', [UniversityController::class, 'index'])->name('api.universities.index');
+    Route::get('/universities/{university}', [UniversityController::class, 'show'])->name('api.universities.show');
+
+    Route::get('/faculties', [FacultyController::class, 'index'])->name('api.faculties.index');
+    Route::get('/faculties/{faculty}', [FacultyController::class, 'show'])->name('api.faculties.show');
+
+    Route::get('/departments', [DepartmentController::class, 'index'])->name('api.departments.index');
+    Route::get('/departments/{department}', [DepartmentController::class, 'show'])->name('api.departments.show');
+});
+
+Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->group(function () {
+    Route::post('/universities', [UniversityController::class, 'store'])->name('api.universities.store');
+    Route::match(['put', 'patch'], '/universities/{university}', [UniversityController::class, 'update'])
+        ->name('api.universities.update');
+    Route::post('/universities/{university}/current', [UniversityController::class, 'makeCurrent'])
+        ->name('api.universities.current');
+    Route::delete('/universities/{university}', [UniversityController::class, 'destroy'])
+        ->name('api.universities.destroy');
+
+    Route::post('/faculties', [FacultyController::class, 'store'])->name('api.faculties.store');
+    Route::match(['put', 'patch'], '/faculties/{faculty}', [FacultyController::class, 'update'])
+        ->name('api.faculties.update');
+    Route::post('/faculties/{faculty}/archive', [FacultyController::class, 'archive'])
+        ->name('api.faculties.archive');
+    Route::post('/faculties/{faculty}/reactivate', [FacultyController::class, 'reactivate'])
+        ->name('api.faculties.reactivate');
+    Route::delete('/faculties/{faculty}', [FacultyController::class, 'destroy'])
+        ->name('api.faculties.destroy');
+
+    Route::post('/departments', [DepartmentController::class, 'store'])->name('api.departments.store');
+    Route::match(['put', 'patch'], '/departments/{department}', [DepartmentController::class, 'update'])
+        ->name('api.departments.update');
+    Route::post('/departments/{department}/archive', [DepartmentController::class, 'archive'])
+        ->name('api.departments.archive');
+    Route::post('/departments/{department}/reactivate', [DepartmentController::class, 'reactivate'])
+        ->name('api.departments.reactivate');
+    Route::delete('/departments/{department}', [DepartmentController::class, 'destroy'])
+        ->name('api.departments.destroy');
 });
 
 // The academic calendar is university-wide data, so both admin roles reach it.

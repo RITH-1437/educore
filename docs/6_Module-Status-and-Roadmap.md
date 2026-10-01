@@ -14,10 +14,11 @@
 | 9.1 | Authentication & Authorization | `[Implemented]` |
 | — | Users management (extra, part of 9.1 scope) | `[Implemented]` |
 | — | Database schema (49 domain tables) | `[Implemented]` |
-| — | Login UI (branding, ITC background/logo) | `[In Progress]` |
+| — | Branding / design system + admin dashboard | `[Implemented]` |
+| — | API contract & OpenAPI audit | `[Implemented]` |
 | 9.2 | Student Management | `[Planned]` |
 | 9.3 | Lecturer Management | `[Planned]` |
-| 9.4 | Faculty & Department Management | `[Planned]` |
+| 9.4 | Faculty & Department Management | `[Implemented]` |
 | 9.5 | Program Management | `[Planned]` |
 | 9.6 | Academic Year & Semester Management | `[Implemented]` |
 | 9.7 | Course Management | `[Planned]` |
@@ -45,8 +46,8 @@
 ```mermaid
 pie showData
   title Module delivery status
-  "Implemented (incl. schema)" : 26
-  "Planned / In progress" : 23
+  "Implemented (incl. schema)" : 29
+  "Planned / In progress" : 20
 ```
 
 ---
@@ -126,9 +127,17 @@ super-admin and university-admin policies, web pages `AcademicYears/Index`,
 feature tests.
 
 **9.4 Faculty & Department** — tables `universities`, `faculties`, `departments`.
-Steps: nested CRUD (departments belong to a faculty), restrict deletes while
-children exist, `Father`-style soft hierarchy, pages `Faculties/`, tests deny for
-non-university-admins.
+Delivered: `UniversityService` / `FacultyService` / `DepartmentService` owning the
+rules (single `is_current` university, unique faculty names, department names
+unique per faculty, archive-vs-delete, delete guards that count soft-deleted
+children), `BusinessRuleException` mapped to `409`, read access for super-admin,
+university-admin and faculty-admin with writes restricted to super-admin and
+university-admin, pages `Universities/Index`, `Universities/Edit`,
+`Faculties/Index` (with inline department management), `Faculties/Edit`,
+resource-transformed `/api/universities`, `/api/faculties`, `/api/departments`
+plus a `/api/faculties-tree` read endpoint, OpenAPI annotations, an idempotent
+`UniversityStructureSeeder` (1 university / 3 faculties / 6 departments) and 49
+feature tests.
 
 **9.5 Program** — table `programs`.
 Steps: CRUD scoped to a department, unique `(department_id, code)`, page
@@ -224,20 +233,34 @@ hardening pass (locking, Superset-free reporting, deployment).
 
 ## 5. Every-module output (definition of done)
 
+Code:
+
 - Model + relationships per `skills/academic-domain`; schema not duplicated.
 - Thin controller + Form Request + Policy (server-side `403`).
 - `/api/<resource>` CRUD with `auth:sanctum` + namespaced route names.
 - Inertia `Index/Create/Edit` pages reusing the Users vertical.
 - Feature tests asserted happy + denied + invalid; suite stays green.
-- `docs/3_business-overview.md` label flipped to `[Implemented]`; this report
-  updated; single `[Feature]: ...` commit per module.
+
+Documentation (same commit as the code — see `AGENTS.md` and
+`skills/documentation/SKILL.md`):
+
+- New numbered report `docs/N_<Module>-Report.md`: scope, schema, models,
+  endpoints, authorization matrix, UI, tests, decisions, Mermaid diagrams.
+- This report: the §1 status label, the §4 playbook entry, and §6 open items
+  the module closed.
+- `docs/3_business-overview.md` §9 label flipped to `[Implemented]`.
+- `docs/api/api-audit.md` rows for every new or changed endpoint.
+- `README.md` when ports, env vars, commands, or routes change;
+  `docs/database/` when the schema changes.
+
+A module is not done until its report exists and its tests pass — never label
+`[Implemented]` on intent alone. Ship one `[Feature]: ...` commit per module.
 
 ---
 
 ## 6. Open items
 
-- Login page UI (glass card, ITC background/logo) is `[In Progress]` — still
-  uncommitted together with the rest of the pre-existing WIP.
+- `[Done]` Login page UI (branding, ITC background/logo) — shipped in `7a32f08`.
 - `[Done]` Pre-existing Pint failures on the 49 migration files — fixed with a
   single trailing-newline pass; `vendor/bin/pint` is now clean (148 files).
 - `[Done]` Docker build contexts resolved from the wrong directory
@@ -247,10 +270,17 @@ hardening pass (locking, Superset-free reporting, deployment).
   running it from inside `docker/` silently bind-mounts a stray `docker/backend`.
 - `[Done]` Brand/design system in `docs/branding/` is now reachable by agents
   through `skills/branding/SKILL.md`, which is wired into `AGENTS.md`.
-- `[Pending]` Implement the `DESIGN-TOKENS.md` §15 `@theme` block in
-  `frontend/src/style.css`; until then the stock `blue`/`slate`/`emerald`/
-  `amber`/`red` utilities are the token implementation.
-- `[Pending]` OpenAPI schema classes referenced by the Academic Year/Semester
-  annotations are not defined yet under `backend/app/OpenApi/`.
-- `[Pending]` Generated Swagger assets (`backend/public/build`, and if kept
-  `backend/storage/api-docs/api-docs.json`) need an explicit gitignore decision.
+- `[Done]` `DESIGN-TOKENS.md` §15 `@theme` block implemented in
+  `frontend/src/style.css` — semantic tokens, dark-mode variants and animations
+  are live (commit `d359090`).
+- `[Done]` OpenAPI schema classes for Academic Year/Semester/Users are defined
+  under `backend/app/OpenApi/Schemas/` (commit `9737dc5`).
+- `[Done]` Generated Swagger assets are gitignored:
+  `backend/public/build` and `backend/storage/api-docs` (commit `e3405dc`).
+- `[Done]` Branded admin dashboard, reusable component library and role-aware
+  redirects shipped in `d359090`; API contract audit in `9737dc5`.
+- `[Done]` 9.4 Faculty & Department Management (`universities`, `faculties`,
+  `departments`) — unlocks 9.5 Programs and makes the dashboard faculty and
+  program metrics real. Report: `docs/7_Faculty-and-Department-Report.md`.
+- `[Next]` 9.5 Program Management (`programs`) — needs the structure in 9.4 to
+  attach programs to departments.

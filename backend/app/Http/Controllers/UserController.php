@@ -61,7 +61,10 @@ class UserController extends Controller
         $this->authorize('update', $user);
 
         return Inertia::render('Users/Edit', [
-            'user' => new UserResource($user->load('role')),
+            // `resolve()` instead of the resource instance: Inertia treats a bare
+            // `JsonResource` as a `Responsable`, so it would nest the payload under
+            // `data` and the page would read `props.user.data.name`.
+            'user' => (new UserResource($user->load('role')))->resolve(),
             'roles' => $this->rolesForSelect(),
         ]);
     }

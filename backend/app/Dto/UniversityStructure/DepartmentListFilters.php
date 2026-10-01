@@ -1,0 +1,93 @@
+<?php
+
+namespace App\Dto\UniversityStructure;
+
+/**
+ * Whitelisted filter, sort and pagination input for department listings.
+ *
+ * `facultyId` is the scoping filter: a department always belongs to exactly one
+ * faculty, so the list view always has a parent in context.
+ */
+final readonly class DepartmentListFilters
+{
+    public const DEFAULT_PER_PAGE = 15;
+
+    public const MAX_PER_PAGE = 100;
+
+    /**
+     * Columns a client may sort by — see `skills/api/SKILL.md`.
+     */
+    public const SORTABLE = ['id', 'code', 'name', 'created_at'];
+
+    public function __construct(
+        public ?string $search = null,
+        public ?int $facultyId = null,
+        public ?bool $isActive = null,
+        public string $sortBy = 'name',
+        public string $sortDir = 'asc',
+        public int $perPage = self::DEFAULT_PER_PAGE,
+    ) {}
+
+    /**
+     * Build filters from a plain input array (`search`, `filters[faculty_id]`,
+     * `filters[is_active]`, `sort_by`, `sort_dir`, `per_page`).
+     *
+     * @param  array<string, mixed>  $input
+     */
+    public static function fromInput(array $input): self
+    {
+        $search = trim((string) ($input['search'] ?? ''));
+        $facultyId = $input['filters']['faculty_id'] ?? null;
+        $isActive = $input['filters']['is_active'] ?? null;
+        $sortBy = (string) ($input['sort_by'] ?? 'name');
+        $sortDir = strtolower((string) ($input['sort_dir'] ?? 'asc'));
+        $perPage = (int) ($input['per_page'] ?? 0);
+
+        return new self(
+            search: $search === '' ? null : $search,
+            facultyId: ($facultyId === null || $facultyId === '') ? null : (int) $facultyId,
+            isActive: self::toNullableBool($isActive),
+            sortBy: in_array($sortBy, self::SORTABLE, true) ? $sortBy : 'name',
+            sortDir: in_array($sortDir, ['asc', 'desc'], true) ? $sortDir : 'asc',
+            perPage: min(max($perPage ?: self::DEFAULT_PER_PAGE, 1), self::MAX_PER_PAGE),
+        );
+    }
+
+    /**
+     * Query string parameters for pagination links.
+     *
+     * @return array<string, mixed>
+     */
+    public function toQueryString(): array
+    {
+        $query = array_filter([
+            'search' => $this->search,
+            'per_page' => $this->perPage !== self::DEFAULT_PER_PAGE ? $this->perPage : null,
+        ], fn ($value) => $value !== null);
+
+        $filters = [];
+
+        if ($this->facultyId !== null) {
+            $filters['faculty_id'] = $this->facultyId;
+        }
+
+        if ($this->isActive !== null) {
+            $filters['is_active'] = $this->isActive ? '1' : '0';
+        }
+
+        if ($filters !== []) {
+            $query['filters'] = $filters;
+        }
+
+        return $query;
+    }
+
+    private static function toNullableBool(mixed $value): ?bool
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return filter_var($value, FILTER_VALIDATE_BOOL, FILTER_NULL_ON_FAILURE) ?? null;
+    }
+}

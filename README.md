@@ -96,6 +96,11 @@ docker compose --project-directory . -f docker/docker-compose.yml exec backend p
 
 Or via Make: `make seed`. To drop and re-seed in one step: `make migrate-fresh`.
 
+The seed is idempotent and produces: 1 current university (`ITC`), 3 faculties
+(`ENG`, `SCI`, `HSS`) and 6 departments, plus roles and a super-admin
+(`admin@educore.kh` / `admin@123`). See
+[`docs/database/seed-strategy.md`](docs/database/seed-strategy.md).
+
 ## 8. Access the application
 
 | URL                          | Purpose                                    |
@@ -105,6 +110,22 @@ Or via Make: `make seed`. To drop and re-seed in one step: `make migrate-fresh`.
 | `http://localhost/api/health`| Backend health endpoint (Laravel)          |
 | `http://localhost/api/documentation` | Swagger UI — interactive API reference |
 | `http://localhost/docs`      | Generated OpenAPI 3.0 document (JSON)      |
+
+### Admin routes
+
+| Path                        | Page                       | Who can write |
+| --------------------------- | -------------------------- | ------------- |
+| `/admin/dashboard`          | Admin dashboard            | — |
+| `/users`                    | Users management           | Super admin   |
+| `/academic-years`           | Academic years & semesters | Super admin, University admin |
+| `/universities`             | University record          | Super admin, University admin |
+| `/universities/{id}/edit`   | Edit university            | Super admin, University admin |
+| `/faculties`                | Faculties + departments    | Super admin, University admin |
+
+Faculty Admin has **read-only** access to `/universities` and `/faculties`; the
+write controls are hidden in the UI and the routes still reject the request with
+`403`. Report:
+[`docs/7_Faculty-and-Department-Report.md`](docs/7_Faculty-and-Department-Report.md).
 
 Pages are rendered by Laravel through Inertia.js. Nginx forwards `/api`,
 `/storage`, and non-existing paths to the Laravel PHP-FPM container, and serves

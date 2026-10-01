@@ -23,9 +23,10 @@ erDiagram
         bigint id PK
         bigint university_id FK
         varchar code UK
-        varchar name
+        varchar name UK
         varchar dean_name
         boolean is_active
+        timestamptz deleted_at
     }
     DEPARTMENTS {
         bigint id PK
@@ -34,6 +35,7 @@ erDiagram
         varchar name
         varchar head_name
         boolean is_active
+        timestamptz deleted_at
     }
     PROGRAMS {
         bigint id PK
@@ -48,5 +50,17 @@ erDiagram
 
 Notes:
 
-- `is_current` marks the active institution row.
-- Deleting a faculty/department/program is `RESTRICT` (must be empty first).
+- `is_current` marks the active institution row. Exactly one university may hold
+  the flag; `UniversityService::makeCurrent()` clears the previous row.
+- `faculties.name` is globally unique (`uq_faculties_name`) so a dean name is
+  unambiguous across the whole institution.
+- `departments` is unique per faculty (`uq_departments_faculty_id_name`), not
+  globally — the same subject department name may exist under two faculties.
+- `faculties` and `departments` carry `deleted_at`. Archiving flips
+  `is_active`; soft deleting is reserved for removal once programs, courses or
+  lecturers reference the row.
+- `universities` deliberately has no `deleted_at` — it is reference data with
+  an `is_current` flag, not archivable history.
+- Deleting a university/faculty is `RESTRICT` (must be empty first), and the
+  guard counts soft-deleted children too, so an archived faculty still blocks
+  deleting its university.

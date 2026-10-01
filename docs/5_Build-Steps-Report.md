@@ -31,10 +31,13 @@ This report answers two questions:
 | API auth (Sanctum tokens) | `[Implemented]` | `Api/AuthController`, `auth:sanctum` routes |
 | Users management (index/create/update/soft-delete) | `[Implemented]` | `UserController`, `UserPolicy`, `UserResource`, `Users/{Index,Create,Edit}` |
 | Academic Year & Semester management (9.6) | `[Implemented]` | `AcademicYearService`, `SemesterService`, `AcademicYearPolicy`, `SemesterPolicy`, `AcademicYears/{Index,Create,Edit}`, `/api/academic-years`, `AcademicYearSeeder` |
+| University / Faculty / Department management (9.4) | `[Implemented]` | `UniversityService`, `FacultyService`, `DepartmentService`, three policies, `Universities/{Index,Edit}`, `Faculties/{Index,Edit}`, `/api/universities`, `/api/faculties`, `/api/departments`, `/api/faculties-tree`, `UniversityStructureSeeder` |
 | Access gates (`role:super-admin`, policy checks, `403`) | `[Implemented]` | `EnsureUserHasRole`, `UserPolicy`, middleware wiring |
 | Brand/design system for agents | `[Implemented]` | `docs/branding/`, routed by `skills/branding/SKILL.md` |
-| Tests | `[Implemented]` | 65 tests / 245 assertions green against isolated `educore_test` DB |
-| Login page UI (branding tokens + ITC background/logo) | `[In Progress]` | Local change, not yet committed |
+| Tests | `[Implemented]` | 121 tests / 487 assertions green against isolated `educore_test` DB; Pint clean on 210 files |
+| Login page UI (branding tokens + ITC background/logo) | `[Implemented]` | `pages/Auth/Login.vue`, `layouts/GuestLayout.vue` (commit `7a32f08`) |
+| Admin dashboard + reusable UI library | `[Implemented]` | `DashboardController`, `pages/Admin/Dashboard.vue`, `components/Base*.vue` (commit `d359090`) |
+| API contract / OpenAPI audit | `[Implemented]` | `app/OpenApi/Schemas/`, `docs/api/api-audit.md` (commit `9737dc5`) |
 
 > The business overview (`docs/3_business-overview.md` §9.1) has been updated from
 > `[Planned]` to `[Implemented]` to match reality.
@@ -176,8 +179,8 @@ flowchart TD
 | Authentication & Authorization | `[Implemented]` |
 | Database schema (49 tables) | `[Implemented]` |
 | Users management | `[Implemented]` |
-| Login page (branding + ITC assets) | `[In Progress]` (uncommitted) |
-| University / Faculty / Dept / Program | `[Planned]` |
+| Login page (branding + ITC assets) | `[Implemented]` |
+| University / Faculty / Dept / Program | `[In Progress]` (9.4 Faculty & Department building) |
 | Students / Lecturers / Courses / Timetable | `[Planned]` |
 | Enrollment / Attendance / Assignments | `[Planned]` |
 | Exams / Grading / GPA / Dashboard | `[Planned]` |

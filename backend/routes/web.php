@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseOfferingController;
@@ -131,6 +132,16 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])
         Route::put('/{program}/courses/{course}', [ProgramController::class, 'updateCourse'])->name('courses.update');
         Route::delete('/{program}/courses/{course}', [ProgramController::class, 'removeCourse'])->name('courses.destroy');
     });
+
+// Attendance: lecturers take it for their sections; staff open the register
+// from the offering page; students see their own (`AttendancePolicy`).
+Route::middleware(['auth', 'role:lecturer'])->get('/attendance', [AttendanceController::class, 'classes'])->name('attendance.classes');
+Route::middleware(['auth', 'role:student'])->get('/my-attendance', [AttendanceController::class, 'mine'])->name('attendance.mine');
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,lecturer'])->group(function () {
+    Route::get('/attendance/sections/{section}', [AttendanceController::class, 'section'])->name('attendance.section');
+    Route::post('/attendance/sections/{section}', [AttendanceController::class, 'record'])->name('attendance.record');
+    Route::post('/attendance-sessions/{session}/cancel', [AttendanceController::class, 'cancel'])->name('attendance.cancel');
+});
 
 // Timetable: rooms (staff read, managers write), section schedules (managers),
 // and a personal weekly timetable for students and lecturers.

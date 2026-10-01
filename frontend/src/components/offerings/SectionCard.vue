@@ -91,6 +91,10 @@ const destroy = async () => {
       <BaseButton type="submit" size="md" :disabled="!assign.lecturer_id" :loading="assign.processing">Assign</BaseButton>
     </form>
 
+    <div class="mt-4">
+      <BaseButton :href="`/attendance/sections/${section.id}`" size="sm" variant="ghost">Attendance register</BaseButton>
+    </div>
+
     <div v-if="canManage" class="mt-4 flex gap-3">
       <BaseButton v-if="!editing" size="sm" variant="secondary" @click="editing = true">Edit section</BaseButton>
       <BaseButton size="sm" variant="ghost" class="text-error dark:text-red-300" @click="destroy">Delete</BaseButton>

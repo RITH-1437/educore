@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AcademicYearController;
+use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\CourseOfferingController;
@@ -75,6 +76,16 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::post('/enrollments/{enrollment}/complete', [EnrollmentController::class, 'complete'])->name('api.enrollments.complete');
     Route::get('/students/{student}/enrollments', [EnrollmentController::class, 'forStudent'])->name('api.students.enrollments');
     Route::get('/timetable/student/{student}', [ScheduleController::class, 'student'])->name('api.timetable.student');
+});
+
+// Attendance: `AttendancePolicy` decides per section / student (lecturer of the
+// section, managers, Faculty Admin read-only, a student their own summary).
+Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-admin,lecturer,student'])->group(function () {
+    Route::get('/sections/{section}/attendance', [AttendanceController::class, 'show'])->name('api.sections.attendance');
+    Route::post('/sections/{section}/attendance', [AttendanceController::class, 'record'])->name('api.sections.attendance.store');
+    Route::get('/sections/{section}/attendance/summary', [AttendanceController::class, 'summary'])->name('api.sections.attendance.summary');
+    Route::post('/attendance-sessions/{session}/cancel', [AttendanceController::class, 'cancel'])->name('api.attendance-sessions.cancel');
+    Route::get('/students/{student}/attendance', [AttendanceController::class, 'student'])->name('api.students.attendance');
 });
 
 // A student may read their own profile; `StudentPolicy::view` limits them to it.

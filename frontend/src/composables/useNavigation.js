@@ -13,6 +13,7 @@ import {
   LayoutGrid,
   Presentation,
   ScrollText,
+  UserCheck,
   UserRound,
   Users,
 } from '@lucide/vue'
@@ -70,6 +71,7 @@ const navForRole = (role) => {
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { label: 'Course registration', href: '/registration', icon: ClipboardCheck },
       { label: 'My timetable', href: '/timetable', icon: CalendarClock },
+      { label: 'My attendance', href: '/my-attendance', icon: UserCheck },
     ] }]
   }
 
@@ -77,6 +79,7 @@ const navForRole = (role) => {
     return [{ label: 'Workspace', items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { label: 'My timetable', href: '/timetable', icon: CalendarClock },
+      { label: 'Attendance', href: '/attendance', icon: UserCheck },
     ] }]
   }
 
@@ -97,6 +100,8 @@ const SECTION_LABELS = {
   registration: 'Course registration',
   rooms: 'Rooms',
   timetable: 'My timetable',
+  attendance: 'Attendance',
+  'my-attendance': 'My attendance',
   'error-logs': 'Error logs',
 }
 

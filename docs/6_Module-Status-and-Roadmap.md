@@ -26,7 +26,7 @@
 | 9.8 | Class / Section Management | `[Implemented]` |
 | 9.9 | Course Registration / Enrollment | `[Implemented]` |
 | 9.10 | Timetable Management | `[Implemented]` |
-| 9.11 | Attendance | `[Planned]` |
+| 9.11 | Attendance | `[Implemented]` |
 | 9.12 | Assignments | `[Planned]` |
 | 9.13 | Examinations | `[Planned]` |
 | 9.14 | Grades & GPA | `[Planned]` |
@@ -47,8 +47,8 @@
 ```mermaid
 pie showData
   title Module delivery status
-  "Implemented (incl. schema)" : 37
-  "Planned / In progress" : 13
+  "Implemented (incl. schema)" : 38
+  "Planned / In progress" : 12
 ```
 
 ---
@@ -322,5 +322,7 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` 9.9 Enrollment (`enrollments`). Report: `docs/15_Enrollment-Report.md`.
 - `[Done]` 9.10 Timetable (`rooms`, `schedule_entries`; dropped the global
   `uq_schedule_room_slot`). Report: `docs/16_Timetable-Report.md`.
-- `[Next]` 9.11 Attendance (sessions per scheduled meeting, records per
-  enrollment).
+- `[Done]` 9.11 Attendance (`attendance_sessions`, `attendance_records`).
+  Report: `docs/17_Attendance-Report.md`.
+- `[Next]` 9.12 Assignments / 9.13 Examinations, then 9.14 Grades & GPA (which
+  will also turn enrollment completion and prerequisites into grade-based rules).

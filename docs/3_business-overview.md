@@ -484,12 +484,16 @@ users, main business activities, and expected outputs.
   overlaps), clash checks at enrollment and lecturer assignment, personal
   timetables. See [16_Timetable-Report.md](16_Timetable-Report.md).
 
-### 9.11 Attendance [Planned]
+### 9.11 Attendance [Implemented]
 
 - **Purpose:** record and view attendance per section.
 - **Primary users:** Lecturer, Student (view), Faculty/Department Admin (monitor).
 - **Main business activities:** mark attendance (present/absent/late/excused), calculate percentages.
 - **Expected outputs:** attendance records and student attendance summaries.
+- **Delivered:** dated sessions per section, bulk recording by the section's
+  lecturers (managers may correct), date policy tied to the weekly schedule,
+  derived attendance rates, cancel/restore class, lecturer register and
+  student \"My attendance\". See [17_Attendance-Report.md](17_Attendance-Report.md).
 
 ### 9.12 Assignments [Planned]
 

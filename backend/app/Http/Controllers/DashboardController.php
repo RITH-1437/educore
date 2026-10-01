@@ -65,6 +65,7 @@ class DashboardController extends Controller
             'active_students' => DB::table('students')->where('status', 'active')->count(),
             'total_offerings' => DB::table('course_offerings')->count(),
             'total_sections' => DB::table('sections')->count(),
+            'attendance_sessions' => DB::table('attendance_sessions')->where('status', 'held')->count(),
             'open_enrollments' => DB::table('enrollments')->whereIn('status', ['pending', 'confirmed'])->whereNull('deleted_at')->count(),
         ];
 

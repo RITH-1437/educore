@@ -33,6 +33,8 @@ class DatabaseSeeder extends Seeder
             ScheduleSeeder::class,
             // Enrollments go through EnrollmentService, so every rule applies.
             EnrollmentSeeder::class,
+            // Attendance needs schedules and enrollments; recorded via AttendanceService.
+            AttendanceSeeder::class,
             // Operational diagnostics last: this table is filled by the recorder
             // at runtime, so seeding it after the structure keeps the rows
             // internally consistent.

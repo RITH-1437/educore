@@ -358,6 +358,11 @@ documented operations.
 | DELETE | `/api/schedule-entries/{entry}` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/timetable/student/{student}` | Sanctum + staff, or the student themself | Documented |
 | GET | `/api/timetable/lecturer/{lecturer}` | Sanctum + staff, or the lecturer themself | Documented |
+| GET | `/api/sections/{section}/attendance` | Sanctum + managers, Faculty Admin, or a lecturer of the section | Documented |
+| POST | `/api/sections/{section}/attendance` | Sanctum + managers or a lecturer of the section | Documented |
+| GET | `/api/sections/{section}/attendance/summary` | Sanctum + managers, Faculty Admin, or a lecturer of the section | Documented |
+| POST | `/api/attendance-sessions/{session}/cancel` | Sanctum + managers or a lecturer of the section | Documented |
+| GET | `/api/students/{student}/attendance` | Sanctum + staff, or the student themself | Documented |
 | GET | `/api/error-logs` | Sanctum + super-admin only | Documented |
 | GET | `/api/error-logs/{errorLog}` | Sanctum + super-admin only | Documented |
 

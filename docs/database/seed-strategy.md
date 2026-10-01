@@ -77,6 +77,9 @@ Invariants it enforces and tests assert:
   section two weekly meetings through `TimetableService` (conflict-free by
   construction; sections that already have meetings are skipped). Both run
   before `EnrollmentSeeder` so student clashes are checked.
+- `AttendanceSeeder` (after enrollments) records the first six scheduled
+  meetings of each open section through `AttendanceService`, with a fixed status
+  pattern; re-running re-saves the same values.
 - `EnrollmentSeeder` enrolls active students in open sections of their
   curriculum through `EnrollmentService`, so every rule applies; refused or
   duplicate enrollments are skipped (idempotent).

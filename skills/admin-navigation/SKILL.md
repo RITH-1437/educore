@@ -70,7 +70,7 @@ module (Super Admin sees at most 3 as "Soon").
 | Overview | Dashboard `[Implemented]` |
 | Academic structure | University `[Implemented]` · Faculties & departments `[Implemented]` · Programs `[Implemented]` · Academic years `[Implemented]` |
 | People | Users & roles `[Implemented]` · Students `[Implemented]` · Lecturers `[Implemented]` |
-| Academics | Courses `[Implemented]` · Sections & timetable `[Planned: 9.8, 9.10]` · Enrollment `[Planned: 9.9]` |
+| Academics | Courses `[Implemented]` · Offerings & sections `[Implemented]` · Timetable `[Planned: 9.10]` · Enrollment `[Planned: 9.9]` |
 | System | Error logs `[Implemented]` · Audit logs `[Future: 9.24]` · Settings & security `[Future]` |
 
 ### University Admin

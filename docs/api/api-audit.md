@@ -329,6 +329,18 @@ documented operations.
 | DELETE | `/api/students/{student}` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/students/{student}/status` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/students/{student}/program` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/offerings` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| POST | `/api/offerings` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/offerings/{offering}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| PUT, PATCH | `/api/offerings/{offering}` | Sanctum + super-admin or university-admin | PUT documented |
+| DELETE | `/api/offerings/{offering}` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/offerings/{offering}/sections` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/sections/{section}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| PUT, PATCH | `/api/sections/{section}` | Sanctum + super-admin or university-admin | PUT documented |
+| DELETE | `/api/sections/{section}` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/sections/{section}/lecturers` | Sanctum + super-admin or university-admin | Documented |
+| DELETE | `/api/sections/{section}/lecturers/{lecturer}` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/lecturers/{lecturer}/sections` | Sanctum + staff, or the lecturer themself | Documented |
 | GET | `/api/error-logs` | Sanctum + super-admin only | Documented |
 | GET | `/api/error-logs/{errorLog}` | Sanctum + super-admin only | Documented |
 

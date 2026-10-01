@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * A stable curriculum unit (code, name, credits) owned by a department.
@@ -112,6 +113,11 @@ class Course extends Model
         return $this->belongsToMany(self::class, 'course_prerequisites', 'prerequisite_course_id', 'course_id')
             ->withPivot('is_strict')
             ->withTimestamps();
+    }
+
+    public function offerings(): HasMany
+    {
+        return $this->hasMany(CourseOffering::class);
     }
 
     public function scopeSearch(Builder $query, ?string $search): Builder

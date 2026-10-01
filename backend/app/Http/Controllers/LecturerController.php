@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateLecturerRequest;
 use App\Http\Resources\DepartmentResource;
 use App\Http\Resources\FacultyResource;
 use App\Http\Resources\LecturerResource;
+use App\Http\Resources\SectionResource;
 use App\Models\Department;
 use App\Models\Faculty;
 use App\Models\Lecturer;
@@ -81,6 +82,9 @@ class LecturerController extends Controller
         return Inertia::render('Lecturers/Edit', [
             // `resolve()` so the page reads `props.lecturer.staff_number`, not `.data.…`.
             'lecturer' => (new LecturerResource($lecturer->load(['user', 'department.faculty:id,code,name'])))->resolve(),
+            'sections' => SectionResource::collection(
+                $lecturer->sections()->with(['offering.course:id,code,name,credits', 'offering.semester.academicYear:id,code'])->get()
+            )->resolve(),
             ...$this->lookups(),
         ]);
     }

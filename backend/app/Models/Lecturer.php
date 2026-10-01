@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 /**
  * A lecturer profile. The login identity lives on `users` (role `lecturer`);
@@ -73,10 +74,17 @@ class Lecturer extends Model
         return $this->belongsTo(Department::class);
     }
 
-    /*
-     * Teaching assignments (`section_lecturers`) arrive with 9.8 Class /
-     * Section; `LecturerService` guards them with the query builder until then.
+    /**
+     * Sections this lecturer teaches (`section_lecturers`, with their role).
+     *
+     * @return BelongsToMany<Section, $this>
      */
+    public function sections(): BelongsToMany
+    {
+        return $this->belongsToMany(Section::class, 'section_lecturers')
+            ->withPivot('role')
+            ->withTimestamps();
+    }
 
     public function fullName(): string
     {

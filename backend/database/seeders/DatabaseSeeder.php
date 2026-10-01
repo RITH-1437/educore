@@ -26,6 +26,8 @@ class DatabaseSeeder extends Seeder
             // Students need the Student role and active programs.
             StudentSeeder::class,
             AcademicYearSeeder::class,
+            // Offerings/sections need courses, lecturers and the semesters above.
+            CourseOfferingSeeder::class,
             // Operational diagnostics last: this table is filled by the recorder
             // at runtime, so seeding it after the structure keeps the rows
             // internally consistent.

@@ -63,6 +63,8 @@ class DashboardController extends Controller
             'active_lecturers' => DB::table('lecturers')->where('is_active', true)->count(),
             'total_students' => DB::table('students')->count(),
             'active_students' => DB::table('students')->where('status', 'active')->count(),
+            'total_offerings' => DB::table('course_offerings')->count(),
+            'total_sections' => DB::table('sections')->count(),
         ];
 
         return Inertia::render('Admin/Dashboard', [

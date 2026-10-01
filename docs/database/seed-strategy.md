@@ -70,6 +70,9 @@ Invariants it enforces and tests assert:
 - `StudentSeeder` upserts 10 student accounts by email (dev password
   `student@123`) and profiles by `student_number`, opening an active program
   period only when none exists.
+- `CourseOfferingSeeder` (after the academic calendar) offers 6 courses in the
+  open semester with 8 sections and a primary lecturer each; upserts by
+  `(course_id, semester_id)` and `(course_offering_id, code)`.
 
 ## 3. Determinism utilities
 

@@ -13,7 +13,9 @@ class AcademicYearFactory extends Factory
 {
     public function definition(): array
     {
-        $startYear = fake()->numberBetween(2020, 2030);
+        // Unique, wide range: `code` is unique, and tests that build several
+        // years (one per semester factory) collided with the old 11-year range.
+        $startYear = fake()->unique()->numberBetween(1950, 2099);
 
         return [
             'code' => $startYear.'-'.($startYear + 1),

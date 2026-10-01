@@ -450,12 +450,17 @@ users, main business activities, and expected outputs.
 - **Not yet delivered `[Planned]`:** course offerings and sections — they need
   lecturers, rooms and the timetable (9.3 / 9.8 / 9.10).
 
-### 9.8 Class / Section Management [Planned]
+### 9.8 Class / Section Management [Implemented]
 
 - **Purpose:** turn a course into concrete class instances for a semester (sections).
 - **Primary users:** Faculty/Department Admin, University Admin.
 - **Main business activities:** create sections (A, B, C…), assign lecturers/rooms/schedules/capacity.
 - **Expected outputs:** concrete teachable classes per semester.
+- **Delivered:** course offerings per semester, sections with capacity and
+  status, lecturer assignment (primary/assistant/tutor), lecturer teaching
+  load, guarded deletes, `/api/offerings` and `/api/sections`. See
+  [14_Class-and-Section-Report.md](14_Class-and-Section-Report.md).
+- **Not yet delivered `[Planned]`:** rooms and weekly schedules (9.10).
 
 ### 9.9 Course Registration / Enrollment [Planned]
 

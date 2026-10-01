@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreLecturerRequest;
 use App\Http\Requests\UpdateLecturerRequest;
 use App\Http\Resources\LecturerResource;
+use App\Http\Resources\SectionResource;
 use App\Models\Lecturer;
 use App\Services\LecturerService;
 use Illuminate\Http\JsonResponse;
@@ -106,6 +107,33 @@ class LecturerController extends Controller
         $this->authorize('view', $lecturer);
 
         return new LecturerResource($lecturer->load(['user', 'department.faculty:id,code,name']));
+    }
+
+    #[OA\Get(
+        path: '/lecturers/{lecturer}/sections',
+        summary: "A lecturer's teaching load",
+        description: 'Sections the lecturer is assigned to, newest semester first. Staff may read any lecturer; a lecturer only their own.',
+        operationId: 'getLecturerSections',
+        tags: ['People'],
+        security: [['sanctum' => []]],
+        parameters: [new OA\PathParameter(name: 'lecturer', required: true, schema: new OA\Schema(type: 'integer', format: 'int64'))],
+        responses: [
+            new OA\Response(response: 200, description: 'Assigned sections with offering and role.', content: new OA\JsonContent(ref: '#/components/schemas/SectionCollection')),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not allowed to view this lecturer.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 404, description: 'Lecturer not found.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+        ]
+    )]
+    public function sections(Lecturer $lecturer): AnonymousResourceCollection
+    {
+        $this->authorize('view', $lecturer);
+
+        return SectionResource::collection(
+            $lecturer->sections()
+                ->with(['offering.course:id,code,name,credits', 'offering.semester.academicYear:id,code', 'lecturers'])
+                ->orderByDesc('section_lecturers.created_at')
+                ->get()
+        );
     }
 
     #[OA\Put(

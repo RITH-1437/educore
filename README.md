@@ -127,6 +127,8 @@ The seed is idempotent and produces: 1 current university (`ITC`), 3 faculties
 | `/programs/{id}/edit`       | Edit program               | Super admin, University admin |
 | `/courses`                  | Course catalog             | Super admin, University admin (Faculty admin read-only) |
 | `/courses/{id}/edit`        | Edit course + prerequisites | Super admin, University admin |
+| `/offerings`                | Offerings & sections       | Super admin, University admin (Faculty admin read-only) |
+| `/offerings/{id}`           | Manage sections + lecturers | Super admin, University admin |
 | `/students`                 | Student profiles, status, program | Super admin, University admin (Faculty admin read-only) |
 | `/students/{id}/edit`       | Manage student             | Super admin, University admin |
 | `/lecturers`                | Lecturer profiles + accounts | Super admin, University admin (Faculty admin read-only) |

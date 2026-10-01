@@ -7,6 +7,7 @@ import {
   Landmark,
   Layers,
   LayoutDashboard,
+  LayoutGrid,
   Presentation,
   ScrollText,
   UserRound,
@@ -36,7 +37,7 @@ const navForRole = (role) => {
           { label: 'Lecturers', href: '/lecturers', icon: Presentation },
         ],
       },
-      { label: 'Academics', items: [{ label: 'Courses', href: '/courses', icon: BookOpen }] },
+      { label: 'Academics', items: [{ label: 'Courses', href: '/courses', icon: BookOpen }, { label: 'Offerings & sections', href: '/offerings', icon: LayoutGrid }] },
       { label: 'System', items: [{ label: 'Error logs', href: '/error-logs', icon: ScrollText }] },
     ]
   }
@@ -47,6 +48,7 @@ const navForRole = (role) => {
       { label: 'Faculties & departments', href: '/faculties', icon: GraduationCap },
       { label: 'Programs', href: '/programs', icon: Layers },
       { label: 'Courses', href: '/courses', icon: BookOpen },
+      { label: 'Offerings & sections', href: '/offerings', icon: LayoutGrid },
     ]
     // Academic calendar management is limited to university admins.
     if (role === 'university-admin') structure.push({ label: 'Academic years', href: '/academic-years', icon: CalendarDays })
@@ -70,6 +72,7 @@ const SECTION_LABELS = {
   courses: 'Courses',
   lecturers: 'Lecturers',
   students: 'Students',
+  offerings: 'Offerings & sections',
   'error-logs': 'Error logs',
 }
 

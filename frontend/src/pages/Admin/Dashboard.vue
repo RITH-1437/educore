@@ -54,6 +54,7 @@ const areas = [
   { title: 'Faculties & departments', detail: 'Organize the university structure.', href: '/faculties', icon: Landmark },
   { title: 'Programs', detail: 'Degree tracks offered by each department.', href: '/programs', icon: BookOpen },
   { title: 'Courses', detail: 'Catalog, prerequisites and program curricula.', href: '/courses', icon: GraduationCap },
+  { title: 'Offerings & sections', detail: 'Classes per semester and their lecturers.', href: '/offerings', icon: CalendarDays },
   { title: 'Lecturers', detail: 'Teaching staff profiles and accounts.', href: '/lecturers', icon: Presentation },
   { title: 'Students', detail: 'Profiles, status and program history.', href: '/students', icon: Users },
 ]

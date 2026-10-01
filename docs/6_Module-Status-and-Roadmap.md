@@ -23,7 +23,7 @@
 | 9.5 | Program Management | `[Implemented]` (curriculum editor delivered with 9.7) |
 | 9.6 | Academic Year & Semester Management | `[Implemented]` |
 | 9.7 | Course Management | `[Implemented]` (offerings/sections `[Planned]` with 9.8) |
-| 9.8 | Class / Section Management | `[Planned]` |
+| 9.8 | Class / Section Management | `[Implemented]` (rooms/schedules with 9.10) |
 | 9.9 | Course Registration / Enrollment | `[Planned]` |
 | 9.10 | Timetable Management | `[Planned]` |
 | 9.11 | Attendance | `[Planned]` |
@@ -47,8 +47,8 @@
 ```mermaid
 pie showData
   title Module delivery status
-  "Implemented (incl. schema)" : 34
-  "Planned / In progress" : 16
+  "Implemented (incl. schema)" : 35
+  "Planned / In progress" : 15
 ```
 
 ---
@@ -317,5 +317,7 @@ A module is not done until its report exists and its tests pass — never label
   deactivation stay valid until logout or expiry.
 - `[Done]` 9.2 Student Management (`students`, `student_programs`). Report:
   `docs/13_Student-Management-Report.md`.
-- `[Next]` 9.8 Class/Section (offerings, sections, lecturer assignment), then
-  9.9 Enrollment.
+- `[Done]` 9.8 Class / Section (`course_offerings`, `sections`,
+  `section_lecturers`). Report: `docs/14_Class-and-Section-Report.md`.
+- `[Next]` 9.9 Enrollment (prerequisites, capacity, duplicates), then 9.10
+  Timetable (rooms, schedules, conflicts).

@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CourseOfferingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ErrorLogController;
 use App\Http\Controllers\FacultyController;
@@ -126,6 +127,24 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])
         Route::put('/{program}/courses/{course}', [ProgramController::class, 'updateCourse'])->name('courses.update');
         Route::delete('/{program}/courses/{course}', [ProgramController::class, 'removeCourse'])->name('courses.destroy');
     });
+
+// Offerings & sections: Faculty Admin reads, Super Admin / University Admin
+// manage (`CourseOfferingPolicy`).
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->group(function () {
+    Route::get('/offerings', [CourseOfferingController::class, 'index'])->name('offerings.index');
+    Route::get('/offerings/{offering}', [CourseOfferingController::class, 'show'])->name('offerings.show');
+});
+
+Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function () {
+    Route::post('/offerings', [CourseOfferingController::class, 'store'])->name('offerings.store');
+    Route::put('/offerings/{offering}', [CourseOfferingController::class, 'update'])->name('offerings.update');
+    Route::delete('/offerings/{offering}', [CourseOfferingController::class, 'destroy'])->name('offerings.destroy');
+    Route::post('/offerings/{offering}/sections', [CourseOfferingController::class, 'storeSection'])->name('offerings.sections.store');
+    Route::put('/sections/{section}', [CourseOfferingController::class, 'updateSection'])->name('sections.update');
+    Route::delete('/sections/{section}', [CourseOfferingController::class, 'destroySection'])->name('sections.destroy');
+    Route::post('/sections/{section}/lecturers', [CourseOfferingController::class, 'assignLecturer'])->name('sections.lecturers.store');
+    Route::delete('/sections/{section}/lecturers/{lecturer}', [CourseOfferingController::class, 'removeLecturer'])->name('sections.lecturers.destroy');
+});
 
 // Students: Faculty Admin reads, Super Admin / University Admin manage
 // (`StudentPolicy`).

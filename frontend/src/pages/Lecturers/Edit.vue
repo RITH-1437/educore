@@ -13,6 +13,7 @@ const props = defineProps({
   faculties: { type: Object, required: true },
   departments: { type: Object, required: true },
   employmentTypes: { type: Array, default: () => [] },
+  sections: { type: Array, default: () => [] },
 })
 
 const form = useForm({
@@ -75,7 +76,19 @@ const toggleActive = () =>
     </BaseCard>
 
     <BaseCard title="Teaching assignments" padding="lg">
-      <template #description>Sections this lecturer teaches will appear here once Class / Section management (9.8) is available.</template>
+      <template #description>Sections this lecturer is assigned to. Assign lecturers from the offering page.</template>
+      <ul v-if="sections.length" class="divide-y divide-border-default dark:divide-dark-border">
+        <li v-for="section in sections" :key="section.id" class="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+          <div>
+            <p class="text-small font-medium text-ink dark:text-dark-ink">
+              <span class="font-semibold">{{ section.offering?.course?.code }}</span> · Section {{ section.code }}
+            </p>
+            <p class="text-caption text-muted dark:text-dark-muted">{{ section.offering?.semester?.academic_year }} · {{ section.offering?.semester?.name }} · {{ section.capacity }} seats</p>
+          </div>
+          <BaseButton :href="`/offerings/${section.offering?.id}`" size="sm" variant="secondary">Open offering</BaseButton>
+        </li>
+      </ul>
+      <p v-else class="text-small text-muted dark:text-dark-muted">Not assigned to any section yet.</p>
     </BaseCard>
   </div>
 </template>

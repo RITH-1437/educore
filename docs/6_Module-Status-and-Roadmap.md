@@ -27,7 +27,7 @@
 | 9.9 | Course Registration / Enrollment | `[Implemented]` |
 | 9.10 | Timetable Management | `[Implemented]` |
 | 9.11 | Attendance | `[Implemented]` |
-| 9.12 | Assignments | `[Planned]` |
+| 9.12 | Assignments | `[Implemented]` |
 | 9.13 | Examinations | `[Planned]` |
 | 9.14 | Grades & GPA | `[Planned]` |
 | 9.15 | Student Academic Dashboard | `[Planned]` |
@@ -324,5 +324,12 @@ A module is not done until its report exists and its tests pass — never label
   `uq_schedule_room_slot`). Report: `docs/16_Timetable-Report.md`.
 - `[Done]` 9.11 Attendance (`attendance_sessions`, `attendance_records`).
   Report: `docs/17_Attendance-Report.md`.
-- `[Next]` 9.12 Assignments / 9.13 Examinations, then 9.14 Grades & GPA (which
+- `[Done]` 9.12 Assignments (`assignments`, `assignment_submissions`, `files`;
+  private MinIO uploads). Report: `docs/18_Assignments-Report.md`.
+- `[Done]` Test-database guard (`tests/TestCase`) and production-only config
+  caching in the container entrypoint, after a cached config let the suite
+  reset the development database.
+- `[Open]` Assignment scores are not yet weighted into course grades (9.14);
+  lecturer-attached materials are not built.
+- `[Next]` 9.13 Examinations, then 9.14 Grades & GPA (which
   will also turn enrollment completion and prerequisites into grade-based rules).

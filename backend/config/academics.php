@@ -14,4 +14,20 @@ return [
 
     'max_semester_credits' => (float) env('MAX_SEMESTER_CREDITS', 24),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Uploads
+    |--------------------------------------------------------------------------
+    |
+    | Disk for private academic files (assignment submissions). MinIO/S3 in
+    | every environment (`skills/file-storage`); tests fake it.
+    |
+    */
+
+    'uploads_disk' => env('UPLOADS_DISK', 's3'),
+
+    'submission_max_kb' => (int) env('SUBMISSION_MAX_KB', 10240),
+
+    'submission_mimes' => ['pdf', 'docx', 'zip', 'png', 'jpg', 'jpeg'],
+
 ];

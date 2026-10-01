@@ -5,6 +5,7 @@ import {
   CalendarClock,
   CalendarDays,
   ClipboardCheck,
+  ClipboardList,
   DoorOpen,
   GraduationCap,
   Landmark,
@@ -72,6 +73,7 @@ const navForRole = (role) => {
       { label: 'Course registration', href: '/registration', icon: ClipboardCheck },
       { label: 'My timetable', href: '/timetable', icon: CalendarClock },
       { label: 'My attendance', href: '/my-attendance', icon: UserCheck },
+      { label: 'My assignments', href: '/my-assignments', icon: ClipboardList },
     ] }]
   }
 
@@ -102,6 +104,8 @@ const SECTION_LABELS = {
   timetable: 'My timetable',
   attendance: 'Attendance',
   'my-attendance': 'My attendance',
+  'my-assignments': 'My assignments',
+  coursework: 'Coursework',
   'error-logs': 'Error logs',
 }
 

@@ -38,6 +38,9 @@ Variables group by responsibility:
 - `POSTGRES_*` / `PGADMIN_*` — database service credentials and host ports.
 - `REDIS_*` — Redis host ports.
 - `MINIO_*` / `AWS_*` — object storage credentials, bucket name, API/console ports.
+  Compose passes the MinIO root credentials and bucket to the backend as `AWS_*`.
+- `UPLOADS_DISK` — filesystem disk for private uploads such as assignment
+  submissions (default `s3` = MinIO).
 - `NGINX_PORT` / `FRONTEND_PORT` — host ports for the web entry point.
 - `VITE_API_URL` — frontend REST API base path (`/api`).
 - `FRONTEND_URL` / `VITE_DEV_SERVER_URL` — front-end connection origins
@@ -133,6 +136,8 @@ limit used by enrollment (`backend/config/academics.php`).
 | `/attendance`               | Take attendance (my sections) | Lecturer |
 | `/attendance/sections/{id}` | Attendance register + rates | Super admin, University admin, Faculty admin (read), the section's lecturers |
 | `/my-attendance`            | My attendance per course   | Student |
+| `/coursework/sections/{id}` | Section assignments, submissions, grading | Super admin, University admin, Faculty admin (read), the section's lecturers, enrolled students (submit) |
+| `/my-assignments`           | My assignments + uploads   | Student |
 | `/rooms`                    | Rooms                      | Super admin, University admin (Faculty admin read-only) |
 | `/timetable`                | My weekly timetable        | Student, Lecturer |
 | `/enrollments`              | Enrollment management      | Super admin, University admin (Faculty admin read-only) |

@@ -495,12 +495,17 @@ users, main business activities, and expected outputs.
   derived attendance rates, cancel/restore class, lecturer register and
   student \"My attendance\". See [17_Attendance-Report.md](17_Attendance-Report.md).
 
-### 9.12 Assignments [Planned]
+### 9.12 Assignments [Implemented]
 
 - **Purpose:** manage course work and submissions.
 - **Primary users:** Lecturer, Student.
 - **Main business activities:** create assignments with deadlines, upload materials, submit work, view results.
 - **Expected outputs:** a structured record of assignments and submissions.
+- **Delivered:** draft → published assignments per section with due dates
+  inside the semester, private file submissions in MinIO (replaceable until
+  graded, late work flagged), grading with feedback, authorized downloads,
+  lecturer coursework page and student "My assignments". Lecturer-attached
+  materials remain [Planned]. See [18_Assignments-Report.md](18_Assignments-Report.md).
 
 ### 9.13 Examinations [Planned]
 
@@ -745,7 +750,7 @@ The initial release will provide:
 - **Enrollment** — validated student registration. [Planned]
 - **Timetable** — schedules with conflict detection. [Planned]
 - **Attendance** — recording and percentages. [Planned]
-- **Assignments** — tasks and submissions. [Planned]
+- **Assignments** — tasks and submissions. [Implemented]
 - **Exams** — definitions, schedules, and results. [Planned]
 - **Grades** — score-to-letter-grade conversion. [Planned]
 - **GPA** — semester and cumulative calculation. [Planned]

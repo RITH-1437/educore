@@ -14,7 +14,7 @@ defineProps({
 <template>
   <Head title="Attendance - EduCore" />
   <div class="space-y-6">
-    <PageHeader eyebrow="Teaching" title="Attendance" description="Sections you teach this term. Open one to take attendance for a class date." />
+    <PageHeader eyebrow="Teaching" title="Attendance & coursework" description="Sections you teach this term. Take attendance for a class date or manage its assignments." />
 
     <BaseCard v-if="!sections.length"><EmptyState title="No sections assigned" description="Sections appear here once an administrator assigns you to them." /></BaseCard>
 
@@ -28,7 +28,10 @@ defineProps({
           <BaseBadge :variant="section.role === 'primary' ? 'primary' : 'muted'" size="sm">{{ section.role }}</BaseBadge>
         </div>
         <p class="mt-3 text-caption text-muted dark:text-dark-muted">{{ section.semester }} · {{ section.students }} students</p>
-        <BaseButton :href="`/attendance/sections/${section.id}`" class="mt-4" size="sm">Take attendance</BaseButton>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <BaseButton :href="`/attendance/sections/${section.id}`" size="sm">Take attendance</BaseButton>
+          <BaseButton :href="`/coursework/sections/${section.id}`" size="sm" variant="secondary">Assignments</BaseButton>
+        </div>
       </BaseCard>
     </div>
   </div>

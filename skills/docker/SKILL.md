@@ -90,6 +90,15 @@ Examples:
 - Startup order: postgres/redis/minio healthy → minio-init creates bucket →
   backend healthy → nginx starts.
 
+## Caching and tests
+
+- The PHP entrypoint caches config/routes (`php artisan optimize`) **only when
+  `APP_ENV=production`**; elsewhere it clears them. A cached config makes the
+  test suite ignore `phpunit.xml` (`DB_DATABASE=educore_test`) and hit the
+  development database.
+- `tests/TestCase::setUpTraits()` refuses to refresh any database
+  whose name does not end in `_test`.
+
 ## Environment variables
 
 - All config in root `.env` (git-ignored; template
@@ -97,7 +106,10 @@ Examples:
 - Compose reads it via `env_file` (`../.env` from `docker/`) and `${VAR:-default}`
   substitution (root `.env` via `--project-directory .`).
 - Backend container overrides: `DB_HOST`, `REDIS_HOST`, `AWS_ENDPOINT`,
-  `FILESYSTEM_DISK=s3`, `SESSION_DRIVER/CACHE_STORE/QUEUE_CONNECTION=redis`.
+  `FILESYSTEM_DISK=s3`, `SESSION_DRIVER/CACHE_STORE/QUEUE_CONNECTION=redis`, and
+  the MinIO credentials/bucket (`AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY` from
+  `MINIO_ROOT_USER`/`MINIO_ROOT_PASSWORD`, `AWS_BUCKET`, `AWS_DEFAULT_REGION`) —
+  the same values `minio-init` provisions.
 - Frontend container: `BACKEND_PUBLIC_DIR=/backend/public` tells `laravel-vite-plugin`
   where to write the manifest/hot file and built assets.
 - `.env` is never committed; **never hardcode secrets** in

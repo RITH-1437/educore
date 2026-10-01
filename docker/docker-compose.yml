@@ -59,6 +59,12 @@ services:
       REDIS_HOST: redis
       AWS_ENDPOINT: http://minio:9000
       AWS_USE_PATH_STYLE_ENDPOINT: "true"
+      # Same credentials/bucket that minio-init provisions; without them every
+      # upload to the s3 disk fails (no key -> instance-profile lookup).
+      AWS_ACCESS_KEY_ID: "${MINIO_ROOT_USER:-educore}"
+      AWS_SECRET_ACCESS_KEY: "${MINIO_ROOT_PASSWORD:-educore_minio_secret}"
+      AWS_DEFAULT_REGION: "${AWS_DEFAULT_REGION:-us-east-1}"
+      AWS_BUCKET: "${AWS_BUCKET:-educore}"
       FILESYSTEM_DISK: s3
       SESSION_DRIVER: redis
       CACHE_STORE: redis

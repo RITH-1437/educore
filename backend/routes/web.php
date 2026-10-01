@@ -6,6 +6,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseOfferingController;
+use App\Http\Controllers\CourseworkController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\ErrorLogController;
@@ -141,6 +142,21 @@ Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,lect
     Route::get('/attendance/sections/{section}', [AttendanceController::class, 'section'])->name('attendance.section');
     Route::post('/attendance/sections/{section}', [AttendanceController::class, 'record'])->name('attendance.record');
     Route::post('/attendance-sessions/{session}/cancel', [AttendanceController::class, 'cancel'])->name('attendance.cancel');
+});
+
+// Coursework (assignments): one page per section, scoped by `AssignmentPolicy`
+// (lecturers of the section, staff, enrolled students); students also get an
+// overview of their own assignments.
+Route::middleware(['auth', 'role:student'])->get('/my-assignments', [CourseworkController::class, 'mine'])->name('coursework.mine');
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,lecturer,student'])->group(function () {
+    Route::get('/coursework/sections/{section}', [CourseworkController::class, 'section'])->name('coursework.section');
+    Route::post('/coursework/sections/{section}', [CourseworkController::class, 'store'])->name('coursework.store');
+    Route::put('/assignments/{assignment}', [CourseworkController::class, 'update'])->name('assignments.update');
+    Route::post('/assignments/{assignment}/publish', [CourseworkController::class, 'publish'])->name('assignments.publish');
+    Route::delete('/assignments/{assignment}', [CourseworkController::class, 'destroy'])->name('assignments.destroy');
+    Route::post('/assignments/{assignment}/submit', [CourseworkController::class, 'submit'])->name('assignments.submit');
+    Route::post('/submissions/{submission}/grade', [CourseworkController::class, 'grade'])->name('submissions.grade');
+    Route::get('/submissions/{submission}/file', [CourseworkController::class, 'download'])->name('submissions.file');
 });
 
 // Timetable: rooms (staff read, managers write), section schedules (managers),

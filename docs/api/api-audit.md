@@ -363,6 +363,16 @@ documented operations.
 | GET | `/api/sections/{section}/attendance/summary` | Sanctum + managers, Faculty Admin, or a lecturer of the section | Documented |
 | POST | `/api/attendance-sessions/{session}/cancel` | Sanctum + managers or a lecturer of the section | Documented |
 | GET | `/api/students/{student}/attendance` | Sanctum + staff, or the student themself | Documented |
+| GET | `/api/sections/{section}/assignments` | Sanctum + managers, Faculty Admin, a lecturer of the section, or an enrolled student (published only) | Documented |
+| POST | `/api/sections/{section}/assignments` | Sanctum + managers or a lecturer of the section | Documented |
+| GET | `/api/assignments/{assignment}` | Sanctum + staff, a lecturer of the section, or an enrolled student (published only) | Documented |
+| PUT, PATCH | `/api/assignments/{assignment}` | Sanctum + managers or a lecturer of the section | PUT documented |
+| DELETE | `/api/assignments/{assignment}` | Sanctum + managers or a lecturer of the section | Documented |
+| POST | `/api/assignments/{assignment}/publish` | Sanctum + managers or a lecturer of the section | Documented |
+| GET | `/api/assignments/{assignment}/submissions` | Sanctum + managers, Faculty Admin, or a lecturer of the section | Documented |
+| POST | `/api/assignments/{assignment}/submissions` | Sanctum + student enrolled in the section (multipart file) | Documented |
+| POST | `/api/submissions/{submission}/grade` | Sanctum + managers or a lecturer of the section | Documented |
+| GET | `/api/submissions/{submission}/file` | Sanctum + staff, a lecturer of the section, or the submitting student | Documented |
 | GET | `/api/error-logs` | Sanctum + super-admin only | Documented |
 | GET | `/api/error-logs/{errorLog}` | Sanctum + super-admin only | Documented |
 

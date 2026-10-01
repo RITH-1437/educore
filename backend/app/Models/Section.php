@@ -42,6 +42,11 @@ class Section extends Model
         return ['capacity' => 'integer'];
     }
 
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(Assignment::class)->orderBy('due_at');
+    }
+
     public function scheduleEntries(): HasMany
     {
         return $this->hasMany(ScheduleEntry::class)->orderBy('day_of_week')->orderBy('start_time');

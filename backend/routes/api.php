@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AcademicYearController;
+use App\Http\Controllers\Api\AssignmentController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CourseController;
@@ -86,6 +87,19 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::get('/sections/{section}/attendance/summary', [AttendanceController::class, 'summary'])->name('api.sections.attendance.summary');
     Route::post('/attendance-sessions/{session}/cancel', [AttendanceController::class, 'cancel'])->name('api.attendance-sessions.cancel');
     Route::get('/students/{student}/attendance', [AttendanceController::class, 'student'])->name('api.students.attendance');
+
+    // Assignments: `AssignmentPolicy` scopes every call to the section's
+    // lecturers / managers / enrolled students.
+    Route::get('/sections/{section}/assignments', [AssignmentController::class, 'index'])->name('api.sections.assignments');
+    Route::post('/sections/{section}/assignments', [AssignmentController::class, 'store'])->name('api.sections.assignments.store');
+    Route::get('/assignments/{assignment}', [AssignmentController::class, 'show'])->name('api.assignments.show');
+    Route::match(['put', 'patch'], '/assignments/{assignment}', [AssignmentController::class, 'update'])->name('api.assignments.update');
+    Route::delete('/assignments/{assignment}', [AssignmentController::class, 'destroy'])->name('api.assignments.destroy');
+    Route::post('/assignments/{assignment}/publish', [AssignmentController::class, 'publish'])->name('api.assignments.publish');
+    Route::get('/assignments/{assignment}/submissions', [AssignmentController::class, 'submissions'])->name('api.assignments.submissions');
+    Route::post('/assignments/{assignment}/submissions', [AssignmentController::class, 'submit'])->name('api.assignments.submit');
+    Route::post('/submissions/{submission}/grade', [AssignmentController::class, 'grade'])->name('api.submissions.grade');
+    Route::get('/submissions/{submission}/file', [AssignmentController::class, 'download'])->name('api.submissions.file');
 });
 
 // A student may read their own profile; `StudentPolicy::view` limits them to it.

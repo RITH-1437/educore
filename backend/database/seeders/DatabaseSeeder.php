@@ -35,6 +35,8 @@ class DatabaseSeeder extends Seeder
             EnrollmentSeeder::class,
             // Attendance needs schedules and enrollments; recorded via AttendanceService.
             AttendanceSeeder::class,
+            // Coursework (files stored on the uploads disk / MinIO).
+            AssignmentSeeder::class,
             // Operational diagnostics last: this table is filled by the recorder
             // at runtime, so seeding it after the structure keeps the rows
             // internally consistent.

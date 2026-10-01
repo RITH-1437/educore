@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Models\Section;
 use App\Models\Student;
 use App\Models\User;
+use App\Policies\Concerns\ChecksSectionTeaching;
 
 /**
  * Attendance (`skills/attendance/SKILL.md` §8): the section's assigned
@@ -16,32 +17,21 @@ use App\Models\User;
  */
 class AttendancePolicy
 {
+    use ChecksSectionTeaching;
+
     public function record(User $user, Section $section): bool
     {
-        return $this->manage($user) || $this->teaches($user, $section);
+        return $this->manages($user) || $this->teaches($user, $section);
     }
 
     public function viewSection(User $user, Section $section): bool
     {
-        return $this->manage($user) || $user->isRole(Role::FacultyAdmin->value) || $this->teaches($user, $section);
+        return $this->staff($user) || $this->teaches($user, $section);
     }
 
     public function viewStudent(User $user, Student $student): bool
     {
-        return $this->manage($user)
-            || $user->isRole(Role::FacultyAdmin->value)
+        return $this->staff($user)
             || ($user->isRole(Role::Student->value) && $user->student?->getKey() === $student->getKey());
-    }
-
-    private function teaches(User $user, Section $section): bool
-    {
-        $lecturer = $user->isRole(Role::Lecturer->value) ? $user->lecturer : null;
-
-        return $lecturer !== null && $lecturer->is_active && $section->lecturers()->whereKey($lecturer->getKey())->exists();
-    }
-
-    private function manage(User $user): bool
-    {
-        return $user->isRole(Role::SuperAdmin->value) || $user->isRole(Role::UniversityAdmin->value);
     }
 }

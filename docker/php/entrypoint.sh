@@ -25,7 +25,15 @@ fi
 # Link storage so /storage/ URLs work.
 php artisan storage:link --force 2>/dev/null || true
 
-# Warm the application cache (including bootstrap/cache/packages.php for auto-discovery).
-php artisan optimize 2>/dev/null || true
+# Warm the application cache only in production. In development a cached
+# config hides .env/phpunit.xml changes — the test suite would then ignore
+# DB_DATABASE=educore_test and run against the development database — and
+# cached routes hide new routes. Package discovery is refreshed either way.
+if [ "${APP_ENV:-}" = "production" ]; then
+    php artisan optimize 2>/dev/null || true
+else
+    php artisan optimize:clear 2>/dev/null || true
+    php artisan package:discover --ansi 2>/dev/null || true
+fi
 
 exec "$@"

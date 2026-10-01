@@ -93,6 +93,7 @@ const destroy = async () => {
 
     <div class="mt-4">
       <BaseButton :href="`/attendance/sections/${section.id}`" size="sm" variant="ghost">Attendance register</BaseButton>
+      <BaseButton :href="`/coursework/sections/${section.id}`" size="sm" variant="ghost">Assignments</BaseButton>
     </div>
 
     <div v-if="canManage" class="mt-4 flex gap-3">

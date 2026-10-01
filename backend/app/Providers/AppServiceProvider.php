@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Models\AssignmentSubmission;
 use App\Models\AttendanceSession;
+use App\Policies\AssignmentPolicy;
 use App\Policies\AttendancePolicy;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -27,6 +29,7 @@ class AppServiceProvider extends ServiceProvider
     {
         // Not discoverable by name: attendance is authorized per section/student.
         Gate::policy(AttendanceSession::class, AttendancePolicy::class);
+        Gate::policy(AssignmentSubmission::class, AssignmentPolicy::class);
 
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(5)->by(

@@ -110,6 +110,42 @@ class LoginTest extends TestCase
         $this->assertGuest();
     }
 
+    public function test_inactive_account_cannot_sign_in_and_gets_the_generic_message(): void
+    {
+        User::factory()->create(['email' => 'off@test.test', 'is_active' => false]);
+
+        $wrong = $this->post('/login', ['email' => 'off@test.test', 'password' => 'not-the-password'])
+            ->assertSessionHasErrors('email');
+        $wrongMessage = session('errors')->first('email');
+
+        $this->post('/login', ['email' => 'off@test.test', 'password' => 'password'])
+            ->assertSessionHasErrors(['email' => $wrongMessage]);
+
+        $this->assertGuest();
+    }
+
+    public function test_inactive_account_cannot_obtain_an_api_token(): void
+    {
+        User::factory()->create(['email' => 'off-api@test.test', 'is_active' => false]);
+
+        $this->postJson('/api/login', ['email' => 'off-api@test.test', 'password' => 'password'])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['email'])
+            ->assertJsonMissingPath('token');
+
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+    }
+
+    public function test_reactivated_account_can_sign_in_again(): void
+    {
+        $user = User::factory()->create(['email' => 'back@test.test', 'is_active' => false]);
+        $user->update(['is_active' => true]);
+
+        $this->post('/login', ['email' => 'back@test.test', 'password' => 'password'])->assertRedirect();
+
+        $this->assertAuthenticatedAs($user);
+    }
+
     public function test_login_is_rate_limited_after_five_failed_attempts(): void
     {
         $user = User::factory()->create(['email' => 'slow@test.test']);

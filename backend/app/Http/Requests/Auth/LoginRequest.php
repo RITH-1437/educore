@@ -28,7 +28,11 @@ class LoginRequest extends FormRequest
     {
         $this->ensureIsNotRateLimited();
 
-        $credentials = $this->only('email', 'password');
+        // Inactive accounts (deactivated in Users or Lecturer management) are
+        // treated exactly like wrong credentials: same generic message and the
+        // attempt still counts toward the rate limit, so the response never
+        // reveals that the account exists (`skills/authentication/SKILL.md`).
+        $credentials = [...$this->only('email', 'password'), 'is_active' => true];
 
         if (! Auth::attempt($credentials, $this->boolean('remember'))) {
             RateLimiter::hit($this->throttleKey(), 60);

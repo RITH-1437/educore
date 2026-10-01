@@ -341,6 +341,12 @@ documented operations.
 | POST | `/api/sections/{section}/lecturers` | Sanctum + super-admin or university-admin | Documented |
 | DELETE | `/api/sections/{section}/lecturers/{lecturer}` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/lecturers/{lecturer}/sections` | Sanctum + staff, or the lecturer themself | Documented |
+| GET | `/api/enrollments` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| POST | `/api/enrollments` | Sanctum + managers (any student) or a student (self) | Documented |
+| GET | `/api/enrollments/{enrollment}` | Sanctum + staff, or the enrolled student | Documented |
+| DELETE | `/api/enrollments/{enrollment}` | Sanctum + managers, or the enrolled student (drop, keeps history) | Documented |
+| POST | `/api/enrollments/{enrollment}/complete` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/students/{student}/enrollments` | Sanctum + staff, or the student themself | Documented |
 | GET | `/api/error-logs` | Sanctum + super-admin only | Documented |
 | GET | `/api/error-logs/{errorLog}` | Sanctum + super-admin only | Documented |
 

@@ -3,6 +3,7 @@ import { usePage } from '@inertiajs/vue3'
 import {
   BookOpen,
   CalendarDays,
+  ClipboardCheck,
   GraduationCap,
   Landmark,
   Layers,
@@ -37,7 +38,7 @@ const navForRole = (role) => {
           { label: 'Lecturers', href: '/lecturers', icon: Presentation },
         ],
       },
-      { label: 'Academics', items: [{ label: 'Courses', href: '/courses', icon: BookOpen }, { label: 'Offerings & sections', href: '/offerings', icon: LayoutGrid }] },
+      { label: 'Academics', items: [{ label: 'Courses', href: '/courses', icon: BookOpen }, { label: 'Offerings & sections', href: '/offerings', icon: LayoutGrid }, { label: 'Enrollments', href: '/enrollments', icon: ClipboardCheck }] },
       { label: 'System', items: [{ label: 'Error logs', href: '/error-logs', icon: ScrollText }] },
     ]
   }
@@ -49,6 +50,7 @@ const navForRole = (role) => {
       { label: 'Programs', href: '/programs', icon: Layers },
       { label: 'Courses', href: '/courses', icon: BookOpen },
       { label: 'Offerings & sections', href: '/offerings', icon: LayoutGrid },
+      { label: 'Enrollments', href: '/enrollments', icon: ClipboardCheck },
     ]
     // Academic calendar management is limited to university admins.
     if (role === 'university-admin') structure.push({ label: 'Academic years', href: '/academic-years', icon: CalendarDays })
@@ -58,6 +60,13 @@ const navForRole = (role) => {
       { label: 'Academic structure', items: structure },
       { label: 'People', items: [{ label: 'Students', href: '/students', icon: UserRound }, { label: 'Lecturers', href: '/lecturers', icon: Presentation }] },
     ]
+  }
+
+  if (role === 'student') {
+    return [{ label: 'Workspace', items: [
+      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+      { label: 'Course registration', href: '/registration', icon: ClipboardCheck },
+    ] }]
   }
 
   return [{ label: 'Workspace', items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }] }]
@@ -73,6 +82,8 @@ const SECTION_LABELS = {
   lecturers: 'Lecturers',
   students: 'Students',
   offerings: 'Offerings & sections',
+  enrollments: 'Enrollments',
+  registration: 'Course registration',
   'error-logs': 'Error logs',
 }
 

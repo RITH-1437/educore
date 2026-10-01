@@ -462,12 +462,16 @@ users, main business activities, and expected outputs.
   [14_Class-and-Section-Report.md](14_Class-and-Section-Report.md).
 - **Not yet delivered `[Planned]`:** rooms and weekly schedules (9.10).
 
-### 9.9 Course Registration / Enrollment [Planned]
+### 9.9 Course Registration / Enrollment [Implemented]
 
 - **Purpose:** let students register for eligible sections.
 - **Primary users:** Student, Faculty/Department Admin.
 - **Main business activities:** view available sections, register with validation (prerequisites, capacity, duplicates), confirm enrollment.
 - **Expected outputs:** a validated enrollment record per student per section.
+- **Delivered:** admin and student self-service registration with one rule
+  engine (active student, open registration, strict prerequisites, credit
+  limit, seats under a row lock, no duplicates), drop with history, completion,
+  `/api/enrollments`. See [15_Enrollment-Report.md](15_Enrollment-Report.md).
 
 ### 9.10 Timetable Management [Planned]
 

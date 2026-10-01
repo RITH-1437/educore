@@ -6,10 +6,12 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseOfferingController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\ErrorLogController;
 use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\LecturerController;
 use App\Http\Controllers\ProgramController;
+use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\UniversityController;
 use App\Http\Controllers\UserController;
@@ -127,6 +129,24 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])
         Route::put('/{program}/courses/{course}', [ProgramController::class, 'updateCourse'])->name('courses.update');
         Route::delete('/{program}/courses/{course}', [ProgramController::class, 'removeCourse'])->name('courses.destroy');
     });
+
+// Enrollment management: Faculty Admin reads, managers enroll/drop/complete
+// (`EnrollmentPolicy`). Student self-service lives under /registration.
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->group(function () {
+    Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');
+});
+
+Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function () {
+    Route::post('/enrollments', [EnrollmentController::class, 'store'])->name('enrollments.store');
+    Route::post('/enrollments/{enrollment}/drop', [EnrollmentController::class, 'drop'])->name('enrollments.drop');
+    Route::post('/enrollments/{enrollment}/complete', [EnrollmentController::class, 'complete'])->name('enrollments.complete');
+});
+
+Route::middleware(['auth', 'role:student'])->group(function () {
+    Route::get('/registration', [RegistrationController::class, 'index'])->name('registration.index');
+    Route::post('/registration', [RegistrationController::class, 'store'])->name('registration.store');
+    Route::post('/registration/{enrollment}/drop', [RegistrationController::class, 'drop'])->name('registration.drop');
+});
 
 // Offerings & sections: Faculty Admin reads, Super Admin / University Admin
 // manage (`CourseOfferingPolicy`).

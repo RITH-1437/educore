@@ -103,6 +103,9 @@ The seed is idempotent and produces: 1 current university (`ITC`), 3 faculties
 `itc-2025-0001@student.educore.kh` / `student@123`), development only. See
 [`docs/database/seed-strategy.md`](docs/database/seed-strategy.md).
 
+Optional: `MAX_SEMESTER_CREDITS` (default `24`) sets the per-semester credit
+limit used by enrollment (`backend/config/academics.php`).
+
 ## 8. Access the application
 
 | URL                          | Purpose                                    |
@@ -127,6 +130,8 @@ The seed is idempotent and produces: 1 current university (`ITC`), 3 faculties
 | `/programs/{id}/edit`       | Edit program               | Super admin, University admin |
 | `/courses`                  | Course catalog             | Super admin, University admin (Faculty admin read-only) |
 | `/courses/{id}/edit`        | Edit course + prerequisites | Super admin, University admin |
+| `/enrollments`              | Enrollment management      | Super admin, University admin (Faculty admin read-only) |
+| `/registration`             | Course registration (self-service) | Student |
 | `/offerings`                | Offerings & sections       | Super admin, University admin (Faculty admin read-only) |
 | `/offerings/{id}`           | Manage sections + lecturers | Super admin, University admin |
 | `/students`                 | Student profiles, status, program | Super admin, University admin (Faculty admin read-only) |

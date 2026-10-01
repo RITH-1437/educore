@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\CourseOfferingController;
 use App\Http\Controllers\Api\DepartmentController;
+use App\Http\Controllers\Api\EnrollmentController;
 use App\Http\Controllers\Api\ErrorLogController;
 use App\Http\Controllers\Api\FacultyController;
 use App\Http\Controllers\Api\LecturerController;
@@ -57,6 +58,17 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::get('/offerings', [CourseOfferingController::class, 'index'])->name('api.offerings.index');
     Route::get('/offerings/{offering}', [CourseOfferingController::class, 'show'])->name('api.offerings.show');
     Route::get('/sections/{section}', [SectionController::class, 'show'])->name('api.sections.show');
+});
+
+// Enrollment: staff list everything; a student enrolls/drops/reads only their
+// own (`EnrollmentPolicy`). Admin-only actions are checked by the policy.
+Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-admin,student'])->group(function () {
+    Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('api.enrollments.index');
+    Route::post('/enrollments', [EnrollmentController::class, 'store'])->name('api.enrollments.store');
+    Route::get('/enrollments/{enrollment}', [EnrollmentController::class, 'show'])->name('api.enrollments.show');
+    Route::delete('/enrollments/{enrollment}', [EnrollmentController::class, 'destroy'])->name('api.enrollments.destroy');
+    Route::post('/enrollments/{enrollment}/complete', [EnrollmentController::class, 'complete'])->name('api.enrollments.complete');
+    Route::get('/students/{student}/enrollments', [EnrollmentController::class, 'forStudent'])->name('api.students.enrollments');
 });
 
 // A student may read their own profile; `StudentPolicy::view` limits them to it.

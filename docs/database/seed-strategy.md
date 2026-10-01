@@ -73,6 +73,9 @@ Invariants it enforces and tests assert:
 - `CourseOfferingSeeder` (after the academic calendar) offers 6 courses in the
   open semester with 8 sections and a primary lecturer each; upserts by
   `(course_id, semester_id)` and `(course_offering_id, code)`.
+- `EnrollmentSeeder` enrolls active students in open sections of their
+  curriculum through `EnrollmentService`, so every rule applies; refused or
+  duplicate enrollments are skipped (idempotent).
 
 ## 3. Determinism utilities
 

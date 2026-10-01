@@ -28,6 +28,8 @@ class DatabaseSeeder extends Seeder
             AcademicYearSeeder::class,
             // Offerings/sections need courses, lecturers and the semesters above.
             CourseOfferingSeeder::class,
+            // Enrollments go through EnrollmentService, so every rule applies.
+            EnrollmentSeeder::class,
             // Operational diagnostics last: this table is filled by the recorder
             // at runtime, so seeding it after the structure keeps the rows
             // internally consistent.

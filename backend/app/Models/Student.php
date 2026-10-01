@@ -123,6 +123,11 @@ class Student extends Model
         return $this->hasOne(StudentProgram::class)->where('status', StudentProgram::STATUS_ACTIVE);
     }
 
+    public function enrollments(): HasMany
+    {
+        return $this->hasMany(Enrollment::class);
+    }
+
     public function fullName(): string
     {
         return trim($this->first_name.' '.$this->last_name);

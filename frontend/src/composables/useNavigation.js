@@ -7,6 +7,7 @@ import {
   ClipboardCheck,
   ClipboardList,
   DoorOpen,
+  FileCheck,
   GraduationCap,
   Landmark,
   Layers,
@@ -74,6 +75,7 @@ const navForRole = (role) => {
       { label: 'My timetable', href: '/timetable', icon: CalendarClock },
       { label: 'My attendance', href: '/my-attendance', icon: UserCheck },
       { label: 'My assignments', href: '/my-assignments', icon: ClipboardList },
+      { label: 'My exams', href: '/my-exams', icon: FileCheck },
     ] }]
   }
 
@@ -106,6 +108,8 @@ const SECTION_LABELS = {
   'my-attendance': 'My attendance',
   'my-assignments': 'My assignments',
   coursework: 'Coursework',
+  'my-exams': 'My exams',
+  exams: 'Examinations',
   'error-logs': 'Error logs',
 }
 

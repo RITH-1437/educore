@@ -47,6 +47,11 @@ class Section extends Model
         return $this->hasMany(Assignment::class)->orderBy('due_at');
     }
 
+    public function exams(): HasMany
+    {
+        return $this->hasMany(Exam::class)->orderByRaw('scheduled_date IS NULL, scheduled_date, start_time');
+    }
+
     public function scheduleEntries(): HasMany
     {
         return $this->hasMany(ScheduleEntry::class)->orderBy('day_of_week')->orderBy('start_time');

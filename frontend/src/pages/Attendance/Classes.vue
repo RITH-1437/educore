@@ -14,7 +14,7 @@ defineProps({
 <template>
   <Head title="Attendance - EduCore" />
   <div class="space-y-6">
-    <PageHeader eyebrow="Teaching" title="Attendance & coursework" description="Sections you teach this term. Take attendance for a class date or manage its assignments." />
+    <PageHeader eyebrow="Teaching" title="Teaching" description="Sections you teach this term. Take attendance, manage assignments, or plan exams and enter results." />
 
     <BaseCard v-if="!sections.length"><EmptyState title="No sections assigned" description="Sections appear here once an administrator assigns you to them." /></BaseCard>
 
@@ -31,6 +31,7 @@ defineProps({
         <div class="mt-4 flex flex-wrap gap-2">
           <BaseButton :href="`/attendance/sections/${section.id}`" size="sm">Take attendance</BaseButton>
           <BaseButton :href="`/coursework/sections/${section.id}`" size="sm" variant="secondary">Assignments</BaseButton>
+          <BaseButton :href="`/exams/sections/${section.id}`" size="sm" variant="secondary">Exams</BaseButton>
         </div>
       </BaseCard>
     </div>

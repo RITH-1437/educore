@@ -138,6 +138,8 @@ limit used by enrollment (`backend/config/academics.php`).
 | `/my-attendance`            | My attendance per course   | Student |
 | `/coursework/sections/{id}` | Section assignments, submissions, grading | Super admin, University admin, Faculty admin (read), the section's lecturers, enrolled students (submit) |
 | `/my-assignments`           | My assignments + uploads   | Student |
+| `/exams/sections/{id}`      | Section exams + results grid | Super admin, University admin, Faculty admin (read), the section's lecturers; enrolled students (schedule, released results) |
+| `/my-exams`                 | My exam schedule + results | Student |
 | `/rooms`                    | Rooms                      | Super admin, University admin (Faculty admin read-only) |
 | `/timetable`                | My weekly timetable        | Student, Lecturer |
 | `/enrollments`              | Enrollment management      | Super admin, University admin (Faculty admin read-only) |

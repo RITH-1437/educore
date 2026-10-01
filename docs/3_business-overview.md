@@ -507,12 +507,17 @@ users, main business activities, and expected outputs.
   lecturer coursework page and student "My assignments". Lecturer-attached
   materials remain [Planned]. See [18_Assignments-Report.md](18_Assignments-Report.md).
 
-### 9.13 Examinations [Planned]
+### 9.13 Examinations [Implemented]
 
 - **Purpose:** manage exams and results.
 - **Primary users:** Lecturer, Faculty/Department Admin, Student (view).
 - **Main business activities:** define exams, schedule, record results with configurable weighting.
 - **Expected outputs:** structured exam schedules and results.
+- **Delivered:** midterm/final/quiz/practical exams per section with weight
+  (section total ≤ 100%), max score, date/time/location, clash detection for
+  shared students, bulk results entry and correction, release of results,
+  lecturer results grid and student "My exams". Weighting into final grades
+  arrives with 9.14. See [19_Examinations-Report.md](19_Examinations-Report.md).
 
 ### 9.14 Grades & GPA [Planned]
 

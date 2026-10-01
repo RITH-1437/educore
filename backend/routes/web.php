@@ -7,6 +7,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseOfferingController;
 use App\Http\Controllers\CourseworkController;
+use App\Http\Controllers\ExamsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\ErrorLogController;
@@ -157,6 +158,19 @@ Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,lect
     Route::post('/assignments/{assignment}/submit', [CourseworkController::class, 'submit'])->name('assignments.submit');
     Route::post('/submissions/{submission}/grade', [CourseworkController::class, 'grade'])->name('submissions.grade');
     Route::get('/submissions/{submission}/file', [CourseworkController::class, 'download'])->name('submissions.file');
+});
+
+// Examinations: one page per section, scoped by `ExamPolicy` (lecturers of the
+// section and managers write, Faculty Admin reads, enrolled students see the
+// schedule and released results); students also get an overview.
+Route::middleware(['auth', 'role:student'])->get('/my-exams', [ExamsController::class, 'mine'])->name('exams.mine');
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,lecturer,student'])->group(function () {
+    Route::get('/exams/sections/{section}', [ExamsController::class, 'section'])->name('exams.section');
+    Route::post('/exams/sections/{section}', [ExamsController::class, 'store'])->name('exams.store');
+    Route::put('/exams/{exam}', [ExamsController::class, 'update'])->name('exams.update');
+    Route::delete('/exams/{exam}', [ExamsController::class, 'destroy'])->name('exams.destroy');
+    Route::post('/exams/{exam}/publish', [ExamsController::class, 'publish'])->name('exams.publish');
+    Route::post('/exams/{exam}/results', [ExamsController::class, 'record'])->name('exams.results');
 });
 
 // Timetable: rooms (staff read, managers write), section schedules (managers),

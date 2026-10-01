@@ -373,6 +373,15 @@ documented operations.
 | POST | `/api/assignments/{assignment}/submissions` | Sanctum + student enrolled in the section (multipart file) | Documented |
 | POST | `/api/submissions/{submission}/grade` | Sanctum + managers or a lecturer of the section | Documented |
 | GET | `/api/submissions/{submission}/file` | Sanctum + staff, a lecturer of the section, or the submitting student | Documented |
+| GET | `/api/sections/{section}/exams` | Sanctum + managers, Faculty Admin, a lecturer of the section, or an enrolled student | Documented |
+| POST | `/api/sections/{section}/exams` | Sanctum + managers or a lecturer of the section | Documented |
+| GET | `/api/exams/{exam}` | Sanctum + staff, a lecturer of the section (roster), or an enrolled student (own released result) | Documented |
+| PUT, PATCH | `/api/exams/{exam}` | Sanctum + managers or a lecturer of the section | PUT documented |
+| DELETE | `/api/exams/{exam}` | Sanctum + managers or a lecturer of the section | Documented |
+| POST | `/api/exams/{exam}/publish` | Sanctum + managers or a lecturer of the section | Documented |
+| POST | `/api/exams/{exam}/results` | Sanctum + managers or a lecturer of the section | Documented |
+| PATCH | `/api/exam-results/{result}` | Sanctum + managers or a lecturer of the section | Documented |
+| GET | `/api/students/{student}/exams` | Sanctum + staff, or the student themself | Documented |
 | GET | `/api/error-logs` | Sanctum + super-admin only | Documented |
 | GET | `/api/error-logs/{errorLog}` | Sanctum + super-admin only | Documented |
 

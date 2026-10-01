@@ -28,7 +28,7 @@
 | 9.10 | Timetable Management | `[Implemented]` |
 | 9.11 | Attendance | `[Implemented]` |
 | 9.12 | Assignments | `[Implemented]` |
-| 9.13 | Examinations | `[Planned]` |
+| 9.13 | Examinations | `[Implemented]` |
 | 9.14 | Grades & GPA | `[Planned]` |
 | 9.15 | Student Academic Dashboard | `[Planned]` |
 | 9.16 | Document Management | `[Planned]` |
@@ -331,5 +331,8 @@ A module is not done until its report exists and its tests pass — never label
   reset the development database.
 - `[Open]` Assignment scores are not yet weighted into course grades (9.14);
   lecturer-attached materials are not built.
-- `[Next]` 9.13 Examinations, then 9.14 Grades & GPA (which
+- `[Done]` 9.13 Examinations (`exams`, `exam_results`). Report:
+  `docs/19_Examinations-Report.md`.
+- `[Open]` Exam result corrections are not audited yet (9.24 Audit Logs).
+- `[Next]` 9.14 Grades & GPA (which will weight exam and assignment scores, and
   will also turn enrollment completion and prerequisites into grade-based rules).

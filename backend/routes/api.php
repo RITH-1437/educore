@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AcademicYearController;
 use App\Http\Controllers\Api\AssignmentController;
+use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CourseController;
@@ -100,6 +101,19 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::post('/assignments/{assignment}/submissions', [AssignmentController::class, 'submit'])->name('api.assignments.submit');
     Route::post('/submissions/{submission}/grade', [AssignmentController::class, 'grade'])->name('api.submissions.grade');
     Route::get('/submissions/{submission}/file', [AssignmentController::class, 'download'])->name('api.submissions.file');
+
+    // Examinations: `ExamPolicy` scopes every call to the section's lecturers /
+    // managers (write), Faculty Admin (read) and enrolled students (schedule +
+    // released results).
+    Route::get('/sections/{section}/exams', [ExamController::class, 'index'])->name('api.sections.exams');
+    Route::post('/sections/{section}/exams', [ExamController::class, 'store'])->name('api.sections.exams.store');
+    Route::get('/exams/{exam}', [ExamController::class, 'show'])->name('api.exams.show');
+    Route::match(['put', 'patch'], '/exams/{exam}', [ExamController::class, 'update'])->name('api.exams.update');
+    Route::delete('/exams/{exam}', [ExamController::class, 'destroy'])->name('api.exams.destroy');
+    Route::post('/exams/{exam}/publish', [ExamController::class, 'publish'])->name('api.exams.publish');
+    Route::post('/exams/{exam}/results', [ExamController::class, 'record'])->name('api.exams.results');
+    Route::patch('/exam-results/{result}', [ExamController::class, 'correct'])->name('api.exam-results.correct');
+    Route::get('/students/{student}/exams', [ExamController::class, 'student'])->name('api.students.exams');
 });
 
 // A student may read their own profile; `StudentPolicy::view` limits them to it.

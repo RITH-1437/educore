@@ -98,10 +98,16 @@ Key characteristics:
 
 ### Current status
 
-The repository has published assets only at
-`frontend/public/assets/logo/edu-core.jpg` (a logo image). A branded inline
-favicon does **not** yet exist — the current `frontend/public/favicon.svg`
-is a generic scaffold asset and should be replaced when a final mark is approved.
+Logo assets live in `frontend/public/assets/logo/` (served at `/assets/logo/`):
+
+| Asset | Use |
+|---|---|
+| `educore-favicon.svg` | **Favicon** (browser tab). A flat, small-size version of the mark — white mortarboard over an "E" on an Academic Blue tile with a teal tassel — drawn on a 64px grid so it stays crisp at 16–32px and reads on light and dark tab bars. |
+| `educore-app-icon.png` | Apple touch icon and PNG fallback for browsers without SVG favicons; app-shell sidebar mark. |
+| `educore-symbol-mark.jpg`, `educore-workmark.png`, `educore-primary.png` | Landing page and marketing. |
+
+Linked from `backend/resources/views/app.blade.php`. The detailed gradient
+app icon is not used as the tab favicon: it blurs below ~48px.
 
 ### Usage rules (once a final mark exists)
 

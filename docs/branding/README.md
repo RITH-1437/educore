@@ -76,9 +76,8 @@ silently creating an inconsistent pattern.
   `bg-gray-50` + `max-w-7xl` + gray text tokens (Tailwind defaults). These map to
   this system (`background`, `1280px`, `text`/`muted`) and should be migrated to
   semantic tokens when the theme is implemented.
-- **Brand asset:** `frontend/public/assets/logo/edu-core.jpg`.
-  `frontend/public/favicon.svg` is still a generic scaffold asset (to be replaced
-  with the final brand mark when approved).
+- **Brand assets:** `frontend/public/assets/logo/` (served at `/assets/logo/`);
+  the tab favicon is `educore-favicon.svg` (see `BRAND-GUIDELINES.md` §5).
 - Existing naming/asset conventions from `skills/documentation/SKILL.md` apply to
   these documents (single root README, `docs/` numbering).
 

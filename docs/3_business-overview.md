@@ -543,6 +543,20 @@ users, main business activities, and expected outputs.
 - **Main business activities:** log who did what, to what record, and when; review for accountability.
 - **Expected outputs:** an append-only audit trail of sensitive actions.
 
+### 9.25 System Error Logs [Implemented]
+
+- **Purpose:** give Super Admin visibility into failing requests — pages that
+  do not exist and server errors — without digging through server log files.
+- **Primary users:** Super Admin only (a row can expose an exception class, a
+  message and the originating path).
+- **Main business activities:** every HTTP 404 and 5xx response is recorded
+  automatically; Super Admin searches, filters by status code/group/method,
+  and reviews a detail page per error.
+- **Expected outputs:** an append-only, read-only error log distinct from the
+  audit trail in 9.24 — this records failed *requests*, not business changes.
+  No create/update/delete endpoint exists. Reached directly at `/error-logs`;
+  not on the sidebar.
+
 ---
 
 ## 10. End-to-End Business Workflow

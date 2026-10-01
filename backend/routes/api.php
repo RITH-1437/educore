@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AcademicYearController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\DepartmentController;
+use App\Http\Controllers\Api\ErrorLogController;
 use App\Http\Controllers\Api\FacultyController;
 use App\Http\Controllers\Api\SemesterController;
 use App\Http\Controllers\Api\UniversityController;
@@ -89,6 +90,14 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->group(
         ->name('api.semesters.status');
     Route::delete('/academic-years/{academicYear}/semesters/{semester}', [SemesterController::class, 'destroy'])
         ->name('api.semesters.destroy');
+});
+
+// System error logs: Super Admin only, read-only. Rows are recorded from 404
+// and 5xx responses by `ErrorLogRecorder`, so there is no create, update or
+// delete endpoint here on purpose (`skills/audit-logging/SKILL.md` §4).
+Route::middleware(['auth:sanctum', 'role:super-admin'])->group(function () {
+    Route::get('/error-logs', [ErrorLogController::class, 'index'])->name('api.error-logs.index');
+    Route::get('/error-logs/{errorLog}', [ErrorLogController::class, 'show'])->name('api.error-logs.show');
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

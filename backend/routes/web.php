@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ErrorLogController;
 use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\UniversityController;
 use App\Http\Controllers\UserController;
@@ -117,4 +118,18 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])
             ->name('semesters.status');
         Route::delete('/{academicYear}/semesters/{semester}', [AcademicYearController::class, 'destroySemester'])
             ->name('semesters.destroy');
+    });
+
+// System error logs. Super Admin only — a row exposes an exception class and the
+// originating path, which is enough to fingerprint internals (`ErrorLogPolicy`).
+//
+// Read-only by design and deliberately absent from the sidebar: it is a
+// diagnostic tool reached by typing `/error-logs`, not a place you navigate to.
+// Rows come from `ErrorLogRecorder`, which records 404 and 5xx only.
+Route::middleware(['auth', 'role:super-admin'])
+    ->prefix('/error-logs')
+    ->name('error-logs.')
+    ->group(function () {
+        Route::get('/', [ErrorLogController::class, 'index'])->name('index');
+        Route::get('/{errorLog}', [ErrorLogController::class, 'show'])->name('show');
     });

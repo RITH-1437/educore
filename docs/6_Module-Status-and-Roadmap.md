@@ -16,6 +16,7 @@
 | — | Database schema (49 domain tables) | `[Implemented]` |
 | — | Branding / design system + admin dashboard | `[Implemented]` |
 | — | API contract & OpenAPI audit | `[Implemented]` |
+| — | System Error Logs (9.25, extra operational diagnostics) | `[Implemented]` |
 | 9.2 | Student Management | `[Planned]` |
 | 9.3 | Lecturer Management | `[Planned]` |
 | 9.4 | Faculty & Department Management | `[Implemented]` |
@@ -46,7 +47,7 @@
 ```mermaid
 pie showData
   title Module delivery status
-  "Implemented (incl. schema)" : 29
+  "Implemented (incl. schema)" : 30
   "Planned / In progress" : 20
 ```
 
@@ -282,5 +283,8 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` 9.4 Faculty & Department Management (`universities`, `faculties`,
   `departments`) — unlocks 9.5 Programs and makes the dashboard faculty and
   program metrics real. Report: `docs/7_Faculty-and-Department-Report.md`.
+- `[Done]` 9.25 System Error Logs (`error_logs`) — Super Admin-only, read-only
+  capture of HTTP 404/5xx responses via `$exceptions->respond()`, distinct from
+  9.24's planned audit trail. Report: `docs/8_System-Error-Logs-Report.md`.
 - `[Next]` 9.5 Program Management (`programs`) — needs the structure in 9.4 to
   attach programs to departments.

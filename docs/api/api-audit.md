@@ -13,11 +13,11 @@
 
 | Measure | Result |
 |---|---:|
-| Application API route definitions (`routes/api.php`) | 40 |
-| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 45 |
-| Swagger operations after documentation corrections | 45 |
-| Swagger document paths | 24 |
-| Swagger document schemas | 42 |
+| Application API route definitions (`routes/api.php`) | 42 |
+| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 47 |
+| Swagger operations after documentation corrections | 47 |
+| Swagger document paths | 26 |
+| Swagger document schemas | 45 |
 | Undocumented application operations | 0 |
 | Extra Swagger operations not in the application API routes | 0 |
 | Swagger generation errors after corrections | 0 |
@@ -251,7 +251,7 @@ were **not changed** during this documentation-only audit.
 Application endpoint counts below exclude the four L5-Swagger/OAuth package
 routes (`api/documentation`, `api/documentation/asset/{asset}`,
 `api/documentation/ui`, `api/oauth2-callback`). Each combined update route
-contributes one PUT and one PATCH operation, so 40 route definitions yield 45
+contributes one PUT and one PATCH operation, so 42 route definitions yield 47
 documented operations.
 
 | Method | Path | Authentication / authorization | Documentation |
@@ -296,6 +296,8 @@ documented operations.
 | DELETE | `/api/departments/{department}` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/departments/{department}/archive` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/departments/{department}/reactivate` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/error-logs` | Sanctum + super-admin only | Documented |
+| GET | `/api/error-logs/{errorLog}` | Sanctum + super-admin only | Documented |
 
 ## Authentication and Authorization Check
 

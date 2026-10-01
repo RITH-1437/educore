@@ -121,11 +121,17 @@ The seed is idempotent and produces: 1 current university (`ITC`), 3 faculties
 | `/universities`             | University record          | Super admin, University admin |
 | `/universities/{id}/edit`   | Edit university            | Super admin, University admin |
 | `/faculties`                | Faculties + departments    | Super admin, University admin |
+| `/error-logs`                | System error logs (404/5xx, read-only) | Super admin only (no write) |
 
 Faculty Admin has **read-only** access to `/universities` and `/faculties`; the
 write controls are hidden in the UI and the routes still reject the request with
 `403`. Report:
 [`docs/7_Faculty-and-Department-Report.md`](docs/7_Faculty-and-Department-Report.md).
+
+`/error-logs` is not on the sidebar — it is a diagnostic tool reached by typing
+the URL directly, recording only HTTP 404/5xx responses (never 401/403/409/422,
+query strings, or request bodies). Report:
+[`docs/8_System-Error-Logs-Report.md`](docs/8_System-Error-Logs-Report.md).
 
 Pages are rendered by Laravel through Inertia.js. Nginx forwards `/api`,
 `/storage`, and non-existing paths to the Laravel PHP-FPM container, and serves

@@ -1,7 +1,7 @@
 # EduCore Table Catalog
 
 Every table in the EduCore schema, its purpose, module, primary entity, and its
-most important relationships. 49 business tables + 8 framework tables.
+most important relationships. 50 business tables + 8 framework tables.
 
 ## Domain tables
 
@@ -56,6 +56,7 @@ most important relationships. 49 business tables + 8 framework tables.
 | 47 | `internship_reports` | Student-submitted internship reports | Internship | Report | → `internships`, file via `files` |
 | 48 | `internship_evaluations` | Supervisor/faculty evaluations | Internship | Evaluation | → `internships` |
 | 49 | `audit_logs` | Append-only record of sensitive actions | Audit & Security | Audit Log | → `actor_id` (users, nullable), `auditable` polymorphic |
+| 50 | `error_logs` | Append-only record of HTTP 404/5xx responses (module 9.25) | Diagnostics | Error Log | → `user_id` (users, nullable, `SET NULL`) |
 
 ## Framework tables (already migrated by Laravel 12 scaffold)
 
@@ -76,9 +77,9 @@ most important relationships. 49 business tables + 8 framework tables.
 
 ## Counts
 
-- Business tables: **49**
+- Business tables: **50** (49 original + `error_logs`, module 9.25)
 - Framework tables: **8**
-- Total physical tables: **57**
+- Total physical tables: **58**
 - Pivot tables: 4 (`permission_role`, `course_programs`, `course_prerequisites`,
   `section_lecturers`)
 - Polymorphic tables: 3 (`files`, `notifications`, `audit_logs`)

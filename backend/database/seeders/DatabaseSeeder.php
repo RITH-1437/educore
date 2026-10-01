@@ -18,6 +18,10 @@ class DatabaseSeeder extends Seeder
             // before the academic calendar that sits alongside it.
             UniversityStructureSeeder::class,
             AcademicYearSeeder::class,
+            // Operational diagnostics last: this table is filled by the recorder
+            // at runtime, so seeding it after the structure keeps the rows
+            // internally consistent.
+            ErrorLogSeeder::class,
         ]);
     }
 }

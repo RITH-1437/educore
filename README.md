@@ -130,6 +130,8 @@ limit used by enrollment (`backend/config/academics.php`).
 | `/programs/{id}/edit`       | Edit program               | Super admin, University admin |
 | `/courses`                  | Course catalog             | Super admin, University admin (Faculty admin read-only) |
 | `/courses/{id}/edit`        | Edit course + prerequisites | Super admin, University admin |
+| `/rooms`                    | Rooms                      | Super admin, University admin (Faculty admin read-only) |
+| `/timetable`                | My weekly timetable        | Student, Lecturer |
 | `/enrollments`              | Enrollment management      | Super admin, University admin (Faculty admin read-only) |
 | `/registration`             | Course registration (self-service) | Student |
 | `/offerings`                | Offerings & sections       | Super admin, University admin (Faculty admin read-only) |

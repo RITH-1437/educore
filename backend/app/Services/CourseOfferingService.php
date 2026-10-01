@@ -26,10 +26,14 @@ use Illuminate\Validation\ValidationException;
  *   section with schedule, enrollments, attendance, assignments or exams, is
  *   refused.
  *
- * Room/time conflicts are the Timetable's job (9.10).
+ * Lecturer time clashes are checked through `TimetableService`.
  */
 class CourseOfferingService
 {
+    public function __construct(
+        private readonly TimetableService $timetable,
+    ) {}
+
     /** @var array<string, string> */
     private const SECTION_HISTORY = [
         'schedule_entries' => 'schedule entries',
@@ -172,6 +176,9 @@ class CourseOfferingService
             if ($section->lecturers()->whereKey($lecturer->getKey())->exists()) {
                 throw ValidationException::withMessages(['lecturer_id' => 'This lecturer is already assigned to the section.']);
             }
+
+            $section->loadMissing('scheduleEntries', 'offering');
+            $this->timetable->assertLecturerFree($lecturer, $section);
 
             if ($role === 'primary' && $section->lecturers()->wherePivot('role', 'primary')->exists()) {
                 throw ValidationException::withMessages(['role' => 'The section already has a primary lecturer.']);

@@ -2,8 +2,10 @@ import { computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import {
   BookOpen,
+  CalendarClock,
   CalendarDays,
   ClipboardCheck,
+  DoorOpen,
   GraduationCap,
   Landmark,
   Layers,
@@ -38,7 +40,7 @@ const navForRole = (role) => {
           { label: 'Lecturers', href: '/lecturers', icon: Presentation },
         ],
       },
-      { label: 'Academics', items: [{ label: 'Courses', href: '/courses', icon: BookOpen }, { label: 'Offerings & sections', href: '/offerings', icon: LayoutGrid }, { label: 'Enrollments', href: '/enrollments', icon: ClipboardCheck }] },
+      { label: 'Academics', items: [{ label: 'Courses', href: '/courses', icon: BookOpen }, { label: 'Offerings & sections', href: '/offerings', icon: LayoutGrid }, { label: 'Enrollments', href: '/enrollments', icon: ClipboardCheck }, { label: 'Rooms', href: '/rooms', icon: DoorOpen }] },
       { label: 'System', items: [{ label: 'Error logs', href: '/error-logs', icon: ScrollText }] },
     ]
   }
@@ -51,6 +53,7 @@ const navForRole = (role) => {
       { label: 'Courses', href: '/courses', icon: BookOpen },
       { label: 'Offerings & sections', href: '/offerings', icon: LayoutGrid },
       { label: 'Enrollments', href: '/enrollments', icon: ClipboardCheck },
+      { label: 'Rooms', href: '/rooms', icon: DoorOpen },
     ]
     // Academic calendar management is limited to university admins.
     if (role === 'university-admin') structure.push({ label: 'Academic years', href: '/academic-years', icon: CalendarDays })
@@ -66,6 +69,14 @@ const navForRole = (role) => {
     return [{ label: 'Workspace', items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { label: 'Course registration', href: '/registration', icon: ClipboardCheck },
+      { label: 'My timetable', href: '/timetable', icon: CalendarClock },
+    ] }]
+  }
+
+  if (role === 'lecturer') {
+    return [{ label: 'Workspace', items: [
+      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+      { label: 'My timetable', href: '/timetable', icon: CalendarClock },
     ] }]
   }
 
@@ -84,6 +95,8 @@ const SECTION_LABELS = {
   offerings: 'Offerings & sections',
   enrollments: 'Enrollments',
   registration: 'Course registration',
+  rooms: 'Rooms',
+  timetable: 'My timetable',
   'error-logs': 'Error logs',
 }
 

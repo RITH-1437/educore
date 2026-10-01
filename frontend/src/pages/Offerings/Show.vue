@@ -17,6 +17,8 @@ const props = defineProps({
   statuses: { type: Array, default: () => [] },
   sectionStatuses: { type: Array, default: () => [] },
   lecturerRoles: { type: Array, default: () => [] },
+  rooms: { type: Array, default: () => [] },
+  days: { type: Object, default: () => ({}) },
 })
 
 const page = usePage()
@@ -76,6 +78,8 @@ const destroy = async () => {
           :lecturers="lecturers"
           :statuses="sectionStatuses"
           :roles="lecturerRoles"
+          :rooms="rooms"
+          :days="days"
           :can-manage="canManage && !locked"
         />
       </div>

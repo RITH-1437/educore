@@ -12,6 +12,8 @@ use App\Http\Resources\CourseOfferingResource;
 use App\Models\Course;
 use App\Models\CourseOffering;
 use App\Models\Lecturer;
+use App\Models\Room;
+use App\Models\ScheduleEntry;
 use App\Models\Section;
 use App\Models\Semester;
 use App\Services\CourseOfferingService;
@@ -75,7 +77,7 @@ class CourseOfferingController extends Controller
                     ->whereColumn('section_id', 'sections.id')
                     ->whereNull('deleted_at')
                     ->whereIn('status', ['pending', 'confirmed'])])
-                ->with('lecturers'),
+                ->with(['lecturers', 'scheduleEntries.room']),
         ]);
 
         return Inertia::render('Offerings/Show', [
@@ -85,6 +87,9 @@ class CourseOfferingController extends Controller
                     'id' => $lecturer->id,
                     'label' => $lecturer->fullName().' ('.$lecturer->staff_number.', '.$lecturer->department?->code.')',
                 ])->values(),
+            'rooms' => Room::query()->where('is_active', true)->orderBy('code')->get(['id', 'code', 'name', 'capacity'])
+                ->map(fn (Room $room) => ['id' => $room->id, 'label' => $room->code.' — '.$room->name.' ('.$room->capacity.' seats)'])->values(),
+            'days' => ScheduleEntry::DAYS,
             'statuses' => CourseOffering::STATUSES,
             'sectionStatuses' => Section::STATUSES,
             'lecturerRoles' => Section::LECTURER_ROLES,

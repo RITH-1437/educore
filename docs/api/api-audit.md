@@ -347,6 +347,17 @@ documented operations.
 | DELETE | `/api/enrollments/{enrollment}` | Sanctum + managers, or the enrolled student (drop, keeps history) | Documented |
 | POST | `/api/enrollments/{enrollment}/complete` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/students/{student}/enrollments` | Sanctum + staff, or the student themself | Documented |
+| GET | `/api/rooms` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| POST | `/api/rooms` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/rooms/{room}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| PUT, PATCH | `/api/rooms/{room}` | Sanctum + super-admin or university-admin | PUT documented |
+| DELETE | `/api/rooms/{room}` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/sections/{section}/schedule` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| POST | `/api/sections/{section}/schedule` | Sanctum + super-admin or university-admin | Documented |
+| PUT, PATCH | `/api/schedule-entries/{entry}` | Sanctum + super-admin or university-admin | PUT documented |
+| DELETE | `/api/schedule-entries/{entry}` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/timetable/student/{student}` | Sanctum + staff, or the student themself | Documented |
+| GET | `/api/timetable/lecturer/{lecturer}` | Sanctum + staff, or the lecturer themself | Documented |
 | GET | `/api/error-logs` | Sanctum + super-admin only | Documented |
 | GET | `/api/error-logs/{errorLog}` | Sanctum + super-admin only | Documented |
 

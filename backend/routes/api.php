@@ -10,6 +10,8 @@ use App\Http\Controllers\Api\ErrorLogController;
 use App\Http\Controllers\Api\FacultyController;
 use App\Http\Controllers\Api\LecturerController;
 use App\Http\Controllers\Api\ProgramController;
+use App\Http\Controllers\Api\RoomController;
+use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\SectionController;
 use App\Http\Controllers\Api\SemesterController;
 use App\Http\Controllers\Api\StudentController;
@@ -58,6 +60,9 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::get('/offerings', [CourseOfferingController::class, 'index'])->name('api.offerings.index');
     Route::get('/offerings/{offering}', [CourseOfferingController::class, 'show'])->name('api.offerings.show');
     Route::get('/sections/{section}', [SectionController::class, 'show'])->name('api.sections.show');
+    Route::get('/sections/{section}/schedule', [ScheduleController::class, 'index'])->name('api.sections.schedule');
+    Route::get('/rooms', [RoomController::class, 'index'])->name('api.rooms.index');
+    Route::get('/rooms/{room}', [RoomController::class, 'show'])->name('api.rooms.show');
 });
 
 // Enrollment: staff list everything; a student enrolls/drops/reads only their
@@ -69,6 +74,7 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::delete('/enrollments/{enrollment}', [EnrollmentController::class, 'destroy'])->name('api.enrollments.destroy');
     Route::post('/enrollments/{enrollment}/complete', [EnrollmentController::class, 'complete'])->name('api.enrollments.complete');
     Route::get('/students/{student}/enrollments', [EnrollmentController::class, 'forStudent'])->name('api.students.enrollments');
+    Route::get('/timetable/student/{student}', [ScheduleController::class, 'student'])->name('api.timetable.student');
 });
 
 // A student may read their own profile; `StudentPolicy::view` limits them to it.
@@ -80,6 +86,7 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
 Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-admin,lecturer'])->group(function () {
     Route::get('/lecturers/{lecturer}', [LecturerController::class, 'show'])->name('api.lecturers.show');
     Route::get('/lecturers/{lecturer}/sections', [LecturerController::class, 'sections'])->name('api.lecturers.sections');
+    Route::get('/timetable/lecturer/{lecturer}', [ScheduleController::class, 'lecturer'])->name('api.timetable.lecturer');
 });
 
 Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->group(function () {
@@ -128,6 +135,13 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->group(
         ->name('api.programs.courses.update');
     Route::delete('/programs/{program}/courses/{course}', [ProgramController::class, 'removeCourse'])
         ->name('api.programs.courses.destroy');
+
+    Route::post('/rooms', [RoomController::class, 'store'])->name('api.rooms.store');
+    Route::match(['put', 'patch'], '/rooms/{room}', [RoomController::class, 'update'])->name('api.rooms.update');
+    Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('api.rooms.destroy');
+    Route::post('/sections/{section}/schedule', [ScheduleController::class, 'store'])->name('api.sections.schedule.store');
+    Route::match(['put', 'patch'], '/schedule-entries/{entry}', [ScheduleController::class, 'update'])->name('api.schedule-entries.update');
+    Route::delete('/schedule-entries/{entry}', [ScheduleController::class, 'destroy'])->name('api.schedule-entries.destroy');
 
     Route::post('/offerings', [CourseOfferingController::class, 'store'])->name('api.offerings.store');
     Route::match(['put', 'patch'], '/offerings/{offering}', [CourseOfferingController::class, 'update'])->name('api.offerings.update');

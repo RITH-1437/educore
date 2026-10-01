@@ -23,9 +23,9 @@
 | 9.5 | Program Management | `[Implemented]` (curriculum editor delivered with 9.7) |
 | 9.6 | Academic Year & Semester Management | `[Implemented]` |
 | 9.7 | Course Management | `[Implemented]` (offerings/sections `[Planned]` with 9.8) |
-| 9.8 | Class / Section Management | `[Implemented]` (rooms/schedules with 9.10) |
+| 9.8 | Class / Section Management | `[Implemented]` |
 | 9.9 | Course Registration / Enrollment | `[Implemented]` |
-| 9.10 | Timetable Management | `[Planned]` |
+| 9.10 | Timetable Management | `[Implemented]` |
 | 9.11 | Attendance | `[Planned]` |
 | 9.12 | Assignments | `[Planned]` |
 | 9.13 | Examinations | `[Planned]` |
@@ -47,8 +47,8 @@
 ```mermaid
 pie showData
   title Module delivery status
-  "Implemented (incl. schema)" : 36
-  "Planned / In progress" : 14
+  "Implemented (incl. schema)" : 37
+  "Planned / In progress" : 13
 ```
 
 ---
@@ -320,4 +320,7 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` 9.8 Class / Section (`course_offerings`, `sections`,
   `section_lecturers`). Report: `docs/14_Class-and-Section-Report.md`.
 - `[Done]` 9.9 Enrollment (`enrollments`). Report: `docs/15_Enrollment-Report.md`.
-- `[Next]` 9.10 Timetable (rooms, schedules, conflicts).
+- `[Done]` 9.10 Timetable (`rooms`, `schedule_entries`; dropped the global
+  `uq_schedule_room_slot`). Report: `docs/16_Timetable-Report.md`.
+- `[Next]` 9.11 Attendance (sessions per scheduled meeting, records per
+  enrollment).

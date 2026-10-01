@@ -12,7 +12,9 @@ use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\LecturerController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\RegistrationController;
+use App\Http\Controllers\RoomController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\TimetableController;
 use App\Http\Controllers\UniversityController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -129,6 +131,22 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])
         Route::put('/{program}/courses/{course}', [ProgramController::class, 'updateCourse'])->name('courses.update');
         Route::delete('/{program}/courses/{course}', [ProgramController::class, 'removeCourse'])->name('courses.destroy');
     });
+
+// Timetable: rooms (staff read, managers write), section schedules (managers),
+// and a personal weekly timetable for students and lecturers.
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->group(function () {
+    Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
+});
+
+Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function () {
+    Route::post('/rooms', [RoomController::class, 'store'])->name('rooms.store');
+    Route::put('/rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
+    Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
+    Route::post('/sections/{section}/schedule', [TimetableController::class, 'store'])->name('sections.schedule.store');
+    Route::delete('/schedule-entries/{entry}', [TimetableController::class, 'destroy'])->name('schedule-entries.destroy');
+});
+
+Route::middleware(['auth', 'role:student,lecturer'])->get('/timetable', [TimetableController::class, 'mine'])->name('timetable.mine');
 
 // Enrollment management: Faculty Admin reads, managers enroll/drop/complete
 // (`EnrollmentPolicy`). Student self-service lives under /registration.

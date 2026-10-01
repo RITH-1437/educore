@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * A concrete class instance of an offering (Section A, B…) with a capacity
  * and assigned lecturers (`section_lecturers`, role primary/assistant/tutor).
- * Rooms and weekly schedules arrive with 9.10 Timetable.
+ * Weekly meetings live in `schedule_entries` (9.10 Timetable).
  *
  * @property int $id
  * @property int $course_offering_id
@@ -40,6 +40,11 @@ class Section extends Model
     protected function casts(): array
     {
         return ['capacity' => 'integer'];
+    }
+
+    public function scheduleEntries(): HasMany
+    {
+        return $this->hasMany(ScheduleEntry::class)->orderBy('day_of_week')->orderBy('start_time');
     }
 
     public function enrollments(): HasMany

@@ -19,11 +19,16 @@ use Illuminate\Validation\ValidationException;
  *
  * Checks, in order: student active → registration open (semester, period,
  * offering, section) → not already enrolled in the offering → strict
- * prerequisites passed → credit limit → seats (section capacity and offering
- * maximum, under a row lock so the last seat cannot be taken twice).
+ * prerequisites passed → credit limit → no timetable clash → seats (section
+ * capacity and offering maximum, under a row lock so the last seat cannot be
+ * taken twice).
  */
 class EnrollmentService
 {
+    public function __construct(
+        private readonly TimetableService $timetable,
+    ) {}
+
     /**
      * @param  array{student_id?: ?int, section_id?: ?int, semester_id?: ?int, status?: ?string, search?: ?string, per_page?: int}  $filters
      * @return LengthAwarePaginator<int, Enrollment>
@@ -52,7 +57,7 @@ class EnrollmentService
         return DB::transaction(function () use ($student, $section) {
             // Serialize concurrent registrations for this section.
             $section = Section::query()->whereKey($section->getKey())->lockForUpdate()->firstOrFail();
-            $section->load('offering.course.prerequisites', 'offering.semester');
+            $section->load('offering.course.prerequisites', 'offering.semester', 'scheduleEntries');
             $offering = $section->offering;
             $semester = $offering->semester;
             $course = $offering->course;
@@ -82,6 +87,7 @@ class EnrollmentService
             }
 
             $this->assertCreditLimit($student, $semester->getKey(), (float) $course->credits);
+            $this->timetable->assertStudentFree($student, $section);
             $this->assertSeats($section);
 
             $dropped = $existing->first(fn (Enrollment $e) => $e->section_id === $section->getKey());

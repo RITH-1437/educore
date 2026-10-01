@@ -8,6 +8,7 @@ import BaseCard from '../BaseCard.vue'
 import BaseInput from '../BaseInput.vue'
 import BaseSelect from '../BaseSelect.vue'
 import StatusBadge from '../StatusBadge.vue'
+import SectionSchedule from './SectionSchedule.vue'
 import { useConfirm } from '../../composables/useConfirm'
 
 // One section: capacity/status edit, assigned lecturers, assign form.
@@ -16,6 +17,8 @@ const props = defineProps({
   lecturers: { type: Array, default: () => [] },
   statuses: { type: Array, default: () => [] },
   roles: { type: Array, default: () => [] },
+  rooms: { type: Array, default: () => [] },
+  days: { type: Object, default: () => ({}) },
   canManage: { type: Boolean, default: false },
 })
 
@@ -65,6 +68,8 @@ const destroy = async () => {
         <BaseButton size="sm" variant="ghost" @click="editing = false">Cancel</BaseButton>
       </div>
     </form>
+
+    <SectionSchedule class="mt-5" :section="section" :rooms="rooms" :days="days" :can-manage="canManage" />
 
     <h4 class="mt-5 text-small font-semibold text-ink dark:text-dark-ink">Lecturers</h4>
     <ul v-if="section.lecturers?.length" class="mt-2 space-y-2">

@@ -460,7 +460,7 @@ users, main business activities, and expected outputs.
   status, lecturer assignment (primary/assistant/tutor), lecturer teaching
   load, guarded deletes, `/api/offerings` and `/api/sections`. See
   [14_Class-and-Section-Report.md](14_Class-and-Section-Report.md).
-- **Not yet delivered `[Planned]`:** rooms and weekly schedules (9.10).
+- **Rooms and weekly schedules:** delivered with 9.10.
 
 ### 9.9 Course Registration / Enrollment [Implemented]
 
@@ -473,12 +473,16 @@ users, main business activities, and expected outputs.
   limit, seats under a row lock, no duplicates), drop with history, completion,
   `/api/enrollments`. See [15_Enrollment-Report.md](15_Enrollment-Report.md).
 
-### 9.10 Timetable Management [Planned]
+### 9.10 Timetable Management [Implemented]
 
 - **Purpose:** manage the weekly schedule of sections, lecturers, and rooms.
 - **Primary users:** Faculty/Department Admin, University Admin.
 - **Main business activities:** schedule lectures into days/time slots; detect lecturer, room, and student-group conflicts.
 - **Expected outputs:** conflict-checked timetables.
+- **Delivered:** rooms, weekly section schedules, per-semester conflict
+  checks (room, section, lecturer, student, room capacity — incl. partial
+  overlaps), clash checks at enrollment and lecturer assignment, personal
+  timetables. See [16_Timetable-Report.md](16_Timetable-Report.md).
 
 ### 9.11 Attendance [Planned]
 

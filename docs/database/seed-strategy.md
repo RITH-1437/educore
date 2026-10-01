@@ -73,6 +73,10 @@ Invariants it enforces and tests assert:
 - `CourseOfferingSeeder` (after the academic calendar) offers 6 courses in the
   open semester with 8 sections and a primary lecturer each; upserts by
   `(course_id, semester_id)` and `(course_offering_id, code)`.
+- `RoomSeeder` upserts 7 rooms by `code`; `ScheduleSeeder` gives each open
+  section two weekly meetings through `TimetableService` (conflict-free by
+  construction; sections that already have meetings are skipped). Both run
+  before `EnrollmentSeeder` so student clashes are checked.
 - `EnrollmentSeeder` enrolls active students in open sections of their
   curriculum through `EnrollmentService`, so every rule applies; refused or
   duplicate enrollments are skipped (idempotent).

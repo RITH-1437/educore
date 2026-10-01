@@ -2,7 +2,7 @@
 
 - **Date:** 2026-10-01
 - **Module:** 9.9 Course Registration / Enrollment (business-overview §9.9)
-- **Status:** `[Implemented]` — timetable-clash check at enrollment `[Planned]` (needs 9.10 schedules)
+- **Status:** `[Implemented]` — timetable-clash check added with 9.10
 - **Depends on:** 9.2 Students, 9.7 Courses (prerequisites), 9.8 Sections
 
 ## 1. Scope
@@ -91,5 +91,5 @@ Full suite: **279 passed**.
 
 ## 7. Follow-ups
 
-- Timetable clashes between a student's sections — added with 9.10.
+- Timetable clashes between a student's sections — implemented in 9.10 (`TimetableService::assertStudentFree`).
 - Pending/approval workflow is not used: valid enrollments are confirmed.

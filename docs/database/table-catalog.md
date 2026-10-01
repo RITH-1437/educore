@@ -24,7 +24,7 @@ most important relationships. 50 business tables + 8 framework tables.
 | 15 | `course_offerings` | A course taught in one semester | Academic Management | Course Offering | → `courses`, → `semesters`, ← `sections` (1–N) |
 | 16 | `sections` | A concrete class instance of an offering | Academic Management | Section | → `course_offerings`, → `lecturers` (N–N via `section_lecturers`), ← `enrollments` (1–N), ← `schedule_entries` (1–N), ← `assignments`, ← `exams`, ← `attendance_sessions` |
 | 17 | `rooms` | Physical room used by schedules | Academic Management | Room | → `schedule_entries` (1–N) |
-| 18 | `schedule_entries` | Recurring weekly time slot for a section | Academic Management | Schedule Entry | → `sections`, → `rooms` |
+| 18 | `schedule_entries` | Recurring weekly time slot for a section | Academic Management | Schedule Entry | → `sections`, → `rooms` | Room overlap is enforced per semester in `TimetableService` (global `uq_schedule_room_slot` dropped).
 | 19 | `section_lecturers` | Pivot section ↔ lecturer (teaching assignment) | Academic Management | Pivot | `section_id` → `sections`, `lecturer_id` → `lecturers` |
 | 20 | `students` | Student profile (extends a user) | People | Student | → `users` (1–1), → `programs` (N–N via `student_programs`), ← `enrollments`, ← `document_requests`, ← `invoices`, ← `internships` |
 | 21 | `student_programs` | Student's program history (changes, effective dates) | People | Student-Program | `student_id` → `students`, `program_id` → `programs` |

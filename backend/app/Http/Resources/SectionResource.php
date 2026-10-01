@@ -43,6 +43,7 @@ class SectionResource extends JsonResource
                         : null,
                 ] : null,
             ]),
+            'schedule' => $this->whenLoaded('scheduleEntries', fn () => ScheduleEntryResource::collection($this->scheduleEntries)->resolve($request)),
             'lecturers' => $this->whenLoaded('lecturers', fn () => $this->lecturers->map(fn (Lecturer $lecturer) => [
                 'id' => $lecturer->id,
                 'staff_number' => $lecturer->staff_number,

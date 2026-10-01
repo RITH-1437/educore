@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -62,12 +63,15 @@ class Department extends Model
         return $this->belongsTo(Faculty::class);
     }
 
+    public function programs(): HasMany
+    {
+        return $this->hasMany(Program::class);
+    }
+
     /*
-     * `programs`, `courses` and `lecturers` hang off this table in the schema
-     * but have no models yet — those arrive with 9.5 Program Management. The
-     * delete guards in `DepartmentService` therefore count the child rows with
-     * the query builder instead of through relations, so no unbuilt module is
-     * depended upon here.
+     * `courses` and `lecturers` hang off this table in the schema but have no
+     * models yet (9.7 / 9.3). The delete guards in `DepartmentService` count
+     * child rows with the query builder, so no unbuilt module is depended upon.
      */
 
     public function scopeActive(Builder $query): Builder

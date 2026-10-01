@@ -2,9 +2,12 @@
 
 use App\Http\Controllers\Api\AcademicYearController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\ErrorLogController;
 use App\Http\Controllers\Api\FacultyController;
+use App\Http\Controllers\Api\LecturerController;
+use App\Http\Controllers\Api\ProgramController;
 use App\Http\Controllers\Api\SemesterController;
 use App\Http\Controllers\Api\UniversityController;
 use App\Http\Controllers\Api\UserController;
@@ -38,6 +41,19 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
 
     Route::get('/departments', [DepartmentController::class, 'index'])->name('api.departments.index');
     Route::get('/departments/{department}', [DepartmentController::class, 'show'])->name('api.departments.show');
+
+    Route::get('/programs', [ProgramController::class, 'index'])->name('api.programs.index');
+    Route::get('/programs/{program}', [ProgramController::class, 'show'])->name('api.programs.show');
+
+    Route::get('/courses', [CourseController::class, 'index'])->name('api.courses.index');
+    Route::get('/courses/{course}', [CourseController::class, 'show'])->name('api.courses.show');
+
+    Route::get('/lecturers', [LecturerController::class, 'index'])->name('api.lecturers.index');
+});
+
+// A lecturer may read their own profile; `LecturerPolicy::view` limits them to it.
+Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-admin,lecturer'])->group(function () {
+    Route::get('/lecturers/{lecturer}', [LecturerController::class, 'show'])->name('api.lecturers.show');
 });
 
 Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->group(function () {
@@ -68,6 +84,48 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->group(
         ->name('api.departments.reactivate');
     Route::delete('/departments/{department}', [DepartmentController::class, 'destroy'])
         ->name('api.departments.destroy');
+
+    Route::post('/programs', [ProgramController::class, 'store'])->name('api.programs.store');
+    Route::match(['put', 'patch'], '/programs/{program}', [ProgramController::class, 'update'])
+        ->name('api.programs.update');
+    Route::post('/programs/{program}/archive', [ProgramController::class, 'archive'])
+        ->name('api.programs.archive');
+    Route::post('/programs/{program}/reactivate', [ProgramController::class, 'reactivate'])
+        ->name('api.programs.reactivate');
+    Route::delete('/programs/{program}', [ProgramController::class, 'destroy'])
+        ->name('api.programs.destroy');
+
+    // Curriculum: program <-> course membership lives with the program.
+    Route::post('/programs/{program}/courses', [ProgramController::class, 'addCourse'])
+        ->name('api.programs.courses.store');
+    Route::patch('/programs/{program}/courses/{course}', [ProgramController::class, 'updateCourse'])
+        ->name('api.programs.courses.update');
+    Route::delete('/programs/{program}/courses/{course}', [ProgramController::class, 'removeCourse'])
+        ->name('api.programs.courses.destroy');
+
+    Route::post('/lecturers', [LecturerController::class, 'store'])->name('api.lecturers.store');
+    Route::match(['put', 'patch'], '/lecturers/{lecturer}', [LecturerController::class, 'update'])
+        ->name('api.lecturers.update');
+    Route::post('/lecturers/{lecturer}/deactivate', [LecturerController::class, 'deactivate'])
+        ->name('api.lecturers.deactivate');
+    Route::post('/lecturers/{lecturer}/reactivate', [LecturerController::class, 'reactivate'])
+        ->name('api.lecturers.reactivate');
+    Route::delete('/lecturers/{lecturer}', [LecturerController::class, 'destroy'])
+        ->name('api.lecturers.destroy');
+
+    Route::post('/courses', [CourseController::class, 'store'])->name('api.courses.store');
+    Route::match(['put', 'patch'], '/courses/{course}', [CourseController::class, 'update'])
+        ->name('api.courses.update');
+    Route::post('/courses/{course}/archive', [CourseController::class, 'archive'])
+        ->name('api.courses.archive');
+    Route::post('/courses/{course}/reactivate', [CourseController::class, 'reactivate'])
+        ->name('api.courses.reactivate');
+    Route::delete('/courses/{course}', [CourseController::class, 'destroy'])
+        ->name('api.courses.destroy');
+    Route::post('/courses/{course}/prerequisites', [CourseController::class, 'addPrerequisite'])
+        ->name('api.courses.prerequisites.store');
+    Route::delete('/courses/{course}/prerequisites/{prerequisite}', [CourseController::class, 'removePrerequisite'])
+        ->name('api.courses.prerequisites.destroy');
 });
 
 // The academic calendar is university-wide data, so both admin roles reach it.

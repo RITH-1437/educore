@@ -18,11 +18,11 @@
 | — | API contract & OpenAPI audit | `[Implemented]` |
 | — | System Error Logs (9.25, extra operational diagnostics) | `[Implemented]` |
 | 9.2 | Student Management | `[Planned]` |
-| 9.3 | Lecturer Management | `[Planned]` |
+| 9.3 | Lecturer Management | `[Implemented]` (section assignment `[Planned]` with 9.8) |
 | 9.4 | Faculty & Department Management | `[Implemented]` |
-| 9.5 | Program Management | `[Planned]` |
+| 9.5 | Program Management | `[Implemented]` (curriculum editor delivered with 9.7) |
 | 9.6 | Academic Year & Semester Management | `[Implemented]` |
-| 9.7 | Course Management | `[Planned]` |
+| 9.7 | Course Management | `[Implemented]` (offerings/sections `[Planned]` with 9.8) |
 | 9.8 | Class / Section Management | `[Planned]` |
 | 9.9 | Course Registration / Enrollment | `[Planned]` |
 | 9.10 | Timetable Management | `[Planned]` |
@@ -47,8 +47,8 @@
 ```mermaid
 pie showData
   title Module delivery status
-  "Implemented (incl. schema)" : 30
-  "Planned / In progress" : 20
+  "Implemented (incl. schema)" : 33
+  "Planned / In progress" : 17
 ```
 
 ---
@@ -127,6 +127,15 @@ super-admin and university-admin policies, web pages `AcademicYears/Index`,
 (nested `/semesters`) with OpenAPI annotations, `AcademicYearSeeder`, and 39
 feature tests.
 
+**9.5 Program Management** — table `programs`. Delivered: `ProgramService` owning
+the rules (unique code, name unique per department via the new
+`uq_programs_department_id_name`, archive via `is_active`, delete refused while
+`student_programs` or `course_programs` reference the program — never the
+schema's silent cascade), `ProgramPolicy` (Faculty Admin read-only), web pages
+`Programs/Index|Edit`, `/api/programs` with OpenAPI annotations,
+`ProgramSeeder`, 24 feature tests. Curriculum (program ↔ course) is deferred to
+9.7. Report: `docs/10_Program-Management-Report.md`.
+
 **9.4 Faculty & Department** — tables `universities`, `faculties`, `departments`.
 Delivered: `UniversityService` / `FacultyService` / `DepartmentService` owning the
 rules (single `is_current` university, unique faculty names, department names
@@ -150,17 +159,28 @@ password, hashed), enroll student into programs, list with filters
 (`filters[program_id]`, `filters[status]`), soft delete; pages `Students/`;
 tests: create duplicates rejected, student sees only own profile, others `403`.
 
-**9.3 Lecturer Management** — tables `lecturers`, `users`.
-Steps: same mini-vertical as students (linked user, `role:lecturer`), assignment
-to departments; pages `Lecturers/`; tests: department-scoped visibility.
+**9.3 Lecturer Management** — tables `lecturers`, `users`. Delivered:
+`LecturerService` (account created via `UserRepository` or an existing
+Lecturer-role account linked, in one transaction; profile/account `is_active`
+mirrored; delete keeps the account inactive and is refused while
+`section_lecturers` rows exist), `LecturerPolicy` (lecturer reads own profile,
+Faculty Admin read-only), `Lecturers/Index|Edit`, `/api/lecturers` with OpenAPI
+annotations, `LecturerSeeder`, 23 feature tests. Department-scoped visibility
+waits for unit scoping on the user record. Report:
+`docs/12_Lecturer-Management-Report.md`.
 
 ### Phase B — Academic core
 
 **9.7 Course Management** — tables `courses`, `course_programs`,
-`course_prerequisites`, `course_offerings`.
-Steps: course CRUD per program; prerequisite self-reference; offering per
-academic year/semester; pages `Courses/`; tests: prerequisite rule enforced on
-enrollment-side checks.
+`course_prerequisites` (`course_offerings` is guarded but not managed yet).
+Delivered: `CourseService` (lifecycle, unique code, acyclic prerequisites via an
+iterative graph walk, delete guards for curricula / dependents / offerings),
+`ProgramService` curriculum methods (membership stays with the program),
+`CoursePolicy` (Faculty Admin read-only), `Courses/Index|Edit`, the curriculum
+editor on `Programs/Edit`, `/api/courses` and `/api/programs/{program}/courses`
+with OpenAPI annotations, `CourseSeeder`, 32 feature tests. Offerings and
+sections are deferred to 9.8 (they need lecturers, rooms, timetable). Report:
+`docs/11_Course-Management-Report.md`.
 
 **9.8 Class / Section Management** — tables `sections`, `rooms`,
 `section_lecturers`, `course_offerings`.
@@ -286,5 +306,14 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` 9.25 System Error Logs (`error_logs`) — Super Admin-only, read-only
   capture of HTTP 404/5xx responses via `$exceptions->respond()`, distinct from
   9.24's planned audit trail. Report: `docs/8_System-Error-Logs-Report.md`.
-- `[Next]` 9.5 Program Management (`programs`) — needs the structure in 9.4 to
-  attach programs to departments.
+- `[Done]` 9.5 Program Management (`programs`). Report:
+  `docs/10_Program-Management-Report.md`.
+- `[Done]` 9.7 Course Management (`courses`, `course_prerequisites`,
+  `course_programs`). Report: `docs/11_Course-Management-Report.md`.
+- `[Done]` 9.3 Lecturer Management (`lecturers`). Report:
+  `docs/12_Lecturer-Management-Report.md`.
+- `[Done]` Sign-in refuses inactive accounts (`users.is_active`) with the
+  generic error, web and API. `[Open]` sessions/tokens issued before a
+  deactivation stay valid until logout or expiry.
+- `[Next]` 9.2 Student Management, then 9.8 Class/Section (needs lecturers) and
+  9.9 Enrollment (needs prerequisites, sections, students).

@@ -58,6 +58,9 @@ class DashboardController extends Controller
             'total_semesters' => Semester::query()->count(),
             'total_faculties' => DB::table('faculties')->count(),
             'total_programs' => DB::table('programs')->count(),
+            'total_courses' => DB::table('courses')->count(),
+            'total_lecturers' => DB::table('lecturers')->count(),
+            'active_lecturers' => DB::table('lecturers')->where('is_active', true)->count(),
         ];
 
         return Inertia::render('Admin/Dashboard', [

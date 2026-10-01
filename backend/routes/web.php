@@ -3,9 +3,12 @@
 use App\Enums\Role;
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\CourseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ErrorLogController;
 use App\Http\Controllers\FacultyController;
+use App\Http\Controllers\LecturerController;
+use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\UniversityController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -95,6 +98,76 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])
             ->name('departments.reactivate');
         Route::delete('/{faculty}/departments/{department}', [FacultyController::class, 'destroyDepartment'])
             ->name('departments.destroy');
+    });
+
+// Programs follow the same split as the rest of the structure: Faculty Admin
+// may read, only Super Admin / University Admin may change (`ProgramPolicy`).
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])
+    ->prefix('/programs')
+    ->name('programs.')
+    ->group(function () {
+        Route::get('/', [ProgramController::class, 'index'])->name('index');
+    });
+
+Route::middleware(['auth', 'role:super-admin,university-admin'])
+    ->prefix('/programs')
+    ->name('programs.')
+    ->group(function () {
+        Route::post('/', [ProgramController::class, 'store'])->name('store');
+        Route::get('/{program}/edit', [ProgramController::class, 'edit'])->name('edit');
+        Route::put('/{program}', [ProgramController::class, 'update'])->name('update');
+        Route::post('/{program}/archive', [ProgramController::class, 'archive'])->name('archive');
+        Route::post('/{program}/reactivate', [ProgramController::class, 'reactivate'])->name('reactivate');
+        Route::delete('/{program}', [ProgramController::class, 'destroy'])->name('destroy');
+
+        // Curriculum: course membership nests under the program that owns it.
+        Route::post('/{program}/courses', [ProgramController::class, 'addCourse'])->name('courses.store');
+        Route::put('/{program}/courses/{course}', [ProgramController::class, 'updateCourse'])->name('courses.update');
+        Route::delete('/{program}/courses/{course}', [ProgramController::class, 'removeCourse'])->name('courses.destroy');
+    });
+
+// Lecturers: Faculty Admin reads, Super Admin / University Admin manage
+// (`LecturerPolicy`).
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])
+    ->prefix('/lecturers')
+    ->name('lecturers.')
+    ->group(function () {
+        Route::get('/', [LecturerController::class, 'index'])->name('index');
+    });
+
+Route::middleware(['auth', 'role:super-admin,university-admin'])
+    ->prefix('/lecturers')
+    ->name('lecturers.')
+    ->group(function () {
+        Route::post('/', [LecturerController::class, 'store'])->name('store');
+        Route::get('/{lecturer}/edit', [LecturerController::class, 'edit'])->name('edit');
+        Route::put('/{lecturer}', [LecturerController::class, 'update'])->name('update');
+        Route::post('/{lecturer}/deactivate', [LecturerController::class, 'deactivate'])->name('deactivate');
+        Route::post('/{lecturer}/reactivate', [LecturerController::class, 'reactivate'])->name('reactivate');
+        Route::delete('/{lecturer}', [LecturerController::class, 'destroy'])->name('destroy');
+    });
+
+// Courses follow the same split: Faculty Admin reads, Super Admin / University
+// Admin change (`CoursePolicy`).
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])
+    ->prefix('/courses')
+    ->name('courses.')
+    ->group(function () {
+        Route::get('/', [CourseController::class, 'index'])->name('index');
+    });
+
+Route::middleware(['auth', 'role:super-admin,university-admin'])
+    ->prefix('/courses')
+    ->name('courses.')
+    ->group(function () {
+        Route::post('/', [CourseController::class, 'store'])->name('store');
+        Route::get('/{course}/edit', [CourseController::class, 'edit'])->name('edit');
+        Route::put('/{course}', [CourseController::class, 'update'])->name('update');
+        Route::post('/{course}/archive', [CourseController::class, 'archive'])->name('archive');
+        Route::post('/{course}/reactivate', [CourseController::class, 'reactivate'])->name('reactivate');
+        Route::delete('/{course}', [CourseController::class, 'destroy'])->name('destroy');
+        Route::post('/{course}/prerequisites', [CourseController::class, 'addPrerequisite'])->name('prerequisites.store');
+        Route::delete('/{course}/prerequisites/{prerequisite}', [CourseController::class, 'removePrerequisite'])->name('prerequisites.destroy');
     });
 
 // The academic calendar is university-wide data, so both admin roles reach it.

@@ -60,6 +60,14 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    /**
+     * The lecturer profile of a Lecturer-role account, if one exists.
+     */
+    public function lecturer()
+    {
+        return $this->hasOne(Lecturer::class);
+    }
+
     public function isRole(string $slug): bool
     {
         return $this->role?->slug === $slug;

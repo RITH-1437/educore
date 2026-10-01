@@ -15,7 +15,7 @@ most important relationships. 50 business tables + 8 framework tables.
 | 6 | `universities` | The institution itself (system-level root) | University Structure | University | → `faculties` (1–N) |
 | 7 | `faculties` | Broad academic division | University Structure | Faculty | → `universities`, ← `departments` (1–N) |
 | 8 | `departments` | Sub-division of a faculty | University Structure | Department | → `faculties`, ← `programs` (1–N), ← `courses` (1–N), ← `lecturers` (1–N) |
-| 9 | `programs` | A degree track within a department | University Structure | Program | → `departments`, → `courses` (N–N via `course_programs`), ← `students` (N–N via `student_programs`) |
+| 9 | `programs` | A degree track within a department (unique `code`; unique `(department_id, name)`) | University Structure | Program | → `departments`, → `courses` (N–N via `course_programs`), ← `students` (N–N via `student_programs`) |
 | 10 | `academic_years` | e.g. 2026–2027 | Academic Management | Academic Year | ← `semesters` (1–N), ← `enrollments` snapshot |
 | 11 | `semesters` | Term within an academic year | Academic Management | Semester | → `academic_years`, ← `course_offerings` (1–N), ← `enrollments` snapshot |
 | 12 | `courses` | Stable curriculum unit (code, name, credits) | Academic Management | Course | → `departments`, → `programs` (N–N via `course_programs`), self-referencing via `course_prerequisites` |

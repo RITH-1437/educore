@@ -57,6 +57,16 @@ Invariants it enforces and tests assert:
   `uq_departments_faculty_id_name`.
 - Every row is created active and not soft-deleted, so a seeded tree is never
   hidden behind the archive filters.
+- `ProgramSeeder` (runs after the structure) upserts 7 degree programs by their
+  unique `code`, attached to the seeded departments by department `code`;
+  missing departments are skipped, never created.
+- `CourseSeeder` (after programs) upserts 10 courses by unique `code`, builds an
+  acyclic prerequisite chain and curricula for the seeded programs using
+  `syncWithoutDetaching`, so re-running never duplicates links. Missing
+  departments/programs are skipped.
+- `LecturerSeeder` (needs the Lecturer role and departments) upserts 6 lecturer
+  accounts by email (dev password `lecturer@123`) and their profiles by
+  `staff_number`.
 
 ## 3. Determinism utilities
 

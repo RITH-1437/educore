@@ -17,6 +17,12 @@ class DatabaseSeeder extends Seeder
             // Faculties belong to a university, so the structure is seeded
             // before the academic calendar that sits alongside it.
             UniversityStructureSeeder::class,
+            // Programs hang off departments, so they follow the structure.
+            ProgramSeeder::class,
+            // Courses (and curricula) need both departments and programs.
+            CourseSeeder::class,
+            // Lecturer accounts + profiles need the Lecturer role and departments.
+            LecturerSeeder::class,
             AcademicYearSeeder::class,
             // Operational diagnostics last: this table is filled by the recorder
             // at runtime, so seeding it after the structure keeps the rows

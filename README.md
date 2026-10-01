@@ -97,8 +97,9 @@ docker compose --project-directory . -f docker/docker-compose.yml exec backend p
 Or via Make: `make seed`. To drop and re-seed in one step: `make migrate-fresh`.
 
 The seed is idempotent and produces: 1 current university (`ITC`), 3 faculties
-(`ENG`, `SCI`, `HSS`) and 6 departments, plus roles and a super-admin
-(`admin@educore.kh` / `admin@123`). See
+(`ENG`, `SCI`, `HSS`), 6 departments, 7 degree programs and 10 courses with prerequisites and curricula, plus roles and a super-admin
+(`admin@educore.kh` / `admin@123`), and 6 lecturer accounts (e.g.
+`dara.lim@educore.kh` / `lecturer@123`, development only). See
 [`docs/database/seed-strategy.md`](docs/database/seed-strategy.md).
 
 ## 8. Access the application
@@ -121,9 +122,15 @@ The seed is idempotent and produces: 1 current university (`ITC`), 3 faculties
 | `/universities`             | University record          | Super admin, University admin |
 | `/universities/{id}/edit`   | Edit university            | Super admin, University admin |
 | `/faculties`                | Faculties + departments    | Super admin, University admin |
+| `/programs`                 | Programs (degree tracks)   | Super admin, University admin (Faculty admin read-only) |
+| `/programs/{id}/edit`       | Edit program               | Super admin, University admin |
+| `/courses`                  | Course catalog             | Super admin, University admin (Faculty admin read-only) |
+| `/courses/{id}/edit`        | Edit course + prerequisites | Super admin, University admin |
+| `/lecturers`                | Lecturer profiles + accounts | Super admin, University admin (Faculty admin read-only) |
+| `/lecturers/{id}/edit`      | Edit lecturer              | Super admin, University admin |
 | `/error-logs`                | System error logs (404/5xx, read-only) | Super admin only (no write) |
 
-Faculty Admin has **read-only** access to `/universities` and `/faculties`; the
+Faculty Admin has **read-only** access to `/universities`, `/faculties`, `/programs`, `/courses` and `/lecturers`; the
 write controls are hidden in the UI and the routes still reject the request with
 `403`. Report:
 [`docs/7_Faculty-and-Department-Report.md`](docs/7_Faculty-and-Department-Report.md).

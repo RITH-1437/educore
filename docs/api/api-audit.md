@@ -296,6 +296,32 @@ documented operations.
 | DELETE | `/api/departments/{department}` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/departments/{department}/archive` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/departments/{department}/reactivate` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/programs` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| POST | `/api/programs` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/programs/{program}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| PUT, PATCH | `/api/programs/{program}` | Sanctum + super-admin or university-admin | Both documented |
+| DELETE | `/api/programs/{program}` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/programs/{program}/archive` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/programs/{program}/reactivate` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/programs/{program}/courses` | Sanctum + super-admin or university-admin | Documented |
+| PATCH | `/api/programs/{program}/courses/{course}` | Sanctum + super-admin or university-admin | Documented |
+| DELETE | `/api/programs/{program}/courses/{course}` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/courses` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| POST | `/api/courses` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/courses/{course}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| PUT, PATCH | `/api/courses/{course}` | Sanctum + super-admin or university-admin | Both documented |
+| DELETE | `/api/courses/{course}` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/courses/{course}/archive` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/courses/{course}/reactivate` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/courses/{course}/prerequisites` | Sanctum + super-admin or university-admin | Documented |
+| DELETE | `/api/courses/{course}/prerequisites/{prerequisite}` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/lecturers` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| POST | `/api/lecturers` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/lecturers/{lecturer}` | Sanctum + super-admin, university-admin, faculty-admin, or the lecturer themself | Documented |
+| PUT, PATCH | `/api/lecturers/{lecturer}` | Sanctum + super-admin or university-admin | Both documented |
+| DELETE | `/api/lecturers/{lecturer}` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/lecturers/{lecturer}/deactivate` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/lecturers/{lecturer}/reactivate` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/error-logs` | Sanctum + super-admin only | Documented |
 | GET | `/api/error-logs/{errorLog}` | Sanctum + super-admin only | Documented |
 

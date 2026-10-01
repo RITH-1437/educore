@@ -379,12 +379,19 @@ users, main business activities, and expected outputs.
 - **Main business activities:** create/update student records, assign programs, maintain status (active, inactive, suspended, graduated, withdrawn).
 - **Expected outputs:** a single, consistent student register.
 
-### 9.3 Lecturer Management [Planned]
+### 9.3 Lecturer Management [Implemented]
 
 - **Purpose:** store and maintain lecturer profiles and assignments.
 - **Primary users:** University Admin, Faculty/Department Admin.
 - **Main business activities:** maintain lecturer records, departments, and positions; assign sections.
 - **Expected outputs:** a reliable staff register linked to teaching duties.
+- **Delivered:** lecturer profiles linked to Lecturer-role login accounts
+  (create a new account or link an existing one), home department, position,
+  specialization, employment type, deactivate/reactivate mirrored onto the
+  account, guarded delete, `/api/lecturers`, seeded staff. A lecturer can read
+  their own profile. See [12_Lecturer-Management-Report.md](12_Lecturer-Management-Report.md).
+- **Not yet delivered `[Planned]`:** section assignment (9.8) and lecturer
+  self-service editing.
 
 ### 9.4 Faculty & Department Management [Implemented]
 
@@ -399,12 +406,18 @@ users, main business activities, and expected outputs.
   deterministic 1 university / 3 faculty / 6 department seed. See
   [7_Faculty-and-Department-Report.md](7_Faculty-and-Department-Report.md).
 
-### 9.5 Program Management [Planned]
+### 9.5 Program Management [Implemented]
 
 - **Purpose:** define programs of study under departments.
 - **Primary users:** University Admin, Faculty/Department Admin.
 - **Main business activities:** create/edit programs and program structures.
 - **Expected outputs:** an accurate list of offered programs.
+- **Delivered:** program CRUD under departments (code, name, degree level,
+  duration, credits), unique code and per-department unique name, archive vs
+  delete with guards, faculty → department cascade UI, `/api/programs`, seeded
+  degree programs. Faculty Admin is read-only. See
+  [10_Program-Management-Report.md](10_Program-Management-Report.md).
+- **Curriculum editor:** delivered with 9.7 (program ↔ course membership).
 
 ### 9.6 Academic Year & Semester Management [Implemented]
 
@@ -417,12 +430,19 @@ users, main business activities, and expected outputs.
   dates constrained to their year, delete guards, web pages plus
   `/api/academic-years` with nested semesters, seeded three-year calendar.
 
-### 9.7 Course Management [Planned]
+### 9.7 Course Management [Implemented]
 
 - **Purpose:** maintain the catalog of courses and their prerequisites.
 - **Primary users:** University Admin, Faculty/Department Admin.
 - **Main business activities:** create courses with codes, credits, descriptions, and prerequisites.
 - **Expected outputs:** a consistent, reusable course catalog.
+- **Delivered:** course CRUD with a draft → active → archived lifecycle, unique
+  codes, acyclic prerequisites (self/duplicate/archived/cycle rejected), the
+  program curriculum editor (course ↔ program with required flag and suggested
+  semester), delete guards, `/api/courses`, seeded catalog. Faculty Admin is
+  read-only. See [11_Course-Management-Report.md](11_Course-Management-Report.md).
+- **Not yet delivered `[Planned]`:** course offerings and sections — they need
+  lecturers, rooms and the timetable (9.3 / 9.8 / 9.10).
 
 ### 9.8 Class / Section Management [Planned]
 

@@ -176,6 +176,7 @@ CREATE TABLE programs (
     created_at       TIMESTAMPTZ    NOT NULL DEFAULT now(),
     updated_at       TIMESTAMPTZ    NOT NULL DEFAULT now(),
     CONSTRAINT uq_programs_code UNIQUE (code),
+    CONSTRAINT uq_programs_department_id_name UNIQUE (department_id, name),
     CONSTRAINT fk_programs_department FOREIGN KEY (department_id)
         REFERENCES departments (id) ON DELETE RESTRICT
 );

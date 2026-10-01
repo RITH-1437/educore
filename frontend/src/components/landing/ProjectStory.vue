@@ -10,10 +10,10 @@ const facts = [
 ]
 
 const status = [
-  { label: 'Core infrastructure, authentication & access', state: 'Implemented', tone: 'bg-teal-50 text-teal-700' },
-  { label: 'Login experience & landing page', state: 'In progress', tone: 'bg-sky-50 text-sky-700' },
-  { label: 'Academic, student & administrator modules', state: 'Planned', tone: 'bg-amber-50 text-amber-700' },
-  { label: 'Analytics, internals & advanced tooling', state: 'Future', tone: 'bg-slate-100 text-slate-500' },
+  { label: 'Authentication, roles, users & admin dashboard', state: 'Implemented', tone: 'bg-teal-50 text-teal-700' },
+  { label: 'University, faculty, department & academic calendar', state: 'Implemented', tone: 'bg-teal-50 text-teal-700' },
+  { label: 'Programs, courses, students & lecturers', state: 'Planned', tone: 'bg-amber-50 text-amber-700' },
+  { label: 'Analytics & advanced tooling', state: 'Future', tone: 'bg-slate-100 text-slate-500' },
 ]
 </script>
 
@@ -46,7 +46,7 @@ const status = [
         <Reveal from="right" class="rounded-2xl border border-slate-200 bg-slate-50 p-6 sm:p-8">
           <div class="flex items-center justify-between">
             <h3 class="font-display text-base font-semibold text-slate-900">Project status</h3>
-            <span class="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-500">
+            <span class="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
               Working progress
             </span>
           </div>

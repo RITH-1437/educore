@@ -1,6 +1,5 @@
 <script setup>
 import { Link } from '@inertiajs/vue3'
-import { useAttrs } from 'vue'
 
 defineProps({
   padding: { type: String, default: 'md', validator: (value) => ['sm', 'md', 'lg'].includes(value) },
@@ -11,9 +10,6 @@ defineProps({
   title: { type: String, default: '' },
 })
 
-defineOptions({ inheritAttrs: false })
-const attrs = useAttrs()
-
 const paddings = { sm: 'p-4', md: 'p-5', lg: 'p-6' }
 </script>
 
@@ -22,11 +18,10 @@ const paddings = { sm: 'p-4', md: 'p-5', lg: 'p-6' }
     v-if="href"
     :href="href"
     :class="[
-      'block rounded-xl bg-surface shadow-sm transition duration-200 ease-out dark:bg-dark-surface motion-reduce:transition-none',
+      'glass-card block rounded-xl transition duration-200 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:focus-visible:outline-dark-primary motion-reduce:transition-none',
       paddings[padding],
-      bordered ? 'border border-border-default dark:border-dark-border' : '',
+      bordered ? 'border' : '',
       hoverable ? 'hover:-translate-y-0.5 hover:shadow-md hover:border-border-muted dark:hover:border-dark-muted' : '',
-      attrs.class,
     ]"
   >
     <slot />
@@ -35,11 +30,10 @@ const paddings = { sm: 'p-4', md: 'p-5', lg: 'p-6' }
     v-else
     :is="as"
     :class="[
-      'rounded-xl bg-surface shadow-sm dark:bg-dark-surface motion-safe:animate-fade-in',
+      'glass-card rounded-xl',
       paddings[padding],
-      bordered ? 'border border-border-default dark:border-dark-border' : '',
+      bordered ? 'border' : '',
       hoverable ? 'transition duration-200 ease-out hover:-translate-y-0.5 hover:shadow-md hover:border-border-muted dark:hover:border-dark-muted motion-reduce:transition-none' : '',
-      attrs.class,
     ]"
   >
     <header v-if="$slots.header || title || $slots.actions" class="mb-4 flex items-start justify-between gap-4">

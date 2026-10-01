@@ -22,8 +22,8 @@ behind keeping them separate, are documented in `skills/audit-logging/SKILL.md`.
 Out of scope:
 
 - Any write/update/delete endpoint — the table is append-only.
-- A sidebar navigation entry — this is a diagnostic tool reached by typing
-  `/error-logs`, not a page anyone navigates to while working.
+- A sidebar navigation entry — **superseded**: Super Admin now has *Error logs*
+  under *System* in the sidebar (`skills/admin-navigation/SKILL.md`).
 - Statuses that are normal control flow: `401`, `403`, `409`, `422`.
 - Request bodies, headers, or query strings — only the path, method, a few
   response/exception facts, and non-sensitive context are stored.

@@ -1,4 +1,5 @@
 <script setup>
+import { Link } from '@inertiajs/vue3'
 import {
   ArrowRight,
   Bell,
@@ -71,13 +72,12 @@ const courses = [
             Explore EduCore
             <ArrowRight class="h-4 w-4" />
           </button>
-          <button
-            type="button"
-            class="rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
-            @click="scrollToId('modules')"
+          <Link
+            href="/login"
+            class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
           >
-            View Platform
-          </button>
+            Sign In
+          </Link>
         </div>
 
         <dl class="edu-fade-up mt-10 grid grid-cols-3 gap-6 border-t border-slate-200 pt-8" style="animation-delay: 0.45s">
@@ -90,15 +90,15 @@ const courses = [
             <dd class="font-display mt-1 text-2xl font-bold text-slate-950">5</dd>
           </div>
           <div>
-            <dt class="text-sm text-slate-500">Data domains</dt>
+            <dt class="text-sm text-slate-500">Domain tables</dt>
             <dd class="font-display mt-1 text-2xl font-bold text-slate-950">49</dd>
           </div>
         </dl>
       </div>
 
       <div class="edu-fade-up relative mx-auto w-full max-w-xl" style="animation-delay: 0.55s">
-        <div class="relative">
-          <div class="rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10">
+        <div class="relative" aria-hidden="true">
+          <div class="rounded-2xl border border-white/70 bg-white/70 shadow-2xl shadow-slate-900/10 backdrop-blur-xl">
             <div class="flex items-center gap-1.5 border-b border-slate-200 px-4 py-3">
               <span class="h-2.5 w-2.5 rounded-full bg-slate-200" />
               <span class="h-2.5 w-2.5 rounded-full bg-slate-200" />
@@ -182,7 +182,7 @@ const courses = [
           </div>
 
           <div
-            class="edu-float absolute -top-5 -right-3 hidden items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 shadow-lg sm:flex"
+            class="edu-float absolute -top-5 -right-3 hidden items-center gap-2.5 rounded-xl border border-white/70 bg-white/70 px-3.5 py-2.5 shadow-lg backdrop-blur-xl sm:flex"
           >
             <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
               <Bell class="h-4 w-4 text-blue-600" />
@@ -194,7 +194,7 @@ const courses = [
           </div>
 
           <div
-            class="edu-float-slow absolute -bottom-6 -left-4 hidden rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-lg sm:block"
+            class="edu-float-slow absolute -bottom-6 -left-4 hidden rounded-xl border border-white/70 bg-white/70 px-4 py-3 shadow-lg backdrop-blur-xl sm:block"
           >
             <div class="flex items-center gap-2">
               <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50">
@@ -210,6 +210,7 @@ const courses = [
             </div>
           </div>
         </div>
+        <p class="mt-10 text-center text-xs text-slate-500">Illustrative interface preview — sample data, not real statistics.</p>
       </div>
     </div>
   </section>

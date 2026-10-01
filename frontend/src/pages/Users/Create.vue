@@ -28,7 +28,7 @@ const submit = () => form.post('/users', { preserveScroll: true })
 
     <header class="flex items-end justify-between gap-4">
       <div>
-        <h2 class="text-h1 font-display font-semibold text-ink dark:text-dark-ink">New user</h2>
+        <h1 class="text-h1 font-display font-semibold text-ink dark:text-dark-ink">New user</h1>
         <p class="mt-2 text-small text-muted dark:text-dark-muted">Create a portal account and assign its access role.</p>
       </div>
       <Link href="/users" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">Back to users</Link>

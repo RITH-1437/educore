@@ -44,8 +44,9 @@ const steps = [
           </p>
         </Reveal>
 
-        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4">
+        <ol class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4">
           <Reveal
+            as="li"
             v-for="(s, i) in steps"
             :key="s.label"
             :delay="i * 60"
@@ -55,13 +56,13 @@ const steps = [
               <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 transition duration-300 group-hover:bg-blue-600">
                 <component :is="s.icon" class="h-5 w-5 text-slate-500 transition duration-300 group-hover:text-white" />
               </span>
-              <span class="font-display text-xs font-bold text-slate-300">
+              <span class="font-display text-xs font-bold text-slate-400" aria-hidden="true">
                 {{ String(i + 1).padStart(2, '0') }}
               </span>
             </div>
             <p class="mt-3 text-sm font-semibold text-slate-800">{{ s.label }}</p>
           </Reveal>
-        </div>
+        </ol>
       </div>
     </div>
   </section>

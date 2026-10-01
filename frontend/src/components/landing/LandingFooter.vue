@@ -21,7 +21,7 @@ const team = ['Rin Nairith', 'Lyhor']
         <div>
           <div class="flex items-center gap-2.5">
             <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-white">
-              <img :src="symbolMark" alt="EduCore symbol" class="h-9 w-9 object-cover" />
+              <img :src="symbolMark" alt="" width="36" height="36" class="h-9 w-9 object-cover" />
             </span>
             <div>
               <p class="font-display text-lg font-bold text-white">EduCore</p>
@@ -38,13 +38,13 @@ const team = ['Rin Nairith', 'Lyhor']
           <h3 class="text-xs font-semibold tracking-[0.2em] text-slate-500 uppercase">Navigation</h3>
           <ul class="mt-4 space-y-2.5">
             <li v-for="n in nav" :key="n.id">
-              <button
-                type="button"
-                class="text-sm text-slate-400 transition hover:text-sky-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
-                @click="scrollToId(n.id, 0)"
+              <a
+                :href="`#${n.id}`"
+                class="inline-flex min-h-8 items-center rounded-sm text-sm text-slate-400 transition hover:text-sky-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+                @click.prevent="scrollToId(n.id, n.id === 'top' ? 0 : 88)"
               >
                 {{ n.label }}
-              </button>
+              </a>
             </li>
           </ul>
         </nav>

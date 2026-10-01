@@ -1,8 +1,10 @@
 <script setup>
-import { Head, Link, router, usePage } from '@inertiajs/vue3'
-import { computed, ref } from 'vue'
+import { Head, Link, router } from '@inertiajs/vue3'
+import { ref } from 'vue'
 import { Search, UserPlus } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
+import PageHeader from '../../components/PageHeader.vue'
+import { useConfirm } from '../../composables/useConfirm'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseTable from '../../components/BaseTable.vue'
@@ -14,9 +16,7 @@ const props = defineProps({
   filters: { type: Object, default: () => ({ search: '' }) },
 })
 
-const page = usePage()
 const search = ref(props.filters.search ?? '')
-const flash = computed(() => page.props.flash)
 const columns = [
   { key: 'name', label: 'Name' },
   { key: 'email', label: 'Email' },
@@ -27,24 +27,20 @@ const columns = [
 ]
 
 const doSearch = () => router.get('/users', { search: search.value || undefined }, { preserveState: true, replace: true })
-const deleteUser = (user) => {
-  if (window.confirm(`Delete user "${user.name}"? This cannot be undone.`)) router.delete(`/users/${user.id}`)
+const { confirm } = useConfirm()
+
+const deleteUser = async (user) => {
+  if (await confirm({ title: 'Delete user?', message: `Delete user "${user.name}"? This cannot be undone.`, confirmLabel: 'Delete', destructive: true })) router.delete(`/users/${user.id}`)
 }
 </script>
 
 <template>
   <Head title="Users & roles - EduCore" />
   <div class="space-y-6">
-    <header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-      <div>
-        <p class="text-caption font-semibold uppercase tracking-widest text-primary">Platform management</p>
-        <h2 class="mt-2 text-h1 font-display font-semibold text-ink dark:text-dark-ink">Users & roles</h2>
-        <p class="mt-2 text-body text-muted dark:text-dark-muted">Manage platform accounts, access roles, and account status.</p>
-      </div>
-      <Link href="/users/create"><BaseButton><UserPlus class="h-4 w-4" aria-hidden="true" /> New user</BaseButton></Link>
-    </header>
+    <PageHeader eyebrow="Platform management" title="Users & roles" description="Manage platform accounts, access roles, and account status.">
+      <template #actions><BaseButton href="/users/create"><UserPlus class="h-4 w-4" aria-hidden="true" /> New user</BaseButton></template>
+    </PageHeader>
 
-    <div v-if="flash?.success" class="rounded-lg border border-success/20 bg-success/5 px-4 py-3 text-small text-success" role="status">{{ flash.success }}</div>
     <BaseCard padding="sm">
       <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="doSearch">
         <BaseInput v-model="search" label="Search accounts" placeholder="Name or email" class="w-full sm:max-w-sm" />

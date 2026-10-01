@@ -1,6 +1,5 @@
 <script setup>
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3'
-import { computed } from 'vue'
+import { Head, Link, useForm } from '@inertiajs/vue3'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseSelect from '../../components/BaseSelect.vue'
@@ -11,9 +10,6 @@ const props = defineProps({
   user: { type: Object, required: true },
   roles: { type: Array, required: true },
 })
-
-const page = usePage()
-const flash = computed(() => page.props.flash)
 
 const form = useForm({
   name: props.user.name,
@@ -34,15 +30,12 @@ const submit = () => form.put(`/users/${props.user.id}`, { preserveScroll: true 
 
     <header class="flex items-end justify-between gap-4">
       <div>
-        <h2 class="text-h1 font-display font-semibold text-ink dark:text-dark-ink">Edit user</h2>
+        <h1 class="text-h1 font-display font-semibold text-ink dark:text-dark-ink">Edit user</h1>
         <p class="mt-2 text-small text-muted dark:text-dark-muted">Update account details and access role.</p>
       </div>
       <Link href="/users" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">Back to users</Link>
     </header>
 
-    <div v-if="flash?.success" class="rounded-lg border border-success/20 bg-success/5 px-4 py-3 text-small text-success" role="status">
-      {{ flash.success }}
-    </div>
 
     <BaseCard padding="lg">
       <form class="space-y-5" @submit.prevent="submit">

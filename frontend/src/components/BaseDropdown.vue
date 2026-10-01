@@ -59,7 +59,7 @@ onBeforeUnmount(() => {
       <div
         v-if="open"
         :class="[
-          'absolute top-full z-50 mt-2 min-w-48 rounded-lg border border-border-default bg-surface py-1 shadow-md dark:border-dark-border dark:bg-dark-surface',
+          'glass-panel absolute top-full z-50 mt-2 min-w-48 rounded-lg border py-1',
           align === 'end' ? 'right-0' : 'left-0',
         ]"
         @click="close"

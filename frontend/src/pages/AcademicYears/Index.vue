@@ -1,16 +1,22 @@
 <script setup>
-import { Head, Link, router, usePage } from '@inertiajs/vue3'
-import { computed, ref } from 'vue'
+import { Head, Link, router } from '@inertiajs/vue3'
+import { ref } from 'vue'
+import { Plus, Search } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
+import BaseBadge from '../../components/BaseBadge.vue'
+import BaseCard from '../../components/BaseCard.vue'
+import BaseInput from '../../components/BaseInput.vue'
+import BaseSelect from '../../components/BaseSelect.vue'
+import BaseTable from '../../components/BaseTable.vue'
+import PageHeader from '../../components/PageHeader.vue'
 import Pagination from '../../components/Pagination.vue'
+import StatusBadge from '../../components/StatusBadge.vue'
+import { useConfirm } from '../../composables/useConfirm'
 
 const props = defineProps({
   academicYears: { type: Object, required: true },
   filters: { type: Object, default: () => ({ search: '', status: '' }) },
 })
-
-const page = usePage()
-const flash = computed(() => page.props.flash)
 
 const search = ref(props.filters.search ?? '')
 const status = ref(props.filters.status ?? '')
@@ -22,11 +28,15 @@ const STATUSES = [
   { value: 'completed', label: 'Completed' },
 ]
 
-const statusClasses = {
-  planned: 'bg-slate-100 text-slate-700',
-  active: 'bg-emerald-100 text-emerald-700',
-  completed: 'bg-blue-100 text-blue-700',
-}
+const columns = [
+  { key: 'code', label: 'Code' },
+  { key: 'name', label: 'Name' },
+  { key: 'span', label: 'Span' },
+  { key: 'semesters_count', label: 'Semesters' },
+  { key: 'status', label: 'Status' },
+  { key: 'is_current', label: 'Current' },
+  { key: 'actions', label: 'Actions', align: 'right' },
+]
 
 const applyFilters = () =>
   router.get(
@@ -43,142 +53,51 @@ const makeCurrent = (academicYear) => {
   router.post(`/academic-years/${academicYear.id}/current`)
 }
 
-const deleteYear = (academicYear) => {
-  if (window.confirm(`Delete academic year "${academicYear.code}"? This cannot be undone.`)) {
+const { confirm } = useConfirm()
+
+const deleteYear = async (academicYear) => {
+  if (await confirm({ title: 'Delete academic year?', message: `Delete academic year "${academicYear.code}"? This cannot be undone.`, confirmLabel: 'Delete', destructive: true })) {
     router.delete(`/academic-years/${academicYear.id}`)
   }
 }
 </script>
 
 <template>
-  <div>
-    <Head title="Academic years" />
+  <Head title="Academic years" />
+  <div class="space-y-6">
+    <PageHeader eyebrow="Platform management" title="Academic years" description="The university calendar every course offering hangs from.">
+      <template #actions>
+        <BaseButton href="/academic-years/create"><Plus class="h-4 w-4" aria-hidden="true" /> New academic year</BaseButton>
+      </template>
+    </PageHeader>
 
-    <div class="flex items-center justify-between">
-      <div>
-        <h2 class="text-2xl font-bold text-slate-900">Academic years</h2>
-        <p class="mt-1 text-sm text-slate-600">The university calendar every course offering hangs from.</p>
-      </div>
-      <Link href="/academic-years/create">
-        <BaseButton type="button">+ New academic year</BaseButton>
-      </Link>
-    </div>
+    <BaseCard padding="sm">
+      <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="applyFilters">
+        <BaseInput v-model="search" type="search" label="Search" placeholder="Code or name" class="w-full sm:max-w-xs" />
+        <BaseSelect v-model="status" label="Status" :options="STATUSES" @change="applyFilters" />
+        <BaseButton type="submit" variant="secondary"><Search class="h-4 w-4" aria-hidden="true" /> Filter</BaseButton>
+      </form>
+    </BaseCard>
 
-    <div v-if="flash?.success" class="mt-4 rounded-md bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-      {{ flash.success }}
-    </div>
-    <div v-if="flash?.error" class="mt-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-800">
-      {{ flash.error }}
-    </div>
-
-    <div class="mt-6 overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-slate-200">
-      <div class="flex flex-wrap items-center gap-3 border-b border-slate-200 px-4 py-3">
-        <form class="flex flex-1 items-center gap-3" @submit.prevent="applyFilters">
-          <input
-            v-model="search"
-            type="search"
-            placeholder="Search by code or name…"
-            class="w-full max-w-xs rounded-md border-slate-300 text-sm shadow-sm focus:border-blue-600 focus:ring-blue-600"
-          />
-          <select
-            v-model="status"
-            class="rounded-md border-slate-300 text-sm shadow-sm focus:border-blue-600 focus:ring-blue-600"
-            @change="applyFilters"
-          >
-            <option v-for="option in STATUSES" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
-          <BaseButton type="submit" size="sm">Filter</BaseButton>
-        </form>
-      </div>
-
-      <table class="min-w-full divide-y divide-slate-200 text-sm">
-        <thead class="bg-slate-50 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-          <tr>
-            <th class="px-4 py-3">Code</th>
-            <th class="px-4 py-3">Name</th>
-            <th class="px-4 py-3">Span</th>
-            <th class="px-4 py-3">Semesters</th>
-            <th class="px-4 py-3">Status</th>
-            <th class="px-4 py-3">Current</th>
-            <th class="px-4 py-3 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-200">
-          <tr v-for="academicYear in academicYears.data" :key="academicYear.id" class="hover:bg-slate-50">
-            <td class="px-4 py-3 font-medium text-slate-900">{{ academicYear.code }}</td>
-            <td class="px-4 py-3 text-slate-600">{{ academicYear.name }}</td>
-            <td class="px-4 py-3 text-slate-500">
-              {{ academicYear.start_date }} → {{ academicYear.end_date }}
-            </td>
-            <td class="px-4 py-3 text-slate-600">{{ academicYear.semesters_count ?? 0 }}</td>
-            <td class="px-4 py-3">
-              <span
-                class="inline-flex rounded px-2 py-0.5 text-xs font-medium"
-                :class="statusClasses[academicYear.status]"
-              >
-                {{ academicYear.status_label }}
-              </span>
-            </td>
-            <td class="px-4 py-3">
-              <span
-                v-if="academicYear.is_current"
-                class="inline-flex rounded bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700"
-              >
-                Current
-              </span>
-              <span v-else class="text-slate-400">—</span>
-            </td>
-            <td class="px-4 py-3 text-right">
-              <Link
-                :href="`/academic-years/${academicYear.id}/edit`"
-                class="font-medium text-blue-600 hover:text-blue-500"
-              >
-                Edit
-              </Link>
-              <button
-                v-if="academicYear.status === 'planned'"
-                type="button"
-                class="ml-4 font-medium text-blue-600 hover:text-blue-500"
-                @click="changeStatus(academicYear, 'active')"
-              >
-                Activate
-              </button>
-              <button
-                v-else-if="academicYear.status === 'active'"
-                type="button"
-                class="ml-4 font-medium text-blue-600 hover:text-blue-500"
-                @click="changeStatus(academicYear, 'completed')"
-              >
-                Complete
-              </button>
-              <button
-                v-if="academicYear.status === 'active' && !academicYear.is_current"
-                type="button"
-                class="ml-4 font-medium text-blue-600 hover:text-blue-500"
-                @click="makeCurrent(academicYear)"
-              >
-                Make current
-              </button>
-              <button
-                type="button"
-                class="ml-4 font-medium text-red-600 hover:text-red-500"
-                @click="deleteYear(academicYear)"
-              >
-                Delete
-              </button>
-            </td>
-          </tr>
-          <tr v-if="academicYears.data.length === 0">
-            <td colspan="7" class="px-4 py-10 text-center text-slate-500">
-              No academic years yet.
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <Pagination :links="academicYears.links" />
-    </div>
+    <BaseTable :columns="columns" :rows="academicYears.data" caption="Academic years" empty-title="No academic years found" empty-description="Create an academic year or adjust your filters.">
+      <template #cell-code="{ row }"><span class="font-medium">{{ row.code }}</span></template>
+      <template #cell-span="{ row }"><span class="whitespace-nowrap text-muted dark:text-dark-muted">{{ row.start_date }} → {{ row.end_date }}</span></template>
+      <template #cell-semesters_count="{ row }">{{ row.semesters_count ?? 0 }}</template>
+      <template #cell-status="{ row }"><StatusBadge :status="row.status" :label="row.status_label" /></template>
+      <template #cell-is_current="{ row }">
+        <BaseBadge v-if="row.is_current" variant="primary">Current</BaseBadge>
+        <span v-else class="text-muted dark:text-dark-muted" aria-label="Not current">—</span>
+      </template>
+      <template #cell-actions="{ row }">
+        <div class="flex flex-wrap justify-end gap-x-4 gap-y-1">
+          <Link :href="`/academic-years/${row.id}/edit`" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">Edit</Link>
+          <button v-if="row.status === 'planned'" type="button" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary" @click="changeStatus(row, 'active')">Activate</button>
+          <button v-else-if="row.status === 'active'" type="button" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary" @click="changeStatus(row, 'completed')">Complete</button>
+          <button v-if="row.status === 'active' && !row.is_current" type="button" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary" @click="makeCurrent(row)">Make current</button>
+          <button type="button" class="text-small font-semibold text-error hover:underline dark:text-red-300" @click="deleteYear(row)">Delete</button>
+        </div>
+      </template>
+    </BaseTable>
+    <Pagination :links="academicYears.links" />
   </div>
 </template>

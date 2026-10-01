@@ -29,6 +29,11 @@ Reusable primitives live under `frontend/src/components` (see
 | `BaseDropdown` / `BaseTooltip` / `BaseBadge` | Small interaction primitives |
 | `EmptyState` / `LoadingSpinner` / `ErrorAlert` | Status visuals |
 | `StatusBadge` | Status → color mapping |
+| `PageHeader` | Page title block (eyebrow, `h1`, description, actions slot) — one `h1` per page |
+| `StatCard` | KPI card: label, value (count-up), detail, icon, optional link or "unavailable" badge |
+| `ErrorState` | Friendly load-failure block with retry; never show raw backend errors |
+| `SkeletonBlock` / `StatCardSkeleton` / `TableSkeleton` | Loading placeholders that match final dimensions |
+| `layout/AppSidebar` / `layout/AppTopbar` | Dashboard shell (see §8, §11) |
 | `Pagination` | Page navigation |
 
 Do not rewrite these; extend/use them.
@@ -288,6 +293,17 @@ Restrained, purposeful.
 
 ---
 
+### 11.1 Dashboard shell motion and theme (added with the UI refinement)
+
+| Item | Rule |
+|---|---|
+| Route change | `animate-page-in`: 250ms, opacity 0→1 + translateY(6px→0), keyed on path (not query) |
+| Section entrance | `animate-section-in`: 500ms ease-out, staggered 60ms steps, `motion-safe:` only |
+| Sidebar collapse / drawer | 300ms ease-out; collapsed state persisted (`educore_sidebar_collapsed`); below `lg` it is a drawer with backdrop, scroll lock, focus trap, Esc, `inert` when closed |
+| Count-up | `useCountUp`, 500ms, skipped under reduced motion |
+| Theme | `useTheme` toggles `dark` on `<html>` only while the dashboard layout is mounted; preference in `educore_theme`, falls back to system |
+| Skeletons | `animate-pulse` blocks sized like the final component |
+
 ## 12. UX States (all components)
 
 Every major component defines these states:
@@ -330,6 +346,36 @@ DO NOT:
 
 If a new pattern is unavoidable, **update the design system** and get it
 approved — do not silently create an inconsistent pattern.
+
+---
+
+## 14. Glass Surfaces
+
+Frosted-glass surfaces are part of the dashboard, login and landing look. They
+are implemented once, as token-based utilities in `frontend/src/style.css`, and
+must not be re-created per component.
+
+| Utility | Use | Treatment |
+|---|---|---|
+| `glass-surface` | Sidebar, topbar | `surface` @ 70% (dark: `dark-surface` @ 65%), blur 16px, no border/shadow |
+| `glass-card` | `BaseCard`, `StatCard`, `BaseTable` container | `surface` @ 72%, blur 12px, `border-default` @ 80%, `shadow-sm` + 1px inner highlight |
+| `glass-panel` | `BaseModal`, `BaseDropdown` | `surface` @ 86% (more opaque for legibility), blur 24px, `shadow-lg` |
+| `glass-frosted` | Login card, any surface over a photo/dark field | white @ 10%, blur 24px, white border @ 22% |
+| `.app-ambient` | Dashboard shell backdrop | Three low-alpha radial fields (primary, secondary, accent; dark: brighter primary) so the glass has something to blur |
+
+Rules:
+
+- Glass only on **containers and chrome**; text, icons, tables rows and badges
+  stay solid. Inputs use `surface` @ 70% with `backdrop-blur-sm`.
+- Text contrast (AA) is measured against the glass background — never lower the
+  opacities below the values above.
+- Fallbacks are built in: no `backdrop-filter` support, `prefers-reduced-transparency`
+  or `prefers-contrast: more` switch every glass utility to the solid
+  `surface`/`dark-surface` token and hide `.app-ambient`.
+- Do not stack more than one glass layer on top of another; do not add glass to
+  flat white landing sections (nothing behind them to blur).
+- The ambient fields are the **only** sanctioned decorative gradient in the app
+  shell (alpha ≤ 18%); no other gradients.
 
 ---
 

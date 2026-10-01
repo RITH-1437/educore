@@ -54,7 +54,7 @@ const onChange = (event) => {
       :aria-required="required || undefined"
       :aria-invalid="error ? 'true' : 'false'"
       :aria-describedby="error ? errorId : undefined"
-      class="min-h-11 w-full rounded-md border border-border-default bg-surface px-3 py-2 text-body text-ink shadow-sm transition-colors focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-border dark:bg-dark-surface dark:text-dark-ink"
+      class="min-h-11 w-full rounded-md border border-border-default bg-surface/70 backdrop-blur-sm px-3 py-2 text-body text-ink shadow-sm transition-colors focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-border dark:bg-dark-surface dark:text-dark-ink"
       @change="onChange"
     >
       <option v-if="!multiple && placeholder" value="">{{ placeholder }}</option>

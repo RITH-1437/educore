@@ -61,7 +61,7 @@ const rows = [
         </Reveal>
 
         <Reveal from="right" class="relative">
-          <div class="rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10">
+          <div class="rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/10" aria-hidden="true">
             <div class="flex items-center gap-1.5 border-b border-slate-200 px-4 py-3">
               <span class="h-2.5 w-2.5 rounded-full bg-slate-200" />
               <span class="h-2.5 w-2.5 rounded-full bg-slate-200" />
@@ -104,7 +104,7 @@ const rows = [
             </div>
           </div>
 
-          <div class="edu-float absolute -right-3 -bottom-5 hidden items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 shadow-lg md:flex">
+          <div aria-hidden="true" class="edu-float absolute -right-3 -bottom-5 hidden items-center gap-2.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 shadow-lg md:flex">
             <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50">
               <Bell class="h-4 w-4 text-teal-600" />
             </span>
@@ -113,12 +113,13 @@ const rows = [
               <p class="text-[11px] text-slate-500">Delivered to all students</p>
             </div>
           </div>
-          <div class="edu-float-slow absolute -top-4 -left-4 hidden items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 shadow-lg md:flex">
+          <div aria-hidden="true" class="edu-float-slow absolute -top-4 -left-4 hidden items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 shadow-lg md:flex">
             <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50">
               <Inbox class="h-3.5 w-3.5 text-blue-600" />
             </span>
             <p class="text-xs font-semibold text-slate-800">5 pending document requests</p>
           </div>
+          <p class="mt-8 text-center text-xs text-slate-500">Illustrative workspace — sample names and data.</p>
         </Reveal>
       </div>
     </div>

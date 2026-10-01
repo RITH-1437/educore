@@ -18,7 +18,7 @@ const generatedId = useId()
 const textareaId = computed(() => props.id || generatedId)
 const errorId = computed(() => `${textareaId.value}-error`)
 const fieldClasses = computed(() => [
-  'min-h-28 w-full resize-y rounded-md border bg-surface px-3 py-2 text-body text-ink shadow-sm transition-colors',
+  'min-h-28 w-full resize-y rounded-md border bg-surface/70 backdrop-blur-sm px-3 py-2 text-body text-ink shadow-sm transition-colors',
   'placeholder:text-muted focus-visible:border-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary',
   'disabled:cursor-not-allowed disabled:opacity-50 dark:bg-dark-surface dark:text-dark-ink dark:placeholder:text-dark-muted dark:border-dark-border',
   props.error ? 'border-error' : 'border-border-default',

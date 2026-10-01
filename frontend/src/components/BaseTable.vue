@@ -2,13 +2,16 @@
 import { computed, ref } from 'vue'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
 import EmptyState from './EmptyState.vue'
-import LoadingSpinner from './LoadingSpinner.vue'
+import ErrorState from './ErrorState.vue'
+import TableSkeleton from './TableSkeleton.vue'
 
 const props = defineProps({
   columns: { type: Array, required: true },
   rows: { type: Array, default: () => [] },
   rowKey: { type: String, default: 'id' },
   loading: { type: Boolean, default: false },
+  error: { type: Boolean, default: false },
+  errorTitle: { type: String, default: 'Unable to load records' },
   sortable: { type: Boolean, default: false },
   rowClickable: { type: Boolean, default: false },
   emptyTitle: { type: String, default: 'No records found' },
@@ -16,7 +19,7 @@ const props = defineProps({
   caption: { type: String, default: '' },
 })
 
-const emit = defineEmits(['sort', 'row-click'])
+const emit = defineEmits(['sort', 'row-click', 'retry'])
 const sortKey = ref('')
 const sortDirection = ref('asc')
 
@@ -42,16 +45,17 @@ const sort = (column) => {
 </script>
 
 <template>
-  <div class="overflow-hidden rounded-xl border border-border-default bg-surface shadow-sm dark:border-dark-border dark:bg-dark-surface">
-    <div v-if="loading" class="flex min-h-48 items-center justify-center" role="status" aria-label="Loading table">
-      <LoadingSpinner label="Loading records" />
+  <div class="glass-card overflow-hidden rounded-xl border">
+    <TableSkeleton v-if="loading" :columns="columns.length" />
+    <div v-else-if="error" class="p-6 sm:p-10">
+      <ErrorState :title="errorTitle" @retry="emit('retry')" />
     </div>
     <div v-else-if="rows.length === 0" class="p-8 sm:p-12">
       <EmptyState :title="emptyTitle" :description="emptyDescription">
         <template v-if="$slots['empty-action']" #action><slot name="empty-action" /></template>
       </EmptyState>
     </div>
-    <div v-else class="overflow-x-auto">
+    <div v-else class="overflow-x-auto" tabindex="0" role="region" :aria-label="caption || 'Data table'">
       <table class="min-w-full divide-y divide-border-default dark:divide-dark-border">
         <caption v-if="caption" class="sr-only">{{ caption }}</caption>
         <thead class="bg-background/70 dark:bg-dark-surface-2/50">
@@ -84,9 +88,11 @@ const sort = (column) => {
           <tr
             v-for="row in visibleRows"
             :key="row[rowKey]"
-            class="transition-colors hover:bg-background dark:hover:bg-dark-surface-2/50"
+            class="transition-colors duration-150 hover:bg-background dark:hover:bg-dark-surface-2/50"
+            :class="rowClickable ? 'cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary' : ''"
+            :tabindex="rowClickable ? 0 : undefined"
             @click="rowClickable && emit('row-click', row)"
-            :class="rowClickable ? 'cursor-pointer' : ''"
+            @keydown.enter="rowClickable && emit('row-click', row)"
           >
             <td
               v-for="column in columns"

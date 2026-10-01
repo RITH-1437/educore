@@ -1,21 +1,23 @@
 <script setup>
 import { computed } from 'vue'
-import { Head, Link } from '@inertiajs/vue3'
+import { Head, Link, usePage } from '@inertiajs/vue3'
 import {
-  ArrowDownRight,
   ArrowRight,
-  ArrowUpRight,
   BookOpen,
   CalendarDays,
+  CircleCheck,
   GraduationCap,
   Landmark,
-  ShieldCheck,
+  Presentation,
+  TriangleAlert,
   Users,
 } from '@lucide/vue'
 import BaseBadge from '../../components/BaseBadge.vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import EmptyState from '../../components/EmptyState.vue'
+import PageHeader from '../../components/PageHeader.vue'
+import StatCard from '../../components/StatCard.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
 
 const props = defineProps({
@@ -25,120 +27,133 @@ const props = defineProps({
   recentUsers: { type: Array, default: () => [] },
 })
 
+const page = usePage()
+const firstName = computed(() => page.props.auth?.user?.name?.split(' ')[0] ?? 'administrator')
+
 const metrics = computed(() => [
   { label: 'Total accounts', value: props.stats.total_users, detail: `${props.stats.active_users} active`, icon: Users, href: '/users', tone: 'primary' },
   { label: 'Academic years', value: props.stats.total_academic_years, detail: `${props.stats.active_academic_years} active`, icon: CalendarDays, href: '/academic-years', tone: 'secondary' },
-  { label: 'Faculties', value: props.stats.total_faculties, detail: 'Institution structure', icon: Landmark, href: '', tone: 'success' },
-  { label: 'Programs', value: props.stats.total_programs, detail: `${props.stats.total_semesters} semesters`, icon: BookOpen, href: '', tone: 'warning' },
+  { label: 'Faculties', value: props.stats.total_faculties, detail: 'Institution structure', icon: Landmark, href: '/faculties', tone: 'success' },
+  { label: 'Programs', value: props.stats.total_programs, detail: `${props.stats.total_semesters} semesters`, icon: BookOpen, href: '/programs', tone: 'warning' },
 ])
 
-const toneClasses = {
-  primary: 'bg-primary/10 text-primary dark:bg-dark-primary/15 dark:text-dark-primary',
-  secondary: 'bg-secondary/15 text-primary-dark dark:bg-secondary/15 dark:text-dark-ink',
-  success: 'bg-success/10 text-success dark:bg-success/15 dark:text-green-300',
-  warning: 'bg-warning/15 text-primary-dark dark:bg-warning/15 dark:text-amber-200',
-}
+// Only real, derivable signals — nothing is shown when everything is in order.
+const attention = computed(() => {
+  const items = []
+  const inactive = props.stats.total_users - props.stats.active_users
+  if (!props.currentAcademicYear) items.push({ text: 'No current academic year is set.', href: '/academic-years', action: 'Set one' })
+  if (inactive > 0) items.push({ text: `${inactive} ${inactive === 1 ? 'account is' : 'accounts are'} inactive.`, href: '/users', action: 'Review accounts' })
+  return items
+})
 
-const managementAreas = [
-  { title: 'User & role management', detail: 'Create accounts, assign fixed platform roles, and manage access.', href: '/users', label: 'Manage users', icon: Users, ready: true },
-  { title: 'Academic calendar', detail: 'Manage academic years, semester dates, and status transitions.', href: '/academic-years', label: 'Open calendar', icon: CalendarDays, ready: true },
-  { title: 'Faculties & departments', detail: 'Organize the university structure and responsible administrators.', href: '', label: 'Planned', icon: Landmark, ready: false },
-  { title: 'Programs & courses', detail: 'Review and manage academic offerings across the institution.', href: '', label: 'Planned', icon: BookOpen, ready: false },
-  { title: 'Students & lecturers', detail: 'Manage academic profiles and institutional memberships.', href: '', label: 'Planned', icon: GraduationCap, ready: false },
-  { title: 'Platform security', detail: 'A future home for audit, system configuration, and security controls.', href: '', label: 'Planned', icon: ShieldCheck, ready: false },
+const roleShare = (total) => (props.stats.total_users ? Math.max(4, Math.round((total / props.stats.total_users) * 100)) : 0)
+
+const areas = [
+  { title: 'Users & roles', detail: 'Create accounts and assign platform roles.', href: '/users', icon: Users },
+  { title: 'Academic calendar', detail: 'Years, semesters, and status transitions.', href: '/academic-years', icon: CalendarDays },
+  { title: 'Faculties & departments', detail: 'Organize the university structure.', href: '/faculties', icon: Landmark },
+  { title: 'Programs', detail: 'Degree tracks offered by each department.', href: '/programs', icon: BookOpen },
+  { title: 'Courses', detail: 'Catalog, prerequisites and program curricula.', href: '/courses', icon: GraduationCap },
+  { title: 'Lecturers', detail: 'Teaching staff profiles and accounts.', href: '/lecturers', icon: Presentation },
 ]
+
+const formatDate = (value) => (value ? new Date(value).toLocaleDateString() : '—')
+const delay = (step) => ({ animationDelay: `${step * 60}ms` })
 </script>
 
 <template>
   <Head title="Admin dashboard - EduCore" />
 
   <div class="space-y-8">
-    <section class="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-      <div>
-        <p class="mb-2 text-caption font-semibold uppercase tracking-widest text-primary">Platform overview</p>
-        <h2 class="text-h1 font-display font-semibold tracking-tight text-ink dark:text-dark-ink">Good day, administrator</h2>
-        <p class="mt-2 max-w-2xl text-body text-muted dark:text-dark-muted">Manage the university platform, review academic operations, and find the tools you need from one place.</p>
-      </div>
-      <div class="flex flex-wrap gap-3">
-        <Link href="/academic-years/create"><BaseButton variant="secondary"><CalendarDays class="h-4 w-4" aria-hidden="true" /> New academic year</BaseButton></Link>
-        <Link href="/users/create"><BaseButton><Users class="h-4 w-4" aria-hidden="true" /> Create account</BaseButton></Link>
-      </div>
+    <PageHeader eyebrow="Platform overview" :title="`Welcome back, ${firstName}`" description="A snapshot of accounts, the academic calendar, and what needs your attention.">
+      <template #actions>
+        <BaseButton href="/academic-years/create" variant="secondary"><CalendarDays class="h-4 w-4" aria-hidden="true" /> New academic year</BaseButton>
+        <BaseButton href="/users/create"><Users class="h-4 w-4" aria-hidden="true" /> Create account</BaseButton>
+      </template>
+    </PageHeader>
+
+    <section v-if="attention.length" class="rounded-xl border border-warning/30 bg-warning/5 p-4 motion-safe:animate-section-in sm:p-5" aria-label="Needs attention">
+      <h2 class="flex items-center gap-2 text-small font-semibold text-ink dark:text-dark-ink"><TriangleAlert class="h-4 w-4 text-warning" aria-hidden="true" /> Needs attention</h2>
+      <ul class="mt-3 divide-y divide-warning/20">
+        <li v-for="item in attention" :key="item.text" class="flex flex-wrap items-center justify-between gap-2 py-2 first:pt-0 last:pb-0">
+          <span class="text-small text-ink dark:text-dark-ink">{{ item.text }}</span>
+          <Link :href="item.href" class="inline-flex min-h-8 items-center gap-1 text-small font-semibold text-primary hover:underline dark:text-dark-primary">{{ item.action }} <ArrowRight class="h-4 w-4" aria-hidden="true" /></Link>
+        </li>
+      </ul>
     </section>
 
     <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Platform metrics">
-      <BaseCard v-for="(metric, index) in metrics" :key="metric.label" :href="metric.href || undefined" :hoverable="Boolean(metric.href)" class="motion-safe:animate-slide-up" :style="{ animationDelay: `${index * 50}ms` }">
-        <div class="flex items-start justify-between gap-4">
-          <div>
-            <p class="text-small font-medium text-muted dark:text-dark-muted">{{ metric.label }}</p>
-            <p class="mt-3 text-h2 font-semibold tabular-nums text-ink dark:text-dark-ink">{{ metric.value }}</p>
-            <p class="mt-1 text-caption text-muted dark:text-dark-muted">{{ metric.detail }}</p>
-          </div>
-          <span :class="['flex h-11 w-11 items-center justify-center rounded-xl', toneClasses[metric.tone]]">
-            <component :is="metric.icon" class="h-5 w-5" aria-hidden="true" />
-          </span>
-        </div>
-        <span v-if="metric.href" class="mt-4 inline-flex items-center gap-1 text-caption font-semibold text-primary dark:text-dark-primary">Open section <ArrowRight class="h-3.5 w-3.5" aria-hidden="true" /></span>
-        <span v-else class="mt-4 inline-flex"><BaseBadge variant="muted" size="sm">Planned module</BaseBadge></span>
-      </BaseCard>
+      <StatCard v-for="(metric, index) in metrics" :key="metric.label" v-bind="metric" class="motion-safe:animate-section-in" :style="delay(index)" />
     </section>
 
-    <section class="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-      <BaseCard title="Management directory" padding="lg">
-        <template #description>Current tools and the management areas planned for this super-admin workspace.</template>
-        <div class="grid gap-3 md:grid-cols-2">
-          <article v-for="area in managementAreas" :key="area.title" class="group flex min-h-36 flex-col rounded-lg border border-border-default p-4 transition duration-150 ease-out hover:border-border-muted hover:shadow-sm dark:border-dark-border dark:hover:border-dark-muted motion-reduce:transition-none">
-            <div class="flex items-start gap-3">
-              <span :class="['flex h-10 w-10 shrink-0 items-center justify-center rounded-lg', area.ready ? 'bg-primary/10 text-primary dark:bg-dark-primary/15 dark:text-dark-primary' : 'bg-background text-muted dark:bg-dark-surface-2 dark:text-dark-muted']">
-                <component :is="area.icon" class="h-5 w-5" aria-hidden="true" />
-              </span>
-              <div class="min-w-0 flex-1">
-                <div class="flex flex-wrap items-center gap-2">
-                  <h3 class="text-h4 font-semibold text-ink dark:text-dark-ink">{{ area.title }}</h3>
-                  <BaseBadge v-if="!area.ready" variant="muted" size="sm">Planned</BaseBadge>
-                </div>
-                <p class="mt-1 text-small text-muted dark:text-dark-muted">{{ area.detail }}</p>
-              </div>
-            </div>
-            <Link v-if="area.ready" :href="area.href" class="mt-auto inline-flex items-center gap-1 pt-4 text-small font-semibold text-primary hover:underline dark:text-dark-primary">
-              {{ area.label }} <ArrowRight class="h-4 w-4" aria-hidden="true" />
-            </Link>
-            <span v-else class="mt-auto pt-4 text-caption text-muted dark:text-dark-muted">This module will be added in a future phase.</span>
-          </article>
+    <section class="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
+      <BaseCard title="Recently created accounts" padding="lg" class="min-w-0 motion-safe:animate-section-in" :style="delay(4)">
+        <template #description>Latest platform accounts with their role and status.</template>
+        <template #actions><Link href="/users" class="inline-flex min-h-8 items-center gap-1 whitespace-nowrap text-small font-semibold text-primary hover:underline dark:text-dark-primary">View all <ArrowRight class="h-4 w-4" aria-hidden="true" /></Link></template>
+        <div v-if="recentUsers.length" class="-mx-2 overflow-x-auto">
+          <table class="min-w-full">
+            <caption class="sr-only">Recently created accounts</caption>
+            <thead>
+              <tr class="border-b border-border-default text-left text-caption font-semibold uppercase tracking-wider text-muted dark:border-dark-border dark:text-dark-muted">
+                <th scope="col" class="px-2 py-2">Account</th>
+                <th scope="col" class="hidden px-2 py-2 sm:table-cell">Role</th>
+                <th scope="col" class="px-2 py-2">Status</th>
+                <th scope="col" class="hidden px-2 py-2 text-right md:table-cell">Created</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-border-default dark:divide-dark-border">
+              <tr v-for="account in recentUsers" :key="account.id" class="transition-colors duration-150 hover:bg-background dark:hover:bg-dark-surface-2/50">
+                <td class="px-2 py-3">
+                  <p class="text-small font-medium text-ink dark:text-dark-ink">{{ account.name }}</p>
+                  <p class="max-w-56 truncate text-caption text-muted dark:text-dark-muted">{{ account.email }}</p>
+                </td>
+                <td class="hidden px-2 py-3 text-small text-ink dark:text-dark-ink sm:table-cell">{{ account.role || '—' }}</td>
+                <td class="px-2 py-3"><StatusBadge :status="account.is_active ? 'active' : 'inactive'" /></td>
+                <td class="hidden px-2 py-3 text-right text-small text-muted dark:text-dark-muted md:table-cell">{{ formatDate(account.created_at) }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+        <EmptyState v-else title="No user accounts yet" description="Create the first account to begin setting up EduCore." action-label="Create account" action-href="/users/create" />
       </BaseCard>
 
       <div class="space-y-6">
-        <BaseCard title="Current academic year">
+        <BaseCard title="Current academic year" class="motion-safe:animate-section-in" :style="delay(5)">
           <template #description>Institution-wide calendar context.</template>
-          <div v-if="currentAcademicYear" class="mt-4">
+          <div v-if="currentAcademicYear">
             <div class="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p class="text-h3 font-semibold text-ink dark:text-dark-ink">{{ currentAcademicYear.name }}</p>
+                <p class="text-h4 font-semibold text-ink dark:text-dark-ink">{{ currentAcademicYear.name }}</p>
                 <p class="mt-1 text-small text-muted dark:text-dark-muted">{{ currentAcademicYear.code }} · {{ currentAcademicYear.start_date }} – {{ currentAcademicYear.end_date }}</p>
               </div>
               <StatusBadge :status="currentAcademicYear.status" />
             </div>
-            <div class="mt-5 space-y-3">
-              <div v-for="semester in currentAcademicYear.semesters" :key="semester.id" class="flex items-center justify-between gap-3 border-t border-border-default pt-3 dark:border-dark-border">
+            <ul class="mt-4 space-y-3">
+              <li v-for="semester in currentAcademicYear.semesters" :key="semester.id" class="flex items-center justify-between gap-3 border-t border-border-default pt-3 dark:border-dark-border">
                 <div>
                   <p class="text-small font-medium text-ink dark:text-dark-ink">{{ semester.sequence }}. {{ semester.name }}</p>
                   <p class="text-caption text-muted dark:text-dark-muted">{{ semester.start_date || 'Dates not set' }}<template v-if="semester.end_date"> – {{ semester.end_date }}</template></p>
                 </div>
-                <StatusBadge :status="semester.status" size="sm" />
-              </div>
-              <p v-if="currentAcademicYear.semesters.length === 0" class="text-small text-muted dark:text-dark-muted">No semesters are configured yet.</p>
-            </div>
-            <Link href="/academic-years" class="mt-5 inline-flex items-center gap-1 text-small font-semibold text-primary hover:underline dark:text-dark-primary">Manage academic calendar <ArrowRight class="h-4 w-4" aria-hidden="true" /></Link>
+                <StatusBadge :status="semester.status" />
+              </li>
+            </ul>
+            <p v-if="currentAcademicYear.semesters.length === 0" class="mt-4 text-small text-muted dark:text-dark-muted">No semesters are configured yet.</p>
+            <Link href="/academic-years" class="mt-4 inline-flex min-h-8 items-center gap-1 text-small font-semibold text-primary hover:underline dark:text-dark-primary">Manage academic calendar <ArrowRight class="h-4 w-4" aria-hidden="true" /></Link>
           </div>
           <EmptyState v-else title="No current academic year" description="Create and activate an academic year to set the current calendar." action-label="Create academic year" action-href="/academic-years/create" />
         </BaseCard>
 
-        <BaseCard title="Accounts by role">
-          <template #description>Active and inactive accounts included.</template>
-          <ul v-if="roleCounts.length" class="mt-4 divide-y divide-border-default dark:divide-dark-border">
-            <li v-for="roleItem in roleCounts" :key="roleItem.slug" class="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
-              <span class="text-small text-ink dark:text-dark-ink">{{ roleItem.name }}</span>
-              <span class="rounded-pill bg-background px-3 py-1 text-small font-semibold tabular-nums text-ink dark:bg-dark-surface-2 dark:text-dark-ink">{{ roleItem.total }}</span>
+        <BaseCard title="Accounts by role" class="motion-safe:animate-section-in" :style="delay(6)">
+          <template #description>Share of all accounts, active and inactive.</template>
+          <ul v-if="roleCounts.length" class="space-y-4">
+            <li v-for="roleItem in roleCounts" :key="roleItem.slug">
+              <div class="flex items-center justify-between gap-4 text-small">
+                <span class="text-ink dark:text-dark-ink">{{ roleItem.name }}</span>
+                <span class="font-semibold tabular-nums text-ink dark:text-dark-ink">{{ roleItem.total }}</span>
+              </div>
+              <div class="mt-2 h-2 overflow-hidden rounded-pill bg-background dark:bg-dark-surface-2" role="presentation">
+                <div class="h-full rounded-pill bg-primary transition-[width] duration-500 ease-out dark:bg-dark-primary motion-reduce:transition-none" :style="{ width: `${roleShare(roleItem.total)}%` }" />
+              </div>
             </li>
           </ul>
           <EmptyState v-else title="No roles assigned" description="Accounts will appear here as roles are assigned." />
@@ -146,29 +161,38 @@ const managementAreas = [
       </div>
     </section>
 
-    <BaseCard title="Recently created accounts" padding="lg">
-      <template #description>Latest platform accounts, with access role and account status.</template>
-      <template #actions><Link href="/users" class="inline-flex items-center gap-1 text-small font-semibold text-primary hover:underline dark:text-dark-primary">View all <ArrowRight class="h-4 w-4" aria-hidden="true" /></Link></template>
-      <div v-if="recentUsers.length" class="mt-4 overflow-x-auto">
-        <table class="min-w-full divide-y divide-border-default dark:divide-dark-border">
-          <thead><tr><th class="px-3 py-3 text-left text-small font-semibold text-muted dark:text-dark-muted">Name</th><th class="px-3 py-3 text-left text-small font-semibold text-muted dark:text-dark-muted">Email</th><th class="px-3 py-3 text-left text-small font-semibold text-muted dark:text-dark-muted">Role</th><th class="px-3 py-3 text-left text-small font-semibold text-muted dark:text-dark-muted">Status</th><th class="px-3 py-3 text-right text-small font-semibold text-muted dark:text-dark-muted">Created</th></tr></thead>
-          <tbody class="divide-y divide-border-default dark:divide-dark-border">
-            <tr v-for="(account, index) in recentUsers" :key="account.id" class="motion-safe:animate-fade-in">
-              <td class="px-3 py-3 text-small font-medium text-ink dark:text-dark-ink">{{ account.name }}</td>
-              <td class="px-3 py-3 text-small text-muted dark:text-dark-muted">{{ account.email }}</td>
-              <td class="px-3 py-3 text-small text-ink dark:text-dark-ink">{{ account.role || '—' }}</td>
-              <td class="px-3 py-3"><StatusBadge :status="account.is_active ? 'active' : 'inactive'" size="sm" /></td>
-              <td class="px-3 py-3 text-right text-small text-muted dark:text-dark-muted">{{ account.created_at ? new Date(account.created_at).toLocaleDateString() : '—' }}</td>
-            </tr>
-          </tbody>
-        </table>
+    <section aria-labelledby="areas-heading" class="motion-safe:animate-section-in" :style="delay(7)">
+      <h2 id="areas-heading" class="text-h4 font-semibold text-ink dark:text-dark-ink">Management areas</h2>
+      <p class="mt-1 text-small text-muted dark:text-dark-muted">Available tools, plus the modules planned for this workspace.</p>
+      <div class="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <template v-for="area in areas" :key="area.title">
+          <BaseCard v-if="area.href" :href="area.href" hoverable padding="sm" class="group">
+            <div class="flex items-start gap-3">
+              <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary dark:bg-dark-primary/15 dark:text-dark-primary"><component :is="area.icon" class="h-5 w-5" aria-hidden="true" /></span>
+              <div class="min-w-0 flex-1">
+                <h3 class="text-small font-semibold text-ink dark:text-dark-ink">{{ area.title }}</h3>
+                <p class="mt-1 text-caption text-muted dark:text-dark-muted">{{ area.detail }}</p>
+              </div>
+              <ArrowRight class="h-4 w-4 shrink-0 text-muted transition-transform duration-150 group-hover:translate-x-0.5 dark:text-dark-muted motion-reduce:transition-none" aria-hidden="true" />
+            </div>
+          </BaseCard>
+          <div v-else class="flex items-start gap-3 rounded-xl border border-dashed border-border-muted p-4 dark:border-dark-border">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-background text-muted dark:bg-dark-surface-2 dark:text-dark-muted"><component :is="area.icon" class="h-5 w-5" aria-hidden="true" /></span>
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <h3 class="text-small font-semibold text-ink dark:text-dark-ink">{{ area.title }}</h3>
+                <BaseBadge variant="muted" size="sm">Planned</BaseBadge>
+              </div>
+              <p class="mt-1 text-caption text-muted dark:text-dark-muted">{{ area.detail }}</p>
+            </div>
+          </div>
+        </template>
       </div>
-      <EmptyState v-else title="No user accounts yet" description="Create the first account to begin setting up EduCore." action-label="Create account" action-href="/users/create" />
-    </BaseCard>
+    </section>
 
-    <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-border-default bg-surface px-5 py-4 text-small text-muted dark:border-dark-border dark:bg-dark-surface dark:text-dark-muted">
-      <span>Administrative actions are protected by server-side role and policy checks.</span>
-      <span class="inline-flex items-center gap-2"><ArrowUpRight class="h-4 w-4 text-success" aria-hidden="true" /><ArrowDownRight class="h-4 w-4 text-error" aria-hidden="true" /> Metrics are current totals; trends will be introduced with analytics.</span>
-    </div>
+    <p class="flex items-center gap-2 text-caption text-muted dark:text-dark-muted">
+      <CircleCheck class="h-4 w-4 shrink-0 text-success" aria-hidden="true" />
+      Metrics are current totals; trends will appear once analytics is available. Actions are enforced by server-side role checks.
+    </p>
   </div>
 </template>

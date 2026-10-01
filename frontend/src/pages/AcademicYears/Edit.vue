@@ -1,20 +1,17 @@
 <script setup>
-import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3'
-import { computed } from 'vue'
+import { Head, Link, router, useForm } from '@inertiajs/vue3'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseSelect from '../../components/BaseSelect.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
+import { useConfirm } from '../../composables/useConfirm'
 import BaseBadge from '../../components/BaseBadge.vue'
 
 const props = defineProps({
   academicYear: { type: Object, required: true },
   semesters: { type: Array, required: true },
 })
-
-const page = usePage()
-const flash = computed(() => page.props.flash)
 
 const form = useForm({
   code: props.academicYear.code,
@@ -48,8 +45,10 @@ const addSemester = () =>
 const changeSemesterStatus = (semester, status) =>
   router.post(`/academic-years/${props.academicYear.id}/semesters/${semester.id}/status`, { status })
 
-const deleteSemester = (semester) => {
-  if (window.confirm(`Delete "${semester.name}"? This cannot be undone.`)) {
+const { confirm } = useConfirm()
+
+const deleteSemester = async (semester) => {
+  if (await confirm({ title: 'Delete semester?', message: `Delete "${semester.name}"? This cannot be undone.`, confirmLabel: 'Delete', destructive: true })) {
     router.delete(`/academic-years/${props.academicYear.id}/semesters/${semester.id}`, {
       preserveScroll: true,
     })
@@ -63,7 +62,7 @@ const deleteSemester = (semester) => {
 
     <header class="flex items-end justify-between gap-4">
       <div>
-        <h2 class="text-h1 font-display font-semibold text-ink dark:text-dark-ink">{{ academicYear.name }}</h2>
+        <h1 class="text-h1 font-display font-semibold text-ink dark:text-dark-ink">{{ academicYear.name }}</h1>
         <p class="mt-2 flex flex-wrap items-center gap-2 text-small text-muted dark:text-dark-muted">
           Code <span class="font-medium text-ink dark:text-dark-ink">{{ academicYear.code }}</span>
           <StatusBadge :status="academicYear.status" />
@@ -73,9 +72,6 @@ const deleteSemester = (semester) => {
       <Link href="/academic-years" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">Back to calendar</Link>
     </header>
 
-    <div v-if="flash?.success" class="rounded-lg border border-success/20 bg-success/5 px-4 py-3 text-small text-success" role="status">
-      {{ flash.success }}
-    </div>
     <div v-if="flash?.error" class="rounded-lg border border-error/20 bg-error/5 px-4 py-3 text-small text-error" role="alert">
       {{ flash.error }}
     </div>

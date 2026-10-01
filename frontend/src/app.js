@@ -9,6 +9,8 @@ createInertiaApp({
     if (!title) return 'EduCore'
     return title.includes('EduCore') ? title : `${title} — EduCore`
   },
+  // Navigation progress bar uses the brand primary token.
+  progress: { color: 'var(--color-primary)' },
   resolve: (name) => {
     const pages = import.meta.glob('./pages/**/*.vue', { eager: true })
     const page = pages[`./pages/${name}.vue`]

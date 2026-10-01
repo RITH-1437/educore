@@ -5,6 +5,7 @@ import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseTextarea from '../../components/BaseTextarea.vue'
 import ErrorAlert from '../../components/ErrorAlert.vue'
+import { useConfirm } from '../../composables/useConfirm'
 
 const props = defineProps({
   university: { type: Object, required: true },
@@ -25,8 +26,10 @@ const submit = () => form.put(`/universities/${props.university.id}`, { preserve
 
 const makeCurrent = () => router.post(`/universities/${props.university.id}/current`)
 
-const destroy = () => {
-  if (window.confirm(`Delete "${props.university.name}"? This is refused while it still has faculties.`)) {
+const { confirm } = useConfirm()
+
+const destroy = async () => {
+  if (await confirm({ title: 'Delete university?', message: `Delete "${props.university.name}"? This is refused while it still has faculties.`, confirmLabel: 'Delete', destructive: true })) {
     router.delete(`/universities/${props.university.id}`)
   }
 }
@@ -38,7 +41,7 @@ const destroy = () => {
     <header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
       <div>
         <p class="text-caption font-semibold uppercase tracking-widest text-primary">University structure</p>
-        <h2 class="mt-2 text-h1 font-display font-semibold text-ink dark:text-dark-ink">{{ university.name }}</h2>
+        <h1 class="mt-2 text-h1 font-display font-semibold text-ink dark:text-dark-ink">{{ university.name }}</h1>
         <p class="mt-2 text-small text-muted dark:text-dark-muted">
           Platform-wide record. Exactly one university may be current at a time.
         </p>

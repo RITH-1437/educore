@@ -13,6 +13,13 @@ const visible = ref(false)
 let observer = null
 
 onMounted(() => {
+  // Show content immediately when motion is reduced or observers are unavailable.
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+  if (reduce || !('IntersectionObserver' in window)) {
+    visible.value = true
+    return
+  }
+
   observer = new IntersectionObserver(
     ([entry]) => {
       if (entry.isIntersecting) {

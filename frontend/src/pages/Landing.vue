@@ -58,9 +58,16 @@ const ogImage = '/assets/logo/educore-primary.png'
     <meta name="twitter:image" :content="ogImage" />
   </Head>
 
+  <a
+    href="#main-content"
+    class="sr-only z-[70] rounded-md bg-white px-4 py-2 text-sm font-semibold text-blue-700 shadow-md focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:ring-2 focus:ring-blue-600"
+  >
+    Skip to content
+  </a>
+
   <LandingNavbar />
 
-  <main>
+  <main id="main-content" tabindex="-1" class="focus:outline-none">
     <HeroSection />
     <TrustSection />
     <AboutSection />

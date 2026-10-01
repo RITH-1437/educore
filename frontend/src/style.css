@@ -90,10 +90,19 @@
 @utility animate-shimmer {
   animation: shimmer 1.5s infinite;
 }
+/* Route change: 250ms fade + 6px rise (dashboard shell). */
+@utility animate-page-in {
+  animation: pageIn 0.25s ease-out;
+}
+/* Section entrance (500ms) — pair with stagger-* delays. */
+@utility animate-section-in {
+  animation: slideUp 0.5s ease-out both;
+}
 
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes pageIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
 @keyframes shimmer {
   0% { background-position: -200% 0; }
@@ -106,6 +115,87 @@
 @utility stagger-3 { animation-delay: 100ms; }
 @utility stagger-4 { animation-delay: 150ms; }
 @utility stagger-5 { animation-delay: 200ms; }
+
+/* ============================================================================
+   GLASS SURFACES — documented in docs/branding/UI-COMPONENTS.md §14
+   Frosted, token-based surfaces. They need something to blur, so the app shell
+   renders the subtle `.app-ambient` backdrop behind them.
+   ============================================================================ */
+@utility glass-surface {
+  /* Large chrome: sidebar, topbar. Colour + blur only (no border/shadow). */
+  background-color: color-mix(in srgb, var(--color-surface) 70%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(150%);
+  backdrop-filter: blur(16px) saturate(150%);
+  &:where(.dark, .dark *) {
+    background-color: color-mix(in srgb, var(--color-dark-surface) 65%, transparent);
+  }
+}
+@utility glass-card {
+  /* Content cards and table containers. */
+  background-color: color-mix(in srgb, var(--color-surface) 72%, transparent);
+  border-color: color-mix(in srgb, var(--color-border-default) 80%, transparent);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgb(255 255 255 / 0.6);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  backdrop-filter: blur(12px) saturate(140%);
+  &:where(.dark, .dark *) {
+    background-color: color-mix(in srgb, var(--color-dark-surface) 62%, transparent);
+    border-color: color-mix(in srgb, var(--color-dark-border) 80%, transparent);
+    box-shadow: var(--shadow-sm), inset 0 1px 0 rgb(255 255 255 / 0.06);
+  }
+}
+@utility glass-panel {
+  /* Floating layers: modals, dropdowns. More opaque for legibility. */
+  background-color: color-mix(in srgb, var(--color-surface) 86%, transparent);
+  border-color: color-mix(in srgb, var(--color-border-default) 80%, transparent);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgb(255 255 255 / 0.6);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(160%);
+  &:where(.dark, .dark *) {
+    background-color: color-mix(in srgb, var(--color-dark-surface) 82%, transparent);
+    border-color: color-mix(in srgb, var(--color-dark-border) 80%, transparent);
+    box-shadow: var(--shadow-lg), inset 0 1px 0 rgb(255 255 255 / 0.08);
+  }
+}
+@utility glass-frosted {
+  /* White-tinted glass for use over photos / dark backgrounds (login, landing). */
+  background-color: rgb(255 255 255 / 0.1);
+  border-color: rgb(255 255 255 / 0.22);
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgb(255 255 255 / 0.25);
+  -webkit-backdrop-filter: blur(24px) saturate(150%);
+  backdrop-filter: blur(24px) saturate(150%);
+}
+
+/* Soft colour fields that give the glass something to refract. */
+.app-ambient {
+  background:
+    radial-gradient(60rem 40rem at 85% -10%, color-mix(in srgb, var(--color-primary) 14%, transparent), transparent 60%),
+    radial-gradient(50rem 36rem at -10% 35%, color-mix(in srgb, var(--color-secondary) 16%, transparent), transparent 60%),
+    radial-gradient(44rem 32rem at 75% 110%, color-mix(in srgb, var(--color-accent) 11%, transparent), transparent 60%);
+}
+.dark .app-ambient {
+  background:
+    radial-gradient(60rem 40rem at 85% -10%, color-mix(in srgb, var(--color-dark-primary) 16%, transparent), transparent 60%),
+    radial-gradient(50rem 36rem at -10% 35%, color-mix(in srgb, var(--color-primary) 18%, transparent), transparent 60%),
+    radial-gradient(44rem 32rem at 75% 110%, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 60%);
+}
+
+/* Solid fallbacks: no backdrop-filter support, or the user asks for less
+   transparency / more contrast. Unlayered, so it wins over the utilities. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-surface, .glass-card, .glass-panel { background-color: var(--color-surface); }
+  .dark .glass-surface, .dark .glass-card, .dark .glass-panel { background-color: var(--color-dark-surface); }
+  .glass-frosted { background-color: rgb(15 23 42 / 0.8); }
+}
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .glass-surface, .glass-card, .glass-panel {
+    background-color: var(--color-surface);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .dark .glass-surface, .dark .glass-card, .dark .glass-panel { background-color: var(--color-dark-surface); }
+  .glass-frosted { background-color: rgb(15 23 42 / 0.85); -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .app-ambient { display: none; }
+}
 
 /* ============================================================================
    REDUCED MOTION
@@ -128,6 +218,8 @@
   .landing {
     font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
       Roboto, Arial, sans-serif;
+    /* Reveal offsets must never create a horizontal scrollbar on mobile. */
+    overflow-x: clip;
   }
 }
 
@@ -185,11 +277,12 @@
     transform: translateY(-10px);
   }
 }
+/* Decorative motion runs a few cycles, then rests (no endless movement). */
 .edu-float {
-  animation: edu-float 6s ease-in-out infinite;
+  animation: edu-float 6s ease-in-out 2;
 }
 .edu-float-slow {
-  animation: edu-float 9s ease-in-out infinite;
+  animation: edu-float 9s ease-in-out 2;
 }
 
 /* QR scan line */
@@ -212,7 +305,12 @@
   }
 }
 .edu-scan {
-  animation: edu-scan 3.6s ease-in-out infinite;
+  animation: edu-scan 3.6s ease-in-out 3;
+}
+
+/* Sections receive programmatic focus from in-page navigation. */
+.landing [tabindex="-1"]:focus {
+  outline: none;
 }
 
 /* Subtle grid backgrounds */

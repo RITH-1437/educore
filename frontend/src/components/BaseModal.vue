@@ -98,12 +98,12 @@ onBeforeUnmount(() => {
       role="presentation"
       @click="onOverlayClick"
     >
-      <div class="absolute inset-0 bg-primary-dark/50 motion-safe:animate-fade-in" aria-hidden="true" />
+      <div class="absolute inset-0 bg-primary-dark/50 backdrop-blur-sm motion-safe:animate-fade-in" aria-hidden="true" />
 
       <section
         ref="modalRef"
         :class="[
-          'relative z-[1] flex max-h-[min(90dvh,48rem)] w-full flex-col overflow-hidden rounded-xl border border-border-default bg-surface shadow-lg motion-safe:animate-scale-in dark:border-dark-border dark:bg-dark-surface',
+          'glass-panel relative z-[1] flex max-h-[min(90dvh,48rem)] w-full flex-col overflow-hidden rounded-xl border motion-safe:animate-scale-in',
           sizeClasses[size],
         ]"
         role="dialog"

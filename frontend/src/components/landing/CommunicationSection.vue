@@ -41,7 +41,7 @@ const channels = [
                   <component :is="n.icon" class="h-4 w-4 text-blue-600" />
                 </span>
                 <span class="text-sm font-semibold text-slate-800">{{ n.label }}</span>
-                <span v-if="i < tree.length - 1" class="ml-auto pr-2 text-slate-300">↓</span>
+                <span v-if="i < tree.length - 1" class="ml-auto pr-2 text-slate-400" aria-hidden="true">↓</span>
               </li>
             </ol>
             <div class="mt-5 flex flex-wrap gap-2">

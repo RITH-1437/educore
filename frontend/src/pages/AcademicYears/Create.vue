@@ -28,7 +28,7 @@ const submit = () => form.post('/academic-years', { preserveScroll: true })
 
     <header class="flex items-end justify-between gap-4">
       <div>
-        <h2 class="text-h1 font-display font-semibold text-ink dark:text-dark-ink">New academic year</h2>
+        <h1 class="text-h1 font-display font-semibold text-ink dark:text-dark-ink">New academic year</h1>
         <p class="mt-2 text-small text-muted dark:text-dark-muted">
           The calendar span that owns every semester, offering and grade of that year.
         </p>

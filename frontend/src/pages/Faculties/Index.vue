@@ -3,6 +3,8 @@ import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import { Building2, Search } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
+import PageHeader from '../../components/PageHeader.vue'
+import { useConfirm } from '../../composables/useConfirm'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseModal from '../../components/BaseModal.vue'
@@ -142,22 +144,24 @@ const submitDepartment = () => {
   })
 }
 
-const archiveFaculty = (faculty) => {
-  if (window.confirm(`Archive "${faculty.name}"? It stays visible but inactive, and its departments keep their parent.`)) {
+const { confirm } = useConfirm()
+
+const archiveFaculty = async (faculty) => {
+  if (await confirm({ title: 'Archive faculty?', message: `Archive "${faculty.name}"? It stays visible but inactive, and its departments keep their parent.`, confirmLabel: 'Archive' })) {
     router.post(`/faculties/${faculty.id}/archive`)
   }
 }
 
 const reactivateFaculty = (faculty) => router.post(`/faculties/${faculty.id}/reactivate`)
 
-const deleteFaculty = (faculty) => {
-  if (window.confirm(`Delete "${faculty.name}"? This is refused while it still has departments.`)) {
+const deleteFaculty = async (faculty) => {
+  if (await confirm({ title: 'Delete faculty?', message: `Delete "${faculty.name}"? This is refused while it still has departments.`, confirmLabel: 'Delete', destructive: true })) {
     router.delete(`/faculties/${faculty.id}`)
   }
 }
 
-const archiveDepartment = (department) => {
-  if (window.confirm(`Archive "${department.name}"?`)) {
+const archiveDepartment = async (department) => {
+  if (await confirm({ title: 'Archive department?', message: `Archive "${department.name}"?`, confirmLabel: 'Archive' })) {
     router.post(`/faculties/${department.faculty_id}/departments/${department.id}/archive`)
   }
 }
@@ -165,8 +169,8 @@ const archiveDepartment = (department) => {
 const reactivateDepartment = (department) =>
   router.post(`/faculties/${department.faculty_id}/departments/${department.id}/reactivate`)
 
-const deleteDepartment = (department) => {
-  if (window.confirm(`Delete "${department.name}"? This is refused while programs, courses or lecturers reference it.`)) {
+const deleteDepartment = async (department) => {
+  if (await confirm({ title: 'Delete department?', message: `Delete "${department.name}"? This is refused while programs, courses or lecturers reference it.`, confirmLabel: 'Delete', destructive: true })) {
     router.delete(`/faculties/${department.faculty_id}/departments/${department.id}`)
   }
 }
@@ -175,21 +179,14 @@ const deleteDepartment = (department) => {
 <template>
   <Head title="Faculties & departments - EduCore" />
   <div class="space-y-6">
-    <header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-      <div>
-        <p class="text-caption font-semibold uppercase tracking-widest text-primary">University structure</p>
-        <h2 class="mt-2 text-h1 font-display font-semibold text-ink dark:text-dark-ink">Faculties & departments</h2>
-        <p class="mt-2 text-body text-muted dark:text-dark-muted">
-          The top of the academic hierarchy. Departments belong to exactly one faculty and may be archived rather than deleted.
-        </p>
-      </div>
-      <div v-if="canManage" class="flex flex-wrap gap-3">
+    <PageHeader eyebrow="University structure" title="Faculties & departments" description="The top of the academic hierarchy. Departments belong to exactly one faculty and may be archived rather than deleted.">
+      <template v-if="canManage" #actions>
         <BaseButton variant="secondary" @click="openDepartmentModal(null)">
           <Building2 class="h-4 w-4" aria-hidden="true" /> New department
         </BaseButton>
         <BaseButton @click="openFacultyModal">+ New faculty</BaseButton>
-      </div>
-    </header>
+      </template>
+    </PageHeader>
 
     <BaseCard padding="sm">
       <form class="flex flex-col gap-3 lg:flex-row lg:items-end" @submit.prevent="applyFilters">

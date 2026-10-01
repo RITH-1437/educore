@@ -48,19 +48,12 @@ pattern is required, **update the design system first**, then use it.
 | Error | `#DC2626` | `red-600` |
 | Info | `#2563EB` | `blue-600` |
 
-### Important implementation note
+### Implementation note
 
-`frontend/src/style.css` currently contains only `@import "tailwindcss";` — the
-`@theme` mapping in `DESIGN-TOKENS.md` §15 is **not implemented yet**. Until it
-is:
-
-- Use the Tailwind stock utilities in the table above; they are the current
-  de-facto implementation of the tokens (see `BaseButton`/`BaseInput`).
-- Do **not** hardcode hex (`bg-[#2563EB]`) and do **not** invent substitutes from
-  other palettes (e.g. `indigo` for primary, `gray` for neutrals). Mixing
-  `indigo`/`gray` into a `blue`/`slate` design is the most common drift.
-- Implementing `@theme` is a separate, approved task — not a side effect of a
-  feature.
+`frontend/src/style.css` already contains the `@theme` mapping from
+`DESIGN-TOKENS.md` §15. Use the semantic utilities (`bg-primary`, `text-muted`,
+`bg-surface`, `border-border-default`, `dark:bg-dark-surface`, ...). Do **not**
+hardcode hex (`bg-[#2563EB]`) or use stock `slate`/`gray`/`indigo` classes.
 
 ## Typography
 
@@ -79,6 +72,7 @@ is:
   96, 128px. No arbitrary values (`p-[13px]`, `mt-[7px]`).
   Card padding default 20px · section gap 32px · page gap 48/64px.
 - Radii: inputs 8px · cards 12px · buttons 8px · pills fully rounded.
+- Glass surfaces: use the `glass-*` utilities and `.app-ambient` only (`docs/branding/UI-COMPONENTS.md` §14); never hand-roll `bg-white/xx backdrop-blur` per component.
 - Shadows: subtle, low count — one card shadow and one raised state; no stacks
   of shadows or decorative gradients.
 - Content max width 1280px (`max-w-7xl`).

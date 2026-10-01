@@ -32,7 +32,7 @@ const afterItems = [
           class="relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50 p-8"
         >
           <div class="flex items-center justify-between">
-            <h3 class="font-display text-lg font-semibold text-slate-400">Before</h3>
+            <h3 class="font-display text-lg font-semibold text-slate-600">Before</h3>
             <span class="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-500">
               Fragmented workflows
             </span>

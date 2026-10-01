@@ -44,7 +44,7 @@ const highlights = [
           v-for="(item, i) in highlights"
           :key="item.title"
           :delay="i * 110"
-          class="rounded-xl border border-white/10 bg-white/5 p-6 transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.07]"
+          class="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.07]"
         >
           <span class="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-500/15">
             <component :is="item.icon" class="h-5 w-5 text-sky-400" />

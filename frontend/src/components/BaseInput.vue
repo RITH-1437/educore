@@ -1,5 +1,5 @@
 <script setup>
-import { computed, useId } from 'vue'
+import { computed, useAttrs, useId } from 'vue'
 
 const props = defineProps({
   modelValue: { type: [String, Number], default: '' },
@@ -20,6 +20,14 @@ const props = defineProps({
 defineEmits(['update:modelValue'])
 defineOptions({ inheritAttrs: false })
 
+// class/style belong to the wrapper (sizing, margins); everything else goes to
+// the <input>. Otherwise a margin lands on the input and de-centers the icons.
+const attrs = useAttrs()
+const inputAttrs = computed(() => {
+  const { class: _class, style: _style, ...rest } = attrs
+  return rest
+})
+
 const generatedId = useId()
 const inputId = computed(() => props.id || generatedId)
 const errorId = computed(() => `${inputId.value}-error`)
@@ -28,8 +36,8 @@ const isGlass = computed(() => props.variant === 'glass')
 
 const field = computed(() =>
   isGlass.value
-    ? 'h-11 w-full rounded-md border border-white/25 bg-white/10 px-3 text-body text-white shadow-sm transition-colors duration-150 ease-out placeholder:text-white/60 hover:border-white/40 focus:border-dark-primary focus:outline-none focus:ring-2 focus:ring-dark-primary/40 disabled:cursor-not-allowed disabled:opacity-50'
-    : 'h-11 w-full rounded-md border border-border-default bg-surface px-3 text-body text-ink shadow-sm transition-colors duration-150 ease-out placeholder:text-muted hover:border-border-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-border dark:bg-dark-surface dark:text-dark-ink dark:placeholder:text-dark-muted dark:focus:border-dark-primary dark:focus:ring-dark-primary/20'
+    ? 'h-11 w-full rounded-md border border-white/25 bg-white/10 px-3 text-body text-white shadow-sm backdrop-blur-sm focus:bg-white/15 transition-colors duration-150 ease-out placeholder:text-white/60 hover:border-white/40 focus:border-dark-primary focus:outline-none focus:ring-2 focus:ring-dark-primary/40 disabled:cursor-not-allowed disabled:opacity-50'
+    : 'h-11 w-full rounded-md border border-border-default bg-surface/70 backdrop-blur-sm px-3 text-body text-ink shadow-sm transition-colors duration-150 ease-out placeholder:text-muted hover:border-border-muted focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50 dark:border-dark-border dark:bg-dark-surface/60 dark:text-dark-ink dark:placeholder:text-dark-muted dark:focus:border-dark-primary dark:focus:ring-dark-primary/20'
 )
 
 const errorField = computed(() =>
@@ -58,7 +66,7 @@ const message = computed(() =>
 </script>
 
 <template>
-  <div>
+  <div :class="attrs.class" :style="attrs.style">
     <label v-if="label" :for="inputId" :class="labelClass">
       {{ label }}
       <span v-if="required" class="ml-1 text-error" aria-hidden="true">*</span>
@@ -83,7 +91,7 @@ const message = computed(() =>
         :aria-invalid="error ? 'true' : 'false'"
         :aria-describedby="error ? errorId : undefined"
         :class="[field, error ? errorField : '', { 'pl-10': $slots.leading, 'pr-10': $slots.trailing }]"
-        v-bind="$attrs"
+        v-bind="inputAttrs"
         @input="$emit('update:modelValue', $event.target.value)"
       />
 

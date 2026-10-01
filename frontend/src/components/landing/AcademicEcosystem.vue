@@ -55,7 +55,7 @@ const levels = [
                   <h3 class="font-display text-base font-semibold text-slate-900">{{ lvl.name }}</h3>
                   <p class="text-sm text-slate-500">{{ lvl.tag }}</p>
                 </div>
-                <span class="hidden text-xs font-semibold text-slate-300 sm:block">
+                <span class="hidden text-xs font-semibold text-slate-400 sm:block" aria-hidden="true">
                   L{{ i + 1 }}
                 </span>
               </div>

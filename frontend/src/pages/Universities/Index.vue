@@ -4,6 +4,8 @@ import { computed, ref } from 'vue'
 import { Plus, Search } from '@lucide/vue'
 import BaseBadge from '../../components/BaseBadge.vue'
 import BaseButton from '../../components/BaseButton.vue'
+import PageHeader from '../../components/PageHeader.vue'
+import { useConfirm } from '../../composables/useConfirm'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseModal from '../../components/BaseModal.vue'
@@ -67,8 +69,10 @@ const submitCreate = () =>
 
 const makeCurrent = (university) => router.post(`/universities/${university.id}/current`)
 
-const destroy = (university) => {
-  if (window.confirm(`Delete "${university.name}"? This is refused while it still has faculties.`)) {
+const { confirm } = useConfirm()
+
+const destroy = async (university) => {
+  if (await confirm({ title: 'Delete university?', message: `Delete "${university.name}"? This is refused while it still has faculties.`, confirmLabel: 'Delete', destructive: true })) {
     router.delete(`/universities/${university.id}`)
   }
 }
@@ -77,19 +81,12 @@ const destroy = (university) => {
 <template>
   <Head title="University - EduCore" />
   <div class="space-y-6">
-    <header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-      <div>
-        <p class="text-caption font-semibold uppercase tracking-widest text-primary">University structure</p>
-        <h2 class="mt-2 text-h1 font-display font-semibold text-ink dark:text-dark-ink">University</h2>
-        <p class="mt-2 text-body text-muted dark:text-dark-muted">
-          The single institution record that owns every faculty, program and course.
-        </p>
-      </div>
-      <div class="flex flex-wrap gap-3">
-        <Link href="/faculties"><BaseButton variant="secondary">Manage faculties</BaseButton></Link>
+    <PageHeader eyebrow="University structure" title="University" description="The single institution record that owns every faculty, program and course.">
+      <template #actions>
+        <BaseButton href="/faculties" variant="secondary">Manage faculties</BaseButton>
         <BaseButton v-if="canManage" @click="openCreate"><Plus class="h-4 w-4" aria-hidden="true" /> New university</BaseButton>
-      </div>
-    </header>
+      </template>
+    </PageHeader>
 
     <BaseCard padding="sm">
       <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="applyFilters">

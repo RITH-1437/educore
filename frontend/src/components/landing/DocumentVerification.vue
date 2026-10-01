@@ -57,7 +57,7 @@ const pipeline = ['Request', 'Review', 'Issue', 'Verify', 'QR']
           <div class="mx-auto max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-900/10 sm:p-7">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2.5">
-                <img :src="symbolMark" alt="EduCore symbol" class="h-8 w-8 rounded-lg object-cover" />
+                <img :src="symbolMark" alt="" width="32" height="32" class="h-8 w-8 rounded-lg object-cover" />
                 <div>
                   <p class="font-display text-sm font-bold text-slate-900">EduCore</p>
                   <p class="text-xs text-slate-500">University Document</p>
@@ -70,11 +70,11 @@ const pipeline = ['Request', 'Review', 'Issue', 'Verify', 'QR']
 
             <dl class="mt-5 space-y-3">
               <div v-for="f in fields" :key="f.label" class="flex items-center justify-between border-b border-dashed border-slate-200 pb-2.5">
-                <dt class="text-xs font-medium text-slate-400">{{ f.label }}</dt>
+                <dt class="text-xs font-medium text-slate-500">{{ f.label }}</dt>
                 <dd class="text-sm font-semibold text-slate-800">{{ f.value }}</dd>
               </div>
               <div class="flex items-center justify-between pt-1.5">
-                <dt class="text-xs font-medium text-slate-400">Status</dt>
+                <dt class="text-xs font-medium text-slate-500">Status</dt>
                 <dd class="flex items-center gap-1.5 text-sm font-semibold text-teal-600">
                   <CheckCircle2 class="h-4 w-4" />
                   Verified
@@ -83,7 +83,7 @@ const pipeline = ['Request', 'Review', 'Issue', 'Verify', 'QR']
             </dl>
 
             <div class="mt-6 flex items-center gap-5">
-              <div class="relative h-28 w-28 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-white">
+              <div class="relative h-28 w-28 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-white" aria-hidden="true">
                 <div class="bg-grid-doc absolute inset-0" aria-hidden="true" />
                 <span class="absolute top-1.5 left-1.5 h-5 w-5 rounded-sm border-2 border-slate-900" />
                 <span class="absolute top-3 left-3 h-1.5 w-1.5 bg-slate-900" />
@@ -115,12 +115,12 @@ const pipeline = ['Request', 'Review', 'Issue', 'Verify', 'QR']
             </div>
           </div>
 
-          <Reveal :delay="160" class="mt-8 flex items-center justify-center gap-2">
+          <Reveal :delay="160" class="mt-8 flex flex-wrap items-center justify-center gap-2">
             <template v-for="(step, i) in pipeline" :key="step">
               <span class="rounded-full border border-slate-200 bg-slate-50 px-3.5 py-1.5 text-xs font-semibold text-slate-600">
                 {{ step }}
               </span>
-              <span v-if="i < pipeline.length - 1" class="text-xs text-slate-300">→</span>
+              <span v-if="i < pipeline.length - 1" class="text-xs text-slate-400" aria-hidden="true">→</span>
             </template>
           </Reveal>
         </Reveal>

@@ -9,7 +9,10 @@ const lineRef = ref(null)
 let barChart = null
 let lineChart = null
 
+const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
 onMounted(() => {
+  const animation = reduceMotion() ? false : undefined
   barChart = new Chart(barRef.value, {
     type: 'bar',
     data: {
@@ -26,6 +29,7 @@ onMounted(() => {
       ],
     },
     options: {
+      animation,
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
@@ -64,6 +68,7 @@ onMounted(() => {
       ],
     },
     options: {
+      animation,
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
@@ -115,7 +120,7 @@ onBeforeUnmount(() => {
             <span class="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700">Students</span>
           </div>
           <div class="mt-5 h-64">
-            <canvas ref="barRef" />
+            <canvas ref="barRef" role="img" aria-label="Bar chart of illustrative enrolled students by faculty: Engineering 1240, IT 982, Business 866, Medicine 512, Education 420, Arts 308." />
           </div>
         </Reveal>
 
@@ -128,7 +133,7 @@ onBeforeUnmount(() => {
             <span class="rounded-full bg-teal-50 px-2.5 py-1 text-[11px] font-semibold text-teal-700">2025 / 26</span>
           </div>
           <div class="mt-5 h-64">
-            <canvas ref="lineRef" />
+            <canvas ref="lineRef" role="img" aria-label="Line chart of illustrative attendance rate from September to April, rising from 92 percent to 96 percent." />
           </div>
         </Reveal>
       </div>

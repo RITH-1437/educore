@@ -38,9 +38,9 @@ const submit = () => form.put(`/faculties/${props.faculty.id}`, { preserveScroll
     <header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
       <div>
         <p class="text-caption font-semibold uppercase tracking-widest text-primary">University structure</p>
-        <h2 class="mt-2 text-h1 font-display font-semibold text-ink dark:text-dark-ink">
+        <h1 class="mt-2 text-h1 font-display font-semibold text-ink dark:text-dark-ink">
           {{ faculty.name }}
-        </h2>
+        </h1>
         <p class="mt-2 text-small text-muted dark:text-dark-muted">
           Renaming keeps every department, program, course and lecturer pointing at the same faculty id.
         </p>

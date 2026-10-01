@@ -4,11 +4,11 @@ import Reveal from './Reveal.vue'
 import SectionHeading from './SectionHeading.vue'
 
 const items = [
-  { icon: Users, title: 'RBAC', text: 'Five institutional roles, each scoped to the workflows they manage.' },
+  { icon: Users, title: 'RBAC', text: 'Five platform roles, each scoped to the workflows they manage.' },
   { icon: Fingerprint, title: 'Secure Authentication', text: 'Session and token-based access with rate-limited sign in.' },
   { icon: ClipboardList, title: 'Audit Logs', text: 'Activity trails designed to record who did what, and when.' },
   { icon: ShieldCheck, title: 'Protected APIs', text: 'REST endpoints guarded by authentication and authorization.' },
-  { icon: KeyRound, title: 'Role-Based Access', text: 'Super Admin, Accountant, Registrar, Lecturer, and Student scopes.' },
+  { icon: KeyRound, title: 'Role-Based Access', text: 'Super Admin, University Admin, Faculty Admin, Lecturer, and Student scopes.' },
   { icon: BadgeCheck, title: 'Document Verification', text: 'Records designed to be checked before they are trusted.' },
 ]
 </script>
@@ -31,7 +31,7 @@ const items = [
           v-for="(item, i) in items"
           :key="item.title"
           :delay="(i % 3) * 110"
-          class="rounded-xl border border-white/10 bg-white/5 p-6 transition duration-300 hover:border-white/20 hover:bg-white/[0.07]"
+          class="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition duration-300 hover:border-white/20 hover:bg-white/[0.07]"
         >
           <span class="flex h-11 w-11 items-center justify-center rounded-lg bg-teal-500/15">
             <component :is="item.icon" class="h-5 w-5 text-teal-400" />

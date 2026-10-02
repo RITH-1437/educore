@@ -97,7 +97,7 @@ const columns = [
       </template>
     </BaseTable>
 
-    <Pagination :links="rooms.links" />
+    <Pagination :links="rooms.meta?.links ?? []" />
 
     <BaseModal v-model="show" :title="editing ? `Edit ${editing.code}` : 'New room'" size="md">
       <form class="space-y-5" @submit.prevent="submit">

@@ -94,6 +94,6 @@ const columns = [
       </template>
     </BaseTable>
 
-    <Pagination :links="enrollments.links" />
+    <Pagination :links="enrollments.meta?.links ?? []" />
   </div>
 </template>

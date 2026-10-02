@@ -217,6 +217,6 @@ const getStatusBadgeVariant = (code) => {
       </template>
     </BaseTable>
 
-    <Pagination :links="errorLogs.links" />
+    <Pagination :links="errorLogs.meta?.links ?? []" />
   </div>
 </template>

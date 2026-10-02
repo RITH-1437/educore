@@ -98,6 +98,6 @@ const deleteYear = async (academicYear) => {
         </div>
       </template>
     </BaseTable>
-    <Pagination :links="academicYears.links" />
+    <Pagination :links="academicYears.meta?.links ?? []" />
   </div>
 </template>

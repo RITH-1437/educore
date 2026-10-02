@@ -193,7 +193,7 @@ const destroy = async (lecturer) => {
       </template>
     </BaseTable>
 
-    <Pagination :links="lecturers.links" />
+    <Pagination :links="lecturers.meta?.links ?? []" />
 
     <BaseModal v-model="showCreate" title="New lecturer" size="lg">
       <form class="space-y-5" @submit.prevent="submitCreate">

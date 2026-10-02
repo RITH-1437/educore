@@ -92,7 +92,7 @@ const submit = () => form.post('/offerings', { preserveScroll: true, onSuccess: 
       </template>
     </BaseTable>
 
-    <Pagination :links="offerings.links" />
+    <Pagination :links="offerings.meta?.links ?? []" />
 
     <BaseModal v-model="showCreate" title="New offering" size="md">
       <form class="space-y-5" @submit.prevent="submit">

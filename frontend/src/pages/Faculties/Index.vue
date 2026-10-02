@@ -241,7 +241,7 @@ const deleteDepartment = async (department) => {
         </template>
       </BaseTable>
 
-      <Pagination :links="faculties.links" />
+      <Pagination :links="faculties.meta?.links ?? []" />
 
       <section
         v-for="faculty in faculties.data.filter((row) => expanded.has(row.id))"

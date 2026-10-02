@@ -379,7 +379,10 @@ A module is not done until its report exists and its tests pass — never label
   runs `invoices:refresh-statuses` yet (reads refresh overdue meanwhile);
   invoice PDFs / receipts, automatic tuition invoices and document-fee billing
   are not built; finance changes are not audited (9.24).
-- `[Open]` `Enrollments/Index` passes `enrollments.links` (the resource's link
-  object) to `Pagination`, which expects the `meta.links` array, so its
-  pagination control never renders. Found during 9.16; not changed here.
+- `[Done]` Pagination never rendered on 12 list pages (Users, Students,
+  Lecturers, Courses, Programs, Faculties, Universities, Academic years,
+  Offerings, Rooms, Enrollments, Error logs): they passed a Resource
+  collection's `links` object instead of its `meta.links` array to
+  `Pagination`. All now read `meta.links`; `tests/Feature/PaginationContractTest.php`
+  pins the shape for every paginated index page.
 - `[Next]` 9.19 Announcements.

@@ -139,7 +139,7 @@ const submitCreate = () =>
       </template>
     </BaseTable>
 
-    <Pagination :links="students.links" />
+    <Pagination :links="students.meta?.links ?? []" />
 
     <BaseModal v-model="showCreate" title="New student" size="lg">
       <form class="space-y-5" @submit.prevent="submitCreate">

@@ -149,6 +149,6 @@ const deleteUser = async (user) => {
         </div>
       </template>
     </BaseTable>
-    <Pagination :links="users.links" />
+    <Pagination :links="users.meta?.links ?? []" />
   </div>
 </template>

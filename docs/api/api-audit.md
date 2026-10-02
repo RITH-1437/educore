@@ -13,10 +13,10 @@
 
 | Measure | Result |
 |---|---:|
-| Application API route definitions (`routes/api.php`) | 190 |
-| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 209 |
-| Swagger operations after documentation corrections | 209 |
-| Swagger document paths | 128 |
+| Application API route definitions (`routes/api.php`) | 192 |
+| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 211 |
+| Swagger operations after documentation corrections | 211 |
+| Swagger document paths | 130 |
 | Swagger document schemas | 159 |
 | Undocumented application operations | 0 |
 | Extra Swagger operations not in the application API routes | 0 |
@@ -395,6 +395,8 @@ documented operations.
 | POST | `/api/sections/{section}/grades/submit` | Sanctum + managers or a lecturer of the section | Documented |
 | POST | `/api/sections/{section}/grades/approve` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/sections/{section}/grades/return` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/sections/{section}/grades/finalize` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/sections/{section}/grades/reopen` | Sanctum + super-admin (reason required) | Documented |
 | GET | `/api/students/{student}/grades` | Sanctum + staff, or the student themself (approved grades only) | Documented |
 | GET | `/api/students/{student}/gpa` | Sanctum + staff, or the student themself | Documented |
 | GET | `/api/students/{student}/dashboard` | Sanctum + staff, or the student themself | Documented |

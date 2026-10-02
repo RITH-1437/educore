@@ -8,6 +8,7 @@ use App\Models\DocumentRequest;
 use App\Models\DocumentType;
 use App\Models\DocumentVerification;
 use App\Models\Enrollment;
+use App\Models\Internship;
 use App\Models\Semester;
 use App\Models\Student;
 use App\Models\University;
@@ -230,6 +231,8 @@ class DocumentService
             DocumentType::TRANSCRIPT => $this->transcriptData($student, $data),
             DocumentType::ACADEMIC_RESULT => $this->resultData($student, $request->semester, $data),
             DocumentType::ENROLLMENT_CERTIFICATE => $this->enrollmentData($student, $data),
+            DocumentType::STUDENT_CERTIFICATE => $this->studentCertificateData($student, $data),
+            DocumentType::INTERNSHIP_LETTER => $this->internshipLetterData($student, $data),
             default => throw new BusinessRuleException('This document type has no template.'),
         };
 
@@ -299,6 +302,51 @@ class DocumentService
             'enrollments' => $enrollments,
             'semesterName' => ($s = $enrollments->first()?->semester) ? trim(($s->academicYear?->code ?? '').' '.$s->name) : null,
         ]];
+    }
+
+    /**
+     * Student status certificate: active students and graduates only.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array{0: string, 1: array<string, mixed>}
+     */
+    private function studentCertificateData(Student $student, array $data): array
+    {
+        if (! in_array($student->status, [Student::STATUS_ACTIVE, Student::STATUS_GRADUATED], true)) {
+            throw new BusinessRuleException("A student certificate is only issued to active or graduated students (this student is {$student->status}).");
+        }
+
+        // A graduate has no active program any more: fall back to the latest one.
+        $enrolment = $student->currentProgram ?? $student->programHistory()->with('program.department.faculty')->first();
+
+        return ['documents.student-certificate', [...$data,
+            'program' => $data['program'] ?? $enrolment?->program,
+            'programEnrolment' => $enrolment,
+        ]];
+    }
+
+    /**
+     * Internship letter for the student's latest approved, ongoing or
+     * completed internship (`docs/26_Internship-Management-Report.md`).
+     *
+     * @param  array<string, mixed>  $data
+     * @return array{0: string, 1: array<string, mixed>}
+     */
+    private function internshipLetterData(Student $student, array $data): array
+    {
+        $internship = Internship::query()
+            ->where('student_id', $student->id)
+            ->whereIn('status', [Internship::STATUS_APPROVED, Internship::STATUS_IN_PROGRESS, Internship::STATUS_COMPLETED])
+            ->with('company')
+            ->orderByRaw('start_date desc nulls last')
+            ->orderByDesc('id')
+            ->first();
+
+        if ($internship === null) {
+            throw new BusinessRuleException('The student has no approved, ongoing or completed internship; an internship letter cannot be generated.');
+        }
+
+        return ['documents.internship-letter', [...$data, 'internship' => $internship]];
     }
 
     /** Audit the decision and tell the student (critical email; queued after commit). */

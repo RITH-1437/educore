@@ -52,6 +52,7 @@ const columns = [
         <div class="flex flex-wrap gap-1">
           <StatusBadge v-if="row.counts.submitted" status="pending" :label="`${row.counts.submitted} awaiting approval`" />
           <StatusBadge v-if="row.counts.approved" status="approved" :label="`${row.counts.approved} approved`" />
+          <StatusBadge v-if="row.counts.finalized" status="finalized" :label="`${row.counts.finalized} finalized`" />
           <StatusBadge v-if="row.counts.draft" status="draft" :label="`${row.counts.draft} draft`" />
         </div>
       </template>

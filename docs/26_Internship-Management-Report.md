@@ -2,7 +2,7 @@
 
 - **Date:** 2026-10-02
 - **Module:** 9.22 Internship Management (business-overview §9.22)
-- **Status:** `[Implemented]` (internship letter document and opportunity postings `[Future]`)
+- **Status:** `[Implemented]` (opportunity postings `[Future]`; the internship letter document ships with `docs/30_Grade-Finalization-and-Document-Templates-Report.md`)
 - **Depends on:** 9.2 Students, 9.20 notifications, MinIO uploads
 
 ## 1. Scope
@@ -14,8 +14,7 @@ private file), and staff record the company supervisor's and the faculty's
 evaluations. Staff keep a lean list of host companies.
 
 Not built: published internship *opportunities* that students browse (students
-propose their own placement at a listed company), an internship letter
-document (would be a 9.16 document type), supervisor logins (staff enter the
+propose their own placement at a listed company), supervisor logins (staff enter the
 supervisor's evaluation), stipends, an audit trail beyond the notes log (9.24).
 
 ## 2. Data model

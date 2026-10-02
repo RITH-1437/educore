@@ -29,9 +29,9 @@
 | 9.11 | Attendance | `[Implemented]` |
 | 9.12 | Assignments | `[Implemented]` |
 | 9.13 | Examinations | `[Implemented]` |
-| 9.14 | Grades & GPA | `[Implemented]` (transcript document delivered by 9.16) |
+| 9.14 | Grades & GPA | `[Implemented]` (transcript by 9.16; finalize lock in report 30) |
 | 9.15 | Student Academic Dashboard | `[Implemented]` |
-| 9.16 | Document Management | `[Implemented]` (internship letter `[Planned]` with 9.22) |
+| 9.16 | Document Management | `[Implemented]` (student certificate and internship letter in report 30) |
 | 9.17 | Digital Document Verification | `[Implemented]` (QR image `[Planned]`) |
 | 9.18 | Invoices & Payment Records | `[Implemented]` |
 | 9.19 | Announcements | `[Implemented]` |
@@ -397,7 +397,7 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` API re-audit 2026-10-02: six PATCH aliases documented; R-01 marked
   resolved (`docs/api/api-audit.md`).
 - `[Done]` Grade submissions, approvals and returns are audited (9.24).
-  `[Open]` The `finalized` grade lock step is not built. `[Done]` The transcript document ships with 9.16.
+  `[Done]` The `finalized` grade lock step (finalize; Super Admin reopen with reason). `[Done]` The transcript document ships with 9.16.
 - `[Done]` 9.15 Student Academic Dashboard. Report:
   `docs/21_Student-Academic-Dashboard-Report.md`. `[Open]` Its announcements
   card shipped with 9.19; lecturer / faculty-admin dashboards are still previews.
@@ -426,8 +426,8 @@ A module is not done until its report exists and its tests pass — never label
   (9.24).
 - `[Done]` 9.22 Internship Management. Report:
   `docs/26_Internship-Management-Report.md`. `[Open]` Opportunity postings,
-  internship letter document (9.16 type), supervisor logins, Faculty Admin
-  approval (needs unit scoping).
+  supervisor logins, Faculty Admin approval (needs unit scoping). `[Done]`
+  Internship letter document.
 - `[Done]` `educore/backend:dev` rebuilt: the image predated the
   production-only config caching fix, so containers started from it cached
   config and pointed the test suite at the development database (the
@@ -454,3 +454,6 @@ A module is not done until its report exists and its tests pass — never label
   ("symlink(): File exists"). Image rebuilt.
 - All modules of business-overview §9 are now implemented. Remaining open
   items are listed above (unit scoping for Faculty Admin is the largest).
+- `[Done]` Grade finalization lock, student certificate and internship letter
+  templates. Report: `docs/30_Grade-Finalization-and-Document-Templates-Report.md`. Existing databases: re-run
+  `DocumentTypeSeeder` to add the two document types.

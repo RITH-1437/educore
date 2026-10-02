@@ -20,6 +20,7 @@ const statusMap = {
   archived: { variant: 'warning', label: 'Archived' },
   draft: { variant: 'muted', label: 'Draft' },
   approved: { variant: 'success', label: 'Approved' },
+  finalized: { variant: 'primary', label: 'Finalized' },
   published: { variant: 'success', label: 'Published' },
   rejected: { variant: 'error', label: 'Rejected' },
   cancelled: { variant: 'muted', label: 'Cancelled' },

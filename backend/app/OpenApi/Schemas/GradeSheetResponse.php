@@ -16,6 +16,7 @@ use OpenApi\Attributes as OA;
             new OA\Property(property: 'draft', type: 'integer'),
             new OA\Property(property: 'submitted', type: 'integer'),
             new OA\Property(property: 'approved', type: 'integer'),
+            new OA\Property(property: 'finalized', type: 'integer'),
             new OA\Property(property: 'students', type: 'integer'),
         ]),
         new OA\Property(property: 'data', type: 'array', items: new OA\Items(ref: '#/components/schemas/GradeSheetRow')),

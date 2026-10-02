@@ -8,6 +8,7 @@ use App\Models\Assignment;
 use App\Models\AssignmentSubmission;
 use App\Models\AttendanceRecord;
 use App\Models\AttendanceSession;
+use App\Models\AuditLog;
 use App\Models\Course;
 use App\Models\CourseOffering;
 use App\Models\Enrollment;
@@ -272,6 +273,49 @@ class GradingTest extends TestCase
     }
 
     // ------------------------------------------------------- authorization ---
+
+    public function test_finalize_locks_grades_and_only_super_admin_reopens(): void
+    {
+        Notification::fake();
+        $this->seedScores();
+        $base = "/api/sections/{$this->section->id}/grades";
+        $uniAdmin = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::UniversityAdmin->value)->create()->id]);
+
+        // Nothing approved yet.
+        $this->actingAs($this->admin)->postJson("{$base}/finalize")->assertStatus(409);
+
+        $this->actingAs($this->lecturer->user)->postJson($base);
+        $this->actingAs($this->lecturer->user)->postJson("{$base}/submit");
+        $this->actingAs($this->admin)->postJson("{$base}/approve");
+
+        $this->actingAs($this->lecturer->user)->postJson("{$base}/finalize")->assertForbidden();
+        $this->actingAs($uniAdmin)->postJson("{$base}/finalize")->assertOk()
+            ->assertJsonPath('saved', 2)->assertJsonPath('counts.finalized', 2)->assertJsonPath('counts.approved', 0);
+        $this->assertTrue(AuditLog::query()->where('action', 'grades.finalized')->exists());
+
+        // Locked: return to draft has nothing to touch, recompute skips them, GPA and the student view are unchanged.
+        $this->actingAs($this->admin)->postJson("{$base}/return")->assertStatus(409);
+        $this->actingAs($this->lecturer->user)->postJson($base)->assertOk()->assertJsonPath('saved', 0);
+        $this->assertEquals(4.0, GpaRecord::query()->where('student_id', $this->alice->id)->where('cumulative', true)->value('gpa_value'));
+        $this->actingAs($this->alice->user)->getJson("/api/students/{$this->alice->id}/grades")->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.letter_grade', 'A');
+
+        // Reopen: Super Admin only, reason required, audited.
+        $this->actingAs($uniAdmin)->postJson("{$base}/reopen", ['reason' => 'Typo'])->assertForbidden();
+        $this->actingAs($this->admin)->postJson("{$base}/reopen")->assertJsonValidationErrors('reason');
+        $this->actingAs($this->admin)->postJson("{$base}/reopen", ['reason' => 'Marking error on the final exam'])->assertOk()
+            ->assertJsonPath('counts.approved', 2)->assertJsonPath('counts.finalized', 0);
+        $this->assertSame('Marking error on the final exam', AuditLog::query()->where('action', 'grades.reopened')->value('description'));
+        $this->actingAs($this->admin)->postJson("{$base}/reopen", ['reason' => 'Again'])->assertStatus(409);
+
+        // Web actions.
+        $this->actingAs($this->admin)->post("/grades/sections/{$this->section->id}/finalize")->assertRedirect()->assertSessionHas('success');
+        $this->actingAs($this->admin)->get("/grades/sections/{$this->section->id}")
+            ->assertInertia(fn (Assert $page) => $page->where('canReopen', true)->where('sheet.counts.finalized', 2));
+        $this->actingAs($uniAdmin)->get('/grades?status=all')
+            ->assertInertia(fn (Assert $page) => $page->where('sections.data.0.counts.finalized', 2));
+        $this->actingAs($uniAdmin)->post("/grades/sections/{$this->section->id}/reopen", ['reason' => 'x'])->assertForbidden();
+        $this->actingAs($this->admin)->post("/grades/sections/{$this->section->id}/reopen", ['reason' => 'Correction'])->assertRedirect()->assertSessionHas('success');
+    }
 
     public function test_role_matrix(): void
     {

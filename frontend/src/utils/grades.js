@@ -19,4 +19,4 @@ export const gpa = (value) => (value === null || value === undefined ? '—' : N
 // Grade status → StatusBadge status (approved = success, submitted = pending, draft = muted).
 export const gradeStatus = (status) => ({ submitted: 'pending' })[status] ?? status
 
-export const gradeStatusLabel = (status) => ({ draft: 'Draft', submitted: 'Awaiting approval', approved: 'Approved' })[status] ?? status
+export const gradeStatusLabel = (status) => ({ draft: 'Draft', submitted: 'Awaiting approval', approved: 'Approved', finalized: 'Finalized' })[status] ?? status

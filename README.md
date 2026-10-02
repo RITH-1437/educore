@@ -142,7 +142,7 @@ limit used by enrollment (`backend/config/academics.php`).
 | `/exams/sections/{id}`      | Section exams + results grid | Super admin, University admin, Faculty admin (read), the section's lecturers; enrolled students (schedule, released results) |
 | `/my-exams`                 | My exam schedule + results | Student |
 | `/grades`                   | Sections awaiting grade approval | Super admin, University admin (Faculty admin read-only) |
-| `/grades/sections/{id}`     | Section grade sheet: compute, submit, approve, return | Super admin, University admin (approve), Faculty admin (read), the section's lecturers (compute, submit) |
+| `/grades/sections/{id}`     | Section grade sheet: compute, submit, approve, return, finalize, reopen | Super admin (reopen), University admin (approve, finalize), Faculty admin (read), the section's lecturers (compute, submit) |
 | `/grading-scale`            | Grading scale              | Super admin, University admin (Faculty admin and lecturers read-only) |
 | `/my-grades`                | My grades + semester / cumulative GPA | Student |
 | `/my-documents`             | Request documents, download PDFs | Student |

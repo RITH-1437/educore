@@ -46,6 +46,7 @@ class GradesController extends Controller
             ->selectRaw("count(*) filter (where grades.status = 'draft') as draft")
             ->selectRaw("count(*) filter (where grades.status = 'submitted') as submitted")
             ->selectRaw("count(*) filter (where grades.status = 'approved') as approved")
+            ->selectRaw("count(*) filter (where grades.status = 'finalized') as finalized")
             ->when($status === 'submitted', fn ($q) => $q->havingRaw("count(*) filter (where grades.status = 'submitted') > 0"));
 
         $sections = Section::query()
@@ -53,7 +54,7 @@ class GradesController extends Controller
             ->with('offering.course:id,code,name', 'offering.semester.academicYear:id,code')
             ->orderByDesc('counts.submitted')
             ->orderBy('sections.id')
-            ->select('sections.*', 'counts.draft', 'counts.submitted', 'counts.approved')
+            ->select('sections.*', 'counts.draft', 'counts.submitted', 'counts.approved', 'counts.finalized')
             ->paginate(15)
             ->withQueryString()
             ->through(fn (Section $section) => [
@@ -61,7 +62,7 @@ class GradesController extends Controller
                 'code' => $section->code,
                 'course' => ['code' => $section->offering->course->code, 'name' => $section->offering->course->name],
                 'semester' => trim(($section->offering->semester->academicYear?->code ?? '').' '.$section->offering->semester->name),
-                'counts' => ['draft' => (int) $section->draft, 'submitted' => (int) $section->submitted, 'approved' => (int) $section->approved],
+                'counts' => ['draft' => (int) $section->draft, 'submitted' => (int) $section->submitted, 'approved' => (int) $section->approved, 'finalized' => (int) $section->finalized],
             ]);
 
         return Inertia::render('Grades/Index', [
@@ -88,6 +89,7 @@ class GradesController extends Controller
             'scale' => $this->api->scalePayload()['data'],
             'canGrade' => $request->user()->can('grade', [Grade::class, $section]),
             'canApprove' => $request->user()->can('approve', Grade::class),
+            'canReopen' => $request->user()->can('reopen', Grade::class),
         ]);
     }
 
@@ -116,6 +118,24 @@ class GradesController extends Controller
         $saved = $this->grading->approve($section);
 
         return back()->with('success', "Approved {$saved} grade".($saved === 1 ? '' : 's').'. GPAs have been recalculated.');
+    }
+
+    public function finalize(Section $section): RedirectResponse
+    {
+        $this->authorize('approve', Grade::class);
+
+        $saved = $this->grading->finalize($section);
+
+        return back()->with('success', "Finalized {$saved} grade".($saved === 1 ? '' : 's').'. They are now locked.');
+    }
+
+    public function reopen(Request $request, Section $section): RedirectResponse
+    {
+        $this->authorize('reopen', Grade::class);
+
+        $saved = $this->grading->reopen($section, $request->validate(['reason' => ['required', 'string', 'max:500']])['reason']);
+
+        return back()->with('success', "Reopened {$saved} grade".($saved === 1 ? '' : 's').'.');
     }
 
     public function returnToDraft(Section $section): RedirectResponse

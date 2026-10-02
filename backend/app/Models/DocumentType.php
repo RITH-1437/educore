@@ -27,8 +27,12 @@ class DocumentType extends Model
 
     public const ACADEMIC_RESULT = 'academic_result';
 
+    public const STUDENT_CERTIFICATE = 'student_certificate';
+
+    public const INTERNSHIP_LETTER = 'internship_letter';
+
     /** Codes with a template; `academic_result` is per semester. */
-    public const GENERATABLE = [self::ENROLLMENT_CERTIFICATE, self::TRANSCRIPT, self::ACADEMIC_RESULT];
+    public const GENERATABLE = [self::ENROLLMENT_CERTIFICATE, self::STUDENT_CERTIFICATE, self::TRANSCRIPT, self::ACADEMIC_RESULT, self::INTERNSHIP_LETTER];
 
     protected $fillable = ['code', 'name', 'description', 'requires_fee', 'is_active', 'sort_order'];
 

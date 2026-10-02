@@ -209,6 +209,8 @@ Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,lect
 Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function () {
     Route::post('/grades/sections/{section}/approve', [GradesController::class, 'approve'])->name('grades.approve');
     Route::post('/grades/sections/{section}/return', [GradesController::class, 'returnToDraft'])->name('grades.return');
+    Route::post('/grades/sections/{section}/finalize', [GradesController::class, 'finalize'])->name('grades.finalize');
+    Route::post('/grades/sections/{section}/reopen', [GradesController::class, 'reopen'])->name('grades.reopen');
     Route::put('/grading-scale', [GradesController::class, 'updateScale'])->name('grading-scale.update');
     Route::put('/courses/{course}/grading-config', [GradesController::class, 'updateConfig'])->name('courses.grading-config.update');
 });

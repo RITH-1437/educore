@@ -15,8 +15,8 @@ prerequisites, and lecturer / staff / student screens.
 
 Not built: an official transcript document (9.16 Document Management), an audit
 trail of grade changes (9.24), manual per-student grade overrides, several named
-scales in use at once, and the `finalized` lock step (the status exists in the
-schema and counts like `approved`, but no action produces it yet).
+scales in use at once. The `finalized` lock step (finalize / Super Admin
+reopen) was added later — see `docs/30_Grade-Finalization-and-Document-Templates-Report.md`.
 
 ## 2. Data model
 
@@ -253,8 +253,8 @@ C 50 / 2.0 · D 45 / 1.0 · F 0 / 0.0) when no scale exists.
   without a practical (or before attendance starts) is not penalised.
 - **Scale edits are not retroactive** for approved grades: letters are
   snapshots, the scale is configuration.
-- **`finalized` counts like `approved`** so data written with that schema status
-  (e.g. imports) is honoured; the workflow itself stops at `approved`.
+- **`finalized` counts like `approved`** for GPA and prerequisites. Managers
+  finalize approved grades and only Super Admin reopens them (`docs/30_Grade-Finalization-and-Document-Templates-Report.md`).
 - **GPA snapshots are rebuilt, not patched**, inside the same transaction as the
   grade change (`skills/grading-gpa` §12 — never stale).
 - Grade changes are not yet audited; that waits for 9.24 Audit Logs.

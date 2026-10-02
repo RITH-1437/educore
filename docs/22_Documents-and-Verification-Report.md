@@ -2,7 +2,7 @@
 
 - **Date:** 2026-10-02
 - **Modules:** 9.16 Document Management, 9.17 Digital Document Verification
-- **Status:** `[Implemented]` (QR image `[Planned]`; internship letter with 9.22)
+- **Status:** `[Implemented]` (QR image `[Planned]`)
 - **Depends on:** 9.2 Students, 9.9 Enrollment, 9.14 Grades & GPA
 - **New dependency:** `barryvdh/laravel-dompdf` ^3.1 (pure-PHP PDF rendering;
   approved by the project owner on 2026-10-02 — no system packages needed)
@@ -14,10 +14,12 @@ reject them and generate a PDF built only from authoritative data; the student
 downloads it through an authorized route; anyone can verify a document with its
 code on a public page. Three document types have templates: **enrollment
 certificate**, **academic transcript**, **academic result** (one semester).
+The **student certificate** and **internship letter** were added later —
+see `docs/30_Grade-Finalization-and-Document-Templates-Report.md`.
 
 Not built: a QR image on the PDF (verification uses the printed URL and code;
 a QR needs another library), document fees (`requires_fee` is stored but not
-billed — 9.18 invoices are not linked to requests), internship letters (9.22),
+billed — 9.18 invoices are not linked to requests),
 an audit trail of transitions (9.24), document-type management screens (types
 are seeded).
 

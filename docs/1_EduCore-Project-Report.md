@@ -494,7 +494,7 @@ pie
 
 ### 9.13 Grades & GPA [Implemented]
 
-> **Status:** `docs/20_Grades-and-GPA-Report.md`. **Not built:** the `finalized` lock step after approval [Planned].
+> **Status:** `docs/20_Grades-and-GPA-Report.md`; finalize lock (Super Admin reopen with reason) in `docs/30_Grade-Finalization-and-Document-Templates-Report.md`.
 
 ```mermaid
 flowchart LR
@@ -525,7 +525,7 @@ flowchart TB
 
 ### 9.15 Document Management [Implemented]
 
-> **Status:** enrollment certificate, transcript and semester result as PDFs — `docs/22_Documents-and-Verification-Report.md`. **Not built:** student certificate and internship letter templates [Planned]; document fees [Future].
+> **Status:** enrollment certificate, student certificate, transcript, semester result and internship letter as PDFs — `docs/22_Documents-and-Verification-Report.md`, `docs/30_Grade-Finalization-and-Document-Templates-Report.md`. **Not built:** document fees [Future].
 
 Students request documents digitally (enrollment certificate, student certificate,
 academic transcript, academic result, internship letter, others).

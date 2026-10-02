@@ -11,6 +11,8 @@ use App\Models\DocumentType;
 use App\Models\DocumentVerification;
 use App\Models\Enrollment;
 use App\Models\Grade;
+use App\Models\Internship;
+use App\Models\InternshipCompany;
 use App\Models\Lecturer;
 use App\Models\Role as RoleModel;
 use App\Models\Section;
@@ -141,6 +143,36 @@ class DocumentTest extends TestCase
         $this->actingAs($this->admin)->postJson("/api/document-requests/{$cert}/generate")->assertStatus(409);
     }
 
+    public function test_student_certificate_for_active_and_graduated_students_only(): void
+    {
+        $type = $this->type(DocumentType::STUDENT_CERTIFICATE);
+
+        $this->assertSame(201, $this->generate($type));
+
+        $this->student->update(['status' => 'graduated']);
+        $this->assertSame(201, $this->generate($type));
+
+        $this->student->update(['status' => 'suspended']);
+        $this->assertSame(409, $this->generate($type));
+    }
+
+    public function test_internship_letter_needs_an_approved_ongoing_or_completed_internship(): void
+    {
+        $type = $this->type(DocumentType::INTERNSHIP_LETTER);
+        $company = InternshipCompany::query()->create(['name' => 'Smart Axiata', 'industry' => 'Telecom', 'is_active' => true]);
+        $internship = Internship::query()->create([
+            'student_id' => $this->student->id, 'company_id' => $company->id, 'position_title' => 'Network intern',
+            'start_date' => '2026-07-01', 'end_date' => '2026-09-30', 'status' => Internship::STATUS_SUBMITTED,
+        ]);
+
+        // A submitted (not yet approved) internship does not qualify.
+        $this->assertSame(409, $this->generate($type));
+
+        $internship->update(['status' => Internship::STATUS_APPROVED]);
+        $this->assertSame(201, $this->generate($type));
+        $this->assertSame(1, Document::query()->count());
+    }
+
     public function test_role_matrix_and_listing_scope(): void
     {
         $type = $this->type(DocumentType::TRANSCRIPT);
@@ -168,7 +200,7 @@ class DocumentTest extends TestCase
         $type = $this->type(DocumentType::TRANSCRIPT);
 
         $this->actingAs($this->student->user)->get('/my-documents')->assertOk()
-            ->assertInertia(fn (Assert $page) => $page->component('Documents/Mine')->has('types', 3)->has('semesters', 1));
+            ->assertInertia(fn (Assert $page) => $page->component('Documents/Mine')->has('types', 5)->has('semesters', 1));
         $this->actingAs($this->student->user)->post('/my-documents', ['document_type_id' => $type])->assertRedirect()->assertSessionHas('success');
         $id = DocumentRequest::query()->value('id');
 
@@ -183,6 +215,21 @@ class DocumentTest extends TestCase
         $this->get("/verify/{$document->verification_token}")->assertOk()
             ->assertInertia(fn (Assert $page) => $page->component('Documents/Verify')->where('result.status', 'valid'));
         $this->get('/verify/unknown')->assertOk()->assertInertia(fn (Assert $page) => $page->where('result', null));
+    }
+
+    /** Request, approve and generate one document; returns the generate status code. */
+    private function generate(int $type): int
+    {
+        $id = $this->actingAs($this->student->user)->postJson('/api/document-requests', ['document_type_id' => $type])->assertCreated()->json('data.id');
+        $this->actingAs($this->admin)->postJson("/api/document-requests/{$id}/approve")->assertOk();
+        $status = $this->actingAs($this->admin)->postJson("/api/document-requests/{$id}/generate")->status();
+
+        // Close a refused request so the next attempt may open a new one.
+        if ($status !== 201) {
+            DocumentRequest::query()->whereKey($id)->update(['status' => 'rejected']);
+        }
+
+        return $status;
     }
 
     private function type(string $code): int

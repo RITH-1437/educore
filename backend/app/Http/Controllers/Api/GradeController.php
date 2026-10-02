@@ -147,6 +147,56 @@ class GradeController extends Controller
         return response()->json(['saved' => $saved, ...$this->sheetPayload($section)]);
     }
 
+    #[OA\Post(
+        path: '/sections/{section}/grades/finalize',
+        summary: 'Finalize approved grades',
+        description: 'Locks approved grades: they can no longer be returned to draft (only reopened by a Super Admin). GPA is unchanged. 409 when nothing is approved.',
+        operationId: 'finalizeSectionGrades',
+        tags: ['Grades'],
+        security: [['sanctum' => []]],
+        parameters: [new OA\PathParameter(name: 'section', required: true, schema: new OA\Schema(type: 'integer', format: 'int64'))],
+        responses: [
+            new OA\Response(response: 200, description: 'Updated grade sheet with `saved` count.', content: new OA\JsonContent(ref: '#/components/schemas/GradeSheetResponse')),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 409, description: 'No approved grades.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+        ]
+    )]
+    public function finalize(Section $section): JsonResponse
+    {
+        $this->authorize('approve', Grade::class);
+
+        $saved = $this->grading->finalize($section);
+
+        return response()->json(['saved' => $saved, ...$this->sheetPayload($section)]);
+    }
+
+    #[OA\Post(
+        path: '/sections/{section}/grades/reopen',
+        summary: 'Reopen finalized grades (Super Admin)',
+        description: 'Finalized → approved so grades can be returned and corrected; a reason is required and audited. 409 when nothing is finalized.',
+        operationId: 'reopenSectionGrades',
+        tags: ['Grades'],
+        security: [['sanctum' => []]],
+        parameters: [new OA\PathParameter(name: 'section', required: true, schema: new OA\Schema(type: 'integer', format: 'int64'))],
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(required: ['reason'], properties: [new OA\Property(property: 'reason', type: 'string', maxLength: 500)])),
+        responses: [
+            new OA\Response(response: 200, description: 'Updated grade sheet with `saved` count.', content: new OA\JsonContent(ref: '#/components/schemas/GradeSheetResponse')),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 409, description: 'No finalized grades.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 422, description: 'Reason missing.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
+        ]
+    )]
+    public function reopen(Request $request, Section $section): JsonResponse
+    {
+        $this->authorize('reopen', Grade::class);
+
+        $saved = $this->grading->reopen($section, $request->validate(['reason' => ['required', 'string', 'max:500']])['reason']);
+
+        return response()->json(['saved' => $saved, ...$this->sheetPayload($section)]);
+    }
+
     #[OA\Get(
         path: '/students/{student}/grades',
         summary: "A student's approved grades and GPA",

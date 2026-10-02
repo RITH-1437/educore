@@ -13,9 +13,9 @@ use Illuminate\Support\Carbon;
  * Workflow: `draft` (computed by the lecturer) → `submitted` (lecturer) →
  * `approved` (University Admin / Super Admin). Only approved grades count
  * toward GPA, prerequisites and the student's record; a manager may return a
- * submitted or approved grade to draft. `finalized` (allowed by the schema,
- * not produced by the workflow yet) counts like approved
- * (`docs/20_Grades-and-GPA-Report.md`).
+ * submitted or approved grade to draft. A manager may then finalize approved
+ * grades (locked: no return to draft); only Super Admin reopens them, with a
+ * reason. `finalized` counts like approved (`docs/20_Grades-and-GPA-Report.md`).
  *
  * @property int $id
  * @property int $enrollment_id

@@ -23,7 +23,7 @@ use OpenApi\Attributes as OA;
         ]),
         new OA\Property(property: 'grade', type: 'object', nullable: true, properties: [
             new OA\Property(property: 'id', type: 'integer', format: 'int64'),
-            new OA\Property(property: 'status', type: 'string', enum: ['draft', 'submitted', 'approved']),
+            new OA\Property(property: 'status', type: 'string', enum: ['draft', 'submitted', 'approved', 'finalized']),
             new OA\Property(property: 'total_score', type: 'number', nullable: true),
             new OA\Property(property: 'letter_grade', type: 'string', nullable: true),
             new OA\Property(property: 'grade_point', type: 'number', nullable: true),

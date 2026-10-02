@@ -560,12 +560,14 @@ users, main business activities, and expected outputs.
 - **Primary users:** Student (request), University Admin / Faculty/Department Admin (approve/generate).
 - **Main business activities:** request, review, approve, generate, download, and track document status.
 - **Expected outputs:** a traceable document workflow.
-- **Delivered:** student requests for an enrollment certificate, academic
-  transcript or one-semester academic result; approve / reject (with reason) /
+- **Delivered:** student requests for an enrollment certificate, student
+  certificate, academic transcript, one-semester academic result or
+  internship letter; approve / reject (with reason) /
   generate / revoke by University Admin; PDFs rendered only from enrollments,
   approved grades and GPA, stored privately in MinIO and downloaded through an
-  authorized route. Internship letters are [Planned] with 9.22; document fees
-  are not billed yet. See [22_Documents-and-Verification-Report.md](22_Documents-and-Verification-Report.md).
+  authorized route. Document fees are not billed yet. See
+  [22_Documents-and-Verification-Report.md](22_Documents-and-Verification-Report.md) and
+  [30_Grade-Finalization-and-Document-Templates-Report.md](30_Grade-Finalization-and-Document-Templates-Report.md).
 
 ### 9.17 Digital Document Verification [Implemented]
 
@@ -640,8 +642,8 @@ users, main business activities, and expected outputs.
   under review → approved / rejected → in progress → completed, or cancelled),
   one open application per student, initial / progress / final reports with
   private files, supervisor and faculty evaluations, status notifications and
-  a decision log. Published opportunity postings and an internship letter
-  document are [Future]. See [26_Internship-Management-Report.md](26_Internship-Management-Report.md).
+  a decision log, and an internship letter document (9.16). Published
+  opportunity postings are [Future]. See [26_Internship-Management-Report.md](26_Internship-Management-Report.md).
 
 ### 9.23 Analytics & Reporting [Implemented]
 

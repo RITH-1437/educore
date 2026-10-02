@@ -36,6 +36,12 @@ class GradePolicy
         return $this->manages($user);
     }
 
+    /** Unlock finalized grades: Super Admin only. */
+    public function reopen(User $user): bool
+    {
+        return $user->isRole(Role::SuperAdmin->value);
+    }
+
     /** Sections awaiting approval. */
     public function viewAny(User $user): bool
     {

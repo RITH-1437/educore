@@ -263,6 +263,7 @@ class GradingService
             'draft' => (int) ($counts[Grade::STATUS_DRAFT] ?? 0),
             'submitted' => (int) ($counts[Grade::STATUS_SUBMITTED] ?? 0),
             'approved' => (int) ($counts[Grade::STATUS_APPROVED] ?? 0),
+            'finalized' => (int) ($counts[Grade::STATUS_FINALIZED] ?? 0),
             'students' => $section->enrollments()->whereIn('status', self::GRADED_STATUSES)->count(),
         ];
     }
@@ -383,6 +384,53 @@ class GradingService
             $this->audit->record('grades.returned', $section, ['statuses' => $before], ['grades' => $this->gradeSnapshot($grades)]);
 
             $grades->pluck('enrollment.student')->unique('id')->each(fn ($student) => $this->gpa->recalculate($student));
+
+            return $grades->count();
+        });
+    }
+
+    /**
+     * Lock approved grades (`finalized`). Finalized grades cannot be returned
+     * to draft; they still count toward GPA exactly like approved ones.
+     */
+    public function finalize(Section $section): int
+    {
+        return DB::transaction(function () use ($section) {
+            $grades = $this->gradesOf($section)->where('status', Grade::STATUS_APPROVED)->lockForUpdate()->get();
+
+            if ($grades->isEmpty()) {
+                throw new BusinessRuleException('There are no approved grades to finalize.');
+            }
+
+            foreach ($grades as $grade) {
+                $grade->update(['status' => Grade::STATUS_FINALIZED]);
+            }
+
+            $this->audit->record('grades.finalized', $section, after: ['grades' => $this->gradeSnapshot($grades)]);
+
+            return $grades->count();
+        });
+    }
+
+    /**
+     * Unlock finalized grades back to approved so they can be corrected
+     * (`skills/grading-gpa` §10: a change after finalization needs permission
+     * and an audit trail — Super Admin only, with a reason). GPA is unchanged.
+     */
+    public function reopen(Section $section, string $reason): int
+    {
+        return DB::transaction(function () use ($section, $reason) {
+            $grades = $this->gradesOf($section)->where('status', Grade::STATUS_FINALIZED)->lockForUpdate()->get();
+
+            if ($grades->isEmpty()) {
+                throw new BusinessRuleException('There are no finalized grades to reopen.');
+            }
+
+            foreach ($grades as $grade) {
+                $grade->update(['status' => Grade::STATUS_APPROVED]);
+            }
+
+            $this->audit->record('grades.reopened', $section, ['status' => Grade::STATUS_FINALIZED], ['grades' => $this->gradeSnapshot($grades)], $reason);
 
             return $grades->count();
         });

@@ -1,9 +1,11 @@
 <script setup>
 import { Head, router, useForm, usePage } from '@inertiajs/vue3'
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
+import BaseModal from '../../components/BaseModal.vue'
+import BaseTextarea from '../../components/BaseTextarea.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import ErrorAlert from '../../components/ErrorAlert.vue'
 import PageHeader from '../../components/PageHeader.vue'
@@ -17,6 +19,7 @@ const props = defineProps({
   scale: { type: Array, default: () => [] },
   canGrade: { type: Boolean, default: false },
   canApprove: { type: Boolean, default: false },
+  canReopen: { type: Boolean, default: false },
 })
 
 const { confirm } = useConfirm()
@@ -40,7 +43,18 @@ const act = async (action, { title, message, confirmLabel, destructive = false }
 }
 const submit = () => act('submit', { title: 'Submit grades for approval?', message: 'Submitted grades can no longer be recomputed unless an administrator returns them.', confirmLabel: 'Submit' })
 const approve = () => act('approve', { title: 'Approve grades?', message: 'Approved grades count toward GPA and prerequisites, and students can see them.', confirmLabel: 'Approve' })
-const sendBack = () => act('return', { title: 'Return grades to draft?', message: 'Submitted and approved grades go back to the lecturer; affected GPAs are recalculated.', confirmLabel: 'Return to draft', destructive: true })
+const sendBack = () => act('return', { title: 'Return grades to draft?', message: 'Submitted and approved grades go back to the lecturer; affected GPAs are recalculated. Finalized grades are not affected.', confirmLabel: 'Return to draft', destructive: true })
+const finalize = () => act('finalize', { title: 'Finalize grades?', message: 'Approved grades are locked: they can no longer be returned to draft. Only a Super Admin can reopen them.', confirmLabel: 'Finalize' })
+
+// Reopening finalized grades needs a reason (audited).
+const showReopen = ref(false)
+const reopenForm = useForm({ reason: '' })
+const openReopen = () => {
+  reopenForm.reset()
+  reopenForm.clearErrors()
+  showReopen.value = true
+}
+const reopen = () => reopenForm.post(`${base}/reopen`, { preserveScroll: true, onSuccess: () => (showReopen.value = false) })
 
 // Submit rejections (missing / blank grades) arrive as a `grades` page error.
 const page = usePage()
@@ -55,7 +69,9 @@ const errors = computed(() => page.props.errors?.grades)
         <BaseButton v-if="canGrade && counts.students" variant="secondary" :loading="form.processing" @click="compute">Compute drafts</BaseButton>
         <BaseButton v-if="canGrade && counts.draft" @click="submit">Submit for approval</BaseButton>
         <BaseButton v-if="canApprove && counts.submitted" @click="approve">Approve</BaseButton>
+        <BaseButton v-if="canApprove && counts.approved" variant="secondary" @click="finalize">Finalize</BaseButton>
         <BaseButton v-if="canApprove && (counts.submitted || counts.approved)" variant="ghost" @click="sendBack">Return to draft</BaseButton>
+        <BaseButton v-if="canReopen && counts.finalized" variant="ghost" @click="openReopen">Reopen</BaseButton>
       </template>
     </PageHeader>
 
@@ -73,6 +89,7 @@ const errors = computed(() => page.props.errors?.grades)
         <StatusBadge status="draft" :label="`${counts.draft} draft`" />
         <StatusBadge status="pending" :label="`${counts.submitted} awaiting approval`" />
         <StatusBadge status="approved" :label="`${counts.approved} approved`" />
+        <StatusBadge status="finalized" :label="`${counts.finalized} finalized`" />
         <span class="text-caption text-muted dark:text-dark-muted">of {{ counts.students }} students</span>
       </div>
     </BaseCard>
@@ -136,5 +153,18 @@ const errors = computed(() => page.props.errors?.grades)
         <span v-for="(band, i) in scale" :key="band.grade">{{ band.grade }} ≥ {{ band.min_percentage }}%<span v-if="i < scale.length - 1"> · </span></span>
       </p>
     </BaseCard>
+
+    <BaseModal v-model="showReopen" title="Reopen finalized grades">
+      <form id="reopen-form" @submit.prevent="reopen">
+        <p class="mb-4 text-small text-muted dark:text-dark-muted">Finalized grades go back to approved so they can be returned and corrected. The reason is kept in the audit log.</p>
+        <BaseTextarea v-model="reopenForm.reason" name="reason" label="Reason" required :rows="3" :error="reopenForm.errors.reason" />
+      </form>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <BaseButton variant="ghost" @click="showReopen = false">Cancel</BaseButton>
+          <BaseButton type="submit" form="reopen-form" variant="danger" :loading="reopenForm.processing">Reopen</BaseButton>
+        </div>
+      </template>
+    </BaseModal>
   </div>
 </template>

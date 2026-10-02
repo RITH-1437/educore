@@ -140,6 +140,8 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::post('/sections/{section}/grades/submit', [GradeController::class, 'submit'])->name('api.sections.grades.submit');
     Route::post('/sections/{section}/grades/approve', [GradeController::class, 'approve'])->name('api.sections.grades.approve');
     Route::post('/sections/{section}/grades/return', [GradeController::class, 'returnToDraft'])->name('api.sections.grades.return');
+    Route::post('/sections/{section}/grades/finalize', [GradeController::class, 'finalize'])->name('api.sections.grades.finalize');
+    Route::post('/sections/{section}/grades/reopen', [GradeController::class, 'reopen'])->name('api.sections.grades.reopen');
     Route::get('/students/{student}/grades', [GradeController::class, 'student'])->name('api.students.grades');
     Route::get('/students/{student}/gpa', [GradeController::class, 'gpa'])->name('api.students.gpa');
     Route::get('/grading-scale', [GradeController::class, 'scale'])->name('api.grading-scale');

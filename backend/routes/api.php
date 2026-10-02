@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\ErrorLogController;
 use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\FacultyController;
 use App\Http\Controllers\Api\GradeController;
+use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\LecturerController;
 use App\Http\Controllers\Api\ProgramController;
 use App\Http\Controllers\Api\RoomController;
@@ -144,6 +145,17 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::post('/document-requests/{documentRequest}/generate', [DocumentController::class, 'generate'])->name('api.document-requests.generate');
     Route::post('/documents/{document}/revoke', [DocumentController::class, 'revoke'])->name('api.documents.revoke');
     Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('api.documents.download');
+
+    // Finance: `InvoicePolicy` — managers only (no Finance Officer role); a
+    // student reads their own invoices.
+    Route::get('/invoices', [InvoiceController::class, 'index'])->name('api.invoices.index');
+    Route::post('/invoices', [InvoiceController::class, 'store'])->name('api.invoices.store');
+    Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('api.invoices.show');
+    Route::match(['put', 'patch'], '/invoices/{invoice}', [InvoiceController::class, 'update'])->name('api.invoices.update');
+    Route::post('/invoices/{invoice}/cancel', [InvoiceController::class, 'cancel'])->name('api.invoices.cancel');
+    Route::post('/invoices/{invoice}/payments', [InvoiceController::class, 'pay'])->name('api.invoices.payments.store');
+    Route::post('/payments/{payment}/reverse', [InvoiceController::class, 'reverse'])->name('api.payments.reverse');
+    Route::get('/students/{student}/invoices', [InvoiceController::class, 'student'])->name('api.students.invoices');
 });
 
 // A student may read their own profile; `StudentPolicy::view` limits them to it.

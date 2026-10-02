@@ -572,12 +572,18 @@ users, main business activities, and expected outputs.
   minimal facts and the file's SHA-256, logs each lookup and is rate limited.
   A scannable QR image is [Planned]. See [22_Documents-and-Verification-Report.md](22_Documents-and-Verification-Report.md).
 
-### 9.18 Invoices & Payment Records [Planned]
+### 9.18 Invoices & Payment Records [Implemented]
 
 - **Purpose:** record invoices and payments.
 - **Primary users:** University Admin, Student (view own).
 - **Main business activities:** create invoices with items, record payments, track status (pending, partially paid, paid, overdue, cancelled).
 - **Expected outputs:** accurate financial records. *(No online payment gateway — see Section 23.)*
+- **Delivered:** itemised invoices (USD / KHR, discount, sequential numbers),
+  payment records within the balance, append-only reversals, cancellation
+  instead of deletion, derived statuses kept current (overdue refreshed on read
+  and by a daily command), a per-currency student summary and "My invoices".
+  Invoice PDFs and automatic tuition billing are [Future].
+  See [23_Invoices-and-Payments-Report.md](23_Invoices-and-Payments-Report.md).
 
 ### 9.19 Announcements [Planned]
 

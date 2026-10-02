@@ -14,6 +14,7 @@ use App\Http\Controllers\ErrorLogController;
 use App\Http\Controllers\ExamsController;
 use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\GradesController;
+use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\LecturerController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\RegistrationController;
@@ -207,6 +208,21 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function
     Route::post('/documents/{document}/revoke', [DocumentsController::class, 'revoke'])->name('documents.revoke');
 });
 Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,student'])->get('/documents/{document}/download', [DocumentsController::class, 'download'])->name('documents.download');
+
+// Finance (`InvoicePolicy`): managers manage invoices and payment records; a
+// student reads their own.
+Route::middleware(['auth', 'role:student'])->get('/my-invoices', [InvoicesController::class, 'mine'])->name('invoices.mine');
+Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function () {
+    Route::get('/invoices', [InvoicesController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/create', [InvoicesController::class, 'create'])->name('invoices.create');
+    Route::post('/invoices', [InvoicesController::class, 'store'])->name('invoices.store');
+    Route::get('/invoices/{invoice}/edit', [InvoicesController::class, 'edit'])->name('invoices.edit');
+    Route::put('/invoices/{invoice}', [InvoicesController::class, 'update'])->name('invoices.update');
+    Route::post('/invoices/{invoice}/cancel', [InvoicesController::class, 'cancel'])->name('invoices.cancel');
+    Route::post('/invoices/{invoice}/payments', [InvoicesController::class, 'pay'])->name('invoices.payments.store');
+    Route::post('/payments/{payment}/reverse', [InvoicesController::class, 'reverse'])->name('payments.reverse');
+});
+Route::middleware(['auth', 'role:super-admin,university-admin,student'])->get('/invoices/{invoice}', [InvoicesController::class, 'show'])->name('invoices.show');
 
 // Public verification page (module 9.17) — no sign-in.
 Route::get('/verify/{token}', [DocumentsController::class, 'verify'])->middleware('throttle:verification')->name('documents.verify');

@@ -42,6 +42,8 @@ class DatabaseSeeder extends Seeder
             GradingScaleSeeder::class,
             // Requestable official documents (module 9.16).
             DocumentTypeSeeder::class,
+            // Demo invoices and payments through InvoiceService (module 9.18).
+            InvoiceSeeder::class,
             // Operational diagnostics last: this table is filled by the recorder
             // at runtime, so seeding it after the structure keeps the rows
             // internally consistent.

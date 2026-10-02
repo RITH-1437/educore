@@ -148,6 +148,8 @@ limit used by enrollment (`backend/config/academics.php`).
 | `/my-documents`             | Request documents, download PDFs | Student |
 | `/documents`                | Document request queue: approve, reject, generate, revoke | Super admin, University admin (Faculty admin read-only) |
 | `/verify/{code}`            | Public document verification (no sign-in, rate limited) | — |
+| `/invoices`                 | Invoices: create, edit, record / reverse payments, cancel | Super admin, University admin |
+| `/my-invoices`              | My invoices, payments and balance | Student |
 | `/rooms`                    | Rooms                      | Super admin, University admin (Faculty admin read-only) |
 | `/timetable`                | My weekly timetable        | Student, Lecturer |
 | `/enrollments`              | Enrollment management      | Super admin, University admin (Faculty admin read-only) |
@@ -310,6 +312,9 @@ The `backend/` folder is a standard Laravel 12 application.
   - `app/Repositories` — data access (query building, writes, token revocation).
   - `app/Policies` — authorization.
 - Code style: Laravel Pint (`vendor/bin/pint`). Linted by CI.
+- Scheduled command: `php artisan invoices:refresh-statuses` (daily 00:10 via
+  `routes/console.php`; marks unpaid past-due invoices overdue — no scheduler
+  container runs it yet, finance reads refresh statuses meanwhile).
 - Tests: PHPUnit (`php artisan test`). Linted and run by CI. Note: the suite uses
   `RefreshDatabase` against the configured database, so it **wipes local data** —
   re-run `php artisan db:seed` afterwards if you need the demo admin account.

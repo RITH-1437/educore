@@ -15,6 +15,7 @@ import {
   Library,
   ListChecks,
   MapPin,
+  Receipt,
   Scale,
   School,
   TableProperties,
@@ -47,7 +48,7 @@ const navForRole = (role) => {
         ],
       },
       { label: 'Academics', items: [{ label: 'Courses', href: '/courses', icon: Library }, { label: 'Offerings & sections', href: '/offerings', icon: TableProperties }, { label: 'Enrollments', href: '/enrollments', icon: ListChecks }, { label: 'Rooms', href: '/rooms', icon: MapPin }, { label: 'Grades', href: '/grades', icon: Award }, { label: 'Grading scale', href: '/grading-scale', icon: Scale }] },
-      { label: 'Operations', items: [{ label: 'Documents', href: '/documents', icon: FileText }] },
+      { label: 'Operations', items: [{ label: 'Documents', href: '/documents', icon: FileText }, { label: 'Invoices', href: '/invoices', icon: Receipt }] },
       { label: 'System', items: [{ label: 'Error logs', href: '/error-logs', icon: FileWarning }] },
     ]
   }
@@ -70,7 +71,8 @@ const navForRole = (role) => {
       { label: 'Academic structure', items: structure },
       { label: 'People', items: [{ label: 'Students', href: '/students', icon: GraduationCap }, { label: 'Lecturers', href: '/lecturers', icon: UserRound }] },
       { label: 'Assessment', items: [{ label: 'Grades', href: '/grades', icon: Award }, { label: 'Grading scale', href: '/grading-scale', icon: Scale }] },
-      { label: 'Operations', items: [{ label: 'Documents', href: '/documents', icon: FileText }] },
+      // Finance is limited to university admins (Faculty Admin has no access).
+      { label: 'Operations', items: [{ label: 'Documents', href: '/documents', icon: FileText }, ...(role === 'university-admin' ? [{ label: 'Invoices', href: '/invoices', icon: Receipt }] : [])] },
     ]
   }
 
@@ -84,6 +86,7 @@ const navForRole = (role) => {
       { label: 'My exams', href: '/my-exams', icon: FileCheck },
       { label: 'Grades & GPA', href: '/my-grades', icon: Award },
       { label: 'My documents', href: '/my-documents', icon: FileText },
+      { label: 'My invoices', href: '/my-invoices', icon: Receipt },
     ] }]
   }
 
@@ -124,6 +127,8 @@ const SECTION_LABELS = {
   'grading-scale': 'Grading scale',
   'my-documents': 'My documents',
   documents: 'Documents',
+  invoices: 'Invoices',
+  'my-invoices': 'My invoices',
   'error-logs': 'Error logs',
 }
 

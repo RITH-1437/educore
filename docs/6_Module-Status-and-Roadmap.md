@@ -33,7 +33,7 @@
 | 9.15 | Student Academic Dashboard | `[Implemented]` (announcements card `[Planned]` with 9.19) |
 | 9.16 | Document Management | `[Implemented]` (internship letter `[Planned]` with 9.22) |
 | 9.17 | Digital Document Verification | `[Implemented]` (QR image `[Planned]`) |
-| 9.18 | Invoices & Payment Records | `[Planned]` |
+| 9.18 | Invoices & Payment Records | `[Implemented]` |
 | 9.19 | Announcements | `[Planned]` |
 | 9.20 | Email Notifications | `[Planned]` |
 | 9.21 | Telegram Notifications | `[Planned]` |
@@ -47,8 +47,8 @@
 ```mermaid
 pie showData
   title Module delivery status
-  "Implemented (incl. schema)" : 42
-  "Planned / In progress" : 8
+  "Implemented (incl. schema)" : 43
+  "Planned / In progress" : 7
 ```
 
 ---
@@ -250,9 +250,15 @@ operations incl. the public `/api/verifications/{token}`, `DocumentTypeSeeder`,
 5 feature tests. New dependency `barryvdh/laravel-dompdf`. Report:
 `docs/22_Documents-and-Verification-Report.md`.
 
-**9.18 Invoices & Payments** — tables `invoices`, `invoice_items`, `payments`.
-Steps: append-only invoice/reversal model; totals from line items; tests:
-status transitions + totals.
+**9.18 Invoices & Payments** `[Implemented]` — tables `invoices`,
+`invoice_items`, `payments` (no schema change). Delivered: `InvoiceService`
+(cent-exact totals from items, `INV-{year}-{seq}` numbering under an advisory
+lock, edit before payment only, payments ≤ balance, append-only reversals,
+cancel instead of delete, one status derivation + overdue refresh on read and
+`invoices:refresh-statuses` daily), `InvoicePolicy` (managers; students read
+own), pages `Invoices/Index|Form|Show|Mine`, 9 API operations,
+`InvoiceSeeder`, 8 feature tests. Report:
+`docs/23_Invoices-and-Payments-Report.md`.
 
 **9.19 Announcements** — table `announcements`.
 Steps: CRUD visible by audience scope; pages `Announcements/`.
@@ -368,4 +374,12 @@ A module is not done until its report exists and its tests pass — never label
   `docs/22_Documents-and-Verification-Report.md`. `[Open]` QR image on the PDF,
   document fees (`requires_fee`) not billed, document-type management screen,
   transition audit trail (9.24).
-- `[Next]` 9.18 Invoices & Payment Records.
+- `[Done]` 9.18 Invoices & Payment Records. Report:
+  `docs/23_Invoices-and-Payments-Report.md`. `[Open]` No scheduler container
+  runs `invoices:refresh-statuses` yet (reads refresh overdue meanwhile);
+  invoice PDFs / receipts, automatic tuition invoices and document-fee billing
+  are not built; finance changes are not audited (9.24).
+- `[Open]` `Enrollments/Index` passes `enrollments.links` (the resource's link
+  object) to `Pagination`, which expects the `meta.links` array, so its
+  pagination control never renders. Found during 9.16; not changed here.
+- `[Next]` 9.19 Announcements.

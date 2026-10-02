@@ -24,6 +24,10 @@ use Illuminate\Validation\ValidationException;
  */
 class CourseService
 {
+    public function __construct(
+        private readonly GpaService $gpa,
+    ) {}
+
     /**
      * @return LengthAwarePaginator<int, Course>
      */
@@ -71,6 +75,12 @@ class CourseService
         return DB::transaction(function () use ($course, $attributes) {
             if ($attributes !== []) {
                 $course->update($attributes);
+            }
+
+            // GPA is credit-weighted, so a credit change recomputes it
+            // (`skills/grading-gpa/SKILL.md` §4 — never stale).
+            if ($course->wasChanged('credits')) {
+                $this->gpa->recalculateForCourse($course);
             }
 
             return $course->refresh();

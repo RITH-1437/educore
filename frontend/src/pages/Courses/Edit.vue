@@ -8,11 +8,13 @@ import ErrorAlert from '../../components/ErrorAlert.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
 import CourseForm from '../../components/courses/CourseForm.vue'
+import GradingWeights from '../../components/courses/GradingWeights.vue'
 import PrerequisiteEditor from '../../components/courses/PrerequisiteEditor.vue'
 
 const props = defineProps({
   course: { type: Object, required: true },
   prerequisiteOptions: { type: Array, default: () => [] },
+  gradingConfig: { type: Object, default: null },
   faculties: { type: Object, required: true },
   departments: { type: Object, required: true },
   programs: { type: Array, default: () => [] },
@@ -79,6 +81,8 @@ const reactivate = () => router.post(`/courses/${props.course.id}/reactivate`, {
     </BaseCard>
 
     <PrerequisiteEditor :course="course" :options="prerequisiteOptions" can-manage />
+
+    <GradingWeights v-if="gradingConfig" :course-id="course.id" :config="gradingConfig" />
 
     <BaseCard title="Used in programs" padding="lg">
       <template #description>Programs whose curriculum includes this course. Manage membership from the program page.</template>

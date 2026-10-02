@@ -38,6 +38,8 @@ class DatabaseSeeder extends Seeder
             // Coursework (files stored on the uploads disk / MinIO).
             AssignmentSeeder::class,
             ExamSeeder::class,
+            // The grading scale grades are mapped against (module 9.14).
+            GradingScaleSeeder::class,
             // Operational diagnostics last: this table is filled by the recorder
             // at runtime, so seeding it after the structure keeps the rows
             // internally consistent.

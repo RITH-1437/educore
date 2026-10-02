@@ -1,6 +1,7 @@
 import { computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import {
+  Award,
   BookMarked,
   Building2,
   Calendar,
@@ -13,6 +14,7 @@ import {
   Library,
   ListChecks,
   MapPin,
+  Scale,
   School,
   TableProperties,
   UserCheck,
@@ -43,7 +45,7 @@ const navForRole = (role) => {
           { label: 'Lecturers', href: '/lecturers', icon: UserRound },
         ],
       },
-      { label: 'Academics', items: [{ label: 'Courses', href: '/courses', icon: Library }, { label: 'Offerings & sections', href: '/offerings', icon: TableProperties }, { label: 'Enrollments', href: '/enrollments', icon: ListChecks }, { label: 'Rooms', href: '/rooms', icon: MapPin }] },
+      { label: 'Academics', items: [{ label: 'Courses', href: '/courses', icon: Library }, { label: 'Offerings & sections', href: '/offerings', icon: TableProperties }, { label: 'Enrollments', href: '/enrollments', icon: ListChecks }, { label: 'Rooms', href: '/rooms', icon: MapPin }, { label: 'Grades', href: '/grades', icon: Award }, { label: 'Grading scale', href: '/grading-scale', icon: Scale }] },
       { label: 'System', items: [{ label: 'Error logs', href: '/error-logs', icon: FileWarning }] },
     ]
   }
@@ -65,6 +67,7 @@ const navForRole = (role) => {
       { label: 'Overview', items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }] },
       { label: 'Academic structure', items: structure },
       { label: 'People', items: [{ label: 'Students', href: '/students', icon: GraduationCap }, { label: 'Lecturers', href: '/lecturers', icon: UserRound }] },
+      { label: 'Assessment', items: [{ label: 'Grades', href: '/grades', icon: Award }, { label: 'Grading scale', href: '/grading-scale', icon: Scale }] },
     ]
   }
 
@@ -76,6 +79,7 @@ const navForRole = (role) => {
       { label: 'My attendance', href: '/my-attendance', icon: UserCheck },
       { label: 'My assignments', href: '/my-assignments', icon: ClipboardList },
       { label: 'My exams', href: '/my-exams', icon: FileCheck },
+      { label: 'Grades & GPA', href: '/my-grades', icon: Award },
     ] }]
   }
 
@@ -84,6 +88,7 @@ const navForRole = (role) => {
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { label: 'My timetable', href: '/timetable', icon: CalendarClock },
       { label: 'Attendance', href: '/attendance', icon: UserCheck },
+      { label: 'Grading scale', href: '/grading-scale', icon: Scale },
     ] }]
   }
 
@@ -110,6 +115,9 @@ const SECTION_LABELS = {
   coursework: 'Coursework',
   'my-exams': 'My exams',
   exams: 'Examinations',
+  'my-grades': 'Grades & GPA',
+  grades: 'Grades',
+  'grading-scale': 'Grading scale',
   'error-logs': 'Error logs',
 }
 

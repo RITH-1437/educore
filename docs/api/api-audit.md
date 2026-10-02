@@ -13,11 +13,11 @@
 
 | Measure | Result |
 |---|---:|
-| Application API route definitions (`routes/api.php`) | 128 |
-| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 143 |
-| Swagger operations after documentation corrections | 143 |
-| Swagger document paths | 79 |
-| Swagger document schemas | 115 |
+| Application API route definitions (`routes/api.php`) | 139 |
+| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 154 |
+| Swagger operations after documentation corrections | 154 |
+| Swagger document paths | 87 |
+| Swagger document schemas | 125 |
 | Undocumented application operations | 0 |
 | Extra Swagger operations not in the application API routes | 0 |
 | Swagger generation errors after corrections | 0 |
@@ -256,7 +256,7 @@ were **not changed** during this documentation-only audit.
 Application endpoint counts below exclude the four L5-Swagger/OAuth package
 routes (`api/documentation`, `api/documentation/asset/{asset}`,
 `api/documentation/ui`, `api/oauth2-callback`). Each combined update route
-contributes one PUT and one PATCH operation, so 128 route definitions yield 143
+contributes one PUT and one PATCH operation, so 139 route definitions yield 154
 documented operations.
 
 | Method | Path | Authentication / authorization | Documentation |
@@ -387,6 +387,17 @@ documented operations.
 | POST | `/api/exams/{exam}/results` | Sanctum + managers or a lecturer of the section | Documented |
 | PATCH | `/api/exam-results/{result}` | Sanctum + managers or a lecturer of the section | Documented |
 | GET | `/api/students/{student}/exams` | Sanctum + staff, or the student themself | Documented |
+| GET | `/api/sections/{section}/grades` | Sanctum + staff (Faculty Admin read) or a lecturer of the section | Documented |
+| POST | `/api/sections/{section}/grades` | Sanctum + managers or a lecturer of the section (compute drafts) | Documented |
+| POST | `/api/sections/{section}/grades/submit` | Sanctum + managers or a lecturer of the section | Documented |
+| POST | `/api/sections/{section}/grades/approve` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/sections/{section}/grades/return` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/students/{student}/grades` | Sanctum + staff, or the student themself (approved grades only) | Documented |
+| GET | `/api/students/{student}/gpa` | Sanctum + staff, or the student themself | Documented |
+| GET | `/api/grading-scale` | Sanctum, any role | Documented |
+| PUT | `/api/grading-scale` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/courses/{course}/grading-config` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| PUT | `/api/courses/{course}/grading-config` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/error-logs` | Sanctum + super-admin only | Documented |
 | GET | `/api/error-logs/{errorLog}` | Sanctum + super-admin only | Documented |
 
@@ -432,6 +443,8 @@ Re-ran Swagger generation and a scripted method/path comparison of
 | OpenAPI operations / paths / schemas | 143 / 79 / 115 |
 | Undocumented operations before the fix | 6 |
 | Undocumented / extra operations after the fix | 0 / 0 |
+| After 9.14 Grades & GPA (11 operations added): route definitions / operations / OpenAPI paths / schemas | 139 / 154 / 87 / 125 |
+| Undocumented / extra operations after 9.14 | 0 / 0 |
 
 - **A-09 — PATCH aliases undocumented.** `PATCH` on `/api/assignments/{assignment}`,
   `/api/exams/{exam}`, `/api/offerings/{offering}`, `/api/rooms/{room}`,

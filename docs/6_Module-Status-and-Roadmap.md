@@ -1,6 +1,6 @@
 # EduCore — Module Status & Build Roadmap Report
 
-- **Date:** 2026-09-26
+- **Date:** 2026-09-26 (updated 2026-10-02)
 - **Source of truth:** `docs/3_business-overview.md` §9 (module list), `docs/5_Build-Steps-Report.md` (build workflow)
 - **Status labels:** `[Implemented]` = shipped and tested · `[Planned]` = next, follows this playbook · `[Future]` = later
 - **Database:** the full 49-table schema already exists as migrations — **every** module below builds on top of already-migrated tables (see `docs/4_Database-Migration-Report.md`).
@@ -29,7 +29,7 @@
 | 9.11 | Attendance | `[Implemented]` |
 | 9.12 | Assignments | `[Implemented]` |
 | 9.13 | Examinations | `[Implemented]` |
-| 9.14 | Grades & GPA | `[Planned]` |
+| 9.14 | Grades & GPA | `[Implemented]` (transcript document `[Planned]` with 9.16) |
 | 9.15 | Student Academic Dashboard | `[Planned]` |
 | 9.16 | Document Management | `[Planned]` |
 | 9.17 | Digital Document Verification | `[Planned]` |
@@ -47,8 +47,8 @@
 ```mermaid
 pie showData
   title Module delivery status
-  "Implemented (incl. schema)" : 38
-  "Planned / In progress" : 12
+  "Implemented (incl. schema)" : 39
+  "Planned / In progress" : 11
 ```
 
 ---
@@ -214,11 +214,20 @@ late/deadline validation; tests: submission authorization.
 Steps: exam plan + results entry, ordering of results; tests: results only by
 lecturer/student owner.
 
-**9.14 Grades & GPA** — tables `grading_scales`, `course_grading_configs`,
-`grades`, `gpa_records`.
-Steps: `GradingService` mapping % → letter/point, GPA computed from
-`gpa_records` (never stored live — see `skills/grading-gpa`); tests: weighted
-GPA correctness + recompute on grade change.
+**9.14 Grades & GPA** `[Implemented]` — tables `grading_scales`,
+`course_grading_configs`, `grades`, `gpa_records` (no schema change).
+Delivered: `GradingService` (active scale with derived gap-free bands, course
+weights that must total 100, a grade sheet computed from attendance rate,
+coursework and exam results with unmeasurable components rescaled, draft →
+submitted → approved / returned workflow; approval completes enrollments),
+`GpaService` (credit-weighted semester and per-year cumulative snapshots rebuilt
+on approve / return / course credit change, latest attempt per course counts
+cumulatively), grade-based prerequisites, `GradePolicy`, pages
+`Grades/Section|Index|Scale|Mine` plus the course *Grading weights* card,
+`/api/sections/{section}/grades…`, `/api/students/{student}/grades|gpa`,
+`/api/grading-scale`, `/api/courses/{course}/grading-config` with OpenAPI
+annotations, `GradingScaleSeeder`, 12 feature tests. Report:
+`docs/20_Grades-and-GPA-Report.md`.
 
 **9.15 Student Academic Dashboard** — read-only pages aggregating enrollments,
 attendance %, GPA, timetable (`withCount`/`withSum`, eager load, no N+1).
@@ -329,10 +338,17 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` Test-database guard (`tests/TestCase`) and production-only config
   caching in the container entrypoint, after a cached config let the suite
   reset the development database.
-- `[Open]` Assignment scores are not yet weighted into course grades (9.14);
-  lecturer-attached materials are not built.
+- `[Done]` Assignment and exam scores are weighted into course grades (9.14).
+  `[Open]` Lecturer-attached materials are not built.
 - `[Done]` 9.13 Examinations (`exams`, `exam_results`). Report:
   `docs/19_Examinations-Report.md`.
 - `[Open]` Exam result corrections are not audited yet (9.24 Audit Logs).
-- `[Next]` 9.14 Grades & GPA (which will weight exam and assignment scores, and
-  will also turn enrollment completion and prerequisites into grade-based rules).
+- `[Done]` 9.14 Grades & GPA (`grading_scales`, `course_grading_configs`,
+  `grades`, `gpa_records`); prerequisites now require an approved passing grade
+  when a grade exists. Report: `docs/20_Grades-and-GPA-Report.md`.
+- `[Done]` API re-audit 2026-10-02: six PATCH aliases documented; R-01 marked
+  resolved (`docs/api/api-audit.md`).
+- `[Open]` Grade changes are not audited yet (9.24); the official transcript
+  document waits for 9.16; the `finalized` grade lock step is not built.
+- `[Next]` 9.15 Student Academic Dashboard (GPA, attendance, credits and recent
+  grades now all have a source).

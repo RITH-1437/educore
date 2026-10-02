@@ -128,6 +128,12 @@ class Student extends Model
         return $this->hasMany(Enrollment::class);
     }
 
+    /** Computed GPA snapshots (rebuilt by `GpaService`). */
+    public function gpaRecords(): HasMany
+    {
+        return $this->hasMany(GpaRecord::class);
+    }
+
     public function fullName(): string
     {
         return trim($this->first_name.' '.$this->last_name);

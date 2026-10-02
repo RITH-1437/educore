@@ -107,7 +107,7 @@ const fieldError = (i, field) => results.errors[`results.${i}.${field}`]
     <p v-if="section.locked" class="text-small text-warning">The semester is completed; exams and results are read-only.</p>
     <p v-if="canReview" class="text-small text-muted dark:text-dark-muted">
       Exam weights in this section: <span class="font-semibold tabular-nums" :class="totalWeight > 100 ? 'text-error' : 'text-ink dark:text-dark-ink'">{{ totalWeight }}%</span> of 100%.
-      The full course weighting (assignments, attendance) arrives with Grades &amp; GPA.
+      The course grade is built from the course's grading weights; open <span class="font-medium">Grades</span> from the section card.
     </p>
 
     <BaseCard v-if="!exams.length">

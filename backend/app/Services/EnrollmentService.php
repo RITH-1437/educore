@@ -6,6 +6,7 @@ use App\Enums\SemesterStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Course;
 use App\Models\Enrollment;
+use App\Models\Grade;
 use App\Models\Section;
 use App\Models\Student;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -158,8 +159,9 @@ class EnrollmentService
     /**
      * Codes of strict prerequisites the student has not passed.
      *
-     * Passed = a completed enrollment in any offering of that course whose
-     * grade (if one exists) is not a fail (F / 0 points).
+     * Passed = a completed enrollment in any offering of that course with
+     * either no grade row (completed manually) or an approved grade that is
+     * not a fail (F / 0 points). Draft / submitted grades do not pass yet.
      *
      * @return list<string>
      */
@@ -182,6 +184,7 @@ class EnrollmentService
                 ->whereNull('enrollments.deleted_at')
                 ->where(fn ($q) => $q->whereNull('grades.id')
                     ->orWhere(fn ($g) => $g
+                        ->whereIn('grades.status', Grade::FINAL_STATUSES)
                         ->where(fn ($l) => $l->whereNull('grades.letter_grade')->orWhere('grades.letter_grade', '!=', 'F'))
                         ->where(fn ($p) => $p->whereNull('grades.grade_point')->orWhere('grades.grade_point', '>', 0))))
                 ->exists();

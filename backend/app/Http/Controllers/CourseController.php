@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Dto\UniversityStructure\CourseListFilters;
+use App\Http\Controllers\Api\GradeController;
 use App\Http\Requests\StoreCoursePrerequisiteRequest;
 use App\Http\Requests\StoreCourseRequest;
 use App\Http\Requests\UpdateCourseRequest;
@@ -14,6 +15,7 @@ use App\Models\Department;
 use App\Models\Faculty;
 use App\Models\Program;
 use App\Services\CourseService;
+use App\Services\GradingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -29,6 +31,7 @@ class CourseController extends Controller
 {
     public function __construct(
         private readonly CourseService $courses,
+        private readonly GradingService $grading,
     ) {}
 
     public function index(Request $request): Response
@@ -85,6 +88,8 @@ class CourseController extends Controller
                 ->get(['id', 'code', 'name'])
                 ->map(fn (Course $option) => ['id' => $option->id, 'code' => $option->code, 'name' => $option->name])
                 ->values(),
+            // Component weights of the course grade (module 9.14).
+            'gradingConfig' => GradeController::configPayload($this->grading->configFor($course)),
             ...$this->lookups(),
         ]);
     }

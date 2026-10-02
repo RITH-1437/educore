@@ -517,14 +517,23 @@ users, main business activities, and expected outputs.
   (section total ≤ 100%), max score, date/time/location, clash detection for
   shared students, bulk results entry and correction, release of results,
   lecturer results grid and student "My exams". Weighting into final grades
-  arrives with 9.14. See [19_Examinations-Report.md](19_Examinations-Report.md).
+  is delivered by 9.14. See [19_Examinations-Report.md](19_Examinations-Report.md).
 
-### 9.14 Grades & GPA [Planned]
+### 9.14 Grades & GPA [Implemented]
 
 - **Purpose:** turn scores into letter grades, grade points, and GPAs.
 - **Primary users:** Lecturer (entry), Student (view), Administrators (oversight).
 - **Main business activities:** enter scores, apply letter-grade scale, compute semester and cumulative GPA.
 - **Expected outputs:** consistent grade records and GPA values.
+- **Delivered:** configurable grading scale (default A=4.0 … F=0.0), per-course
+  component weights (attendance, coursework, midterm, final, practical = 100%),
+  a live section grade sheet computed from attendance, assignments and exam
+  results, a draft → submitted → approved workflow (approval completes the
+  enrollment), credit-weighted semester and cumulative GPA rebuilt on every
+  grade or credit change (retakes replace earlier attempts), grade-based
+  prerequisites, and lecturer / staff / student screens. The official
+  transcript document is [Planned] with 9.16; grade-change auditing with 9.24.
+  See [20_Grades-and-GPA-Report.md](20_Grades-and-GPA-Report.md).
 
 ### 9.15 Student Academic Dashboard [Planned]
 

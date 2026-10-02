@@ -32,6 +32,7 @@ defineProps({
           <BaseButton :href="`/attendance/sections/${section.id}`" size="sm">Take attendance</BaseButton>
           <BaseButton :href="`/coursework/sections/${section.id}`" size="sm" variant="secondary">Assignments</BaseButton>
           <BaseButton :href="`/exams/sections/${section.id}`" size="sm" variant="secondary">Exams</BaseButton>
+          <BaseButton :href="`/grades/sections/${section.id}`" size="sm" variant="secondary">Grades</BaseButton>
         </div>
       </BaseCard>
     </div>

@@ -8,6 +8,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseOfferingController;
 use App\Http\Controllers\CourseworkController;
 use App\Http\Controllers\ExamsController;
+use App\Http\Controllers\GradesController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\ErrorLogController;
@@ -171,6 +172,24 @@ Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,lect
     Route::delete('/exams/{exam}', [ExamsController::class, 'destroy'])->name('exams.destroy');
     Route::post('/exams/{exam}/publish', [ExamsController::class, 'publish'])->name('exams.publish');
     Route::post('/exams/{exam}/results', [ExamsController::class, 'record'])->name('exams.results');
+});
+
+// Grades & GPA (`GradePolicy`): lecturers of the section compute and submit,
+// managers approve / return and edit the scale and course weights, Faculty
+// Admin reads, students see their own approved grades and GPA.
+Route::middleware(['auth', 'role:student'])->get('/my-grades', [GradesController::class, 'mine'])->name('grades.mine');
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->get('/grades', [GradesController::class, 'index'])->name('grades.index');
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,lecturer'])->group(function () {
+    Route::get('/grades/sections/{section}', [GradesController::class, 'section'])->name('grades.section');
+    Route::post('/grades/sections/{section}', [GradesController::class, 'compute'])->name('grades.compute');
+    Route::post('/grades/sections/{section}/submit', [GradesController::class, 'submit'])->name('grades.submit');
+    Route::get('/grading-scale', [GradesController::class, 'scale'])->name('grading-scale');
+});
+Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function () {
+    Route::post('/grades/sections/{section}/approve', [GradesController::class, 'approve'])->name('grades.approve');
+    Route::post('/grades/sections/{section}/return', [GradesController::class, 'returnToDraft'])->name('grades.return');
+    Route::put('/grading-scale', [GradesController::class, 'updateScale'])->name('grading-scale.update');
+    Route::put('/courses/{course}/grading-config', [GradesController::class, 'updateConfig'])->name('courses.grading-config.update');
 });
 
 // Timetable: rooms (staff read, managers write), section schedules (managers),

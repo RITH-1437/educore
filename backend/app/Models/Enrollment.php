@@ -6,6 +6,7 @@ use Database\Factories\EnrollmentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 
@@ -69,6 +70,12 @@ class Enrollment extends Model
     public function semester(): BelongsTo
     {
         return $this->belongsTo(Semester::class);
+    }
+
+    /** The final course grade (`skills/grading-gpa/SKILL.md` — one per enrollment). */
+    public function grade(): HasOne
+    {
+        return $this->hasOne(Grade::class);
     }
 
     public function isOpen(): bool

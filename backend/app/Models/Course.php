@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 /**
  * A stable curriculum unit (code, name, credits) owned by a department.
@@ -118,6 +119,11 @@ class Course extends Model
     public function offerings(): HasMany
     {
         return $this->hasMany(CourseOffering::class);
+    }
+
+    public function gradingConfig(): HasOne
+    {
+        return $this->hasOne(CourseGradingConfig::class);
     }
 
     public function scopeSearch(Builder $query, ?string $search): Builder

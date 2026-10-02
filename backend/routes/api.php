@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\EnrollmentController;
 use App\Http\Controllers\Api\ErrorLogController;
 use App\Http\Controllers\Api\FacultyController;
+use App\Http\Controllers\Api\GradeController;
 use App\Http\Controllers\Api\LecturerController;
 use App\Http\Controllers\Api\ProgramController;
 use App\Http\Controllers\Api\RoomController;
@@ -114,6 +115,21 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::post('/exams/{exam}/results', [ExamController::class, 'record'])->name('api.exams.results');
     Route::patch('/exam-results/{result}', [ExamController::class, 'correct'])->name('api.exam-results.correct');
     Route::get('/students/{student}/exams', [ExamController::class, 'student'])->name('api.students.exams');
+
+    // Grades & GPA: `GradePolicy` — lecturers of the section compute / submit,
+    // managers approve / return and configure, Faculty Admin reads, a student
+    // reads their own grades and GPA.
+    Route::get('/sections/{section}/grades', [GradeController::class, 'sheet'])->name('api.sections.grades');
+    Route::post('/sections/{section}/grades', [GradeController::class, 'compute'])->name('api.sections.grades.compute');
+    Route::post('/sections/{section}/grades/submit', [GradeController::class, 'submit'])->name('api.sections.grades.submit');
+    Route::post('/sections/{section}/grades/approve', [GradeController::class, 'approve'])->name('api.sections.grades.approve');
+    Route::post('/sections/{section}/grades/return', [GradeController::class, 'returnToDraft'])->name('api.sections.grades.return');
+    Route::get('/students/{student}/grades', [GradeController::class, 'student'])->name('api.students.grades');
+    Route::get('/students/{student}/gpa', [GradeController::class, 'gpa'])->name('api.students.gpa');
+    Route::get('/grading-scale', [GradeController::class, 'scale'])->name('api.grading-scale');
+    Route::put('/grading-scale', [GradeController::class, 'updateScale'])->name('api.grading-scale.update');
+    Route::get('/courses/{course}/grading-config', [GradeController::class, 'config'])->name('api.courses.grading-config');
+    Route::put('/courses/{course}/grading-config', [GradeController::class, 'updateConfig'])->name('api.courses.grading-config.update');
 });
 
 // A student may read their own profile; `StudentPolicy::view` limits them to it.

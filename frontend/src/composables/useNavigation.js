@@ -132,6 +132,7 @@ const SECTION_LABELS = {
   documents: 'Documents',
   invoices: 'Invoices',
   announcements: 'Announcements',
+  notifications: 'Notification settings',
   'my-invoices': 'My invoices',
   'error-logs': 'Error logs',
 }

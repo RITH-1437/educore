@@ -7,6 +7,8 @@ use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Student;
 use App\Models\User;
+use App\Notifications\InvoiceIssued;
+use App\Notifications\PaymentRecorded;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -81,8 +83,9 @@ class InvoiceService
             ]);
             $invoice->items()->createMany($items);
             $this->syncStatus($invoice);
+            $student->user?->notify(new InvoiceIssued($invoice->refresh()));
 
-            return $invoice->refresh();
+            return $invoice;
         });
     }
 
@@ -184,8 +187,9 @@ class InvoiceService
 
             $invoice->update(['amount_paid' => (Invoice::cents($invoice->amount_paid) + $amount) / 100]);
             $this->syncStatus($invoice);
+            $invoice->student->user?->notify(new PaymentRecorded($payment->refresh()));
 
-            return $payment->refresh();
+            return $payment;
         });
     }
 
@@ -217,8 +221,9 @@ class InvoiceService
 
             $invoice->update(['amount_paid' => (Invoice::cents($invoice->amount_paid) - Invoice::cents($payment->amount)) / 100]);
             $this->syncStatus($invoice);
+            $invoice->student->user?->notify(new PaymentRecorded($reversal->refresh()));
 
-            return $reversal->refresh();
+            return $reversal;
         });
     }
 

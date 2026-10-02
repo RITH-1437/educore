@@ -9,6 +9,7 @@ use App\Models\Enrollment;
 use App\Models\Grade;
 use App\Models\Section;
 use App\Models\Student;
+use App\Notifications\EnrollmentConfirmed;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -101,18 +102,22 @@ class EnrollmentService
                     'enrolled_at' => now(),
                     'dropped_at' => null,
                 ]);
-
-                return $dropped->refresh();
+                $enrollment = $dropped->refresh();
+            } else {
+                $enrollment = Enrollment::query()->create([
+                    'student_id' => $student->getKey(),
+                    'section_id' => $section->getKey(),
+                    'academic_year_id' => $semester->academic_year_id,
+                    'semester_id' => $semester->getKey(),
+                    'status' => Enrollment::STATUS_CONFIRMED,
+                    'enrolled_at' => now(),
+                ])->refresh();
             }
 
-            return Enrollment::query()->create([
-                'student_id' => $student->getKey(),
-                'section_id' => $section->getKey(),
-                'academic_year_id' => $semester->academic_year_id,
-                'semester_id' => $semester->getKey(),
-                'status' => Enrollment::STATUS_CONFIRMED,
-                'enrolled_at' => now(),
-            ])->refresh();
+            // Queued, sent after commit (module 9.20).
+            $student->user?->notify(new EnrollmentConfirmed($enrollment));
+
+            return $enrollment;
         });
     }
 

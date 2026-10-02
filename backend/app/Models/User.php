@@ -76,6 +76,25 @@ class User extends Authenticatable
         return $this->hasOne(Student::class);
     }
 
+    public function notificationPreference()
+    {
+        return $this->hasOne(NotificationPreference::class);
+    }
+
+    /** Stored preferences, or the unsaved defaults (email on, no Telegram chat). */
+    public function preferences(): NotificationPreference
+    {
+        return $this->notificationPreference ?? new NotificationPreference(['user_id' => $this->getKey()]);
+    }
+
+    /** Telegram chat for `TelegramChannel`; null unless the user opted in and linked a chat. */
+    public function routeNotificationForTelegram(): ?string
+    {
+        $preferences = $this->preferences();
+
+        return $preferences->telegramReady() ? $preferences->telegram_chat_id : null;
+    }
+
     public function isRole(string $slug): bool
     {
         return $this->role?->slug === $slug;

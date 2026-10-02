@@ -17,6 +17,7 @@ use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\GradesController;
 use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\LecturerController;
+use App\Http\Controllers\NotificationPreferencesController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RoomController;
@@ -235,6 +236,13 @@ Route::middleware(['auth', 'role:super-admin,university-admin,lecturer'])->group
     Route::delete('/announcements/{announcement}', [AnnouncementsController::class, 'destroy'])->name('announcements.destroy');
     Route::post('/announcements/{announcement}/publish', [AnnouncementsController::class, 'publish'])->name('announcements.publish');
     Route::post('/announcements/{announcement}/archive', [AnnouncementsController::class, 'archive'])->name('announcements.archive');
+});
+
+// Notification settings (modules 9.20 / 9.21): every signed-in user, own only.
+Route::middleware('auth')->group(function () {
+    Route::get('/notifications', [NotificationPreferencesController::class, 'edit'])->name('notifications.edit');
+    Route::put('/notifications', [NotificationPreferencesController::class, 'update'])->name('notifications.update');
+    Route::post('/notifications/test', [NotificationPreferencesController::class, 'test'])->middleware('throttle:notification-test')->name('notifications.test');
 });
 
 // Public verification page (module 9.17) — no sign-in.

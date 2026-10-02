@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\Role;
 use App\Exceptions\BusinessRuleException;
+use App\Jobs\SendAnnouncementNotifications;
 use App\Models\Announcement;
 use App\Models\Course;
 use App\Models\Department;
@@ -67,6 +68,44 @@ class AnnouncementService
     }
 
     /**
+     * Active users an announcement reaches — the inverse of `feedFor`, used to
+     * deliver notifications at publish time (later joiners see it in their
+     * feed but are not notified retroactively).
+     *
+     * @return Builder<User>
+     */
+    public function recipients(Announcement $announcement): Builder
+    {
+        $id = $announcement->audience_id;
+        // Sub-selects of user ids for students / active lecturers in a set.
+        $studentUsers = fn ($studentIds) => DB::table('students')->whereIn('id', $studentIds)->select('user_id');
+        $lecturerUsers = fn ($lecturerIds) => DB::table('lecturers')->where('is_active', true)->whereIn('id', $lecturerIds)->select('user_id');
+        $inPrograms = fn ($programs) => DB::table('student_programs')->where('status', 'active')->whereIn('program_id', $programs)->select('student_id');
+        $openIn = fn ($sections) => DB::table('enrollments')->whereIn('status', Enrollment::OPEN_STATUSES)->whereNull('deleted_at')->whereIn('section_id', $sections)->select('student_id');
+        $teaching = fn ($sections) => DB::table('section_lecturers')->whereIn('section_id', $sections)->select('lecturer_id');
+        $courseSections = fn () => DB::table('sections')->join('course_offerings', 'course_offerings.id', '=', 'sections.course_offering_id')->where('course_offerings.course_id', $id)->select('sections.id');
+        $facultyDepartments = fn () => DB::table('departments')->where('faculty_id', $id)->select('id');
+        $roles = fn (array $slugs) => fn (Builder $q) => $q->whereHas('role', fn ($r) => $r->whereIn('slug', $slugs));
+        $members = fn ($students, $lecturers = null) => fn (Builder $q) => $q->whereIn('id', $studentUsers($students))
+            ->when($lecturers !== null, fn ($w) => $w->orWhereIn('id', $lecturerUsers($lecturers)));
+
+        $scope = match ($announcement->audience_type) {
+            'all' => fn (Builder $q) => $q,
+            'students' => $roles([Role::Student->value]),
+            'lecturers' => $roles([Role::Lecturer->value]),
+            'staff' => $roles([Role::SuperAdmin->value, Role::UniversityAdmin->value, Role::FacultyAdmin->value]),
+            'program' => $members($inPrograms([$id])),
+            'department' => $members($inPrograms(DB::table('programs')->where('department_id', $id)->select('id')), DB::table('lecturers')->where('department_id', $id)->select('id')),
+            'faculty' => $members($inPrograms(DB::table('programs')->whereIn('department_id', $facultyDepartments())->select('id')), DB::table('lecturers')->whereIn('department_id', $facultyDepartments())->select('id')),
+            'section' => $members($openIn([$id]), $teaching([$id])),
+            'course' => $members($openIn($courseSections()), $teaching($courseSections())),
+            default => fn (Builder $q) => $q->whereRaw('false'),
+        };
+
+        return User::query()->where('is_active', true)->where(fn (Builder $q) => $scope($q));
+    }
+
+    /**
      * Announcements a user manages: everything for managers, own for lecturers.
      *
      * @return Builder<Announcement>
@@ -90,7 +129,7 @@ class AnnouncementService
         return DB::transaction(function () use ($author, $data, $publish) {
             $audience = $this->assertAudience($author, $data['audience_type'], $data['audience_id'] ?? null);
 
-            return Announcement::query()->create([
+            $announcement = Announcement::query()->create([
                 'author_id' => $author->getKey(),
                 'title' => $data['title'],
                 'body' => $data['body'],
@@ -99,6 +138,12 @@ class AnnouncementService
                 'publish_state' => $publish ? Announcement::STATE_PUBLISHED : Announcement::STATE_DRAFT,
                 'published_at' => $publish ? now() : null,
             ])->refresh();
+
+            if ($publish) {
+                SendAnnouncementNotifications::dispatch($announcement);
+            }
+
+            return $announcement;
         });
     }
 
@@ -129,6 +174,8 @@ class AnnouncementService
             // The publisher must still be allowed to reach the audience.
             $this->assertAudience($by, $announcement->audience_type, $announcement->audience_id);
             $announcement->update(['publish_state' => Announcement::STATE_PUBLISHED, 'published_at' => now()]);
+            // Delivery to the audience is queued and runs after commit (9.20 / 9.21).
+            SendAnnouncementNotifications::dispatch($announcement);
 
             return $announcement->refresh();
         });

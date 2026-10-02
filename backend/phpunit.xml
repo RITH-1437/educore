@@ -29,6 +29,8 @@
         <server name="CACHE_STORE" value="array" force="true"/>
         <server name="QUEUE_CONNECTION" value="sync" force="true"/>
         <server name="MAIL_MAILER" value="array" force="true"/>
+        <!-- Never reach the real Telegram API from tests (the local .env may hold a token). -->
+        <server name="TELEGRAM_BOT_TOKEN" value="" force="true"/>
         <env name="APP_MAINTENANCE_DRIVER" value="file" force="true"/>
         <env name="BCRYPT_ROUNDS" value="4" force="true"/>
         <env name="PULSE_ENABLED" value="false" force="true"/>

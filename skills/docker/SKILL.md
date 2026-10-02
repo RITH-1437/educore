@@ -39,6 +39,8 @@ docker/docker-compose.yml`) — prefer `make up`, `make ps`, `make migrate`, etc
 | redis | `redis` | 6379 | Cache/queue/session |
 | minio | `minio` | 9000/9001 | S3 storage + console |
 | minio-init | `minio-init` | — | one-shot bucket creation |
+| queue | `queue` | — | `php artisan queue:work redis --queue=notifications,default` (backend image) |
+| scheduler | `scheduler` | — | `php artisan schedule:work` (backend image) |
 
 ## Golden rule
 

@@ -32,6 +32,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(AssignmentSubmission::class, AssignmentPolicy::class);
 
         // Public document verification (module 9.17).
+        // Test notifications from the preferences page (modules 9.20 / 9.21).
+        RateLimiter::for('notification-test', fn (Request $request) => Limit::perMinute(3)->by((string) $request->user()?->getKey()));
+
         RateLimiter::for('verification', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
 
         RateLimiter::for('login', function (Request $request) {

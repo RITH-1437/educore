@@ -12,6 +12,7 @@ use App\Models\Semester;
 use App\Models\Student;
 use App\Models\University;
 use App\Models\User;
+use App\Notifications\DocumentRequestUpdated;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -87,12 +88,12 @@ class DocumentService
 
     public function approve(DocumentRequest $request, User $by): DocumentRequest
     {
-        return $this->transition($request, DocumentRequest::STATUS_PENDING, ['status' => DocumentRequest::STATUS_APPROVED, 'processed_by' => $by->getKey(), 'processed_at' => now()]);
+        return $this->notifyStudent($this->transition($request, DocumentRequest::STATUS_PENDING, ['status' => DocumentRequest::STATUS_APPROVED, 'processed_by' => $by->getKey(), 'processed_at' => now()]));
     }
 
     public function reject(DocumentRequest $request, User $by, string $reason): DocumentRequest
     {
-        return $this->transition($request, DocumentRequest::STATUS_PENDING, ['status' => DocumentRequest::STATUS_REJECTED, 'rejection_reason' => $reason, 'processed_by' => $by->getKey(), 'processed_at' => now()]);
+        return $this->notifyStudent($this->transition($request, DocumentRequest::STATUS_PENDING, ['status' => DocumentRequest::STATUS_REJECTED, 'rejection_reason' => $reason, 'processed_by' => $by->getKey(), 'processed_at' => now()]));
     }
 
     /**
@@ -133,6 +134,7 @@ class DocumentService
                     'status' => Document::STATUS_VALID,
                 ]);
                 $locked->update(['status' => DocumentRequest::STATUS_GENERATED]);
+                $this->notifyStudent($locked->refresh());
 
                 return $document->refresh();
             });
@@ -293,6 +295,14 @@ class DocumentService
             'enrollments' => $enrollments,
             'semesterName' => ($s = $enrollments->first()?->semester) ? trim(($s->academicYear?->code ?? '').' '.$s->name) : null,
         ]];
+    }
+
+    /** Tell the student their request moved (critical email; queued after commit). */
+    private function notifyStudent(DocumentRequest $request): DocumentRequest
+    {
+        $request->loadMissing('student.user')->student->user?->notify(new DocumentRequestUpdated($request));
+
+        return $request;
     }
 
     /**

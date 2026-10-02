@@ -152,6 +152,7 @@ limit used by enrollment (`backend/config/academics.php`).
 | `/my-invoices`              | My invoices, payments and balance | Student |
 | `/announcements`            | Announcement feed (own audience) | Every signed-in role |
 | `/announcements/manage`     | Write, publish, archive announcements | Super admin, University admin (any audience), Lecturer (own sections / courses) |
+| `/notifications`            | My notification settings (email opt-out, Telegram chat) | Every signed-in user (own only) |
 | `/rooms`                    | Rooms                      | Super admin, University admin (Faculty admin read-only) |
 | `/timetable`                | My weekly timetable        | Student, Lecturer |
 | `/enrollments`              | Enrollment management      | Super admin, University admin (Faculty admin read-only) |
@@ -259,6 +260,8 @@ docker compose --project-directory . -f docker/docker-compose.yml logs minio-ini
 | minio        | `educore-minio`               | `${MINIO_API_PORT:-9000}`    | S3 API                                 |
 |              |                               | `${MINIO_CONSOLE_PORT:-9001}`| Web console                            |
 | minio-init   | `educore-minio-init`          | —                            | One-shot bucket creation               |
+| queue        | `educore-queue`               | —                            | `queue:work` (notifications, default)  |
+| scheduler    | `educore-scheduler`           | —                            | `schedule:work` (daily commands)       |
 
 Internal service names (`postgres`, `redis`, `minio`, `backend`, `frontend`,
 `nginx`) resolve on the dedicated `educore-network` bridge network and are used
@@ -314,9 +317,14 @@ The `backend/` folder is a standard Laravel 12 application.
   - `app/Repositories` — data access (query building, writes, token revocation).
   - `app/Policies` — authorization.
 - Code style: Laravel Pint (`vendor/bin/pint`). Linted by CI.
-- Scheduled command: `php artisan invoices:refresh-statuses` (daily 00:10 via
-  `routes/console.php`; marks unpaid past-due invoices overdue — no scheduler
-  container runs it yet, finance reads refresh statuses meanwhile).
+- Scheduled commands (`routes/console.php`, run by the `scheduler` container):
+  `php artisan invoices:refresh-statuses` (daily 00:10, marks unpaid past-due
+  invoices overdue) and `php artisan notifications:assignment-reminders`
+  (daily 07:00). Queued jobs (notifications) run in the `queue` container;
+  watch them with `docker compose --project-directory . -f docker/docker-compose.yml logs -f queue`.
+- Notifications: email via `MAIL_MAILER` (`log` in development — messages land
+  in `storage/logs/laravel.log`); Telegram via `TELEGRAM_BOT_TOKEN` in `.env`
+  (empty disables the channel; never commit a real token).
 - Tests: PHPUnit (`php artisan test`). Linted and run by CI. Note: the suite uses
   `RefreshDatabase` against the configured database, so it **wipes local data** —
   re-run `php artisan db:seed` afterwards if you need the demo admin account.

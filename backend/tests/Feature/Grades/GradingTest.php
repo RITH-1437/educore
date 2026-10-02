@@ -21,11 +21,13 @@ use App\Models\Section;
 use App\Models\Semester;
 use App\Models\Student;
 use App\Models\User;
+use App\Notifications\GradePublished;
 use App\Services\EnrollmentService;
 use App\Services\GpaService;
 use App\Services\GradingService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Notification;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -138,6 +140,7 @@ class GradingTest extends TestCase
 
     public function test_compute_submit_approve_and_return(): void
     {
+        Notification::fake();
         $this->seedScores();
         $base = "/api/sections/{$this->section->id}/grades";
 
@@ -156,6 +159,8 @@ class GradingTest extends TestCase
 
         $this->actingAs($this->admin)->postJson("{$base}/approve")->assertOk()->assertJsonPath('counts.approved', 2);
         $this->assertSame(Enrollment::STATUS_COMPLETED, $this->aliceEnrollment->refresh()->status);
+        // Each student is told their grade is out (module 9.20).
+        Notification::assertSentTo([$this->alice->user, $this->bob->user], GradePublished::class);
         $this->assertEquals(4.0, GpaRecord::query()->where('student_id', $this->alice->id)->where('cumulative', true)->value('gpa_value'));
         $this->assertEquals(0, GpaRecord::query()->where('student_id', $this->bob->id)->where('cumulative', false)->value('earned_credits'));
 

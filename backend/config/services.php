@@ -28,6 +28,14 @@ return [
         'key' => env('RESEND_KEY'),
     ],
 
+    // In-app Telegram notifications (module 9.21). The bot token comes from the
+    // environment only; users link their own chat id in their preferences.
+    // (CI's team Telegram messages use separate GitHub secrets.)
+    'telegram' => [
+        'bot_token' => env('TELEGRAM_BOT_TOKEN'),
+        'api_url' => env('TELEGRAM_API_URL', 'https://api.telegram.org'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

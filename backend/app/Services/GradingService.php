@@ -13,6 +13,7 @@ use App\Models\Grade;
 use App\Models\GradingScale;
 use App\Models\Section;
 use App\Models\User;
+use App\Notifications\GradePublished;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -326,6 +327,8 @@ class GradingService
                 if ($grade->enrollment->status === Enrollment::STATUS_CONFIRMED) {
                     $grade->enrollment->update(['status' => Enrollment::STATUS_COMPLETED]);
                 }
+
+                $grade->enrollment->student->user?->notify(new GradePublished($grade));
             }
 
             $grades->pluck('enrollment.student')->unique('id')->each(fn ($student) => $this->gpa->recalculate($student));

@@ -595,23 +595,34 @@ users, main business activities, and expected outputs.
   role group, or one faculty / department / program / section / course;
   lecturers write to the sections and courses they teach; every user has a
   live feed resolved from their memberships, and the student dashboard shows
-  the latest three. Email / Telegram delivery is [Planned] with 9.20 / 9.21;
+  the latest three. Email / Telegram delivery ships with 9.20 / 9.21;
   attachments and read receipts are [Future].
   See [24_Announcements-Report.md](24_Announcements-Report.md).
 
-### 9.20 Email Notifications [Planned]
+### 9.20 Email Notifications [Implemented]
 
 - **Purpose:** deliver important messages by email.
 - **Primary users:** System (all roles receive).
 - **Main business activities:** notifications for announcements, document status, registration confirmation, password-related messages, and administrative updates.
 - **Expected outputs:** reliable asynchronous email delivery.
+- **Delivered:** queued, retried emails for registration confirmation, grade
+  approval, document request status, invoices and payments (always sent),
+  announcements and assignment reminders, with a per-user opt-out for
+  non-critical mail and a queue worker container. Password-related emails are
+  [Future] (no password-reset flow yet).
+  See [25_Notifications-Report.md](25_Notifications-Report.md).
 
-### 9.21 Telegram Notifications [Planned]
+### 9.21 Telegram Notifications [Implemented]
 
 - **Purpose:** deliver time-sensitive messages via Telegram.
 - **Primary users:** System (Students and Staff who opt in).
 - **Main business activities:** class reminders, assignment reminders, announcement alerts.
 - **Expected outputs:** supplementary near-real-time notification channel.
+- **Delivered:** opt-in Telegram delivery of the same notifications (announcement
+  alerts, daily assignment reminders, status updates) to a chat id the user
+  links in their settings, through the Bot API with the server's bot token.
+  Class reminders and automatic chat linking are [Future].
+  See [25_Notifications-Report.md](25_Notifications-Report.md).
 
 ### 9.22 Internship Management [Planned]
 

@@ -34,9 +34,9 @@
 | 9.16 | Document Management | `[Implemented]` (internship letter `[Planned]` with 9.22) |
 | 9.17 | Digital Document Verification | `[Implemented]` (QR image `[Planned]`) |
 | 9.18 | Invoices & Payment Records | `[Implemented]` |
-| 9.19 | Announcements | `[Implemented]` (email / Telegram delivery with 9.20 / 9.21) |
-| 9.20 | Email Notifications | `[Planned]` |
-| 9.21 | Telegram Notifications | `[Planned]` |
+| 9.19 | Announcements | `[Implemented]` |
+| 9.20 | Email Notifications | `[Implemented]` (password emails `[Future]`) |
+| 9.21 | Telegram Notifications | `[Implemented]` (class reminders `[Future]`) |
 | 9.22 | Internship Management | `[Planned]` |
 | 9.23 | Analytics & Reporting | `[Future]` |
 | 9.24 | Audit Logs & Security | `[Future]` |
@@ -47,8 +47,8 @@
 ```mermaid
 pie showData
   title Module delivery status
-  "Implemented (incl. schema)" : 44
-  "Planned / In progress" : 6
+  "Implemented (incl. schema)" : 46
+  "Planned / In progress" : 4
 ```
 
 ---
@@ -268,10 +268,16 @@ pages `Announcements/Feed|Manage` plus the student dashboard card, 9 API
 operations, `AnnouncementSeeder`, 6 feature tests. Report:
 `docs/24_Announcements-Report.md`.
 
-**9.20 / 9.21 Email & Telegram Notifications** — tables `notifications`,
-`notification_preferences`.
-Steps: Laravel Notifications, queue on Redis, preference checks before send;
-tests: queued notification dispatched with correct payload.
+**9.20 / 9.21 Email & Telegram Notifications** `[Implemented]` — table
+`notification_preferences` (no schema change; `notifications` unused — its
+bigint id does not fit Laravel's UUID database channel). Delivered:
+`EduCoreNotification` base (queue `notifications`, after commit, 3 tries,
+critical vs optional email, Telegram opt-in), `TelegramChannel` (Bot API via
+the HTTP client), seven notifications wired into enrollment, grading,
+documents, invoices and announcements (`SendAnnouncementNotifications`
+fan-out via `AnnouncementService::recipients`), daily assignment reminders,
+the settings page and 3 API operations, `queue` + `scheduler` containers,
+8 feature tests. Report: `docs/25_Notifications-Report.md`.
 
 ### Phase E — Internship & hardening (`[Future]`)
 
@@ -380,9 +386,8 @@ A module is not done until its report exists and its tests pass — never label
   document fees (`requires_fee`) not billed, document-type management screen,
   transition audit trail (9.24).
 - `[Done]` 9.18 Invoices & Payment Records. Report:
-  `docs/23_Invoices-and-Payments-Report.md`. `[Open]` No scheduler container
-  runs `invoices:refresh-statuses` yet (reads refresh overdue meanwhile);
-  invoice PDFs / receipts, automatic tuition invoices and document-fee billing
+  `docs/23_Invoices-and-Payments-Report.md`. `[Done]` The `scheduler`
+  container (9.20) now runs `invoices:refresh-statuses` daily. `[Open]` Invoice PDFs / receipts, automatic tuition invoices and document-fee billing
   are not built; finance changes are not audited (9.24).
 - `[Done]` Pagination never rendered on 12 list pages (Users, Students,
   Lecturers, Courses, Programs, Faculties, Universities, Academic years,
@@ -391,6 +396,12 @@ A module is not done until its report exists and its tests pass — never label
   `Pagination`. All now read `meta.links`; `tests/Feature/PaginationContractTest.php`
   pins the shape for every paginated index page.
 - `[Done]` 9.19 Announcements. Report: `docs/24_Announcements-Report.md`.
-  `[Open]` Delivery by email / Telegram (9.20 / 9.21), attachments, read
-  receipts, scheduled publishing, Faculty Admin authoring (needs unit scoping).
-- `[Next]` 9.20 / 9.21 Email & Telegram Notifications.
+  `[Done]` Delivery by email / Telegram (9.20 / 9.21). `[Open]` Attachments,
+  read receipts, scheduled publishing, Faculty Admin authoring (needs unit
+  scoping).
+- `[Done]` 9.20 / 9.21 Email & Telegram Notifications. Report:
+  `docs/25_Notifications-Report.md`. `[Open]` Class-start reminders,
+  password-reset emails (no reset flow), in-app inbox, automatic Telegram chat
+  linking (bot webhook), surfacing repeated delivery failures in the audit log
+  (9.24).
+- `[Next]` 9.22 Internship Management.

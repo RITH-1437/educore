@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\FacultyController;
 use App\Http\Controllers\Api\GradeController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\LecturerController;
+use App\Http\Controllers\Api\NotificationPreferenceController;
 use App\Http\Controllers\Api\ProgramController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\ScheduleController;
@@ -309,6 +310,15 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->group(
 Route::middleware(['auth:sanctum', 'role:super-admin'])->group(function () {
     Route::get('/error-logs', [ErrorLogController::class, 'index'])->name('api.error-logs.index');
     Route::get('/error-logs/{errorLog}', [ErrorLogController::class, 'show'])->name('api.error-logs.show');
+});
+
+// Notification preferences (modules 9.20 / 9.21): always the caller's own.
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/notification-preferences', [NotificationPreferenceController::class, 'show'])->name('api.notification-preferences.show');
+    Route::put('/notification-preferences', [NotificationPreferenceController::class, 'update'])->name('api.notification-preferences.update');
+    Route::post('/notification-preferences/test', [NotificationPreferenceController::class, 'test'])
+        ->middleware('throttle:notification-test')
+        ->name('api.notification-preferences.test');
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

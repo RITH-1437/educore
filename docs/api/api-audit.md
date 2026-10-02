@@ -13,11 +13,11 @@
 
 | Measure | Result |
 |---|---:|
-| Application API route definitions (`routes/api.php`) | 166 |
-| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 183 |
-| Swagger operations after documentation corrections | 183 |
-| Swagger document paths | 108 |
-| Swagger document schemas | 142 |
+| Application API route definitions (`routes/api.php`) | 169 |
+| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 186 |
+| Swagger operations after documentation corrections | 186 |
+| Swagger document paths | 110 |
+| Swagger document schemas | 144 |
 | Undocumented application operations | 0 |
 | Extra Swagger operations not in the application API routes | 0 |
 | Swagger generation errors after corrections | 0 |
@@ -256,7 +256,7 @@ were **not changed** during this documentation-only audit.
 Application endpoint counts below exclude the four L5-Swagger/OAuth package
 routes (`api/documentation`, `api/documentation/asset/{asset}`,
 `api/documentation/ui`, `api/oauth2-callback`). Each combined update route
-contributes one PUT and one PATCH operation, so 166 route definitions yield 183
+contributes one PUT and one PATCH operation, so 169 route definitions yield 186
 documented operations.
 
 | Method | Path | Authentication / authorization | Documentation |
@@ -421,6 +421,9 @@ documented operations.
 | DELETE | `/api/announcements/{announcement}` | Sanctum + author or managers (drafts only) | Documented |
 | POST | `/api/announcements/{announcement}/publish` | Sanctum + author or managers | Documented |
 | POST | `/api/announcements/{announcement}/archive` | Sanctum + author or managers | Documented |
+| GET | `/api/notification-preferences` | Sanctum, any role (own only) | Documented |
+| PUT | `/api/notification-preferences` | Sanctum, any role (own only) | Documented |
+| POST | `/api/notification-preferences/test` | Sanctum, any role; `throttle:notification-test` (3/min) | Documented |
 | GET | `/api/grading-scale` | Sanctum, any role | Documented |
 | PUT | `/api/grading-scale` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/courses/{course}/grading-config` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
@@ -480,6 +483,8 @@ Re-ran Swagger generation and a scripted method/path comparison of
 | Undocumented / extra operations after 9.18 | 0 / 0 |
 | After 9.19 Announcements (9 operations added): route definitions / operations / OpenAPI paths / schemas | 166 / 183 / 108 / 142 |
 | Undocumented / extra operations after 9.19 | 0 / 0 |
+| After 9.20 / 9.21 Notifications (3 operations added): route definitions / operations / OpenAPI paths / schemas | 169 / 186 / 110 / 144 |
+| Undocumented / extra operations after 9.20 / 9.21 | 0 / 0 |
 
 - **A-09 — PATCH aliases undocumented.** `PATCH` on `/api/assignments/{assignment}`,
   `/api/exams/{exam}`, `/api/offerings/{offering}`, `/api/rooms/{room}`,

@@ -22,6 +22,8 @@ starts the complete stack:
 * `redis` — session, cache, and queue storage
 * `minio` — S3-compatible object storage, volume + automatic bucket creation
 * `minio-init` — one-shot service that creates the storage bucket on first run
+* `queue` — Laravel queue worker (`notifications`, `default`) on the backend image (added with 9.20)
+* `scheduler` — `php artisan schedule:work` on the backend image (added with 9.20)
 
 All services are connected to a dedicated bridge network (`educore-network`) and
 communicate by service name, never by `localhost`. Every service ships a
@@ -125,6 +127,8 @@ Documentation now lives in a single root `README.md`.
 | redis | `educore-redis` | `6380` | Host port configurable (`REDIS_HOST_PORT`) |
 | minio | `educore-minio` | `9100` (API) / `9101` (console) | Configurable (`MINIO_API_PORT`/`MINIO_CONSOLE_PORT`) |
 | minio-init | `educore-minio-init` | — | One-shot bucket creation |
+| queue | `educore-queue` | — | Queue worker (backend image) |
+| scheduler | `educore-scheduler` | — | Task scheduler (backend image) |
 
 > The default ports in the versioned `docker/docker-compose.yml` are the standard ones
 > (`5432`, `6379`, `5050`, `9000`, `9001`). The `.env` file used during this
@@ -243,6 +247,7 @@ Compose waits for dependencies instead of "sleeping":
 * `backend` → `postgres` healthy, `redis` healthy, `minio-init` completed
 * `pgadmin` → `postgres` healthy
 * `minio-init` → `minio` healthy
+* `queue`, `scheduler` → `backend` healthy (they share its image, code, vendor volume and environment)
 
 Healthchecks used:
 

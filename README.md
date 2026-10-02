@@ -124,6 +124,7 @@ limit used by enrollment (`backend/config/academics.php`).
 | Path                        | Page                       | Who can write |
 | --------------------------- | -------------------------- | ------------- |
 | `/admin/dashboard`          | Admin dashboard            | — |
+| `/dashboard`                | Student academic dashboard (GPA, credits, attendance, today's classes, due work, exams, grades); other roles see their workspace preview | — |
 | `/users`                    | Users management           | Super admin   |
 | `/academic-years`           | Academic years & semesters | Super admin, University admin |
 | `/universities`             | University record          | Super admin, University admin |

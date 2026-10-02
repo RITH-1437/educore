@@ -30,7 +30,7 @@
 | 9.12 | Assignments | `[Implemented]` |
 | 9.13 | Examinations | `[Implemented]` |
 | 9.14 | Grades & GPA | `[Implemented]` (transcript document `[Planned]` with 9.16) |
-| 9.15 | Student Academic Dashboard | `[Planned]` |
+| 9.15 | Student Academic Dashboard | `[Implemented]` (announcements card `[Planned]` with 9.19) |
 | 9.16 | Document Management | `[Planned]` |
 | 9.17 | Digital Document Verification | `[Planned]` |
 | 9.18 | Invoices & Payment Records | `[Planned]` |
@@ -47,8 +47,8 @@
 ```mermaid
 pie showData
   title Module delivery status
-  "Implemented (incl. schema)" : 39
-  "Planned / In progress" : 11
+  "Implemented (incl. schema)" : 40
+  "Planned / In progress" : 10
 ```
 
 ---
@@ -229,8 +229,13 @@ cumulatively), grade-based prerequisites, `GradePolicy`, pages
 annotations, `GradingScaleSeeder`, 12 feature tests. Report:
 `docs/20_Grades-and-GPA-Report.md`.
 
-**9.15 Student Academic Dashboard** — read-only pages aggregating enrollments,
-attendance %, GPA, timetable (`withCount`/`withSum`, eager load, no N+1).
+**9.15 Student Academic Dashboard** `[Implemented]` — no tables of its own.
+Delivered: `StudentDashboardService` composing `GpaService`,
+`AttendanceService`, `TimetableService`, `ExamService` and `GradingService`
+(no duplicated calculations), `GET /api/students/{student}/dashboard`
+(`StudentPolicy::view`), the `Student/Dashboard` page replacing the student's
+placeholder at `/dashboard`, 5 feature tests. Report:
+`docs/21_Student-Academic-Dashboard-Report.md`.
 
 ### Phase D — Administration & communication
 
@@ -350,5 +355,8 @@ A module is not done until its report exists and its tests pass — never label
   resolved (`docs/api/api-audit.md`).
 - `[Open]` Grade changes are not audited yet (9.24); the official transcript
   document waits for 9.16; the `finalized` grade lock step is not built.
-- `[Next]` 9.15 Student Academic Dashboard (GPA, attendance, credits and recent
-  grades now all have a source).
+- `[Done]` 9.15 Student Academic Dashboard. Report:
+  `docs/21_Student-Academic-Dashboard-Report.md`. `[Open]` Its announcements
+  card waits for 9.19; lecturer / faculty-admin dashboards are still previews.
+- `[Next]` 9.16 / 9.17 Document Management & Verification (the transcript can
+  now be generated from approved grades and GPA).

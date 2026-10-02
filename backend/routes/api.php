@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\Api\AcademicYearController;
 use App\Http\Controllers\Api\AssignmentController;
-use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CourseController;
@@ -10,6 +9,7 @@ use App\Http\Controllers\Api\CourseOfferingController;
 use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\EnrollmentController;
 use App\Http\Controllers\Api\ErrorLogController;
+use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\FacultyController;
 use App\Http\Controllers\Api\GradeController;
 use App\Http\Controllers\Api\LecturerController;
@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\ScheduleController;
 use App\Http\Controllers\Api\SectionController;
 use App\Http\Controllers\Api\SemesterController;
 use App\Http\Controllers\Api\StudentController;
+use App\Http\Controllers\Api\StudentDashboardController;
 use App\Http\Controllers\Api\UniversityController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
@@ -135,6 +136,7 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
 // A student may read their own profile; `StudentPolicy::view` limits them to it.
 Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-admin,student'])->group(function () {
     Route::get('/students/{student}', [StudentController::class, 'show'])->name('api.students.show');
+    Route::get('/students/{student}/dashboard', StudentDashboardController::class)->name('api.students.dashboard');
 });
 
 // A lecturer may read their own profile; `LecturerPolicy::view` limits them to it.

@@ -6,6 +6,7 @@ use App\Models\AcademicYear;
 use App\Models\Role;
 use App\Models\Semester;
 use App\Models\User;
+use App\Services\StudentDashboardService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -92,9 +93,17 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function roleDashboard(Request $request): Response
+    public function roleDashboard(Request $request, StudentDashboardService $students): Response
     {
         $user = $request->user();
+
+        // Students with a profile get their academic dashboard (module 9.15).
+        if ($user->isRole('student') && $user->student !== null) {
+            return Inertia::render('Student/Dashboard', [
+                'dashboard' => $students->build($user->student),
+                'userName' => $user->name,
+            ]);
+        }
 
         $role = $user->role?->slug;
         $dashboard = match ($role) {

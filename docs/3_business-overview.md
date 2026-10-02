@@ -535,12 +535,18 @@ users, main business activities, and expected outputs.
   transcript document is [Planned] with 9.16; grade-change auditing with 9.24.
   See [20_Grades-and-GPA-Report.md](20_Grades-and-GPA-Report.md).
 
-### 9.15 Student Academic Dashboard [Planned]
+### 9.15 Student Academic Dashboard [Implemented]
 
 - **Purpose:** a single-page view of a student's academic life.
 - **Primary users:** Student.
 - **Main business activities:** view GPA, attendance, credits, today's classes, upcoming assignments, announcements, and recent grades.
 - **Expected outputs:** an "at a glance" academic summary for each student.
+- **Delivered:** the student `/dashboard` shows cumulative and semester GPA,
+  credits this semester and earned, current-semester attendance (overall and
+  per course), today's classes, assignments due, upcoming exams and recent
+  approved grades, all read from the owning modules, plus
+  `GET /api/students/{student}/dashboard`. Announcements are [Planned] with
+  9.19. See [21_Student-Academic-Dashboard-Report.md](21_Student-Academic-Dashboard-Report.md).
 
 ### 9.16 Document Management [Planned]
 

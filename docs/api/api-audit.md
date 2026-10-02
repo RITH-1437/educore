@@ -13,11 +13,11 @@
 
 | Measure | Result |
 |---|---:|
-| Application API route definitions (`routes/api.php`) | 140 |
-| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 155 |
-| Swagger operations after documentation corrections | 155 |
-| Swagger document paths | 88 |
-| Swagger document schemas | 126 |
+| Application API route definitions (`routes/api.php`) | 150 |
+| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 165 |
+| Swagger operations after documentation corrections | 165 |
+| Swagger document paths | 97 |
+| Swagger document schemas | 132 |
 | Undocumented application operations | 0 |
 | Extra Swagger operations not in the application API routes | 0 |
 | Swagger generation errors after corrections | 0 |
@@ -256,7 +256,7 @@ were **not changed** during this documentation-only audit.
 Application endpoint counts below exclude the four L5-Swagger/OAuth package
 routes (`api/documentation`, `api/documentation/asset/{asset}`,
 `api/documentation/ui`, `api/oauth2-callback`). Each combined update route
-contributes one PUT and one PATCH operation, so 140 route definitions yield 155
+contributes one PUT and one PATCH operation, so 150 route definitions yield 165
 documented operations.
 
 | Method | Path | Authentication / authorization | Documentation |
@@ -395,6 +395,16 @@ documented operations.
 | GET | `/api/students/{student}/grades` | Sanctum + staff, or the student themself (approved grades only) | Documented |
 | GET | `/api/students/{student}/gpa` | Sanctum + staff, or the student themself | Documented |
 | GET | `/api/students/{student}/dashboard` | Sanctum + staff, or the student themself | Documented |
+| GET | `/api/document-types` | Sanctum, any role | Documented |
+| GET | `/api/document-requests` | Sanctum + staff (all) or a student (own) | Documented |
+| POST | `/api/document-requests` | Sanctum + student with a profile (self only) | Documented |
+| GET | `/api/document-requests/{documentRequest}` | Sanctum + staff, or the requesting student | Documented |
+| POST | `/api/document-requests/{documentRequest}/approve` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/document-requests/{documentRequest}/reject` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/document-requests/{documentRequest}/generate` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/documents/{document}/revoke` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/documents/{document}/download` | Sanctum + staff, or the requesting student (PDF stream) | Documented |
+| GET | `/api/verifications/{token}` | Public; `throttle:verification` (30/min/IP) | Documented |
 | GET | `/api/grading-scale` | Sanctum, any role | Documented |
 | PUT | `/api/grading-scale` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/courses/{course}/grading-config` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
@@ -406,7 +416,7 @@ documented operations.
 
 - OpenAPI declares an HTTP bearer security scheme named `sanctum` with bearer
   format “Sanctum personal access token”.
-- `POST /api/login` and `GET /api/health` are explicitly anonymous in OpenAPI.
+- `POST /api/login`, `GET /api/health` and `GET /api/verifications/{token}` are explicitly anonymous in OpenAPI.
 - `POST /api/logout`, `GET /api/user`, user-management routes, and academic
   calendar routes declare the `sanctum` security requirement.
 - Runtime middleware matches those declarations: user management additionally
@@ -448,6 +458,8 @@ Re-ran Swagger generation and a scripted method/path comparison of
 | Undocumented / extra operations after 9.14 | 0 / 0 |
 | After 9.15 Student Academic Dashboard (1 operation added): route definitions / operations / OpenAPI paths / schemas | 140 / 155 / 88 / 126 |
 | Undocumented / extra operations after 9.15 | 0 / 0 |
+| After 9.16 / 9.17 Documents (10 operations added): route definitions / operations / OpenAPI paths / schemas | 150 / 165 / 97 / 132 |
+| Undocumented / extra operations after 9.16 / 9.17 | 0 / 0 |
 
 - **A-09 — PATCH aliases undocumented.** `PATCH` on `/api/assignments/{assignment}`,
   `/api/exams/{exam}`, `/api/offerings/{offering}`, `/api/rooms/{room}`,

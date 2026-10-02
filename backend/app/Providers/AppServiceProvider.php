@@ -31,6 +31,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(AttendanceSession::class, AttendancePolicy::class);
         Gate::policy(AssignmentSubmission::class, AssignmentPolicy::class);
 
+        // Public document verification (module 9.17).
+        RateLimiter::for('verification', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
+
         RateLimiter::for('login', function (Request $request) {
             return Limit::perMinute(5)->by(
                 $request->input('email').'|'.$request->ip(),

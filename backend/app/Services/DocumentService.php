@@ -1,0 +1,315 @@
+<?php
+
+namespace App\Services;
+
+use App\Exceptions\BusinessRuleException;
+use App\Models\Document;
+use App\Models\DocumentRequest;
+use App\Models\DocumentType;
+use App\Models\DocumentVerification;
+use App\Models\Enrollment;
+use App\Models\Semester;
+use App\Models\Student;
+use App\Models\University;
+use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
+
+/**
+ * Document requests, generation and verification (modules 9.16 / 9.17,
+ * `skills/documents/SKILL.md`).
+ *
+ * - `pending → approved → generated`, or `pending → rejected` with a reason.
+ * - One open (pending / approved) request per student, type and semester.
+ * - Content comes only from authoritative data: enrollments, approved grades
+ *   (`GradingService`) and GPA (`GpaService`). A generated PDF is an immutable
+ *   snapshot; staff revoke it when it goes stale and the student requests anew.
+ * - Files are private on the uploads disk under `documents/{student}/{uuid}.pdf`.
+ * - Public verification by token shows minimal data and logs every lookup.
+ */
+class DocumentService
+{
+    public function __construct(
+        private readonly GradingService $grading,
+        private readonly GpaService $gpa,
+    ) {}
+
+    /**
+     * @param  array{document_type_id: int, semester_id?: int|null, reason?: string|null}  $data
+     */
+    public function request(Student $student, array $data): DocumentRequest
+    {
+        return DB::transaction(function () use ($student, $data) {
+            $type = DocumentType::query()->findOrFail($data['document_type_id']);
+
+            if (! $type->is_active || ! in_array($type->code, DocumentType::GENERATABLE, true)) {
+                throw ValidationException::withMessages(['document_type_id' => 'This document type cannot be requested.']);
+            }
+
+            $semester = null;
+
+            if ($type->needsSemester()) {
+                $semester = Semester::query()->find($data['semester_id'] ?? null);
+
+                if ($semester === null) {
+                    throw ValidationException::withMessages(['semester_id' => 'Choose the semester for the academic result.']);
+                }
+            }
+
+            $open = DocumentRequest::query()
+                ->where('student_id', $student->getKey())
+                ->where('document_type_id', $type->getKey())
+                ->where('semester_id', $semester?->getKey())
+                ->whereIn('status', [DocumentRequest::STATUS_PENDING, DocumentRequest::STATUS_APPROVED])
+                ->lockForUpdate()
+                ->exists();
+
+            if ($open) {
+                throw new BusinessRuleException("You already have an open request for this {$type->name}.");
+            }
+
+            return DocumentRequest::query()->create([
+                'student_id' => $student->getKey(),
+                'document_type_id' => $type->getKey(),
+                'semester_id' => $semester?->getKey(),
+                'academic_year_id' => $semester?->academic_year_id,
+                'reason' => $data['reason'] ?? null,
+                'status' => DocumentRequest::STATUS_PENDING,
+                'submitted_at' => now(),
+            ])->refresh();
+        });
+    }
+
+    public function approve(DocumentRequest $request, User $by): DocumentRequest
+    {
+        return $this->transition($request, DocumentRequest::STATUS_PENDING, ['status' => DocumentRequest::STATUS_APPROVED, 'processed_by' => $by->getKey(), 'processed_at' => now()]);
+    }
+
+    public function reject(DocumentRequest $request, User $by, string $reason): DocumentRequest
+    {
+        return $this->transition($request, DocumentRequest::STATUS_PENDING, ['status' => DocumentRequest::STATUS_REJECTED, 'rejection_reason' => $reason, 'processed_by' => $by->getKey(), 'processed_at' => now()]);
+    }
+
+    /**
+     * Render, store and register the PDF. If storing fails the request stays
+     * `approved` so generation can be retried, and no orphan file is left.
+     */
+    public function generate(DocumentRequest $request, User $by): Document
+    {
+        if ($request->status !== DocumentRequest::STATUS_APPROVED) {
+            throw new BusinessRuleException("A {$request->status} request cannot be generated; approve it first.");
+        }
+
+        $request->loadMissing('type', 'semester.academicYear', 'student');
+        $token = bin2hex(random_bytes(32));
+        $pdf = $this->render($request, $token);
+        $key = "documents/{$request->student_id}/".Str::uuid().'.pdf';
+
+        Storage::disk($this->disk())->put($key, $pdf);
+
+        try {
+            return DB::transaction(function () use ($request, $by, $token, $pdf, $key) {
+                $locked = DocumentRequest::query()->lockForUpdate()->findOrFail($request->getKey());
+
+                if ($locked->status !== DocumentRequest::STATUS_APPROVED) {
+                    throw new BusinessRuleException('This request was processed meanwhile.');
+                }
+
+                $document = Document::query()->create([
+                    'document_request_id' => $request->getKey(),
+                    'file_key' => $key,
+                    'file_name' => Str::slug($request->type->name.' '.$request->student->student_number).'.pdf',
+                    'mime_type' => 'application/pdf',
+                    'file_size' => strlen($pdf),
+                    'checksum' => hash('sha256', $pdf),
+                    'verification_token' => $token,
+                    'generated_by' => $by->getKey(),
+                    'generated_at' => now(),
+                    'status' => Document::STATUS_VALID,
+                ]);
+                $locked->update(['status' => DocumentRequest::STATUS_GENERATED]);
+
+                return $document->refresh();
+            });
+        } catch (Throwable $e) {
+            Storage::disk($this->disk())->delete($key);
+
+            throw $e;
+        }
+    }
+
+    public function revoke(Document $document): Document
+    {
+        if ($document->status !== Document::STATUS_VALID) {
+            throw new BusinessRuleException('Only a valid document can be revoked.');
+        }
+
+        $document->update(['status' => Document::STATUS_REVOKED]);
+
+        return $document->refresh();
+    }
+
+    public function download(Document $document): StreamedResponse
+    {
+        return Storage::disk($this->disk())->download($document->file_key, $document->file_name, ['Content-Type' => 'application/pdf']);
+    }
+
+    /**
+     * Public lookup (9.17): minimal data only, every lookup logged.
+     *
+     * @return array<string, mixed>|null null when the token is unknown
+     */
+    public function verify(string $token, ?string $ip, ?string $userAgent): ?array
+    {
+        $document = Document::query()->where('verification_token', $token)->with('request.type', 'request.student', 'request.semester.academicYear')->first();
+
+        if ($document === null) {
+            return null;
+        }
+
+        DocumentVerification::query()->create([
+            'document_id' => $document->id,
+            'verification_token' => $token,
+            'result' => $document->status,
+            'verified_at' => now(),
+            'ip_address' => $ip,
+            'user_agent' => $userAgent ? Str::limit($userAgent, 500, '') : null,
+        ]);
+
+        $request = $document->request;
+
+        return [
+            'status' => $document->status,
+            'document_type' => $request->type->name,
+            'semester' => $request->semester ? trim(($request->semester->academicYear?->code ?? '').' '.$request->semester->name) : null,
+            'issued_to' => $request->student->fullName(),
+            'student_number' => $request->student->student_number,
+            'issued_on' => $document->generated_at->toDateString(),
+            'issuer' => University::query()->where('is_current', true)->value('name'),
+            'checksum' => $document->checksum,
+        ];
+    }
+
+    public function disk(): string
+    {
+        return (string) config('academics.uploads_disk', 's3');
+    }
+
+    public function verificationUrl(string $token): string
+    {
+        return rtrim((string) config('app.url'), '/')."/verify/{$token}";
+    }
+
+    // ---------------------------------------------------------------- render
+
+    private function render(DocumentRequest $request, string $token): string
+    {
+        $student = $request->student->loadMissing('currentProgram.program.department.faculty');
+        $data = [
+            'request' => $request,
+            'student' => $student,
+            'program' => $student->currentProgram?->program,
+            'university' => University::query()->where('is_current', true)->first(),
+            'issuedOn' => now()->toDateString(),
+            'token' => $token,
+            'verifyUrl' => $this->verificationUrl($token),
+        ];
+
+        $view = match ($request->type->code) {
+            DocumentType::TRANSCRIPT => $this->transcriptData($student, $data),
+            DocumentType::ACADEMIC_RESULT => $this->resultData($student, $request->semester, $data),
+            DocumentType::ENROLLMENT_CERTIFICATE => $this->enrollmentData($student, $data),
+            default => throw new BusinessRuleException('This document type has no template.'),
+        };
+
+        // Subset fonts so a one-page PDF stays small (~tens of KB, not ~1 MB).
+        return Pdf::loadView($view[0], $view[1])->setPaper('a4')->setOption('isFontSubsettingEnabled', true)->output();
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{0: string, 1: array<string, mixed>}
+     */
+    private function transcriptData(Student $student, array $data): array
+    {
+        $grades = $this->grading->forStudent($student->id);
+
+        if ($grades->isEmpty()) {
+            throw new BusinessRuleException('The student has no approved grades; a transcript cannot be generated yet.');
+        }
+
+        $gpa = $this->gpa->summary($student);
+
+        return ['documents.transcript', [...$data,
+            'semesters' => $grades->groupBy('semester_id')->map(fn ($rows, $id) => [
+                'name' => $rows->first()['semester'],
+                'grades' => $rows->values(),
+                'gpa' => collect($gpa['semesters'])->firstWhere('semester_id', $id),
+            ])->values(),
+            'cumulative' => $gpa['cumulative'],
+        ]];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{0: string, 1: array<string, mixed>}
+     */
+    private function resultData(Student $student, ?Semester $semester, array $data): array
+    {
+        $grades = $this->grading->forStudent($student->id)->where('semester_id', $semester?->id)->values();
+
+        if ($grades->isEmpty()) {
+            throw new BusinessRuleException('The student has no approved grades in this semester.');
+        }
+
+        return ['documents.academic-result', [...$data,
+            'semesterName' => $grades->first()['semester'],
+            'grades' => $grades,
+            'gpa' => collect($this->gpa->summary($student)['semesters'])->firstWhere('semester_id', $semester->id),
+        ]];
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array{0: string, 1: array<string, mixed>}
+     */
+    private function enrollmentData(Student $student, array $data): array
+    {
+        if ($student->status !== Student::STATUS_ACTIVE) {
+            throw new BusinessRuleException("An enrollment certificate is only issued to active students (this student is {$student->status}).");
+        }
+
+        $enrollments = $student->enrollments()
+            ->whereIn('status', Enrollment::OPEN_STATUSES)
+            ->with('section.offering.course:id,code,name,credits', 'semester.academicYear:id,code')
+            ->get();
+
+        return ['documents.enrollment-certificate', [...$data,
+            'enrollments' => $enrollments,
+            'semesterName' => ($s = $enrollments->first()?->semester) ? trim(($s->academicYear?->code ?? '').' '.$s->name) : null,
+        ]];
+    }
+
+    /**
+     * @param  array<string, mixed>  $changes
+     */
+    private function transition(DocumentRequest $request, string $from, array $changes): DocumentRequest
+    {
+        return DB::transaction(function () use ($request, $from, $changes) {
+            $locked = DocumentRequest::query()->lockForUpdate()->findOrFail($request->getKey());
+
+            if ($locked->status !== $from) {
+                throw new BusinessRuleException("A {$locked->status} request cannot change this way.");
+            }
+
+            $locked->update($changes);
+
+            return $locked->refresh();
+        });
+    }
+}

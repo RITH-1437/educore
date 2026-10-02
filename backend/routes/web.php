@@ -8,6 +8,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseOfferingController;
 use App\Http\Controllers\CourseworkController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DocumentsController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\ErrorLogController;
 use App\Http\Controllers\ExamsController;
@@ -191,6 +192,24 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function
     Route::put('/grading-scale', [GradesController::class, 'updateScale'])->name('grading-scale.update');
     Route::put('/courses/{course}/grading-config', [GradesController::class, 'updateConfig'])->name('courses.grading-config.update');
 });
+
+// Documents (`DocumentRequestPolicy`): students request and download their
+// own; managers approve / reject / generate / revoke; Faculty Admin reads.
+Route::middleware(['auth', 'role:student'])->group(function () {
+    Route::get('/my-documents', [DocumentsController::class, 'mine'])->name('documents.mine');
+    Route::post('/my-documents', [DocumentsController::class, 'store'])->name('documents.store');
+});
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->get('/documents', [DocumentsController::class, 'index'])->name('documents.index');
+Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function () {
+    Route::post('/document-requests/{documentRequest}/approve', [DocumentsController::class, 'approve'])->name('documents.approve');
+    Route::post('/document-requests/{documentRequest}/reject', [DocumentsController::class, 'reject'])->name('documents.reject');
+    Route::post('/document-requests/{documentRequest}/generate', [DocumentsController::class, 'generate'])->name('documents.generate');
+    Route::post('/documents/{document}/revoke', [DocumentsController::class, 'revoke'])->name('documents.revoke');
+});
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,student'])->get('/documents/{document}/download', [DocumentsController::class, 'download'])->name('documents.download');
+
+// Public verification page (module 9.17) — no sign-in.
+Route::get('/verify/{token}', [DocumentsController::class, 'verify'])->middleware('throttle:verification')->name('documents.verify');
 
 // Timetable: rooms (staff read, managers write), section schedules (managers),
 // and a personal weekly timetable for students and lecturers.

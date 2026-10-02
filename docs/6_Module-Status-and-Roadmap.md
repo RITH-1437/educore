@@ -29,10 +29,10 @@
 | 9.11 | Attendance | `[Implemented]` |
 | 9.12 | Assignments | `[Implemented]` |
 | 9.13 | Examinations | `[Implemented]` |
-| 9.14 | Grades & GPA | `[Implemented]` (transcript document `[Planned]` with 9.16) |
+| 9.14 | Grades & GPA | `[Implemented]` (transcript document delivered by 9.16) |
 | 9.15 | Student Academic Dashboard | `[Implemented]` (announcements card `[Planned]` with 9.19) |
-| 9.16 | Document Management | `[Planned]` |
-| 9.17 | Digital Document Verification | `[Planned]` |
+| 9.16 | Document Management | `[Implemented]` (internship letter `[Planned]` with 9.22) |
+| 9.17 | Digital Document Verification | `[Implemented]` (QR image `[Planned]`) |
 | 9.18 | Invoices & Payment Records | `[Planned]` |
 | 9.19 | Announcements | `[Planned]` |
 | 9.20 | Email Notifications | `[Planned]` |
@@ -47,8 +47,8 @@
 ```mermaid
 pie showData
   title Module delivery status
-  "Implemented (incl. schema)" : 40
-  "Planned / In progress" : 10
+  "Implemented (incl. schema)" : 42
+  "Planned / In progress" : 8
 ```
 
 ---
@@ -239,10 +239,16 @@ placeholder at `/dashboard`, 5 feature tests. Report:
 
 ### Phase D — Administration & communication
 
-**9.16 / 9.17 Document Management & Verification** — tables `document_types`,
-`document_requests`, `documents`, `document_verifications`, `files`.
-Steps: request → approval → generation → QR verification flow
-(`skills/documents`); tests: download authorization, verification lookup.
+**9.16 / 9.17 Document Management & Verification** `[Implemented]` — tables
+`document_types`, `document_requests`, `documents`, `document_verifications`
+(no schema change; `files` not needed). Delivered: `DocumentService`
+(pending → approved → generated / rejected, one open request per type and
+semester, PDFs via dompdf from approved grades / GPA / enrollments only,
+private MinIO storage, revoke, public verification with lookup log),
+`DocumentRequestPolicy`, pages `Documents/Mine|Index|Verify`, 10 API
+operations incl. the public `/api/verifications/{token}`, `DocumentTypeSeeder`,
+5 feature tests. New dependency `barryvdh/laravel-dompdf`. Report:
+`docs/22_Documents-and-Verification-Report.md`.
 
 **9.18 Invoices & Payments** — tables `invoices`, `invoice_items`, `payments`.
 Steps: append-only invoice/reversal model; totals from line items; tests:
@@ -353,10 +359,13 @@ A module is not done until its report exists and its tests pass — never label
   when a grade exists. Report: `docs/20_Grades-and-GPA-Report.md`.
 - `[Done]` API re-audit 2026-10-02: six PATCH aliases documented; R-01 marked
   resolved (`docs/api/api-audit.md`).
-- `[Open]` Grade changes are not audited yet (9.24); the official transcript
-  document waits for 9.16; the `finalized` grade lock step is not built.
+- `[Open]` Grade changes are not audited yet (9.24); the `finalized` grade lock
+  step is not built. `[Done]` The transcript document ships with 9.16.
 - `[Done]` 9.15 Student Academic Dashboard. Report:
   `docs/21_Student-Academic-Dashboard-Report.md`. `[Open]` Its announcements
   card waits for 9.19; lecturer / faculty-admin dashboards are still previews.
-- `[Next]` 9.16 / 9.17 Document Management & Verification (the transcript can
-  now be generated from approved grades and GPA).
+- `[Done]` 9.16 / 9.17 Document Management & Verification. Report:
+  `docs/22_Documents-and-Verification-Report.md`. `[Open]` QR image on the PDF,
+  document fees (`requires_fee`) not billed, document-type management screen,
+  transition audit trail (9.24).
+- `[Next]` 9.18 Invoices & Payment Records.

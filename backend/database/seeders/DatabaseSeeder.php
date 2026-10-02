@@ -40,6 +40,8 @@ class DatabaseSeeder extends Seeder
             ExamSeeder::class,
             // The grading scale grades are mapped against (module 9.14).
             GradingScaleSeeder::class,
+            // Requestable official documents (module 9.16).
+            DocumentTypeSeeder::class,
             // Operational diagnostics last: this table is filled by the recorder
             // at runtime, so seeding it after the structure keeps the rows
             // internally consistent.

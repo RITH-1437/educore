@@ -548,19 +548,29 @@ users, main business activities, and expected outputs.
   `GET /api/students/{student}/dashboard`. Announcements are [Planned] with
   9.19. See [21_Student-Academic-Dashboard-Report.md](21_Student-Academic-Dashboard-Report.md).
 
-### 9.16 Document Management [Planned]
+### 9.16 Document Management [Implemented]
 
 - **Purpose:** digital handling of official documents (enrollment certificates, transcripts, results, internship letters).
 - **Primary users:** Student (request), University Admin / Faculty/Department Admin (approve/generate).
 - **Main business activities:** request, review, approve, generate, download, and track document status.
 - **Expected outputs:** a traceable document workflow.
+- **Delivered:** student requests for an enrollment certificate, academic
+  transcript or one-semester academic result; approve / reject (with reason) /
+  generate / revoke by University Admin; PDFs rendered only from enrollments,
+  approved grades and GPA, stored privately in MinIO and downloaded through an
+  authorized route. Internship letters are [Planned] with 9.22; document fees
+  are not billed yet. See [22_Documents-and-Verification-Report.md](22_Documents-and-Verification-Report.md).
 
-### 9.17 Digital Document Verification [Planned]
+### 9.17 Digital Document Verification [Implemented]
 
 - **Purpose:** let third parties verify the authenticity of generated documents.
 - **Primary users:** anyone with a document and internet access (employers, institutions, graduates).
 - **Main business activities:** scan/enter a QR code to verify validity.
 - **Expected outputs:** a clear valid/invalid verification result per document.
+- **Delivered:** every PDF prints a verification URL and code; the public
+  `/verify/{code}` page (and API) reports valid / revoked / not found with
+  minimal facts and the file's SHA-256, logs each lookup and is rate limited.
+  A scannable QR image is [Planned]. See [22_Documents-and-Verification-Report.md](22_Documents-and-Verification-Report.md).
 
 ### 9.18 Invoices & Payment Records [Planned]
 

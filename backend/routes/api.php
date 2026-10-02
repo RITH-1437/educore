@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\CourseOfferingController;
 use App\Http\Controllers\Api\DepartmentController;
+use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\EnrollmentController;
 use App\Http\Controllers\Api\ErrorLogController;
 use App\Http\Controllers\Api\ExamController;
@@ -131,6 +132,18 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::put('/grading-scale', [GradeController::class, 'updateScale'])->name('api.grading-scale.update');
     Route::get('/courses/{course}/grading-config', [GradeController::class, 'config'])->name('api.courses.grading-config');
     Route::put('/courses/{course}/grading-config', [GradeController::class, 'updateConfig'])->name('api.courses.grading-config.update');
+
+    // Documents: `DocumentRequestPolicy` — a student requests and downloads
+    // their own, managers process, Faculty Admin reads.
+    Route::get('/document-types', [DocumentController::class, 'types'])->name('api.document-types');
+    Route::get('/document-requests', [DocumentController::class, 'index'])->name('api.document-requests.index');
+    Route::post('/document-requests', [DocumentController::class, 'store'])->name('api.document-requests.store');
+    Route::get('/document-requests/{documentRequest}', [DocumentController::class, 'show'])->name('api.document-requests.show');
+    Route::post('/document-requests/{documentRequest}/approve', [DocumentController::class, 'approve'])->name('api.document-requests.approve');
+    Route::post('/document-requests/{documentRequest}/reject', [DocumentController::class, 'reject'])->name('api.document-requests.reject');
+    Route::post('/document-requests/{documentRequest}/generate', [DocumentController::class, 'generate'])->name('api.document-requests.generate');
+    Route::post('/documents/{document}/revoke', [DocumentController::class, 'revoke'])->name('api.documents.revoke');
+    Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('api.documents.download');
 });
 
 // A student may read their own profile; `StudentPolicy::view` limits them to it.
@@ -277,6 +290,11 @@ Route::middleware(['auth:sanctum', 'role:super-admin'])->group(function () {
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// Public document verification (module 9.17): minimal data, logged, rate limited.
+Route::get('/verifications/{token}', [DocumentController::class, 'verify'])
+    ->middleware('throttle:verification')
+    ->name('api.verifications.show');
 
 Route::get('/health', function () {
     return response()->json(['status' => 'ok']);

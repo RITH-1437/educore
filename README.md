@@ -145,6 +145,9 @@ limit used by enrollment (`backend/config/academics.php`).
 | `/grades/sections/{id}`     | Section grade sheet: compute, submit, approve, return | Super admin, University admin (approve), Faculty admin (read), the section's lecturers (compute, submit) |
 | `/grading-scale`            | Grading scale              | Super admin, University admin (Faculty admin and lecturers read-only) |
 | `/my-grades`                | My grades + semester / cumulative GPA | Student |
+| `/my-documents`             | Request documents, download PDFs | Student |
+| `/documents`                | Document request queue: approve, reject, generate, revoke | Super admin, University admin (Faculty admin read-only) |
+| `/verify/{code}`            | Public document verification (no sign-in, rate limited) | — |
 | `/rooms`                    | Rooms                      | Super admin, University admin (Faculty admin read-only) |
 | `/timetable`                | My weekly timetable        | Student, Lecturer |
 | `/enrollments`              | Enrollment management      | Super admin, University admin (Faculty admin read-only) |
@@ -292,7 +295,8 @@ The `backend/` folder is a standard Laravel 12 application.
 - **Local runtime:** PHP 8.4 with `pgsql`, `pdo_pgsql`, `redis` extensions.
 - Installed packages: `laravel/sanctum` (API auth), `laravel/tinker`,
   `league/flysystem-aws-s3-v3` (S3/MinIO storage),
-  `darkaonline/l5-swagger` (OpenAPI document + Swagger UI), pinned via
+  `darkaonline/l5-swagger` (OpenAPI document + Swagger UI),
+  `barryvdh/laravel-dompdf` (official document PDFs), pinned via
   `backend/composer.json`.
 - API entry point: `backend/routes/api.php` (mounted at `/api`).
 - Layering (dependencies point downwards only):

@@ -8,6 +8,7 @@ import {
   CalendarClock,
   ClipboardList,
   FileCheck,
+  FileText,
   FileWarning,
   GraduationCap,
   LayoutDashboard,
@@ -46,6 +47,7 @@ const navForRole = (role) => {
         ],
       },
       { label: 'Academics', items: [{ label: 'Courses', href: '/courses', icon: Library }, { label: 'Offerings & sections', href: '/offerings', icon: TableProperties }, { label: 'Enrollments', href: '/enrollments', icon: ListChecks }, { label: 'Rooms', href: '/rooms', icon: MapPin }, { label: 'Grades', href: '/grades', icon: Award }, { label: 'Grading scale', href: '/grading-scale', icon: Scale }] },
+      { label: 'Operations', items: [{ label: 'Documents', href: '/documents', icon: FileText }] },
       { label: 'System', items: [{ label: 'Error logs', href: '/error-logs', icon: FileWarning }] },
     ]
   }
@@ -68,6 +70,7 @@ const navForRole = (role) => {
       { label: 'Academic structure', items: structure },
       { label: 'People', items: [{ label: 'Students', href: '/students', icon: GraduationCap }, { label: 'Lecturers', href: '/lecturers', icon: UserRound }] },
       { label: 'Assessment', items: [{ label: 'Grades', href: '/grades', icon: Award }, { label: 'Grading scale', href: '/grading-scale', icon: Scale }] },
+      { label: 'Operations', items: [{ label: 'Documents', href: '/documents', icon: FileText }] },
     ]
   }
 
@@ -80,6 +83,7 @@ const navForRole = (role) => {
       { label: 'My assignments', href: '/my-assignments', icon: ClipboardList },
       { label: 'My exams', href: '/my-exams', icon: FileCheck },
       { label: 'Grades & GPA', href: '/my-grades', icon: Award },
+      { label: 'My documents', href: '/my-documents', icon: FileText },
     ] }]
   }
 
@@ -118,6 +122,8 @@ const SECTION_LABELS = {
   'my-grades': 'Grades & GPA',
   grades: 'Grades',
   'grading-scale': 'Grading scale',
+  'my-documents': 'My documents',
+  documents: 'Documents',
   'error-logs': 'Error logs',
 }
 

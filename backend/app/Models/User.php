@@ -3,6 +3,7 @@
 namespace App\Models;
 
 // use Database\Factories\UserFactory;
+use App\Notifications\ResetPasswordLink;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -85,6 +86,12 @@ class User extends Authenticatable
     public function preferences(): NotificationPreference
     {
         return $this->notificationPreference ?? new NotificationPreference(['user_id' => $this->getKey()]);
+    }
+
+    /** Queued, EduCore-worded reset email instead of Laravel's default. */
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new ResetPasswordLink($token));
     }
 
     /** Telegram chat for `TelegramChannel`; null unless the user opted in and linked a chat. */

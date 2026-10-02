@@ -13,10 +13,10 @@
 
 | Measure | Result |
 |---|---:|
-| Application API route definitions (`routes/api.php`) | 187 |
-| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 206 |
-| Swagger operations after documentation corrections | 206 |
-| Swagger document paths | 125 |
+| Application API route definitions (`routes/api.php`) | 190 |
+| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 209 |
+| Swagger operations after documentation corrections | 209 |
+| Swagger document paths | 128 |
 | Swagger document schemas | 159 |
 | Undocumented application operations | 0 |
 | Extra Swagger operations not in the application API routes | 0 |
@@ -256,13 +256,16 @@ were **not changed** during this documentation-only audit.
 Application endpoint counts below exclude the four L5-Swagger/OAuth package
 routes (`api/documentation`, `api/documentation/asset/{asset}`,
 `api/documentation/ui`, `api/oauth2-callback`). Each combined update route
-contributes one PUT and one PATCH operation, so 187 route definitions yield 206
+contributes one PUT and one PATCH operation, so 190 route definitions yield 209
 documented operations.
 
 | Method | Path | Authentication / authorization | Documentation |
 |---|---|---|---|
 | POST | `/api/login` | Public; `throttle:login` | Documented |
 | POST | `/api/logout` | `auth:sanctum` | Documented |
+| PUT | `/api/password` | `auth:sanctum` (own password; current password required) | Documented |
+| POST | `/api/forgot-password` | Public; `throttle:password-reset` (5/min per email + IP); generic 202 | Documented |
+| POST | `/api/reset-password` | Public; `throttle:password-reset` | Documented |
 | GET | `/api/user` | `auth:sanctum` | Documented |
 | GET | `/api/health` | Public | Documented |
 | GET | `/api/users` | Sanctum + super-admin | Documented |
@@ -453,7 +456,7 @@ documented operations.
 
 - OpenAPI declares an HTTP bearer security scheme named `sanctum` with bearer
   format “Sanctum personal access token”.
-- `POST /api/login`, `GET /api/health` and `GET /api/verifications/{token}` are explicitly anonymous in OpenAPI.
+- `POST /api/login`, `GET /api/health`, `GET /api/verifications/{token}`, `POST /api/forgot-password` and `POST /api/reset-password` are explicitly anonymous in OpenAPI.
 - `POST /api/logout`, `GET /api/user`, user-management routes, and academic
   calendar routes declare the `sanctum` security requirement.
 - Runtime middleware matches those declarations: user management additionally
@@ -509,6 +512,8 @@ Re-ran Swagger generation and a scripted method/path comparison of
 | Undocumented / extra operations after 9.23 | 0 / 0 |
 | After 9.24 Audit logs (2 operations added): route definitions / operations / OpenAPI paths / schemas | 187 / 206 / 125 / 159 |
 | Undocumented / extra operations after 9.24 | 0 / 0 |
+| After password change / reset (3 operations added): route definitions / operations / OpenAPI paths / schemas | 190 / 209 / 128 / 159 |
+| Undocumented / extra operations after password change / reset | 0 / 0 |
 
 - **A-09 — PATCH aliases undocumented.** `PATCH` on `/api/assignments/{assignment}`,
   `/api/exams/{exam}`, `/api/offerings/{offering}`, `/api/rooms/{room}`,

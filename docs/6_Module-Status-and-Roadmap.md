@@ -420,8 +420,8 @@ A module is not done until its report exists and its tests pass — never label
   read receipts, scheduled publishing, Faculty Admin authoring (needs unit
   scoping).
 - `[Done]` 9.20 / 9.21 Email & Telegram Notifications. Report:
-  `docs/25_Notifications-Report.md`. `[Open]` Class-start reminders,
-  password-reset emails (no reset flow), in-app inbox, automatic Telegram chat
+  `docs/25_Notifications-Report.md`. `[Done]` Password-reset emails (report
+  29). `[Open]` Class-start reminders, in-app inbox, automatic Telegram chat
   linking (bot webhook), surfacing repeated delivery failures in the audit log
   (9.24).
 - `[Done]` 9.22 Internship Management. Report:
@@ -442,5 +442,8 @@ A module is not done until its report exists and its tests pass — never label
   `docs/28_Audit-Logs-and-Security-Report.md`. `[Open]` Audit retention /
   export, alerting on repeated notification failures, auditing low-risk
   structure CRUD, two-factor sign-in.
+- `[Done]` Password change and emailed password reset (web + API; other
+  sessions / tokens end; audited; rate limited). Report:
+  `docs/29_Password-Change-and-Reset-Report.md`.
 - All modules of business-overview §9 are now implemented. Remaining open
   items are listed above (unit scoping for Faculty Admin is the largest).

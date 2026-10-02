@@ -139,6 +139,7 @@ const SECTION_LABELS = {
   announcements: 'Announcements',
   analytics: 'Analytics',
   notifications: 'Notification settings',
+  account: 'Account',
   'my-invoices': 'My invoices',
   internships: 'Internships',
   'my-internships': 'My internship',

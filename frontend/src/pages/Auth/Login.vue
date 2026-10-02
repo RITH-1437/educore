@@ -1,9 +1,14 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
-import { CircleAlert, Eye, EyeOff, Lock, Mail, ShieldCheck } from '@lucide/vue'
+import { CircleAlert, CircleCheck, Eye, EyeOff, Lock, Mail, ShieldCheck } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseInput from '../../components/BaseInput.vue'
+
+defineProps({
+  canResetPassword: { type: Boolean, default: false },
+  status: { type: String, default: null },
+})
 
 const form = useForm({ email: '', password: '', remember: false })
 const showPassword = ref(false)
@@ -38,6 +43,11 @@ export default { layout: GuestLayout }
 
         <h1 class="mt-6 text-center text-h4 font-semibold tracking-tight text-white sm:text-h3">ITC Win Win</h1>
         <p class="mt-2 text-center text-small text-white/80">Access your Institute of Technology of Cambodia securely.</p>
+
+        <div v-if="status && !hasAuthError" class="mt-6 flex items-start gap-3 rounded-lg border border-green-300/40 bg-success/15 p-4" role="status">
+          <CircleCheck class="mt-0.5 h-5 w-5 shrink-0 text-green-200" aria-hidden="true" />
+          <p class="text-small text-green-100">{{ status }}</p>
+        </div>
 
         <div
           v-if="hasAuthError"
@@ -94,10 +104,13 @@ export default { layout: GuestLayout }
             </template>
           </BaseInput>
 
-          <label class="mt-3 flex min-h-11 w-fit cursor-pointer items-center gap-2">
-            <input v-model="form.remember" type="checkbox" class="h-4 w-4 rounded-sm border-white/30 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-dark-primary" />
-            <span class="select-none text-small text-white/90">Remember me</span>
-          </label>
+          <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
+            <label class="flex min-h-11 w-fit cursor-pointer items-center gap-2">
+              <input v-model="form.remember" type="checkbox" class="h-4 w-4 rounded-sm border-white/30 accent-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-dark-primary" />
+              <span class="select-none text-small text-white/90">Remember me</span>
+            </label>
+            <Link v-if="canResetPassword" href="/forgot-password" class="rounded-sm text-small font-medium text-dark-primary underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-dark-primary">Forgot password?</Link>
+          </div>
 
           <BaseButton type="submit" size="lg" :loading="form.processing" class="mt-4 w-full hover:border-primary! hover:bg-primary/85!">
             {{ form.processing ? 'Signing in…' : 'Sign in' }}

@@ -158,6 +158,8 @@ limit used by enrollment (`backend/config/academics.php`).
 | `/internship-companies`     | Host companies | Super admin, University admin (Faculty admin read-only) |
 | `/analytics`                | Analytics: enrollment, academic performance, workload | Super admin, University admin |
 | `/audit-logs`               | Audit trail (read-only): sign-ins and sensitive changes | Super admin |
+| `/account/password`         | Change my password (other sessions are signed out) | Every signed-in user |
+| `/forgot-password`          | Request a password reset link by email (rate limited) | Guests |
 | `/rooms`                    | Rooms                      | Super admin, University admin (Faculty admin read-only) |
 | `/timetable`                | My weekly timetable        | Student, Lecturer |
 | `/enrollments`              | Enrollment management      | Super admin, University admin (Faculty admin read-only) |

@@ -7,6 +7,8 @@ use App\Http\Controllers\AnnouncementsController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuditLogsController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\Auth\PasswordController;
+use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseOfferingController;
 use App\Http\Controllers\CourseworkController;
@@ -44,6 +46,18 @@ Route::get('/', function () {
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store'])->name('login.store');
+
+    // Password reset (`skills/authentication`): generic answers, rate limited.
+    Route::get('/forgot-password', [PasswordResetController::class, 'create'])->name('password.request');
+    Route::post('/forgot-password', [PasswordResetController::class, 'store'])->middleware('throttle:password-reset')->name('password.email');
+    Route::get('/reset-password/{token}', [PasswordResetController::class, 'edit'])->name('password.reset');
+    Route::post('/reset-password', [PasswordResetController::class, 'update'])->middleware('throttle:password-reset')->name('password.update');
+});
+
+// Change your own password (every signed-in role).
+Route::middleware('auth')->group(function () {
+    Route::get('/account/password', [PasswordController::class, 'edit'])->name('account.password');
+    Route::put('/account/password', [PasswordController::class, 'update'])->name('account.password.update');
 });
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])

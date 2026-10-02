@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
-import { Bell, CalendarDays, ChevronRight, LogOut, Menu, Moon, Sun } from '@lucide/vue'
+import { Bell, CalendarDays, ChevronRight, KeyRound, LogOut, Menu, Moon, Sun } from '@lucide/vue'
 import BaseDropdown from '../BaseDropdown.vue'
 import { useNavigation } from '../../composables/useNavigation'
 
@@ -66,6 +66,9 @@ const logout = () => router.post('/logout')
           <div class="p-1" role="menu">
             <Link href="/notifications" class="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-small text-ink hover:bg-surface focus-visible:outline-2 focus-visible:outline-primary dark:text-dark-ink dark:hover:bg-dark-surface-2" role="menuitem">
               <Bell class="h-4 w-4" aria-hidden="true" /> Notification settings
+            </Link>
+            <Link href="/account/password" class="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-small text-ink hover:bg-surface focus-visible:outline-2 focus-visible:outline-primary dark:text-dark-ink dark:hover:bg-dark-surface-2" role="menuitem">
+              <KeyRound class="h-4 w-4" aria-hidden="true" /> Change password
             </Link>
             <button type="button" class="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-small text-error hover:bg-error/5 focus-visible:outline-2 focus-visible:outline-error dark:text-red-300 dark:hover:bg-error/10" role="menuitem" @click="logout">
               <LogOut class="h-4 w-4" aria-hidden="true" /> Sign out

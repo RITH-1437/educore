@@ -343,7 +343,7 @@ module, what was deliberately left out.
 
 ### 9.1 Authentication & Authorization [Implemented]
 
-> **Status:** sign-in by email + password (web session and Sanctum API token), five roles enforced by route middleware and policies, inactive accounts refused and their sessions / tokens revoked (9.24). **Not built:** password change and password reset [Planned]; sign-in by student / staff ID [Future]; editable permission sets (roles are fixed) [Future].
+> **Status:** sign-in by email + password (web session and Sanctum API token), five roles enforced by route middleware and policies, inactive accounts refused and their sessions / tokens revoked (9.24). Password change and emailed reset — `docs/29_Password-Change-and-Reset-Report.md`. **Not built:** sign-in by student / staff ID [Future]; editable permission sets (roles are fixed) [Future]; two-factor sign-in [Future].
 
 - **Login** with student ID / staff ID + password.
 - **Logout, password change, password reset, session/account management.**
@@ -584,7 +584,7 @@ flowchart LR
 
 ### 9.19 Notification System [Implemented]
 
-> **Status:** email + Telegram, queued, with user preferences — `docs/25_Notifications-Report.md`. **Not built:** class-start reminders, password emails, in-app inbox [Future].
+> **Status:** email + Telegram, queued, with user preferences — `docs/25_Notifications-Report.md`. Password-reset and password-changed emails added with report 29. **Not built:** class-start reminders, in-app inbox [Future].
 
 - **Email:** announcements, document status, registration confirmation, password-related,
   administrative notifications.

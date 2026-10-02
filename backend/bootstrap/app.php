@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\BusinessRuleException;
+use App\Http\Middleware\AuthenticateWebSession;
 use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\HandleInertiaRequests;
@@ -24,6 +25,8 @@ return Application::configure(basePath: dirname(__DIR__))
             HandleInertiaRequests::class,
             // Module 9.24: a deactivated account loses its session / token.
             EnsureAccountIsActive::class,
+            // A password change / reset ends every other session of the account.
+            AuthenticateWebSession::class,
         ]);
         $middleware->api(append: [
             EnsureAccountIsActive::class,

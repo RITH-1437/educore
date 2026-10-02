@@ -63,6 +63,14 @@ can do) is separate — see `skills/authorization/SKILL.md`.
   audits it (`auth.access_revoked`). Sign-in, logout, failures and lockouts are
   audited too (`docs/28_Audit-Logs-and-Security-Report.md`).
 
+## Password change & reset (implemented)
+
+- `PasswordService` (report 29): change needs the current password; reset uses
+  Laravel's broker (hashed, single-use, 60-minute token) and only for active
+  accounts, with a generic answer. Both end other sessions
+  (`AuthenticateWebSession`) and API tokens, are audited and email the owner.
+- Rule: `Password::defaults()` = ≥ 8 characters with letters and numbers.
+
 ## Rate limiting
 
 - `throttle` middleware on `/api/login` and password-reset endpoints

@@ -20,6 +20,7 @@ use App\Http\Controllers\Api\InternshipController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\LecturerController;
 use App\Http\Controllers\Api\NotificationPreferenceController;
+use App\Http\Controllers\Api\PasswordController;
 use App\Http\Controllers\Api\ProgramController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\ScheduleController;
@@ -35,6 +36,13 @@ use Illuminate\Support\Facades\Route;
 Route::post('/login', [AuthController::class, 'login'])
     ->middleware('throttle:login')
     ->name('api.login');
+
+// Password reset (public, rate limited) and change (signed in).
+Route::middleware('throttle:password-reset')->group(function () {
+    Route::post('/forgot-password', [PasswordController::class, 'forgot'])->name('api.password.email');
+    Route::post('/reset-password', [PasswordController::class, 'reset'])->name('api.password.reset');
+});
+Route::put('/password', [PasswordController::class, 'update'])->middleware('auth:sanctum')->name('api.password.update');
 
 Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth:sanctum')

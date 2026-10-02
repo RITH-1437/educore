@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Validation\Rules\Password;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -38,6 +39,13 @@ class AppServiceProvider extends ServiceProvider
         // Not discoverable by name: attendance is authorized per section/student.
         Gate::policy(AttendanceSession::class, AttendancePolicy::class);
         Gate::policy(AssignmentSubmission::class, AssignmentPolicy::class);
+
+        // Password rule for change / reset (`skills/authentication`): at least
+        // 8 characters with letters and numbers.
+        Password::defaults(fn () => Password::min(8)->letters()->numbers());
+
+        // Password reset requests (guest): per email + IP.
+        RateLimiter::for('password-reset', fn (Request $request) => Limit::perMinute(5)->by(strtolower((string) $request->input('email')).'|'.$request->ip()));
 
         // Audit trail of sign-in activity (module 9.24): who signed in or out,
         // failed attempts (the email tried, never the password) and lockouts.

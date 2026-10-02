@@ -371,6 +371,12 @@ users, main business activities, and expected outputs.
 - **Primary users:** all roles.
 - **Main business activities:** login/logout, password management, session control, role and permission assignment.
 - **Expected outputs:** a secure environment where each user sees only what their role allows.
+- **Delivered:** sign-in / sign-out (web session and API token), five fixed
+  roles enforced server-side, inactive accounts refused and their sessions /
+  tokens revoked, password change and emailed password reset
+  ([29_Password-Change-and-Reset-Report.md](29_Password-Change-and-Reset-Report.md)),
+  sign-in activity audited. Editable permission sets and two-factor sign-in
+  are [Future].
 
 ### 9.2 Student Management [Implemented]
 

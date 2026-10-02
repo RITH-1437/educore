@@ -61,7 +61,7 @@ const modules = [
               <component :is="m.icon" class="h-5 w-5 text-slate-500 transition duration-300 group-hover:text-white" />
             </span>
             <div>
-              <h3 class="font-display text-[15px] font-semibold text-slate-900">{{ m.title }}</h3>
+              <h3 class="font-display text-[15px] font-semibold text-slate-900 transition-colors duration-200 group-hover:text-blue-600">{{ m.title }}</h3>
               <p class="mt-1 text-sm leading-relaxed text-slate-500">{{ m.text }}</p>
             </div>
           </div>

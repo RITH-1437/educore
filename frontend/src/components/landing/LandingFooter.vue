@@ -11,21 +11,21 @@ const nav = [
   { id: 'about', label: 'About' },
 ]
 
-const team = ['Rin Nairith', 'Lyhor']
+const team = ['Rin Nairith', 'Yong Lyhor']
 </script>
 
 <template>
-  <footer class="border-t border-white/10 bg-[#020617] py-16">
+  <footer class="border-t border-white/10 bg-slate-950 py-16">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       <div class="grid gap-10 lg:grid-cols-[1.2fr_1fr_1fr]">
         <div>
           <div class="flex items-center gap-2.5">
-            <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-white">
+            <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-white shadow-sm">
               <img :src="symbolMark" alt="" width="36" height="36" class="h-9 w-9 object-cover" />
             </span>
             <div>
               <p class="font-display text-lg font-bold text-white">EduCore</p>
-              <p class="text-xs text-slate-400">One Platform. Smarter Education.</p>
+              <p class="text-xs font-medium text-sky-400/90">One Platform. Smarter Education.</p>
             </div>
           </div>
           <p class="mt-5 max-w-sm text-sm leading-relaxed text-slate-400">

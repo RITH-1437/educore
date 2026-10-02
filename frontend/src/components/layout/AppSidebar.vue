@@ -14,7 +14,7 @@ defineProps({
 const emit = defineEmits(['toggle-collapse', 'close'])
 const { navGroups, homeHref, isActive } = useNavigation()
 const closeButton = ref(null)
-const appIcon = '/assets/logo/educore-app-icon.png'
+const appIcon = '/assets/logo/educore-favicon.svg'
 
 defineExpose({ focusClose: () => closeButton.value?.focus() })
 

@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
-import { ChevronDown, ChevronRight, LogOut, Menu, Moon, Sun } from '@lucide/vue'
+import { CalendarDays, ChevronRight, LogOut, Menu, Moon, Sun } from '@lucide/vue'
 import BaseDropdown from '../BaseDropdown.vue'
 import { useNavigation } from '../../composables/useNavigation'
 
@@ -14,6 +14,8 @@ const page = usePage()
 const user = computed(() => page.props.auth?.user ?? null)
 const initial = computed(() => user.value?.name?.slice(0, 1)?.toUpperCase() ?? 'U')
 const { breadcrumbs } = useNavigation()
+
+const todayLabel = computed(() => new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }))
 
 const logout = () => router.post('/logout')
 </script>
@@ -35,6 +37,11 @@ const logout = () => router.post('/logout')
       </nav>
     </div>
 
+    <span class="hidden items-center gap-1.5 text-caption text-muted dark:text-dark-muted sm:flex">
+      <CalendarDays class="h-3.5 w-3.5" aria-hidden="true" />
+      {{ todayLabel }}
+    </span>
+
     <div class="flex items-center gap-1 sm:gap-2">
       <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted transition-colors duration-150 hover:bg-surface hover:text-ink focus-visible:outline-2 focus-visible:outline-primary dark:text-dark-muted dark:hover:bg-dark-surface-2 dark:hover:text-dark-ink" :aria-label="theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'" @click="emit('toggle-theme')">
         <Sun v-if="theme === 'dark'" class="h-5 w-5" aria-hidden="true" />
@@ -49,7 +56,6 @@ const logout = () => router.post('/logout')
               <span class="block max-w-36 truncate text-small font-medium leading-4">{{ user?.name }}</span>
               <span class="block max-w-36 truncate text-caption leading-4 text-muted dark:text-dark-muted">{{ user?.role?.name }}</span>
             </span>
-            <ChevronDown class="hidden h-4 w-4 text-muted transition-transform duration-200 md:block dark:text-dark-muted" :class="open ? 'rotate-180' : ''" aria-hidden="true" />
           </button>
         </template>
         <template #content>

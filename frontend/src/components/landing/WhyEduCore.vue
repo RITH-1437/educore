@@ -19,12 +19,12 @@ const reasons = [
       <SectionHeading eyebrow="Why EduCore" title="Why EduCore?" description="A straightforward look at what EduCore is designed to do — no exaggerated promises." />
 
       <div class="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Reveal v-for="(r, i) in reasons" :key="r.title" :delay="(i % 3) * 100" class="flex items-start gap-4 rounded-xl border border-slate-200 bg-white p-6">
-          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100">
-            <component :is="r.icon" class="h-5 w-5 text-blue-600" />
+        <Reveal v-for="(r, i) in reasons" :key="r.title" :delay="(i % 3) * 100" class="group flex items-start gap-4 rounded-xl border border-slate-200 bg-white p-6 transition duration-300 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md hover:shadow-slate-900/5">
+          <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 transition-colors duration-200 group-hover:bg-blue-600 group-hover:text-white">
+            <component :is="r.icon" class="h-5 w-5 text-blue-600 transition-colors duration-200 group-hover:text-white" />
           </span>
           <div>
-            <h3 class="font-display text-base font-semibold text-slate-900">{{ r.title }}</h3>
+            <h3 class="font-display text-base font-semibold text-slate-900 transition-colors duration-200 group-hover:text-blue-600">{{ r.title }}</h3>
             <p class="mt-1.5 text-sm leading-relaxed text-slate-500">{{ r.text }}</p>
           </div>
         </Reveal>

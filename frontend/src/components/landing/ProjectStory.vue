@@ -65,7 +65,7 @@ const status = [
           </ul>
           <p class="mt-5 text-sm text-slate-500">
             Built by
-            <span class="font-semibold text-slate-800">Rin Nairith &amp; Lyhor</span> as a university
+            <span class="font-semibold text-slate-800">Rin Nairith &amp; Yong Lyhor</span> as a university
             digital administration platform.
           </p>
         </Reveal>

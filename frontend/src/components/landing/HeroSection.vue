@@ -40,7 +40,7 @@ const courses = [
     <div class="relative mx-auto grid max-w-7xl items-center gap-14 px-4 pt-32 pb-20 sm:px-6 lg:grid-cols-2 lg:gap-10 lg:pt-40 lg:pb-28">
       <div class="max-w-xl">
         <div
-          class="edu-fade-up inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3.5 py-1.5 text-sm font-medium text-slate-700 shadow-sm"
+          class="edu-fade-up inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/90 px-3.5 py-1.5 text-sm font-medium text-slate-700 shadow-sm backdrop-blur-sm"
           style="animation-delay: 0.05s"
         >
           <Landmark class="h-4 w-4 text-blue-600" />
@@ -52,7 +52,7 @@ const courses = [
           style="animation-delay: 0.15s"
         >
           One Platform.
-          <span class="text-blue-600">Smarter Education.</span>
+          <span class="bg-gradient-to-r from-blue-600 via-blue-600 to-sky-500 bg-clip-text text-transparent">Smarter Education.</span>
         </h1>
 
         <p
@@ -66,7 +66,7 @@ const courses = [
         <div class="edu-fade-up mt-8 flex flex-wrap items-center gap-3" style="animation-delay: 0.35s">
           <button
             type="button"
-            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-blue-600/25 transition hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/35 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 active:scale-[0.98]"
             @click="scrollToId('platform')"
           >
             Explore EduCore
@@ -74,7 +74,7 @@ const courses = [
           </button>
           <Link
             href="/login"
-            class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+            class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 active:scale-[0.98]"
           >
             Sign In
           </Link>
@@ -82,23 +82,23 @@ const courses = [
 
         <dl class="edu-fade-up mt-10 grid grid-cols-3 gap-6 border-t border-slate-200 pt-8" style="animation-delay: 0.45s">
           <div>
-            <dt class="text-sm text-slate-500">Core modules</dt>
-            <dd class="font-display mt-1 text-2xl font-bold text-slate-950">16</dd>
+            <dt class="text-sm font-medium text-slate-500">Core modules</dt>
+            <dd class="font-display mt-1 text-3xl font-bold tracking-tight text-slate-950">16</dd>
           </div>
           <div>
-            <dt class="text-sm text-slate-500">User roles</dt>
-            <dd class="font-display mt-1 text-2xl font-bold text-slate-950">5</dd>
+            <dt class="text-sm font-medium text-slate-500">User roles</dt>
+            <dd class="font-display mt-1 text-3xl font-bold tracking-tight text-slate-950">5</dd>
           </div>
           <div>
-            <dt class="text-sm text-slate-500">Domain tables</dt>
-            <dd class="font-display mt-1 text-2xl font-bold text-slate-950">49</dd>
+            <dt class="text-sm font-medium text-slate-500">Domain tables</dt>
+            <dd class="font-display mt-1 text-3xl font-bold tracking-tight text-slate-950">49</dd>
           </div>
         </dl>
       </div>
 
       <div class="edu-fade-up relative mx-auto w-full max-w-xl" style="animation-delay: 0.55s">
         <div class="relative" aria-hidden="true">
-          <div class="rounded-2xl border border-white/70 bg-white/70 shadow-2xl shadow-slate-900/10 backdrop-blur-xl">
+          <div class="glass-frosted rounded-2xl border border-white/80 shadow-2xl shadow-slate-900/10">
             <div class="flex items-center gap-1.5 border-b border-slate-200 px-4 py-3">
               <span class="h-2.5 w-2.5 rounded-full bg-slate-200" />
               <span class="h-2.5 w-2.5 rounded-full bg-slate-200" />
@@ -182,7 +182,7 @@ const courses = [
           </div>
 
           <div
-            class="edu-float absolute -top-5 -right-3 hidden items-center gap-2.5 rounded-xl border border-white/70 bg-white/70 px-3.5 py-2.5 shadow-lg backdrop-blur-xl sm:flex"
+            class="edu-float glass-frosted absolute -top-5 -right-3 hidden items-center gap-2.5 rounded-xl border border-white/80 px-3.5 py-2.5 shadow-lg sm:flex"
           >
             <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
               <Bell class="h-4 w-4 text-blue-600" />
@@ -194,7 +194,7 @@ const courses = [
           </div>
 
           <div
-            class="edu-float-slow absolute -bottom-6 -left-4 hidden rounded-xl border border-white/70 bg-white/70 px-4 py-3 shadow-lg backdrop-blur-xl sm:block"
+            class="edu-float-slow glass-frosted absolute -bottom-6 -left-4 hidden rounded-xl border border-white/80 px-4 py-3 shadow-lg sm:block"
           >
             <div class="flex items-center gap-2">
               <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50">

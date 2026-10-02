@@ -44,12 +44,12 @@ const highlights = [
           v-for="(item, i) in highlights"
           :key="item.title"
           :delay="i * 110"
-          class="rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.07]"
+          class="group relative overflow-hidden rounded-xl border border-white/10 bg-white/5 p-6 backdrop-blur-md transition duration-300 hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.08] hover:shadow-xl hover:shadow-blue-500/5 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-sky-400/30 before:to-transparent"
         >
-          <span class="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-500/15">
+          <span class="flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-gradient-to-br from-blue-500/20 to-sky-500/10 transition-transform duration-300 group-hover:scale-105">
             <component :is="item.icon" class="h-5 w-5 text-sky-400" />
           </span>
-          <h3 class="font-display mt-4 text-lg font-semibold text-white">{{ item.title }}</h3>
+          <h3 class="font-display mt-4 text-lg font-semibold text-white transition-colors duration-200 group-hover:text-sky-300">{{ item.title }}</h3>
           <p class="mt-2 text-sm leading-relaxed text-slate-400">{{ item.text }}</p>
         </Reveal>
       </div>

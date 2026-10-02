@@ -12,13 +12,29 @@ defineProps({
 
 <template>
   <Reveal class="max-w-3xl" :class="align === 'left' ? 'text-left' : 'mx-auto text-center'">
-    <p
+    <div
       v-if="eyebrow"
-      class="text-xs font-semibold tracking-[0.2em] uppercase"
-      :class="dark ? 'text-sky-400' : 'text-blue-600'"
+      class="flex items-center gap-2"
+      :class="align === 'left' ? 'justify-start' : 'justify-center'"
     >
-      {{ eyebrow }}
-    </p>
+      <span
+        class="inline-block h-px w-5"
+        :class="dark ? 'bg-sky-400/50' : 'bg-blue-600/40'"
+        aria-hidden="true"
+      />
+      <p
+        class="text-xs font-semibold tracking-[0.2em] uppercase"
+        :class="dark ? 'text-sky-400' : 'text-blue-600'"
+      >
+        {{ eyebrow }}
+      </p>
+      <span
+        v-if="align !== 'left'"
+        class="inline-block h-px w-5"
+        :class="dark ? 'bg-sky-400/50' : 'bg-blue-600/40'"
+        aria-hidden="true"
+      />
+    </div>
     <h2
       class="font-display mt-3 text-3xl font-bold tracking-tight text-balance sm:text-4xl"
       :class="dark ? 'text-white' : 'text-slate-950'"
@@ -27,7 +43,7 @@ defineProps({
     </h2>
     <p
       v-if="description"
-      class="mt-4 text-lg leading-relaxed"
+      class="mt-4 text-base leading-relaxed sm:text-lg"
       :class="dark ? 'text-slate-400' : 'text-slate-600'"
     >
       {{ description }}

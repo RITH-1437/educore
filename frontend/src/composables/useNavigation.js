@@ -1,23 +1,23 @@
 import { computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import {
-  BookOpen,
+  BookMarked,
+  Building2,
+  Calendar,
   CalendarClock,
-  CalendarDays,
-  ClipboardCheck,
   ClipboardList,
-  DoorOpen,
   FileCheck,
+  FileWarning,
   GraduationCap,
-  Landmark,
-  Layers,
   LayoutDashboard,
-  LayoutGrid,
-  Presentation,
-  ScrollText,
+  Library,
+  ListChecks,
+  MapPin,
+  School,
+  TableProperties,
   UserCheck,
   UserRound,
-  Users,
+  UsersRound,
 } from '@lucide/vue'
 
 // Mirrors the route-level role middleware in backend/routes/web.php. This only
@@ -29,49 +29,49 @@ const navForRole = (role) => {
       {
         label: 'Academic structure',
         items: [
-          { label: 'University', href: '/universities', icon: Landmark },
-          { label: 'Faculties & departments', href: '/faculties', icon: GraduationCap },
-          { label: 'Programs', href: '/programs', icon: Layers },
-          { label: 'Academic years', href: '/academic-years', icon: CalendarDays },
+          { label: 'University', href: '/universities', icon: Building2 },
+          { label: 'Faculties & departments', href: '/faculties', icon: School },
+          { label: 'Programs', href: '/programs', icon: BookMarked },
+          { label: 'Academic years', href: '/academic-years', icon: Calendar },
         ],
       },
       {
         label: 'People',
         items: [
-          { label: 'Users & roles', href: '/users', icon: Users },
-          { label: 'Students', href: '/students', icon: UserRound },
-          { label: 'Lecturers', href: '/lecturers', icon: Presentation },
+          { label: 'Users & roles', href: '/users', icon: UsersRound },
+          { label: 'Students', href: '/students', icon: GraduationCap },
+          { label: 'Lecturers', href: '/lecturers', icon: UserRound },
         ],
       },
-      { label: 'Academics', items: [{ label: 'Courses', href: '/courses', icon: BookOpen }, { label: 'Offerings & sections', href: '/offerings', icon: LayoutGrid }, { label: 'Enrollments', href: '/enrollments', icon: ClipboardCheck }, { label: 'Rooms', href: '/rooms', icon: DoorOpen }] },
-      { label: 'System', items: [{ label: 'Error logs', href: '/error-logs', icon: ScrollText }] },
+      { label: 'Academics', items: [{ label: 'Courses', href: '/courses', icon: Library }, { label: 'Offerings & sections', href: '/offerings', icon: TableProperties }, { label: 'Enrollments', href: '/enrollments', icon: ListChecks }, { label: 'Rooms', href: '/rooms', icon: MapPin }] },
+      { label: 'System', items: [{ label: 'Error logs', href: '/error-logs', icon: FileWarning }] },
     ]
   }
 
   if (['university-admin', 'faculty-admin'].includes(role)) {
     const structure = [
-      { label: 'University', href: '/universities', icon: Landmark },
-      { label: 'Faculties & departments', href: '/faculties', icon: GraduationCap },
-      { label: 'Programs', href: '/programs', icon: Layers },
-      { label: 'Courses', href: '/courses', icon: BookOpen },
-      { label: 'Offerings & sections', href: '/offerings', icon: LayoutGrid },
-      { label: 'Enrollments', href: '/enrollments', icon: ClipboardCheck },
-      { label: 'Rooms', href: '/rooms', icon: DoorOpen },
+      { label: 'University', href: '/universities', icon: Building2 },
+      { label: 'Faculties & departments', href: '/faculties', icon: School },
+      { label: 'Programs', href: '/programs', icon: BookMarked },
+      { label: 'Courses', href: '/courses', icon: Library },
+      { label: 'Offerings & sections', href: '/offerings', icon: TableProperties },
+      { label: 'Enrollments', href: '/enrollments', icon: ListChecks },
+      { label: 'Rooms', href: '/rooms', icon: MapPin },
     ]
     // Academic calendar management is limited to university admins.
-    if (role === 'university-admin') structure.push({ label: 'Academic years', href: '/academic-years', icon: CalendarDays })
+    if (role === 'university-admin') structure.push({ label: 'Academic years', href: '/academic-years', icon: Calendar })
 
     return [
       { label: 'Overview', items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }] },
       { label: 'Academic structure', items: structure },
-      { label: 'People', items: [{ label: 'Students', href: '/students', icon: UserRound }, { label: 'Lecturers', href: '/lecturers', icon: Presentation }] },
+      { label: 'People', items: [{ label: 'Students', href: '/students', icon: GraduationCap }, { label: 'Lecturers', href: '/lecturers', icon: UserRound }] },
     ]
   }
 
   if (role === 'student') {
     return [{ label: 'Workspace', items: [
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { label: 'Course registration', href: '/registration', icon: ClipboardCheck },
+      { label: 'Course registration', href: '/registration', icon: ListChecks },
       { label: 'My timetable', href: '/timetable', icon: CalendarClock },
       { label: 'My attendance', href: '/my-attendance', icon: UserCheck },
       { label: 'My assignments', href: '/my-assignments', icon: ClipboardList },

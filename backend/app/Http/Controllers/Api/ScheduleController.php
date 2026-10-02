@@ -85,6 +85,22 @@ class ScheduleController extends Controller
             new OA\Response(response: 422, description: 'Invalid slot or conflict.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
     )]
+    #[OA\Patch(
+        path: '/schedule-entries/{entry}',
+        summary: 'Move a weekly meeting (PATCH)',
+        description: 'Same checks as creating one (the entry itself is ignored when looking for overlaps).',
+        operationId: 'patchScheduleEntry',
+        tags: ['Timetable'],
+        security: [['sanctum' => []]],
+        parameters: [new OA\PathParameter(name: 'entry', required: true, schema: new OA\Schema(type: 'integer', format: 'int64'))],
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/ScheduleEntryRequest')),
+        responses: [
+            new OA\Response(response: 200, description: 'Entry updated.', content: new OA\JsonContent(ref: '#/components/schemas/ScheduleEntryResourceResponse')),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 422, description: 'Invalid slot or conflict.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
+        ]
+    )]
     public function update(ScheduleEntryRequest $request, ScheduleEntry $entry): ScheduleEntryResource
     {
         $this->authorize('update', $entry->section->offering);

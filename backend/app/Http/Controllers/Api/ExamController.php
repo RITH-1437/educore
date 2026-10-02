@@ -12,6 +12,7 @@ use App\Models\ExamResult;
 use App\Models\Section;
 use App\Models\Student;
 use App\Services\ExamService;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -106,6 +107,23 @@ class ExamController extends Controller
         summary: 'Update an exam',
         description: 'Same rules as create; max score cannot drop below a recorded score.',
         operationId: 'updateExam',
+        tags: ['Examinations'],
+        security: [['sanctum' => []]],
+        parameters: [new OA\PathParameter(name: 'exam', required: true, schema: new OA\Schema(type: 'integer', format: 'int64'))],
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/ExamRequest')),
+        responses: [
+            new OA\Response(response: 200, description: 'Updated.', content: new OA\JsonContent(ref: '#/components/schemas/ExamResourceResponse')),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a lecturer of the section or a manager.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 409, description: 'Time clash, or semester completed.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
+        ]
+    )]
+    #[OA\Patch(
+        path: '/exams/{exam}',
+        summary: 'Update an exam (PATCH)',
+        description: 'Same rules as create; max score cannot drop below a recorded score.',
+        operationId: 'patchExam',
         tags: ['Examinations'],
         security: [['sanctum' => []]],
         parameters: [new OA\PathParameter(name: 'exam', required: true, schema: new OA\Schema(type: 'integer', format: 'int64'))],
@@ -245,7 +263,7 @@ class ExamController extends Controller
     /**
      * Shared with the web controller.
      *
-     * @return \Illuminate\Database\Eloquent\Collection<int, Exam>
+     * @return Collection<int, Exam>
      */
     public function listFor(Request $request, Section $section)
     {

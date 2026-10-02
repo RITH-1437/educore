@@ -1,6 +1,6 @@
 # EduCore API Audit
 
-- **Date:** 2026-09-28
+- **Date:** 2026-09-28 (refreshed 2026-10-02 — see *Re-audit 2026-10-02*)
 - **Scope:** `routes/api.php`, API controllers, Form Requests, API Resources,
   models, policies/middleware, Swagger/OpenAPI, and frontend API service usage.
 - **Runtime:** Local Docker Compose development stack. No database schema or
@@ -13,16 +13,16 @@
 
 | Measure | Result |
 |---|---:|
-| Application API route definitions (`routes/api.php`) | 42 |
-| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 47 |
-| Swagger operations after documentation corrections | 47 |
-| Swagger document paths | 26 |
-| Swagger document schemas | 45 |
+| Application API route definitions (`routes/api.php`) | 128 |
+| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 143 |
+| Swagger operations after documentation corrections | 143 |
+| Swagger document paths | 79 |
+| Swagger document schemas | 115 |
 | Undocumented application operations | 0 |
 | Extra Swagger operations not in the application API routes | 0 |
 | Swagger generation errors after corrections | 0 |
 | Current documentation mismatches fixed in this audit | 8 |
-| Remaining API contract / security concerns reported (not changed) | 4 |
+| Remaining API contract / security concerns (R-01 resolved; R-02–R-04 open) | 3 |
 | Frontend API-service calls found | 0 |
 
 `route:list --path=api` also displays L5-Swagger's JSON endpoint
@@ -171,7 +171,12 @@ against application routes. The frontend's API service has no consumers in
 These concerns involve runtime behavior or an explicit API contract choice and
 were **not changed** during this documentation-only audit.
 
-### R-01 — Disabled users can authenticate through the API
+### R-01 — Disabled users can authenticate through the API — `[Resolved]`
+
+> Resolved in `d22e91d`: `LoginRequest::authenticate()` now attempts with
+> `is_active => true`, so inactive accounts get the generic credential error on
+> both web and API sign-in. Tokens issued before a deactivation stay valid until
+> logout/expiry (tracked in `docs/6_Module-Status-and-Roadmap.md` §6).
 
 - **Endpoint:** `POST /api/login`, then all token-protected endpoints.
 - **Current backend behavior:** `AuthService::login()` calls the shared
@@ -251,7 +256,7 @@ were **not changed** during this documentation-only audit.
 Application endpoint counts below exclude the four L5-Swagger/OAuth package
 routes (`api/documentation`, `api/documentation/asset/{asset}`,
 `api/documentation/ui`, `api/oauth2-callback`). Each combined update route
-contributes one PUT and one PATCH operation, so 42 route definitions yield 47
+contributes one PUT and one PATCH operation, so 128 route definitions yield 143
 documented operations.
 
 | Method | Path | Authentication / authorization | Documentation |
@@ -332,11 +337,11 @@ documented operations.
 | GET | `/api/offerings` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
 | POST | `/api/offerings` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/offerings/{offering}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
-| PUT, PATCH | `/api/offerings/{offering}` | Sanctum + super-admin or university-admin | PUT documented |
+| PUT, PATCH | `/api/offerings/{offering}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/offerings/{offering}` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/offerings/{offering}/sections` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/sections/{section}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
-| PUT, PATCH | `/api/sections/{section}` | Sanctum + super-admin or university-admin | PUT documented |
+| PUT, PATCH | `/api/sections/{section}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/sections/{section}` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/sections/{section}/lecturers` | Sanctum + super-admin or university-admin | Documented |
 | DELETE | `/api/sections/{section}/lecturers/{lecturer}` | Sanctum + super-admin or university-admin | Documented |
@@ -350,11 +355,11 @@ documented operations.
 | GET | `/api/rooms` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
 | POST | `/api/rooms` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/rooms/{room}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
-| PUT, PATCH | `/api/rooms/{room}` | Sanctum + super-admin or university-admin | PUT documented |
+| PUT, PATCH | `/api/rooms/{room}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/rooms/{room}` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/sections/{section}/schedule` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
 | POST | `/api/sections/{section}/schedule` | Sanctum + super-admin or university-admin | Documented |
-| PUT, PATCH | `/api/schedule-entries/{entry}` | Sanctum + super-admin or university-admin | PUT documented |
+| PUT, PATCH | `/api/schedule-entries/{entry}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/schedule-entries/{entry}` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/timetable/student/{student}` | Sanctum + staff, or the student themself | Documented |
 | GET | `/api/timetable/lecturer/{lecturer}` | Sanctum + staff, or the lecturer themself | Documented |
@@ -366,7 +371,7 @@ documented operations.
 | GET | `/api/sections/{section}/assignments` | Sanctum + managers, Faculty Admin, a lecturer of the section, or an enrolled student (published only) | Documented |
 | POST | `/api/sections/{section}/assignments` | Sanctum + managers or a lecturer of the section | Documented |
 | GET | `/api/assignments/{assignment}` | Sanctum + staff, a lecturer of the section, or an enrolled student (published only) | Documented |
-| PUT, PATCH | `/api/assignments/{assignment}` | Sanctum + managers or a lecturer of the section | PUT documented |
+| PUT, PATCH | `/api/assignments/{assignment}` | Sanctum + managers or a lecturer of the section | Both documented |
 | DELETE | `/api/assignments/{assignment}` | Sanctum + managers or a lecturer of the section | Documented |
 | POST | `/api/assignments/{assignment}/publish` | Sanctum + managers or a lecturer of the section | Documented |
 | GET | `/api/assignments/{assignment}/submissions` | Sanctum + managers, Faculty Admin, or a lecturer of the section | Documented |
@@ -376,7 +381,7 @@ documented operations.
 | GET | `/api/sections/{section}/exams` | Sanctum + managers, Faculty Admin, a lecturer of the section, or an enrolled student | Documented |
 | POST | `/api/sections/{section}/exams` | Sanctum + managers or a lecturer of the section | Documented |
 | GET | `/api/exams/{exam}` | Sanctum + staff, a lecturer of the section (roster), or an enrolled student (own released result) | Documented |
-| PUT, PATCH | `/api/exams/{exam}` | Sanctum + managers or a lecturer of the section | PUT documented |
+| PUT, PATCH | `/api/exams/{exam}` | Sanctum + managers or a lecturer of the section | Both documented |
 | DELETE | `/api/exams/{exam}` | Sanctum + managers or a lecturer of the section | Documented |
 | POST | `/api/exams/{exam}/publish` | Sanctum + managers or a lecturer of the section | Documented |
 | POST | `/api/exams/{exam}/results` | Sanctum + managers or a lecturer of the section | Documented |
@@ -396,8 +401,7 @@ documented operations.
   requires `super-admin`; academic calendar routes require `super-admin` or
   `university-admin`.
 - Policies additionally gate User, AcademicYear, and Semester operations.
-- The remaining inactive-user issue (R-01) is not represented as API behavior
-  because runtime currently permits inactive users to authenticate.
+- Inactive accounts are refused at sign-in (R-01 resolved).
 
 ## Validation Results
 
@@ -416,10 +420,30 @@ documented operations.
 - Full API backend test suite was not run as part of this audit; no runtime code
   or business logic was changed.
 
+## Re-audit 2026-10-02
+
+Re-ran Swagger generation and a scripted method/path comparison of
+`route:list --path=api --json` against the generated `api-docs.json`.
+
+| Check | Result |
+|---|---:|
+| Application route definitions | 128 |
+| Application operations (HEAD excluded, `PUT|PATCH` expanded) | 143 |
+| OpenAPI operations / paths / schemas | 143 / 79 / 115 |
+| Undocumented operations before the fix | 6 |
+| Undocumented / extra operations after the fix | 0 / 0 |
+
+- **A-09 — PATCH aliases undocumented.** `PATCH` on `/api/assignments/{assignment}`,
+  `/api/exams/{exam}`, `/api/offerings/{offering}`, `/api/rooms/{room}`,
+  `/api/schedule-entries/{entry}` and `/api/sections/{section}` was routed but
+  only the PUT operation was annotated. Added `OA\Patch` operations mirroring
+  each PUT (same request schema and full-update validation — see R-03).
+- **R-01** is resolved (inactive accounts are refused at sign-in).
+- The *Validation Results* section below is the original 2026-09-28 snapshot.
+
 ## Recommended Next Steps
 
-1. Confirm the policy for inactive accounts and add shared web/API auth tests if
-   they must be blocked.
+1. ~~Confirm the policy for inactive accounts~~ — done (R-01 resolved).
 2. Decide whether API login failures should follow the authentication skill's
    401 contract or the current 422 validation contract.
 3. Decide whether PATCH should remain full-update validation or become genuinely

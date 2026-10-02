@@ -98,6 +98,23 @@ class RoomController extends Controller
             new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
     )]
+    #[OA\Patch(
+        path: '/rooms/{room}',
+        summary: 'Update a room (PATCH)',
+        description: 'Set `is_active` false to retire a room; inactive rooms cannot receive new classes.',
+        operationId: 'patchRoom',
+        tags: ['Timetable'],
+        security: [['sanctum' => []]],
+        parameters: [new OA\PathParameter(name: 'room', required: true, schema: new OA\Schema(type: 'integer', format: 'int64'))],
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/RoomRequest')),
+        responses: [
+            new OA\Response(response: 200, description: 'The updated room.', content: new OA\JsonContent(ref: '#/components/schemas/RoomResourceResponse')),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 404, description: 'Not found.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
+        ]
+    )]
     public function update(RoomRequest $request, Room $room): RoomResource
     {
         $this->authorize('update', $room);

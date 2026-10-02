@@ -112,6 +112,22 @@ class AssignmentController extends Controller
             new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
     )]
+    #[OA\Patch(
+        path: '/assignments/{assignment}',
+        summary: 'Update an assignment (PATCH)',
+        description: 'A changed due date must be in the future; max score cannot drop below an awarded score.',
+        operationId: 'patchAssignment',
+        tags: ['Assignments'],
+        security: [['sanctum' => []]],
+        parameters: [new OA\PathParameter(name: 'assignment', required: true, schema: new OA\Schema(type: 'integer', format: 'int64'))],
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/AssignmentRequest')),
+        responses: [
+            new OA\Response(response: 200, description: 'Updated.', content: new OA\JsonContent(ref: '#/components/schemas/AssignmentResourceResponse')),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a lecturer of the section or a manager.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
+        ]
+    )]
     public function update(AssignmentRequest $request, Assignment $assignment): AssignmentResource
     {
         $this->authorize('update', $assignment);

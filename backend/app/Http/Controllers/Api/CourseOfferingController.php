@@ -127,6 +127,23 @@ class CourseOfferingController extends Controller
             new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
     )]
+    #[OA\Patch(
+        path: '/offerings/{offering}',
+        summary: 'Update an offering (status, max enrollments, notes) (PATCH)',
+        description: 'Course and semester are the offering identity and cannot change.',
+        operationId: 'patchOffering',
+        tags: ['Academics'],
+        security: [['sanctum' => []]],
+        parameters: [new OA\PathParameter(name: 'offering', required: true, schema: new OA\Schema(type: 'integer', format: 'int64'))],
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/UpdateCourseOfferingRequest')),
+        responses: [
+            new OA\Response(response: 200, description: 'The updated offering.', content: new OA\JsonContent(ref: '#/components/schemas/CourseOfferingResourceResponse')),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 404, description: 'Not found.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
+        ]
+    )]
     public function update(UpdateCourseOfferingRequest $request, CourseOffering $offering): CourseOfferingResource
     {
         $this->authorize('update', $offering);

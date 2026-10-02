@@ -61,6 +61,23 @@ class SectionController extends Controller
             new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
     )]
+    #[OA\Patch(
+        path: '/sections/{section}',
+        summary: 'Update a section (PATCH)',
+        description: 'Capacity cannot drop below the open (pending/confirmed) enrollments.',
+        operationId: 'patchSection',
+        tags: ['Academics'],
+        security: [['sanctum' => []]],
+        parameters: [new OA\PathParameter(name: 'section', required: true, schema: new OA\Schema(type: 'integer', format: 'int64'))],
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/UpdateSectionRequest')),
+        responses: [
+            new OA\Response(response: 200, description: 'The updated section.', content: new OA\JsonContent(ref: '#/components/schemas/SectionResourceResponse')),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 404, description: 'Not found.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
+        ]
+    )]
     public function update(UpdateSectionRequest $request, Section $section): SectionResource
     {
         $this->authorize('update', $section->offering);

@@ -59,6 +59,7 @@ Keep in `frontend/src/components` and reuse everywhere:
 | `BaseDropdown` / `BaseTooltip` / `BaseBadge` | Small interaction primitives |
 | `EmptyState` / `LoadingSpinner` / `ErrorAlert` | Status visuals |
 | `StatusBadge` | Status → color mapping (e.g. Paid/Pending) |
+| `IconButton` | Icon-only row/card action (Edit = `Pencil`, Delete = `Trash2` danger) with required label → aria-label + tooltip |
 | `Pagination` | Page navigation |
 
 - Add components when a pattern repeats; do not create a component for a single

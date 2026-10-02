@@ -1,7 +1,8 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
 import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { Plus, Search } from '@lucide/vue'
+import { Pencil, Plus, Search, Trash2 } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
@@ -90,9 +91,9 @@ const columns = [
       <template #cell-room_type="{ row }"><span class="capitalize">{{ row.room_type }}</span></template>
       <template #cell-is_active="{ row }"><StatusBadge :status="row.is_active ? 'active' : 'inactive'" /></template>
       <template #cell-actions="{ row }">
-        <div v-if="canManage" class="flex justify-end gap-4">
-          <button type="button" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary" @click="openEdit(row)">Edit</button>
-          <button type="button" class="text-small font-semibold text-error hover:underline dark:text-red-300" @click="destroy(row)">Delete</button>
+        <div v-if="canManage" class="flex items-center justify-end gap-1">
+          <IconButton :icon="Pencil" :label="`Edit room ${row.code}`" @click="openEdit(row)" />
+          <IconButton :icon="Trash2" variant="danger" :label="`Delete room ${row.code}`" @click="destroy(row)" />
         </div>
       </template>
     </BaseTable>

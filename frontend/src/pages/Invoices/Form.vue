@@ -1,4 +1,6 @@
 <script setup>
+import { Trash2 } from '@lucide/vue'
+import IconButton from '../../components/IconButton.vue'
 import { Head, useForm } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -84,7 +86,7 @@ const itemError = (i, field) => form.errors[`items.${i}.${field}`]
             <BaseInput v-model="item.quantity" :name="`item-${i}-quantity`" label="Qty" type="number" required :error="itemError(i, 'quantity')" />
             <BaseInput v-model="item.unit_price" :name="`item-${i}-price`" label="Unit price" type="number" required :error="itemError(i, 'unit_price')" />
             <BaseSelect v-model="item.fee_category" :options="categoryOptions" label="Category" placeholder="None" :error="itemError(i, 'fee_category')" />
-            <BaseButton class="sm:mt-6" size="sm" variant="ghost" :disabled="form.items.length <= 1" :aria-label="`Remove item ${i + 1}`" @click="form.items.splice(i, 1)">Remove</BaseButton>
+            <IconButton class="sm:mt-7" :icon="Trash2" variant="danger" :disabled="form.items.length <= 1" :label="`Remove item ${i + 1}`" @click="form.items.splice(i, 1)" />
           </div>
         </div>
         <ErrorAlert v-if="form.errors.items" class="mt-4" title="Items" :message="form.errors.items" />

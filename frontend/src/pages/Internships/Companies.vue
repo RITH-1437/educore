@@ -1,4 +1,6 @@
 <script setup>
+import { Pencil } from '@lucide/vue'
+import IconButton from '../../components/IconButton.vue'
 import { Head, useForm } from '@inertiajs/vue3'
 import { ref } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -61,7 +63,7 @@ const columns = [
       </template>
       <template #cell-count="{ row }"><span class="tabular-nums">{{ row.internships_count }}</span></template>
       <template #cell-status="{ row }"><StatusBadge :status="row.is_active ? 'active' : 'inactive'" /></template>
-      <template #cell-actions="{ row }"><BaseButton v-if="canManage" size="sm" variant="secondary" @click="open(row)">Edit</BaseButton></template>
+      <template #cell-actions="{ row }"><div class="flex justify-end"><IconButton v-if="canManage" :icon="Pencil" :label="`Edit ${row.name}`" @click="open(row)" /></div></template>
     </BaseTable>
 
     <BaseModal v-model="showForm" :title="editing ? 'Edit company' : 'Add company'" size="lg">

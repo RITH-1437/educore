@@ -1,4 +1,6 @@
 <script setup>
+import { Trash2 } from '@lucide/vue'
+import IconButton from '../../components/IconButton.vue'
 import { Head, useForm } from '@inertiajs/vue3'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
@@ -62,7 +64,7 @@ const fieldError = (i, field) => form.errors[`bands.${i}.${field}`]
             <input v-model="band.is_pass" type="checkbox" class="size-4 rounded border-border-default text-primary focus-visible:outline-2 focus-visible:outline-primary" />
             Pass
           </label>
-          <BaseButton class="sm:mt-6" size="sm" variant="ghost" :disabled="form.bands.length <= 2" :aria-label="`Remove grade ${band.grade}`" @click="remove(i)">Remove</BaseButton>
+          <IconButton class="sm:mt-7" :icon="Trash2" variant="danger" :disabled="form.bands.length <= 2" :label="`Remove grade ${band.grade || i + 1}`" @click="remove(i)" />
         </div>
 
         <ErrorAlert v-if="form.errors.bands" title="Could not save" :message="form.errors.bands" />

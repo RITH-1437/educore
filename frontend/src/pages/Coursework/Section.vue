@@ -1,4 +1,6 @@
 <script setup>
+import { Pencil, Trash2 } from '@lucide/vue'
+import IconButton from '../../components/IconButton.vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import BaseBadge from '../../components/BaseBadge.vue'
@@ -115,10 +117,10 @@ const badge = (status) => ({ submitted: 'active', late: 'pending', graded: 'comp
           </p>
         </div>
         <div v-if="canManage" class="flex flex-wrap gap-2">
-          <BaseButton size="sm" variant="secondary" @click="openEdit(assignment)">Edit</BaseButton>
+          <IconButton :icon="Pencil" :label="`Edit ${assignment.title}`" @click="openEdit(assignment)" />
           <BaseButton v-if="!assignment.is_published" size="sm" @click="publish(assignment, true)">Publish</BaseButton>
           <BaseButton v-else-if="!rows(assignment).length" size="sm" variant="ghost" @click="publish(assignment, false)">Unpublish</BaseButton>
-          <BaseButton v-if="!rows(assignment).length" size="sm" variant="ghost" @click="remove(assignment)">Delete</BaseButton>
+          <IconButton v-if="!rows(assignment).length" :icon="Trash2" variant="danger" :label="`Delete ${assignment.title}`" @click="remove(assignment)" />
         </div>
       </div>
 

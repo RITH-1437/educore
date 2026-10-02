@@ -1,7 +1,8 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { Building2, Search } from '@lucide/vue'
+import { Building2, Pencil, Search, Trash2 } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import { useConfirm } from '../../composables/useConfirm'
@@ -230,12 +231,12 @@ const deleteDepartment = async (department) => {
           <StatusBadge :status="row.is_active ? 'active' : 'archived'" />
         </template>
         <template #cell-actions="{ row }">
-          <div v-if="canManage" class="flex justify-end gap-3">
-            <Link :href="`/faculties/${row.id}/edit`" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">Edit</Link>
+          <div v-if="canManage" class="flex items-center justify-end gap-3">
+            <IconButton :icon="Pencil" :href="`/faculties/${row.id}/edit`" :label="`Edit ${row.name}`" />
             <button type="button" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary" @click="openDepartmentModal(row.id)">Add dept</button>
             <button v-if="row.is_active" type="button" class="text-small font-semibold text-warning hover:underline" @click="archiveFaculty(row)">Archive</button>
             <button v-else type="button" class="text-small font-semibold text-success hover:underline" @click="reactivateFaculty(row)">Reactivate</button>
-            <button type="button" class="text-small font-semibold text-error hover:underline" @click="deleteFaculty(row)">Delete</button>
+            <IconButton :icon="Trash2" variant="danger" :label="`Delete ${row.name}`" @click="deleteFaculty(row)" />
           </div>
           <span v-else class="block text-right text-caption text-muted dark:text-dark-muted">Read only</span>
         </template>

@@ -1,7 +1,8 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { Plus, Search } from '@lucide/vue'
+import { Pencil, Plus, Search, Trash2 } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
@@ -172,11 +173,11 @@ const destroy = async (course) => {
       </template>
       <template #cell-status="{ row }"><StatusBadge :status="row.status" /></template>
       <template #cell-actions="{ row }">
-        <div v-if="canManage" class="flex flex-wrap justify-end gap-x-4 gap-y-1">
-          <Link :href="`/courses/${row.id}/edit`" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">Edit</Link>
+        <div v-if="canManage" class="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
+          <IconButton :icon="Pencil" :href="`/courses/${row.id}/edit`" :label="`Edit ${row.code}`" />
           <button v-if="row.status !== 'archived'" type="button" class="text-small font-semibold text-warning hover:underline" @click="archive(row)">Archive</button>
           <button v-else type="button" class="text-small font-semibold text-success hover:underline" @click="reactivate(row)">Reactivate</button>
-          <button type="button" class="text-small font-semibold text-error hover:underline dark:text-red-300" @click="destroy(row)">Delete</button>
+          <IconButton :icon="Trash2" variant="danger" :label="`Delete ${row.code}`" @click="destroy(row)" />
         </div>
         <span v-else class="block text-right text-caption text-muted dark:text-dark-muted">Read only</span>
       </template>

@@ -1,4 +1,6 @@
 <script setup>
+import { Pencil, Trash2 } from '@lucide/vue'
+import IconButton from '../../components/IconButton.vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import BaseBadge from '../../components/BaseBadge.vue'
@@ -148,10 +150,10 @@ const fieldError = (i, field) => results.errors[`results.${i}.${field}`]
             </p>
 
             <div v-if="canManage && !section.locked" class="mt-4 flex flex-wrap gap-2">
-              <BaseButton size="sm" variant="secondary" @click="openEdit(exam)">Edit</BaseButton>
+              <IconButton :icon="Pencil" :label="`Edit ${exam.title}`" @click="openEdit(exam)" />
               <BaseButton v-if="!exam.is_published" size="sm" variant="ghost" @click="release(exam, true)">Release results</BaseButton>
               <BaseButton v-else size="sm" variant="ghost" @click="release(exam, false)">Hide results</BaseButton>
-              <BaseButton v-if="!exam.results_count" size="sm" variant="ghost" @click="remove(exam)">Delete</BaseButton>
+              <IconButton v-if="!exam.results_count" :icon="Trash2" variant="danger" :label="`Delete ${exam.title}`" @click="remove(exam)" />
             </div>
           </BaseCard>
         </li>

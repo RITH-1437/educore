@@ -1,4 +1,6 @@
 <script setup>
+import { Pencil, Trash2 } from '@lucide/vue'
+import IconButton from '../../components/IconButton.vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
 import BaseBadge from '../../components/BaseBadge.vue'
@@ -112,8 +114,8 @@ const remove = async (item) => {
             <div class="flex flex-wrap gap-2">
               <template v-if="item.publish_state === 'draft'">
                 <BaseButton size="sm" @click="publish(item)">Publish</BaseButton>
-                <BaseButton size="sm" variant="secondary" @click="openEdit(item)">Edit</BaseButton>
-                <BaseButton size="sm" variant="ghost" @click="remove(item)">Delete</BaseButton>
+                <IconButton :icon="Pencil" label="Edit draft" @click="openEdit(item)" />
+                <IconButton :icon="Trash2" variant="danger" label="Delete draft" @click="remove(item)" />
               </template>
               <BaseButton v-else-if="item.publish_state === 'published'" size="sm" variant="ghost" @click="archive(item)">Archive</BaseButton>
             </div>

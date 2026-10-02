@@ -123,7 +123,7 @@ Tables are the backbone of this administration platform.
 | Empty state | `EmptyState` component with message + CTA |
 | Loading | skeleton rows or spinner overlay |
 
-- **Actions column:** rightmost, icon buttons, `gap-2`.
+- **Actions column:** rightmost, icon buttons, `gap-2`. Use `components/IconButton.vue` for Edit (`Pencil`) and Delete / Remove (`Trash2`, `variant="danger"`): 32px target, muted at rest, primary (or error) on hover, a required `label` that is both the accessible name and the tooltip. Other row actions (Archive, Activate…) stay as text links. Page-header actions keep text labels.
 - **Sorting:** header toggles `sort_by`/`sort_dir` (see `skills/api/SKILL.md`).
 - **Filtering/search:** toolbar above the table; consistent across all tables.
 - **Pagination:** `Pagination` footer; shared `useDataTable` composable.

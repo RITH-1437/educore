@@ -1,7 +1,8 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
-import { Plus, Search } from '@lucide/vue'
+import { Pencil, Plus, Search, Trash2 } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseBadge from '../../components/BaseBadge.vue'
 import BaseCard from '../../components/BaseCard.vue'
@@ -89,12 +90,12 @@ const deleteYear = async (academicYear) => {
         <span v-else class="text-muted dark:text-dark-muted" aria-label="Not current">—</span>
       </template>
       <template #cell-actions="{ row }">
-        <div class="flex flex-wrap justify-end gap-x-4 gap-y-1">
-          <Link :href="`/academic-years/${row.id}/edit`" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">Edit</Link>
+        <div class="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
+          <IconButton :icon="Pencil" :href="`/academic-years/${row.id}/edit`" :label="`Edit ${row.code}`" />
           <button v-if="row.status === 'planned'" type="button" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary" @click="changeStatus(row, 'active')">Activate</button>
           <button v-else-if="row.status === 'active'" type="button" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary" @click="changeStatus(row, 'completed')">Complete</button>
           <button v-if="row.status === 'active' && !row.is_current" type="button" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary" @click="makeCurrent(row)">Make current</button>
-          <button type="button" class="text-small font-semibold text-error hover:underline dark:text-red-300" @click="deleteYear(row)">Delete</button>
+          <IconButton :icon="Trash2" variant="danger" :label="`Delete ${row.code}`" @click="deleteYear(row)" />
         </div>
       </template>
     </BaseTable>

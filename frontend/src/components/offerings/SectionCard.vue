@@ -1,7 +1,8 @@
 <script setup>
+import IconButton from '../IconButton.vue'
 import { computed, ref } from 'vue'
 import { router, useForm } from '@inertiajs/vue3'
-import { X } from '@lucide/vue'
+import { Trash2, X } from '@lucide/vue'
 import BaseBadge from '../BaseBadge.vue'
 import BaseButton from '../BaseButton.vue'
 import BaseCard from '../BaseCard.vue'
@@ -100,7 +101,7 @@ const destroy = async () => {
 
     <div v-if="canManage" class="mt-4 flex gap-3">
       <BaseButton v-if="!editing" size="sm" variant="secondary" @click="editing = true">Edit section</BaseButton>
-      <BaseButton size="sm" variant="ghost" class="text-error dark:text-red-300" @click="destroy">Delete</BaseButton>
+      <IconButton :icon="Trash2" variant="danger" :label="`Delete section ${section.code}`" @click="destroy" />
     </div>
   </BaseCard>
 </template>

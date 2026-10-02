@@ -545,8 +545,8 @@ users, main business activities, and expected outputs.
   credits this semester and earned, current-semester attendance (overall and
   per course), today's classes, assignments due, upcoming exams and recent
   approved grades, all read from the owning modules, plus
-  `GET /api/students/{student}/dashboard`. Announcements are [Planned] with
-  9.19. See [21_Student-Academic-Dashboard-Report.md](21_Student-Academic-Dashboard-Report.md).
+  `GET /api/students/{student}/dashboard`, and (since 9.19) the latest
+  announcements. See [21_Student-Academic-Dashboard-Report.md](21_Student-Academic-Dashboard-Report.md).
 
 ### 9.16 Document Management [Implemented]
 
@@ -585,12 +585,19 @@ users, main business activities, and expected outputs.
   Invoice PDFs and automatic tuition billing are [Future].
   See [23_Invoices-and-Payments-Report.md](23_Invoices-and-Payments-Report.md).
 
-### 9.19 Announcements [Planned]
+### 9.19 Announcements [Implemented]
 
 - **Purpose:** publish and target announcements.
 - **Primary users:** Administrators, authorized Lecturers, Student (receive).
 - **Main business activities:** create announcements targeted to all/faculty/department/program/class/course; publish.
 - **Expected outputs:** a structured announcement feed per audience.
+- **Delivered:** drafts → published → archived announcements to everyone, a
+  role group, or one faculty / department / program / section / course;
+  lecturers write to the sections and courses they teach; every user has a
+  live feed resolved from their memberships, and the student dashboard shows
+  the latest three. Email / Telegram delivery is [Planned] with 9.20 / 9.21;
+  attachments and read receipts are [Future].
+  See [24_Announcements-Report.md](24_Announcements-Report.md).
 
 ### 9.20 Email Notifications [Planned]
 

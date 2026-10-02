@@ -2,7 +2,7 @@
 
 - **Date:** 2026-10-02
 - **Module:** 9.15 Student Academic Dashboard (business-overview §9.15)
-- **Status:** `[Implemented]` (announcements card `[Planned]` with 9.19)
+- **Status:** `[Implemented]` (announcements card added with 9.19)
 - **Depends on:** 9.9 Enrollment, 9.10 Timetable, 9.11 Attendance, 9.12 Assignments, 9.13 Examinations, 9.14 Grades & GPA
 
 ## 1. Scope
@@ -13,8 +13,9 @@ credits this semester and earned overall, current-semester attendance (overall
 and per course), today's classes, assignments due, upcoming exams and recent
 approved grades. Each card links to the module page that owns the data.
 
-Not built: announcements (9.19 is not implemented, so no card is shown rather
-than a placeholder), lecturer and admin role dashboards (unchanged), charts.
+Not built: lecturer and admin role dashboards (unchanged), charts. The
+announcements card was added with 9.19 (latest three from
+`AnnouncementService::feedFor`; see `24_Announcements-Report.md`).
 
 ## 2. Data sources
 

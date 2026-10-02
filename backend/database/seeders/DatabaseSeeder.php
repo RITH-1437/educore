@@ -44,6 +44,8 @@ class DatabaseSeeder extends Seeder
             DocumentTypeSeeder::class,
             // Demo invoices and payments through InvoiceService (module 9.18).
             InvoiceSeeder::class,
+            // Demo announcements through AnnouncementService (module 9.19).
+            AnnouncementSeeder::class,
             // Operational diagnostics last: this table is filled by the recorder
             // at runtime, so seeding it after the structure keeps the rows
             // internally consistent.

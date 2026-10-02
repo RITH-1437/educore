@@ -150,6 +150,8 @@ limit used by enrollment (`backend/config/academics.php`).
 | `/verify/{code}`            | Public document verification (no sign-in, rate limited) | — |
 | `/invoices`                 | Invoices: create, edit, record / reverse payments, cancel | Super admin, University admin |
 | `/my-invoices`              | My invoices, payments and balance | Student |
+| `/announcements`            | Announcement feed (own audience) | Every signed-in role |
+| `/announcements/manage`     | Write, publish, archive announcements | Super admin, University admin (any audience), Lecturer (own sections / courses) |
 | `/rooms`                    | Rooms                      | Super admin, University admin (Faculty admin read-only) |
 | `/timetable`                | My weekly timetable        | Student, Lecturer |
 | `/enrollments`              | Enrollment management      | Super admin, University admin (Faculty admin read-only) |

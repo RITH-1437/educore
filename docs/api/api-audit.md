@@ -13,11 +13,11 @@
 
 | Measure | Result |
 |---|---:|
-| Application API route definitions (`routes/api.php`) | 158 |
-| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 174 |
-| Swagger operations after documentation corrections | 174 |
-| Swagger document paths | 103 |
-| Swagger document schemas | 138 |
+| Application API route definitions (`routes/api.php`) | 166 |
+| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 183 |
+| Swagger operations after documentation corrections | 183 |
+| Swagger document paths | 108 |
+| Swagger document schemas | 142 |
 | Undocumented application operations | 0 |
 | Extra Swagger operations not in the application API routes | 0 |
 | Swagger generation errors after corrections | 0 |
@@ -256,7 +256,7 @@ were **not changed** during this documentation-only audit.
 Application endpoint counts below exclude the four L5-Swagger/OAuth package
 routes (`api/documentation`, `api/documentation/asset/{asset}`,
 `api/documentation/ui`, `api/oauth2-callback`). Each combined update route
-contributes one PUT and one PATCH operation, so 158 route definitions yield 174
+contributes one PUT and one PATCH operation, so 166 route definitions yield 183
 documented operations.
 
 | Method | Path | Authentication / authorization | Documentation |
@@ -413,6 +413,14 @@ documented operations.
 | POST | `/api/invoices/{invoice}/payments` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/payments/{payment}/reverse` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/students/{student}/invoices` | Sanctum + managers, or the student themself | Documented |
+| GET | `/api/announcements/feed` | Sanctum, any role (own audience only) | Documented |
+| GET | `/api/announcements` | Sanctum + managers (all) or an active lecturer (own) | Documented |
+| POST | `/api/announcements` | Sanctum + managers or an active lecturer (own sections / courses) | Documented |
+| GET | `/api/announcements/{announcement}` | Sanctum + author, managers, or a member of the audience | Documented |
+| PUT, PATCH | `/api/announcements/{announcement}` | Sanctum + author or managers (drafts only) | Both documented |
+| DELETE | `/api/announcements/{announcement}` | Sanctum + author or managers (drafts only) | Documented |
+| POST | `/api/announcements/{announcement}/publish` | Sanctum + author or managers | Documented |
+| POST | `/api/announcements/{announcement}/archive` | Sanctum + author or managers | Documented |
 | GET | `/api/grading-scale` | Sanctum, any role | Documented |
 | PUT | `/api/grading-scale` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/courses/{course}/grading-config` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
@@ -470,6 +478,8 @@ Re-ran Swagger generation and a scripted method/path comparison of
 | Undocumented / extra operations after 9.16 / 9.17 | 0 / 0 |
 | After 9.18 Invoices & Payments (9 operations added): route definitions / operations / OpenAPI paths / schemas | 158 / 174 / 103 / 138 |
 | Undocumented / extra operations after 9.18 | 0 / 0 |
+| After 9.19 Announcements (9 operations added): route definitions / operations / OpenAPI paths / schemas | 166 / 183 / 108 / 142 |
+| Undocumented / extra operations after 9.19 | 0 / 0 |
 
 - **A-09 — PATCH aliases undocumented.** `PATCH` on `/api/assignments/{assignment}`,
   `/api/exams/{exam}`, `/api/offerings/{offering}`, `/api/rooms/{room}`,

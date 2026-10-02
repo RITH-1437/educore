@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\AnnouncementsController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CourseController;
@@ -223,6 +224,18 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function
     Route::post('/payments/{payment}/reverse', [InvoicesController::class, 'reverse'])->name('payments.reverse');
 });
 Route::middleware(['auth', 'role:super-admin,university-admin,student'])->get('/invoices/{invoice}', [InvoicesController::class, 'show'])->name('invoices.show');
+
+// Announcements: every signed-in role reads its feed; managers and lecturers
+// compose (`AnnouncementPolicy` + audience rules in `AnnouncementService`).
+Route::middleware('auth')->get('/announcements', [AnnouncementsController::class, 'feed'])->name('announcements.feed');
+Route::middleware(['auth', 'role:super-admin,university-admin,lecturer'])->group(function () {
+    Route::get('/announcements/manage', [AnnouncementsController::class, 'manage'])->name('announcements.manage');
+    Route::post('/announcements', [AnnouncementsController::class, 'store'])->name('announcements.store');
+    Route::put('/announcements/{announcement}', [AnnouncementsController::class, 'update'])->name('announcements.update');
+    Route::delete('/announcements/{announcement}', [AnnouncementsController::class, 'destroy'])->name('announcements.destroy');
+    Route::post('/announcements/{announcement}/publish', [AnnouncementsController::class, 'publish'])->name('announcements.publish');
+    Route::post('/announcements/{announcement}/archive', [AnnouncementsController::class, 'archive'])->name('announcements.archive');
+});
 
 // Public verification page (module 9.17) — no sign-in.
 Route::get('/verify/{token}', [DocumentsController::class, 'verify'])->middleware('throttle:verification')->name('documents.verify');

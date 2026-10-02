@@ -99,6 +99,18 @@ const linkClass = 'text-small font-medium text-primary hover:underline underline
       </BaseCard>
     </div>
 
+    <!-- Latest announcements (module 9.19) -->
+    <BaseCard title="Announcements">
+      <EmptyState v-if="!d.announcements.length" title="No announcements" description="News for your program, classes and courses appears here." />
+      <ul v-else class="divide-y divide-border-default dark:divide-dark-border">
+        <li v-for="item in d.announcements" :key="item.id" class="py-3">
+          <p class="text-small font-medium text-ink dark:text-dark-ink">{{ item.title }}</p>
+          <p class="text-caption text-muted dark:text-dark-muted">{{ item.audience }} · {{ dueLabel(item.published_at) }}</p>
+        </li>
+      </ul>
+      <Link href="/announcements" :class="['mt-3 inline-block', linkClass]">All announcements</Link>
+    </BaseCard>
+
     <!-- Attendance by course -->
     <BaseCard v-if="d.attendance.courses.length" title="Attendance by course">
       <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">

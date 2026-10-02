@@ -14,7 +14,8 @@ use Illuminate\Support\Collection;
  *
  * Every number comes from the owning module's service — GPA from
  * `GpaService`, attendance from `AttendanceService`, classes from
- * `TimetableService`, exams from `ExamService`, grades from `GradingService`
+ * `TimetableService`, exams from `ExamService`, grades from `GradingService`,
+ * announcements from `AnnouncementService`
  * (`skills/analytics-reporting` §12: no duplicated calculations). Only the
  * overall attendance rate is aggregated here, from the per-course counts.
  *
@@ -32,6 +33,7 @@ class StudentDashboardService
         private readonly TimetableService $timetable,
         private readonly ExamService $exams,
         private readonly GradingService $grading,
+        private readonly AnnouncementService $announcements,
     ) {}
 
     /**
@@ -79,6 +81,11 @@ class StudentDashboardService
                 ->filter(fn ($exam) => $exam['scheduled_date'] !== null && $exam['scheduled_date'] >= today()->toDateString())
                 ->take(self::LIMIT)->values(),
             'grades' => $this->grading->forStudent($student->id)->reverse()->take(self::LIMIT)->values(),
+            'announcements' => $student->user
+                ? collect($this->announcements->preloadTargets($this->announcements->feedFor($student->user)->limit(3)->get()))
+                    ->map(fn ($a) => ['id' => $a->id, 'title' => $a->title, 'announcement_type' => $a->announcement_type, 'audience' => $this->announcements->audienceLabel($a), 'published_at' => $a->published_at?->toIso8601String()])
+                    ->values()
+                : collect(),
         ];
     }
 

@@ -30,11 +30,11 @@
 | 9.12 | Assignments | `[Implemented]` |
 | 9.13 | Examinations | `[Implemented]` |
 | 9.14 | Grades & GPA | `[Implemented]` (transcript document delivered by 9.16) |
-| 9.15 | Student Academic Dashboard | `[Implemented]` (announcements card `[Planned]` with 9.19) |
+| 9.15 | Student Academic Dashboard | `[Implemented]` |
 | 9.16 | Document Management | `[Implemented]` (internship letter `[Planned]` with 9.22) |
 | 9.17 | Digital Document Verification | `[Implemented]` (QR image `[Planned]`) |
 | 9.18 | Invoices & Payment Records | `[Implemented]` |
-| 9.19 | Announcements | `[Planned]` |
+| 9.19 | Announcements | `[Implemented]` (email / Telegram delivery with 9.20 / 9.21) |
 | 9.20 | Email Notifications | `[Planned]` |
 | 9.21 | Telegram Notifications | `[Planned]` |
 | 9.22 | Internship Management | `[Planned]` |
@@ -47,8 +47,8 @@
 ```mermaid
 pie showData
   title Module delivery status
-  "Implemented (incl. schema)" : 43
-  "Planned / In progress" : 7
+  "Implemented (incl. schema)" : 44
+  "Planned / In progress" : 6
 ```
 
 ---
@@ -260,8 +260,13 @@ own), pages `Invoices/Index|Form|Show|Mine`, 9 API operations,
 `InvoiceSeeder`, 8 feature tests. Report:
 `docs/23_Invoices-and-Payments-Report.md`.
 
-**9.19 Announcements** — table `announcements`.
-Steps: CRUD visible by audience scope; pages `Announcements/`.
+**9.19 Announcements** `[Implemented]` — table `announcements` (no schema
+change). Delivered: `AnnouncementService` (nine audience types resolved live
+from memberships, draft → published → archived, lecturers limited to the
+sections / courses they teach, batched audience labels), `AnnouncementPolicy`,
+pages `Announcements/Feed|Manage` plus the student dashboard card, 9 API
+operations, `AnnouncementSeeder`, 6 feature tests. Report:
+`docs/24_Announcements-Report.md`.
 
 **9.20 / 9.21 Email & Telegram Notifications** — tables `notifications`,
 `notification_preferences`.
@@ -369,7 +374,7 @@ A module is not done until its report exists and its tests pass — never label
   step is not built. `[Done]` The transcript document ships with 9.16.
 - `[Done]` 9.15 Student Academic Dashboard. Report:
   `docs/21_Student-Academic-Dashboard-Report.md`. `[Open]` Its announcements
-  card waits for 9.19; lecturer / faculty-admin dashboards are still previews.
+  card shipped with 9.19; lecturer / faculty-admin dashboards are still previews.
 - `[Done]` 9.16 / 9.17 Document Management & Verification. Report:
   `docs/22_Documents-and-Verification-Report.md`. `[Open]` QR image on the PDF,
   document fees (`requires_fee`) not billed, document-type management screen,
@@ -385,4 +390,7 @@ A module is not done until its report exists and its tests pass — never label
   collection's `links` object instead of its `meta.links` array to
   `Pagination`. All now read `meta.links`; `tests/Feature/PaginationContractTest.php`
   pins the shape for every paginated index page.
-- `[Next]` 9.19 Announcements.
+- `[Done]` 9.19 Announcements. Report: `docs/24_Announcements-Report.md`.
+  `[Open]` Delivery by email / Telegram (9.20 / 9.21), attachments, read
+  receipts, scheduled publishing, Faculty Admin authoring (needs unit scoping).
+- `[Next]` 9.20 / 9.21 Email & Telegram Notifications.

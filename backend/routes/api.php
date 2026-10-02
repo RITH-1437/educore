@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AcademicYearController;
+use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\AssignmentController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuthController;
@@ -156,6 +157,17 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::post('/invoices/{invoice}/payments', [InvoiceController::class, 'pay'])->name('api.invoices.payments.store');
     Route::post('/payments/{payment}/reverse', [InvoiceController::class, 'reverse'])->name('api.payments.reverse');
     Route::get('/students/{student}/invoices', [InvoiceController::class, 'student'])->name('api.students.invoices');
+
+    // Announcements: every role reads its feed; `AnnouncementPolicy` limits
+    // writing to managers and active lecturers (own sections / courses).
+    Route::get('/announcements/feed', [AnnouncementController::class, 'feed'])->name('api.announcements.feed');
+    Route::get('/announcements', [AnnouncementController::class, 'index'])->name('api.announcements.index');
+    Route::post('/announcements', [AnnouncementController::class, 'store'])->name('api.announcements.store');
+    Route::get('/announcements/{announcement}', [AnnouncementController::class, 'show'])->name('api.announcements.show');
+    Route::match(['put', 'patch'], '/announcements/{announcement}', [AnnouncementController::class, 'update'])->name('api.announcements.update');
+    Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('api.announcements.destroy');
+    Route::post('/announcements/{announcement}/publish', [AnnouncementController::class, 'publish'])->name('api.announcements.publish');
+    Route::post('/announcements/{announcement}/archive', [AnnouncementController::class, 'archive'])->name('api.announcements.archive');
 });
 
 // A student may read their own profile; `StudentPolicy::view` limits them to it.

@@ -14,6 +14,7 @@ import {
   LayoutDashboard,
   Library,
   ListChecks,
+  Megaphone,
   MapPin,
   Receipt,
   Scale,
@@ -48,7 +49,7 @@ const navForRole = (role) => {
         ],
       },
       { label: 'Academics', items: [{ label: 'Courses', href: '/courses', icon: Library }, { label: 'Offerings & sections', href: '/offerings', icon: TableProperties }, { label: 'Enrollments', href: '/enrollments', icon: ListChecks }, { label: 'Rooms', href: '/rooms', icon: MapPin }, { label: 'Grades', href: '/grades', icon: Award }, { label: 'Grading scale', href: '/grading-scale', icon: Scale }] },
-      { label: 'Operations', items: [{ label: 'Documents', href: '/documents', icon: FileText }, { label: 'Invoices', href: '/invoices', icon: Receipt }] },
+      { label: 'Operations', items: [{ label: 'Announcements', href: '/announcements', icon: Megaphone }, { label: 'Documents', href: '/documents', icon: FileText }, { label: 'Invoices', href: '/invoices', icon: Receipt }] },
       { label: 'System', items: [{ label: 'Error logs', href: '/error-logs', icon: FileWarning }] },
     ]
   }
@@ -72,7 +73,7 @@ const navForRole = (role) => {
       { label: 'People', items: [{ label: 'Students', href: '/students', icon: GraduationCap }, { label: 'Lecturers', href: '/lecturers', icon: UserRound }] },
       { label: 'Assessment', items: [{ label: 'Grades', href: '/grades', icon: Award }, { label: 'Grading scale', href: '/grading-scale', icon: Scale }] },
       // Finance is limited to university admins (Faculty Admin has no access).
-      { label: 'Operations', items: [{ label: 'Documents', href: '/documents', icon: FileText }, ...(role === 'university-admin' ? [{ label: 'Invoices', href: '/invoices', icon: Receipt }] : [])] },
+      { label: 'Operations', items: [{ label: 'Announcements', href: '/announcements', icon: Megaphone }, { label: 'Documents', href: '/documents', icon: FileText }, ...(role === 'university-admin' ? [{ label: 'Invoices', href: '/invoices', icon: Receipt }] : [])] },
     ]
   }
 
@@ -87,6 +88,7 @@ const navForRole = (role) => {
       { label: 'Grades & GPA', href: '/my-grades', icon: Award },
       { label: 'My documents', href: '/my-documents', icon: FileText },
       { label: 'My invoices', href: '/my-invoices', icon: Receipt },
+      { label: 'Announcements', href: '/announcements', icon: Megaphone },
     ] }]
   }
 
@@ -96,6 +98,7 @@ const navForRole = (role) => {
       { label: 'My timetable', href: '/timetable', icon: CalendarClock },
       { label: 'Attendance', href: '/attendance', icon: UserCheck },
       { label: 'Grading scale', href: '/grading-scale', icon: Scale },
+      { label: 'Announcements', href: '/announcements', icon: Megaphone },
     ] }]
   }
 
@@ -128,6 +131,7 @@ const SECTION_LABELS = {
   'my-documents': 'My documents',
   documents: 'Documents',
   invoices: 'Invoices',
+  announcements: 'Announcements',
   'my-invoices': 'My invoices',
   'error-logs': 'Error logs',
 }

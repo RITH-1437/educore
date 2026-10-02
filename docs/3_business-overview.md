@@ -624,12 +624,18 @@ users, main business activities, and expected outputs.
   Class reminders and automatic chat linking are [Future].
   See [25_Notifications-Report.md](25_Notifications-Report.md).
 
-### 9.22 Internship Management [Planned]
+### 9.22 Internship Management [Implemented]
 
 - **Purpose:** support the university internship workflow.
 - **Primary users:** Student, University Admin / Faculty/Department Admin.
 - **Main business activities:** manage company information, opportunities, applications, internship reports, evaluations, and status.
 - **Expected outputs:** a structured internship lifecycle.
+- **Delivered:** host companies, student applications (draft → submitted →
+  under review → approved / rejected → in progress → completed, or cancelled),
+  one open application per student, initial / progress / final reports with
+  private files, supervisor and faculty evaluations, status notifications and
+  a decision log. Published opportunity postings and an internship letter
+  document are [Future]. See [26_Internship-Management-Report.md](26_Internship-Management-Report.md).
 
 ### 9.23 Analytics & Reporting [Planned]
 

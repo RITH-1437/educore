@@ -46,6 +46,8 @@ class DatabaseSeeder extends Seeder
             InvoiceSeeder::class,
             // Demo announcements through AnnouncementService (module 9.19).
             AnnouncementSeeder::class,
+            // Host companies and a few internships through InternshipService (module 9.22).
+            InternshipSeeder::class,
             // Operational diagnostics last: this table is filled by the recorder
             // at runtime, so seeding it after the structure keeps the rows
             // internally consistent.

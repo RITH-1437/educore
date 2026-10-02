@@ -15,6 +15,7 @@ use App\Http\Controllers\ErrorLogController;
 use App\Http\Controllers\ExamsController;
 use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\GradesController;
+use App\Http\Controllers\InternshipsController;
 use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\LecturerController;
 use App\Http\Controllers\NotificationPreferencesController;
@@ -236,6 +237,30 @@ Route::middleware(['auth', 'role:super-admin,university-admin,lecturer'])->group
     Route::delete('/announcements/{announcement}', [AnnouncementsController::class, 'destroy'])->name('announcements.destroy');
     Route::post('/announcements/{announcement}/publish', [AnnouncementsController::class, 'publish'])->name('announcements.publish');
     Route::post('/announcements/{announcement}/archive', [AnnouncementsController::class, 'archive'])->name('announcements.archive');
+});
+
+// Internships (`InternshipPolicy`): students apply and report; managers review,
+// approve, evaluate and keep companies; Faculty Admin reads.
+Route::middleware(['auth', 'role:student'])->group(function () {
+    Route::get('/my-internships', [InternshipsController::class, 'mine'])->name('internships.mine');
+    Route::post('/my-internships', [InternshipsController::class, 'store'])->name('internships.store');
+});
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->group(function () {
+    Route::get('/internships', [InternshipsController::class, 'index'])->name('internships.index');
+    Route::get('/internship-companies', [InternshipsController::class, 'companies'])->name('internship-companies.index');
+});
+Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function () {
+    Route::post('/internship-companies', [InternshipsController::class, 'storeCompany'])->name('internship-companies.store');
+    Route::put('/internship-companies/{company}', [InternshipsController::class, 'updateCompany'])->name('internship-companies.update');
+    Route::post('/internships/{internship}/evaluations', [InternshipsController::class, 'evaluate'])->name('internships.evaluate');
+    Route::post('/internship-reports/{report}/review', [InternshipsController::class, 'reviewReport'])->name('internship-reports.review');
+});
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,student'])->group(function () {
+    Route::get('/internships/{internship}', [InternshipsController::class, 'show'])->name('internships.show');
+    Route::put('/internships/{internship}', [InternshipsController::class, 'update'])->name('internships.update');
+    Route::post('/internships/{internship}/reports', [InternshipsController::class, 'report'])->name('internships.reports.store');
+    Route::post('/internships/{internship}/{action}', [InternshipsController::class, 'transition'])->whereIn('action', ['submit', 'review', 'approve', 'reject', 'start', 'complete', 'cancel'])->name('internships.transition');
+    Route::get('/internship-reports/{report}/file', [InternshipsController::class, 'downloadReport'])->name('internship-reports.file');
 });
 
 // Notification settings (modules 9.20 / 9.21): every signed-in user, own only.

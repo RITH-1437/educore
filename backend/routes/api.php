@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\ErrorLogController;
 use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\FacultyController;
 use App\Http\Controllers\Api\GradeController;
+use App\Http\Controllers\Api\InternshipController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\LecturerController;
 use App\Http\Controllers\Api\NotificationPreferenceController;
@@ -169,6 +170,21 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('api.announcements.destroy');
     Route::post('/announcements/{announcement}/publish', [AnnouncementController::class, 'publish'])->name('api.announcements.publish');
     Route::post('/announcements/{announcement}/archive', [AnnouncementController::class, 'archive'])->name('api.announcements.archive');
+
+    // Internships: `InternshipPolicy` — a student runs their own application
+    // and reports; managers review, approve, evaluate and keep companies.
+    Route::get('/internship-companies', [InternshipController::class, 'companies'])->name('api.internship-companies.index');
+    Route::post('/internship-companies', [InternshipController::class, 'storeCompany'])->name('api.internship-companies.store');
+    Route::match(['put', 'patch'], '/internship-companies/{company}', [InternshipController::class, 'updateCompany'])->name('api.internship-companies.update');
+    Route::get('/internships', [InternshipController::class, 'index'])->name('api.internships.index');
+    Route::post('/internships', [InternshipController::class, 'store'])->name('api.internships.store');
+    Route::get('/internships/{internship}', [InternshipController::class, 'show'])->name('api.internships.show');
+    Route::match(['put', 'patch'], '/internships/{internship}', [InternshipController::class, 'update'])->name('api.internships.update');
+    Route::post('/internships/{internship}/reports', [InternshipController::class, 'report'])->name('api.internships.reports.store');
+    Route::post('/internships/{internship}/evaluations', [InternshipController::class, 'evaluate'])->name('api.internships.evaluations.store');
+    Route::post('/internships/{internship}/{action}', [InternshipController::class, 'transition'])->whereIn('action', ['submit', 'review', 'approve', 'reject', 'start', 'complete', 'cancel'])->name('api.internships.transition');
+    Route::post('/internship-reports/{report}/review', [InternshipController::class, 'reviewReport'])->name('api.internship-reports.review');
+    Route::get('/internship-reports/{report}/file', [InternshipController::class, 'downloadReport'])->name('api.internship-reports.file');
 });
 
 // A student may read their own profile; `StudentPolicy::view` limits them to it.

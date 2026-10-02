@@ -13,11 +13,11 @@
 
 | Measure | Result |
 |---|---:|
-| Application API route definitions (`routes/api.php`) | 169 |
-| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 186 |
-| Swagger operations after documentation corrections | 186 |
-| Swagger document paths | 110 |
-| Swagger document schemas | 144 |
+| Application API route definitions (`routes/api.php`) | 181 |
+| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 200 |
+| Swagger operations after documentation corrections | 200 |
+| Swagger document paths | 119 |
+| Swagger document schemas | 151 |
 | Undocumented application operations | 0 |
 | Extra Swagger operations not in the application API routes | 0 |
 | Swagger generation errors after corrections | 0 |
@@ -256,7 +256,7 @@ were **not changed** during this documentation-only audit.
 Application endpoint counts below exclude the four L5-Swagger/OAuth package
 routes (`api/documentation`, `api/documentation/asset/{asset}`,
 `api/documentation/ui`, `api/oauth2-callback`). Each combined update route
-contributes one PUT and one PATCH operation, so 169 route definitions yield 186
+contributes one PUT and one PATCH operation, so 181 route definitions yield 200
 documented operations.
 
 | Method | Path | Authentication / authorization | Documentation |
@@ -424,6 +424,18 @@ documented operations.
 | GET | `/api/notification-preferences` | Sanctum, any role (own only) | Documented |
 | PUT | `/api/notification-preferences` | Sanctum, any role (own only) | Documented |
 | POST | `/api/notification-preferences/test` | Sanctum, any role; `throttle:notification-test` (3/min) | Documented |
+| GET | `/api/internship-companies` | Sanctum + staff (all) or a student (active only) | Documented |
+| POST | `/api/internship-companies` | Sanctum + super-admin or university-admin | Documented |
+| PUT, PATCH | `/api/internship-companies/{company}` | Sanctum + super-admin or university-admin | Both documented |
+| GET | `/api/internships` | Sanctum + staff (all) or a student (own) | Documented |
+| POST | `/api/internships` | Sanctum + student with a profile (self only) | Documented |
+| GET | `/api/internships/{internship}` | Sanctum + staff, or the student | Documented |
+| PUT, PATCH | `/api/internships/{internship}` | Sanctum + the student (draft) or managers (until final) | Both documented |
+| POST | `/api/internships/{internship}/{action}` | Sanctum; `submit` / student `cancel`: the student; others: managers | Documented |
+| POST | `/api/internships/{internship}/reports` | Sanctum + the student (multipart) | Documented |
+| POST | `/api/internships/{internship}/evaluations` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/internship-reports/{report}/review` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/internship-reports/{report}/file` | Sanctum + staff, or the student | Documented |
 | GET | `/api/grading-scale` | Sanctum, any role | Documented |
 | PUT | `/api/grading-scale` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/courses/{course}/grading-config` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
@@ -485,6 +497,8 @@ Re-ran Swagger generation and a scripted method/path comparison of
 | Undocumented / extra operations after 9.19 | 0 / 0 |
 | After 9.20 / 9.21 Notifications (3 operations added): route definitions / operations / OpenAPI paths / schemas | 169 / 186 / 110 / 144 |
 | Undocumented / extra operations after 9.20 / 9.21 | 0 / 0 |
+| After 9.22 Internships (14 operations added): route definitions / operations / OpenAPI paths / schemas | 181 / 200 / 119 / 151 |
+| Undocumented / extra operations after 9.22 | 0 / 0 |
 
 - **A-09 — PATCH aliases undocumented.** `PATCH` on `/api/assignments/{assignment}`,
   `/api/exams/{exam}`, `/api/offerings/{offering}`, `/api/rooms/{room}`,

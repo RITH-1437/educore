@@ -71,7 +71,7 @@ module (Super Admin sees at most 3 as "Soon").
 | Academic structure | University `[Implemented]` · Faculties & departments `[Implemented]` · Programs `[Implemented]` · Academic years `[Implemented]` |
 | People | Users & roles `[Implemented]` · Students `[Implemented]` · Lecturers `[Implemented]` |
 | Academics | Courses `[Implemented]` · Offerings & sections `[Implemented]` · Rooms `[Implemented]` · My timetable (student/lecturer) `[Implemented]` · Attendance (lecturer) / My attendance (student) `[Implemented]` · My assignments (student; lecturers reach coursework from their section cards) `[Implemented]` · My exams (student; lecturers reach exams from their section cards) `[Implemented]` · Enrollments `[Implemented]` · Grades `[Implemented]` · Grading scale `[Implemented]` · Grades & GPA (student; lecturers reach grade sheets from their section cards) `[Implemented]` |
-| Operations | Announcements (every role; staff here, others in their workspace) `[Implemented]` · Documents `[Implemented]` · My documents (student) `[Implemented]` · Invoices (Super / University Admin only) `[Implemented]` · My invoices (student) `[Implemented]` |
+| Operations | Announcements (every role; staff here, others in their workspace) `[Implemented]` · Documents `[Implemented]` · My documents (student) `[Implemented]` · Internships (staff) / My internship (student) `[Implemented]` · Invoices (Super / University Admin only) `[Implemented]` · My invoices (student) `[Implemented]` |
 | System | Error logs `[Implemented]` · Audit logs `[Future: 9.24]` · Settings & security `[Future]` |
 
 ### University Admin

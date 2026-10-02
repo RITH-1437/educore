@@ -153,6 +153,9 @@ limit used by enrollment (`backend/config/academics.php`).
 | `/announcements`            | Announcement feed (own audience) | Every signed-in role |
 | `/announcements/manage`     | Write, publish, archive announcements | Super admin, University admin (any audience), Lecturer (own sections / courses) |
 | `/notifications`            | My notification settings (email opt-out, Telegram chat) | Every signed-in user (own only) |
+| `/my-internships`           | Apply for an internship, follow it, submit reports | Student |
+| `/internships`              | Internship queue: review, approve, start, complete, evaluate | Super admin, University admin (Faculty admin read-only) |
+| `/internship-companies`     | Host companies | Super admin, University admin (Faculty admin read-only) |
 | `/rooms`                    | Rooms                      | Super admin, University admin (Faculty admin read-only) |
 | `/timetable`                | My weekly timetable        | Student, Lecturer |
 | `/enrollments`              | Enrollment management      | Super admin, University admin (Faculty admin read-only) |
@@ -233,6 +236,15 @@ docker compose --project-directory . -f docker/docker-compose.yml logs minio-ini
 ```
 
 ## 13. Troubleshooting
+
+- **Tests refuse to run: `Refusing to refresh database [educore]`** — the
+  Laravel config is cached (`backend/bootstrap/cache/config.php`). Run
+  `docker compose --project-directory . -f docker/docker-compose.yml exec backend php artisan optimize:clear`.
+  If it comes back after every restart, the `educore/backend:dev` image
+  predates the entrypoint fix — rebuild it and recreate the PHP containers:
+  `docker compose --project-directory . -f docker/docker-compose.yml build backend`
+  then `... up -d backend queue scheduler`. Rebuild whenever
+  `docker/php/entrypoint.sh` or `docker/php/Dockerfile` changes.
 
 - **Backend unhealthy / `Connection refused`** — PostgreSQL may still be
   booting; wait a few seconds and check `docker compose ps`.

@@ -209,8 +209,9 @@ class GradingTest extends TestCase
 
     public function test_gpa_is_credit_weighted_with_retakes_and_recomputed_on_credit_change(): void
     {
-        $y1 = AcademicYear::factory()->create(['code' => '2024-2025', 'start_date' => '2024-09-01', 'end_date' => '2025-08-31']);
-        $y2 = AcademicYear::factory()->create(['code' => '2025-2026', 'start_date' => '2025-09-01', 'end_date' => '2026-08-31']);
+        // Codes outside the factory's 1950–2099 range so they can never collide.
+        $y1 = AcademicYear::factory()->create(['code' => '1940-1941', 'start_date' => '1940-09-01', 'end_date' => '1941-08-31']);
+        $y2 = AcademicYear::factory()->create(['code' => '1941-1942', 'start_date' => '1941-09-01', 'end_date' => '1942-08-31']);
         $s1 = Semester::factory()->forYear($y1)->create(['sequence' => 1, 'status' => 'completed']);
         $s2 = Semester::factory()->forYear($y2)->create(['sequence' => 1, 'status' => 'completed']);
         $p = Course::factory()->create(['credits' => 3]);

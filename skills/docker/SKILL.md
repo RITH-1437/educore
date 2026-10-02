@@ -114,6 +114,9 @@ Examples:
   the same values `minio-init` provisions.
 - Frontend container: `BACKEND_PUBLIC_DIR=/backend/public` tells `laravel-vite-plugin`
   where to write the manifest/hot file and built assets.
+- After changing `docker/php/entrypoint.sh` or `docker/php/Dockerfile`, rebuild
+  `educore/backend:dev` (`... build backend`) and recreate `backend`, `queue`
+  and `scheduler` — they all run the image's copy of the entrypoint.
 - `.env` is never committed; **never hardcode secrets** in
   `docker/docker-compose.yml` (use `${VAR:-default}` so real values stay in
   `.env`).

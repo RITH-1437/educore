@@ -3,6 +3,7 @@ import { usePage } from '@inertiajs/vue3'
 import {
   Award,
   BookMarked,
+  Briefcase,
   Building2,
   Calendar,
   CalendarClock,
@@ -49,7 +50,7 @@ const navForRole = (role) => {
         ],
       },
       { label: 'Academics', items: [{ label: 'Courses', href: '/courses', icon: Library }, { label: 'Offerings & sections', href: '/offerings', icon: TableProperties }, { label: 'Enrollments', href: '/enrollments', icon: ListChecks }, { label: 'Rooms', href: '/rooms', icon: MapPin }, { label: 'Grades', href: '/grades', icon: Award }, { label: 'Grading scale', href: '/grading-scale', icon: Scale }] },
-      { label: 'Operations', items: [{ label: 'Announcements', href: '/announcements', icon: Megaphone }, { label: 'Documents', href: '/documents', icon: FileText }, { label: 'Invoices', href: '/invoices', icon: Receipt }] },
+      { label: 'Operations', items: [{ label: 'Announcements', href: '/announcements', icon: Megaphone }, { label: 'Documents', href: '/documents', icon: FileText }, { label: 'Internships', href: '/internships', icon: Briefcase }, { label: 'Invoices', href: '/invoices', icon: Receipt }] },
       { label: 'System', items: [{ label: 'Error logs', href: '/error-logs', icon: FileWarning }] },
     ]
   }
@@ -73,7 +74,7 @@ const navForRole = (role) => {
       { label: 'People', items: [{ label: 'Students', href: '/students', icon: GraduationCap }, { label: 'Lecturers', href: '/lecturers', icon: UserRound }] },
       { label: 'Assessment', items: [{ label: 'Grades', href: '/grades', icon: Award }, { label: 'Grading scale', href: '/grading-scale', icon: Scale }] },
       // Finance is limited to university admins (Faculty Admin has no access).
-      { label: 'Operations', items: [{ label: 'Announcements', href: '/announcements', icon: Megaphone }, { label: 'Documents', href: '/documents', icon: FileText }, ...(role === 'university-admin' ? [{ label: 'Invoices', href: '/invoices', icon: Receipt }] : [])] },
+      { label: 'Operations', items: [{ label: 'Announcements', href: '/announcements', icon: Megaphone }, { label: 'Documents', href: '/documents', icon: FileText }, { label: 'Internships', href: '/internships', icon: Briefcase }, ...(role === 'university-admin' ? [{ label: 'Invoices', href: '/invoices', icon: Receipt }] : [])] },
     ]
   }
 
@@ -88,6 +89,7 @@ const navForRole = (role) => {
       { label: 'Grades & GPA', href: '/my-grades', icon: Award },
       { label: 'My documents', href: '/my-documents', icon: FileText },
       { label: 'My invoices', href: '/my-invoices', icon: Receipt },
+      { label: 'My internship', href: '/my-internships', icon: Briefcase },
       { label: 'Announcements', href: '/announcements', icon: Megaphone },
     ] }]
   }
@@ -134,6 +136,9 @@ const SECTION_LABELS = {
   announcements: 'Announcements',
   notifications: 'Notification settings',
   'my-invoices': 'My invoices',
+  internships: 'Internships',
+  'my-internships': 'My internship',
+  'internship-companies': 'Internship companies',
   'error-logs': 'Error logs',
 }
 

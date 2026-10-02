@@ -37,7 +37,7 @@
 | 9.19 | Announcements | `[Implemented]` |
 | 9.20 | Email Notifications | `[Implemented]` (password emails `[Future]`) |
 | 9.21 | Telegram Notifications | `[Implemented]` (class reminders `[Future]`) |
-| 9.22 | Internship Management | `[Planned]` |
+| 9.22 | Internship Management | `[Implemented]` (opportunity postings, letter document `[Future]`) |
 | 9.23 | Analytics & Reporting | `[Future]` |
 | 9.24 | Audit Logs & Security | `[Future]` |
 
@@ -47,8 +47,8 @@
 ```mermaid
 pie showData
   title Module delivery status
-  "Implemented (incl. schema)" : 46
-  "Planned / In progress" : 4
+  "Implemented (incl. schema)" : 47
+  "Planned / In progress" : 3
 ```
 
 ---
@@ -281,8 +281,15 @@ the settings page and 3 API operations, `queue` + `scheduler` containers,
 
 ### Phase E — Internship & hardening (`[Future]`)
 
-**9.22 Internship** — tables `internship_companies`, `internships`,
-`internship_reports`, `internship_evaluations`.
+**9.22 Internship** `[Implemented]` — tables `internship_companies`,
+`internships`, `internship_reports`, `internship_evaluations` (no schema
+change). Delivered: `InternshipService` (state machine with one open
+application per student, append-only decision notes, reports with private
+files, one evaluation per evaluator type, final report required to complete),
+`InternshipPolicy`, `InternshipStatusChanged` notification, pages
+`Internships/Mine|Index|Show|Companies`, 20 API operations,
+`InternshipSeeder`, 6 feature tests. Report:
+`docs/26_Internship-Management-Report.md`.
 **9.23 Analytics & Reporting** — aggregation/read models (never iterate in PHP).
 **9.24 Audit Logs & Security** — table `audit_logs`; log sensitive access;
 hardening pass (locking, Superset-free reporting, deployment).
@@ -404,4 +411,15 @@ A module is not done until its report exists and its tests pass — never label
   password-reset emails (no reset flow), in-app inbox, automatic Telegram chat
   linking (bot webhook), surfacing repeated delivery failures in the audit log
   (9.24).
-- `[Next]` 9.22 Internship Management.
+- `[Done]` 9.22 Internship Management. Report:
+  `docs/26_Internship-Management-Report.md`. `[Open]` Opportunity postings,
+  internship letter document (9.16 type), supervisor logins, Faculty Admin
+  approval (needs unit scoping).
+- `[Done]` `educore/backend:dev` rebuilt: the image predated the
+  production-only config caching fix, so containers started from it cached
+  config and pointed the test suite at the development database (the
+  `TestCase` guard refused). README §13 documents the rebuild.
+- `[Done]` Flaky `GradingTest` fixed (explicit academic-year codes moved outside
+  the factory's random 1950–2099 range).
+- `[Next]` 9.23 Analytics & Reporting, 9.24 Audit Logs & Security (`[Future]`
+  in the business overview).

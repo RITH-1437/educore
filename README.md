@@ -156,6 +156,7 @@ limit used by enrollment (`backend/config/academics.php`).
 | `/my-internships`           | Apply for an internship, follow it, submit reports | Student |
 | `/internships`              | Internship queue: review, approve, start, complete, evaluate | Super admin, University admin (Faculty admin read-only) |
 | `/internship-companies`     | Host companies | Super admin, University admin (Faculty admin read-only) |
+| `/analytics`                | Analytics: enrollment, academic performance, workload | Super admin, University admin |
 | `/rooms`                    | Rooms                      | Super admin, University admin (Faculty admin read-only) |
 | `/timetable`                | My weekly timetable        | Student, Lecturer |
 | `/enrollments`              | Enrollment management      | Super admin, University admin (Faculty admin read-only) |

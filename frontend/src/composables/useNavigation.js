@@ -2,6 +2,7 @@ import { computed } from 'vue'
 import { usePage } from '@inertiajs/vue3'
 import {
   Award,
+  BarChart3,
   BookMarked,
   Briefcase,
   Building2,
@@ -31,7 +32,7 @@ import {
 const navForRole = (role) => {
   if (role === 'super-admin') {
     return [
-      { label: 'Overview', items: [{ label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard }] },
+      { label: 'Overview', items: [{ label: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard }, { label: 'Analytics', href: '/analytics', icon: BarChart3 }] },
       {
         label: 'Academic structure',
         items: [
@@ -69,7 +70,8 @@ const navForRole = (role) => {
     if (role === 'university-admin') structure.push({ label: 'Academic years', href: '/academic-years', icon: Calendar })
 
     return [
-      { label: 'Overview', items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }] },
+      // Analytics is institution-wide, so University Admin only (not Faculty Admin).
+      { label: 'Overview', items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }, ...(role === 'university-admin' ? [{ label: 'Analytics', href: '/analytics', icon: BarChart3 }] : [])] },
       { label: 'Academic structure', items: structure },
       { label: 'People', items: [{ label: 'Students', href: '/students', icon: GraduationCap }, { label: 'Lecturers', href: '/lecturers', icon: UserRound }] },
       { label: 'Assessment', items: [{ label: 'Grades', href: '/grades', icon: Award }, { label: 'Grading scale', href: '/grading-scale', icon: Scale }] },
@@ -134,6 +136,7 @@ const SECTION_LABELS = {
   documents: 'Documents',
   invoices: 'Invoices',
   announcements: 'Announcements',
+  analytics: 'Analytics',
   notifications: 'Notification settings',
   'my-invoices': 'My invoices',
   internships: 'Internships',

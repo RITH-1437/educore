@@ -256,7 +256,7 @@ Colors come from the EduCore palette; **no rainbow charts.**
 
 | Element | Value |
 |---|---|
-| Primary series | `#2563EB` |
+| Primary series | `#2563EB` (dark: `#3B82F6` — `chart-primary` / `dark-chart-primary`; `#60A5FA` fails the dark chart lightness band) |
 | Secondary series | `#38BDF8` |
 | Accent series | `#14B8A6` |
 | Semantics | reuse `success`/`warning`/`error` for status series |

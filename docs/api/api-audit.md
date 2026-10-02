@@ -13,11 +13,11 @@
 
 | Measure | Result |
 |---|---:|
-| Application API route definitions (`routes/api.php`) | 181 |
-| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 200 |
-| Swagger operations after documentation corrections | 200 |
-| Swagger document paths | 119 |
-| Swagger document schemas | 151 |
+| Application API route definitions (`routes/api.php`) | 185 |
+| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 204 |
+| Swagger operations after documentation corrections | 204 |
+| Swagger document paths | 123 |
+| Swagger document schemas | 157 |
 | Undocumented application operations | 0 |
 | Extra Swagger operations not in the application API routes | 0 |
 | Swagger generation errors after corrections | 0 |
@@ -256,7 +256,7 @@ were **not changed** during this documentation-only audit.
 Application endpoint counts below exclude the four L5-Swagger/OAuth package
 routes (`api/documentation`, `api/documentation/asset/{asset}`,
 `api/documentation/ui`, `api/oauth2-callback`). Each combined update route
-contributes one PUT and one PATCH operation, so 181 route definitions yield 200
+contributes one PUT and one PATCH operation, so 185 route definitions yield 204
 documented operations.
 
 | Method | Path | Authentication / authorization | Documentation |
@@ -436,6 +436,10 @@ documented operations.
 | POST | `/api/internships/{internship}/evaluations` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/internship-reports/{report}/review` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/internship-reports/{report}/file` | Sanctum + staff, or the student | Documented |
+| GET | `/api/analytics/overview` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
+| GET | `/api/analytics/enrollment` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
+| GET | `/api/analytics/academic` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
+| GET | `/api/analytics/administrative` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
 | GET | `/api/grading-scale` | Sanctum, any role | Documented |
 | PUT | `/api/grading-scale` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/courses/{course}/grading-config` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
@@ -499,6 +503,8 @@ Re-ran Swagger generation and a scripted method/path comparison of
 | Undocumented / extra operations after 9.20 / 9.21 | 0 / 0 |
 | After 9.22 Internships (14 operations added): route definitions / operations / OpenAPI paths / schemas | 181 / 200 / 119 / 151 |
 | Undocumented / extra operations after 9.22 | 0 / 0 |
+| After 9.23 Analytics (4 operations added): route definitions / operations / OpenAPI paths / schemas | 185 / 204 / 123 / 157 |
+| Undocumented / extra operations after 9.23 | 0 / 0 |
 
 - **A-09 — PATCH aliases undocumented.** `PATCH` on `/api/assignments/{assignment}`,
   `/api/exams/{exam}`, `/api/offerings/{offering}`, `/api/rooms/{room}`,

@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Enums\Role;
 use App\Models\AssignmentSubmission;
 use App\Models\AttendanceSession;
+use App\Models\User;
 use App\Policies\AssignmentPolicy;
 use App\Policies\AttendancePolicy;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -31,10 +33,14 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(AttendanceSession::class, AttendancePolicy::class);
         Gate::policy(AssignmentSubmission::class, AssignmentPolicy::class);
 
-        // Public document verification (module 9.17).
+        // Institution-wide analytics (module 9.23): managers only — Faculty Admin
+        // would need unit scoping first (`skills/analytics-reporting` §12).
+        Gate::define('view-analytics', fn (User $user) => $user->isRole(Role::SuperAdmin->value) || $user->isRole(Role::UniversityAdmin->value));
+
         // Test notifications from the preferences page (modules 9.20 / 9.21).
         RateLimiter::for('notification-test', fn (Request $request) => Limit::perMinute(3)->by((string) $request->user()?->getKey()));
 
+        // Public document verification (module 9.17).
         RateLimiter::for('verification', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
 
         RateLimiter::for('login', function (Request $request) {

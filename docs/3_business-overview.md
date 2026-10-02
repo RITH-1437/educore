@@ -637,12 +637,18 @@ users, main business activities, and expected outputs.
   a decision log. Published opportunity postings and an internship letter
   document are [Future]. See [26_Internship-Management-Report.md](26_Internship-Management-Report.md).
 
-### 9.23 Analytics & Reporting [Planned]
+### 9.23 Analytics & Reporting [Implemented]
 
 - **Purpose:** provide institutional visibility.
 - **Primary users:** Administrators and management.
 - **Main business activities:** view student, enrollment, attendance, grade, GPA, course, faculty/department, internship, and administrative statistics.
 - **Expected outputs:** dashboards and reports derived from centralized data. *(Not predictive analytics.)*
+- **Delivered:** a management analytics page and API for a chosen semester —
+  headline numbers, enrollment by program, attendance and results per course,
+  grade and GPA distributions — plus the current workload (documents,
+  internships, invoices, finance per currency), all computed live in SQL from
+  the domain tables. Exports, faculty-scoped views and trends are [Future].
+  See [27_Analytics-and-Reporting-Report.md](27_Analytics-and-Reporting-Report.md).
 
 ### 9.24 Audit Logs & Security [Planned]
 

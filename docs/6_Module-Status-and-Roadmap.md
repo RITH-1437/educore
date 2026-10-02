@@ -38,7 +38,7 @@
 | 9.20 | Email Notifications | `[Implemented]` (password emails `[Future]`) |
 | 9.21 | Telegram Notifications | `[Implemented]` (class reminders `[Future]`) |
 | 9.22 | Internship Management | `[Implemented]` (opportunity postings, letter document `[Future]`) |
-| 9.23 | Analytics & Reporting | `[Future]` |
+| 9.23 | Analytics & Reporting | `[Implemented]` (exports, faculty-scoped views `[Future]`) |
 | 9.24 | Audit Logs & Security | `[Future]` |
 
 > No module is documented as implemented unless it is genuinely tested and running
@@ -47,8 +47,8 @@
 ```mermaid
 pie showData
   title Module delivery status
-  "Implemented (incl. schema)" : 47
-  "Planned / In progress" : 3
+  "Implemented (incl. schema)" : 48
+  "Planned / In progress" : 2
 ```
 
 ---
@@ -290,7 +290,13 @@ files, one evaluation per evaluator type, final report required to complete),
 `Internships/Mine|Index|Show|Companies`, 20 API operations,
 `InternshipSeeder`, 6 feature tests. Report:
 `docs/26_Internship-Management-Report.md`.
-**9.23 Analytics & Reporting** — aggregation/read models (never iterate in PHP).
+**9.23 Analytics & Reporting** `[Implemented]` — no tables of its own.
+Delivered: `AnalyticsService` (grouped SQL, semester-bounded academic figures,
+point-in-time workload, finance per currency, null-safe ratios, reusing the
+grade / attendance / GPA definitions of 9.11 and 9.14), gate `view-analytics`
+(managers), `Analytics/Index` with KPI tiles and single-hue bar charts
+(`components/charts/BarChart.vue`, palette-validated, table toggle), 4 API
+operations, 4 feature tests. Report: `docs/27_Analytics-and-Reporting-Report.md`.
 **9.24 Audit Logs & Security** — table `audit_logs`; log sensitive access;
 hardening pass (locking, Superset-free reporting, deployment).
 
@@ -421,5 +427,9 @@ A module is not done until its report exists and its tests pass — never label
   `TestCase` guard refused). README §13 documents the rebuild.
 - `[Done]` Flaky `GradingTest` fixed (explicit academic-year codes moved outside
   the factory's random 1950–2099 range).
-- `[Next]` 9.23 Analytics & Reporting, 9.24 Audit Logs & Security (`[Future]`
+- `[Done]` 9.23 Analytics & Reporting. Report:
+  `docs/27_Analytics-and-Reporting-Report.md`. `[Open]` CSV / PDF exports,
+  Faculty Admin views (unit scoping), trends across semesters; the charts were
+  not inspected in a browser when shipped.
+- `[Next]` 9.24 Audit Logs & Security (`[Future]`
   in the business overview).

@@ -2,6 +2,7 @@
 
 use App\Enums\Role;
 use App\Http\Controllers\AcademicYearController;
+use App\Http\Controllers\AnalyticsPageController;
 use App\Http\Controllers\AnnouncementsController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -262,6 +263,9 @@ Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,stud
     Route::post('/internships/{internship}/{action}', [InternshipsController::class, 'transition'])->whereIn('action', ['submit', 'review', 'approve', 'reject', 'start', 'complete', 'cancel'])->name('internships.transition');
     Route::get('/internship-reports/{report}/file', [InternshipsController::class, 'downloadReport'])->name('internship-reports.file');
 });
+
+// Analytics (module 9.23): managers only.
+Route::middleware(['auth', 'role:super-admin,university-admin'])->get('/analytics', AnalyticsPageController::class)->name('analytics');
 
 // Notification settings (modules 9.20 / 9.21): every signed-in user, own only.
 Route::middleware('auth')->group(function () {

@@ -30,6 +30,11 @@
   --color-dark-primary: #60A5FA;
   --color-dark-border: #334155;
 
+  /* Charts — UI-COMPONENTS §10. Single-series marks; the dark step is blue-500
+     (blue-400 = dark-primary falls outside the dark chart lightness band). */
+  --color-chart-primary: #2563EB;
+  --color-dark-chart-primary: #3B82F6;
+
   /* Typography — §4 */
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Plus Jakarta Sans", var(--font-sans);

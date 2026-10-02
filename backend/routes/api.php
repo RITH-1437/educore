@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AcademicYearController;
+use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\AssignmentController;
 use App\Http\Controllers\Api\AttendanceController;
@@ -326,6 +327,14 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->group(
 Route::middleware(['auth:sanctum', 'role:super-admin'])->group(function () {
     Route::get('/error-logs', [ErrorLogController::class, 'index'])->name('api.error-logs.index');
     Route::get('/error-logs/{errorLog}', [ErrorLogController::class, 'show'])->name('api.error-logs.show');
+});
+
+// Analytics (module 9.23): institution-wide, so managers only (`view-analytics`).
+Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->prefix('/analytics')->name('api.analytics.')->group(function () {
+    Route::get('/overview', [AnalyticsController::class, 'overview'])->name('overview');
+    Route::get('/enrollment', [AnalyticsController::class, 'enrollment'])->name('enrollment');
+    Route::get('/academic', [AnalyticsController::class, 'academic'])->name('academic');
+    Route::get('/administrative', [AnalyticsController::class, 'administrative'])->name('administrative');
 });
 
 // Notification preferences (modules 9.20 / 9.21): always the caller's own.

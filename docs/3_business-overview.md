@@ -7,7 +7,7 @@
 **Document type:** Business overview / project proposal (non-technical first)
 **Project:** EduCore — University Digital Administration Platform
 **Prepared for:** University management, administrators, lecturers, students, project supervisors, developers, and potential stakeholders
-**Prepared by:** Rin Nairith & Lyhor (Project Team)
+**Prepared by:** Rin Nairith & Yong Lyhor (Project Team)
 **Target market:** Designed for Cambodian university environments
 **Proposed development period:** Approximately 4–6 months
 **Architecture:** Modular Monolith (web platform)
@@ -257,7 +257,7 @@ The following table summarizes both alongside the main users of the platform.
 | Student | System role | Enrolled learner | View own academic portal, register courses, view timetable/attendance/grades, request documents, receive notifications | Primary beneficiary of student services |
 | University Management | Stakeholder | Institutional leadership; may not operate the system directly | Visibility into enrollment, performance, and administrative activity | Receives reports and overview dashboards; may be represented by admin accounts |
 | IT/Technical Staff | Stakeholder | Support and infrastructure | Deploy, maintain, and troubleshoot the platform | Operate Docker/CI, servers, and support accounts |
-| Project Team | Stakeholder | Rin Nairith & Lyhor — developers | Deliver a reliable platform within scope | Develop, test, document, and deploy |
+| Project Team | Stakeholder | Rin Nairith & Yong Lyhor — developers | Deliver a reliable platform within scope | Develop, test, document, and deploy |
 
 **Notes:**
 - Finance Officer appears here only as a *non-system observation*: in the initial scope there is
@@ -836,7 +836,7 @@ not failures of the project.
 
 ### Human Resource Limitations
 
-- The project is developed by a two-person team (Rin Nairith & Lyhor). Development capacity
+- The project is developed by a two-person team (Rin Nairith & Yong Lyhor). Development capacity
   establishes the pace of the roadmap.
 
 ### Project Time Limitations
@@ -1309,7 +1309,7 @@ The project will produce:
   - DevOps/infrastructure
   - Documentation
 
-- **Lyhor**
+- **Yong Lyhor**
   - Full-stack development
   - Frontend/backend implementation
   - Testing

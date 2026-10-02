@@ -3,7 +3,7 @@
 **Report:** 2 of the EduCore project series
 **Scope:** Full local Docker setup for the EduCore (Laravel 12 + Vue 3) project
 **Date:** 2026-09-24
-**Team:** Rin Nairith & Lyhor
+**Team:** Rin Nairith & Yong Lyhor
 **Status:** Implemented and validated
 
 ---

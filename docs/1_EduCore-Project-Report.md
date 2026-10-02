@@ -5,7 +5,7 @@
 | **Project** | EduCore — University Digital Administration Platform |
 | **Target market** | Designed for Cambodian university environments |
 | **Architecture** | Modular Monolith (MVC backend) |
-| **Development team** | Rin Nairith & Lyhor |
+| **Development team** | Rin Nairith & Yong Lyhor |
 | **Status** | In development — foundation [Implemented], modules [Planned] |
 | **Report version** | 2.0 (rewritten; modernized formal baseline) |
 
@@ -737,7 +737,7 @@ flowchart LR
     Test --> Rel[Release → main]
 ```
 
-Two developers (Rin + Lyhor) review each other's work.
+Two developers (Rin + Yong Lyhor) review each other's work.
 
 **CI/CD:**
 
@@ -932,7 +932,7 @@ Only after these are approved should implementation proceed.
 | Project | EduCore |
 | Type | University Digital Administration Platform |
 | Target | Designed for Cambodian universities |
-| Team | Rin Nairith + Lyhor |
+| Team | Rin Nairith + Yong Lyhor |
 | Architecture | Modular Monolith (MVC backend) |
 | Backend | Laravel 12 (PHP 8.4) |
 | Frontend | Vue 3 + Inertia (JavaScript) |

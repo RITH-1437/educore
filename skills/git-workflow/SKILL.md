@@ -5,7 +5,7 @@ description: EduCore git and GitHub workflow - branch naming, commit conventions
 
 # EduCore — Git & GitHub Workflow
 
-EduCore is version-controlled on GitHub. Two developers (Rin + Lyhor) work off
+EduCore is version-controlled on GitHub. Two developers (Rin + Yong Lyhor) work off
 the same repository — a disciplined workflow prevents conflicts.
 
 ## When to use

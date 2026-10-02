@@ -445,5 +445,12 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` Password change and emailed password reset (web + API; other
   sessions / tokens end; audited; rate limited). Report:
   `docs/29_Password-Change-and-Reset-Report.md`.
+- `[Done]` Business-rule refusals (`BusinessRuleException`, answered 409) are
+  no longer reported to `laravel.log` as ERROR with a stack trace — they were
+  ~98% of logged errors (2,712 of 2,774) and would bury real failures
+  (`tests/Feature/ExceptionReportingTest.php`).
+- `[Done]` Container entrypoint: `storage:link` runs only when the link is
+  missing — backend, queue and scheduler raced on the shared bind mount
+  ("symlink(): File exists"). Image rebuilt.
 - All modules of business-overview §9 are now implemented. Remaining open
   items are listed above (unit scoping for Faculty Admin is the largest).

@@ -43,6 +43,11 @@ return Application::configure(basePath: dirname(__DIR__))
             fn ($request) => $request->is('api/*') || $request->expectsJson(),
         );
 
+        // A business-rule refusal (409) is an expected outcome, not a fault:
+        // do not write it to the log as an ERROR with a stack trace (it was
+        // ~98% of all logged errors and would bury real failures).
+        $exceptions->dontReport(BusinessRuleException::class);
+
         $exceptions->render(function (BusinessRuleException $exception, $request) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => $exception->getMessage()], 409);

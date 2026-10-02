@@ -23,7 +23,11 @@ if [ -f .env ] && ! grep -q '^APP_KEY=base64:' .env; then
 fi
 
 # Link storage so /storage/ URLs work.
-php artisan storage:link --force 2>/dev/null || true
+# Only when missing: backend, queue and scheduler start together on the same
+# bind mount, and `--force` from all three raced ("symlink(): File exists").
+if [ ! -L public/storage ]; then
+    php artisan storage:link 2>/dev/null || true
+fi
 
 # Warm the application cache only in production. In development a cached
 # config hides .env/phpunit.xml changes — the test suite would then ignore

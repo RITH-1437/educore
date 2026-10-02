@@ -1,4 +1,6 @@
 <script setup>
+import ExportLink from '../../components/ExportLink.vue'
+import { exportUrl } from '../../utils/exports'
 import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import { Search, UserPlus } from '@lucide/vue'
@@ -30,6 +32,8 @@ const label = (value) => value.charAt(0).toUpperCase() + value.slice(1)
 const search = ref(props.filters.search ?? '')
 const semesterId = ref(props.filters.semester_id ?? '')
 const status = ref(props.filters.status ?? '')
+// Exports what the list currently shows (the applied filters, not unsaved input).
+const csvUrl = computed(() => exportUrl('/enrollments/export', { search: props.filters.search, filters: { semester_id: props.filters.semester_id, section_id: props.filters.section_id, status: props.filters.status } }))
 const applyFilters = () => router.get('/enrollments', { search: search.value || undefined, semester_id: semesterId.value || undefined, status: status.value || undefined }, { preserveState: true, replace: true })
 
 const semesterOptions = computed(() => props.semesters.map((s) => ({ value: s.id, label: s.label })))
@@ -59,7 +63,9 @@ const columns = [
 <template>
   <Head title="Enrollments - EduCore" />
   <div class="space-y-6">
-    <PageHeader eyebrow="Academics" title="Enrollments" description="Course registrations. Every enrollment — admin or student — passes the same checks: active student, open registration, prerequisites, credit limit and seats." />
+    <PageHeader eyebrow="Academics" title="Enrollments" description="Course registrations. Every enrollment — admin or student — passes the same checks: active student, open registration, prerequisites, credit limit and seats.">
+      <template #actions><ExportLink :href="csvUrl" /></template>
+    </PageHeader>
 
     <BaseCard v-if="canManage" title="Enroll a student" padding="lg">
       <form class="grid gap-4 lg:grid-cols-[2fr_3fr_auto] lg:items-end" @submit.prevent="enroll">

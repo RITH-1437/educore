@@ -1,4 +1,6 @@
 <script setup>
+import ExportLink from '../../components/ExportLink.vue'
+import { exportUrl } from '../../utils/exports'
 import { Head, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -20,6 +22,8 @@ const area = ref(props.filters.area ?? '')
 const from = ref(props.filters.from ?? '')
 const to = ref(props.filters.to ?? '')
 const areaOptions = computed(() => [{ value: '', label: 'All areas' }, ...props.areas.map((a) => ({ value: a, label: a.replace('_', ' ') }))])
+// Exports what the list currently shows (the applied filters, not unsaved input).
+const csvUrl = computed(() => exportUrl('/audit-logs/export', { search: props.filters.search, filters: { area: props.filters.area }, from: props.filters.from, to: props.filters.to }))
 const apply = () => router.get('/audit-logs', {
   search: search.value || undefined,
   filters: area.value ? { area: area.value } : undefined,
@@ -39,7 +43,9 @@ const columns = [
 <template>
   <Head title="Audit logs - EduCore" />
   <div class="space-y-6">
-    <PageHeader eyebrow="System" title="Audit logs" description="Append-only record of sign-ins and sensitive changes: who did what, to which record, and when. Entries cannot be edited or deleted." />
+    <PageHeader eyebrow="System" title="Audit logs" description="Append-only record of sign-ins and sensitive changes: who did what, to which record, and when. Entries cannot be edited or deleted. Exports are audited too.">
+      <template #actions><ExportLink :href="csvUrl" /></template>
+    </PageHeader>
 
     <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] lg:items-end" @submit.prevent="apply">
       <BaseInput v-model="search" name="search" label="Search" placeholder="Description, person or action" />

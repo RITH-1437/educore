@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\EnrollmentController;
 use App\Http\Controllers\Api\ErrorLogController;
 use App\Http\Controllers\Api\ExamController;
+use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\FacultyController;
 use App\Http\Controllers\Api\GradeController;
 use App\Http\Controllers\Api\InternshipController;
@@ -89,6 +90,7 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
 // own (`EnrollmentPolicy`). Admin-only actions are checked by the policy.
 Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-admin,student'])->group(function () {
     Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('api.enrollments.index');
+    Route::get('/enrollments/export', [ExportController::class, 'enrollments'])->name('api.enrollments.export');
     Route::post('/enrollments', [EnrollmentController::class, 'store'])->name('api.enrollments.store');
     Route::get('/enrollments/{enrollment}', [EnrollmentController::class, 'show'])->name('api.enrollments.show');
     Route::delete('/enrollments/{enrollment}', [EnrollmentController::class, 'destroy'])->name('api.enrollments.destroy');
@@ -164,6 +166,7 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     // Finance: `InvoicePolicy` — managers only (no Finance Officer role); a
     // student reads their own invoices.
     Route::get('/invoices', [InvoiceController::class, 'index'])->name('api.invoices.index');
+    Route::get('/invoices/export', [ExportController::class, 'invoices'])->name('api.invoices.export');
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('api.invoices.store');
     Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('api.invoices.show');
     Route::match(['put', 'patch'], '/invoices/{invoice}', [InvoiceController::class, 'update'])->name('api.invoices.update');
@@ -341,6 +344,7 @@ Route::middleware(['auth:sanctum', 'role:super-admin'])->group(function () {
 
     // Audit trail (module 9.24): read-only; rows are written by `AuditLogger`.
     Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('api.audit-logs.index');
+    Route::get('/audit-logs/export', [ExportController::class, 'auditLogs'])->name('api.audit-logs.export');
     Route::get('/audit-logs/{auditLog}', [AuditLogController::class, 'show'])->name('api.audit-logs.show');
 });
 
@@ -350,6 +354,7 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->prefix
     Route::get('/enrollment', [AnalyticsController::class, 'enrollment'])->name('enrollment');
     Route::get('/academic', [AnalyticsController::class, 'academic'])->name('academic');
     Route::get('/administrative', [AnalyticsController::class, 'administrative'])->name('administrative');
+    Route::get('/export', [ExportController::class, 'analytics'])->name('export');
 });
 
 // Notification preferences (modules 9.20 / 9.21): always the caller's own.

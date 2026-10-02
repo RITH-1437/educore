@@ -1,4 +1,6 @@
 <script setup>
+import ExportLink from '../../components/ExportLink.vue'
+import { exportUrl } from '../../utils/exports'
 import { Head, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -19,6 +21,8 @@ const props = defineProps({
 const search = ref(props.filters.search ?? '')
 const status = ref(props.filters.status ?? '')
 const statusOptions = computed(() => [{ value: '', label: 'All statuses' }, ...props.statuses.map((value) => ({ value, label: invoiceBadge(value).label }))])
+// Exports what the list currently shows (the applied filters, not unsaved input).
+const csvUrl = computed(() => exportUrl('/invoices/export', { search: props.filters.search, filters: { status: props.filters.status } }))
 const apply = () => router.get('/invoices', { search: search.value || undefined, filters: status.value ? { status: status.value } : undefined }, { preserveState: true, replace: true })
 
 const columns = [
@@ -37,6 +41,7 @@ const columns = [
   <div class="space-y-6">
     <PageHeader eyebrow="Operations" title="Invoices" description="Charges and payment records per student. Payments are recorded by staff; there is no online payment.">
       <template #actions>
+        <ExportLink :href="csvUrl" />
         <BaseButton href="/invoices/create">New invoice</BaseButton>
       </template>
     </PageHeader>

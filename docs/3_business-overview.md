@@ -655,8 +655,10 @@ users, main business activities, and expected outputs.
   headline numbers, enrollment by program, attendance and results per course,
   grade and GPA distributions — plus the current workload (documents,
   internships, invoices, finance per currency), all computed live in SQL from
-  the domain tables. Exports, faculty-scoped views and trends are [Future].
-  See [27_Analytics-and-Reporting-Report.md](27_Analytics-and-Reporting-Report.md).
+  the domain tables, each table downloadable as CSV. PDF exports,
+  faculty-scoped views and trends are [Future].
+  See [27_Analytics-and-Reporting-Report.md](27_Analytics-and-Reporting-Report.md) and
+  [31_CSV-Exports-Report.md](31_CSV-Exports-Report.md).
 
 ### 9.24 Audit Logs & Security [Implemented]
 
@@ -669,8 +671,10 @@ users, main business activities, and expected outputs.
   documents, invoices and payments, announcements, internships) with
   before / after values and no secrets, append-only in the application and in
   the database; a Super Admin viewer; deactivated accounts lose their
-  sessions and API tokens immediately. Retention / export is [Future].
-  See [28_Audit-Logs-and-Security-Report.md](28_Audit-Logs-and-Security-Report.md).
+  sessions and API tokens immediately; the trail exports as CSV (the export
+  is audited too). Retention is [Future].
+  See [28_Audit-Logs-and-Security-Report.md](28_Audit-Logs-and-Security-Report.md) and
+  [31_CSV-Exports-Report.md](31_CSV-Exports-Report.md).
 
 ### 9.25 System Error Logs [Implemented]
 

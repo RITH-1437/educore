@@ -148,7 +148,7 @@ limit used by enrollment (`backend/config/academics.php`).
 | `/my-documents`             | Request documents, download PDFs | Student |
 | `/documents`                | Document request queue: approve, reject, generate, revoke | Super admin, University admin (Faculty admin read-only) |
 | `/verify/{code}`            | Public document verification (no sign-in, rate limited) | — |
-| `/invoices`                 | Invoices: create, edit, record / reverse payments, cancel | Super admin, University admin |
+| `/invoices`                 | Invoices: create, edit, record / reverse payments, cancel, export CSV | Super admin, University admin |
 | `/my-invoices`              | My invoices, payments and balance | Student |
 | `/announcements`            | Announcement feed (own audience) | Every signed-in role |
 | `/announcements/manage`     | Write, publish, archive announcements | Super admin, University admin (any audience), Lecturer (own sections / courses) |
@@ -156,13 +156,13 @@ limit used by enrollment (`backend/config/academics.php`).
 | `/my-internships`           | Apply for an internship, follow it, submit reports | Student |
 | `/internships`              | Internship queue: review, approve, start, complete, evaluate | Super admin, University admin (Faculty admin read-only) |
 | `/internship-companies`     | Host companies | Super admin, University admin (Faculty admin read-only) |
-| `/analytics`                | Analytics: enrollment, academic performance, workload | Super admin, University admin |
-| `/audit-logs`               | Audit trail (read-only): sign-ins and sensitive changes | Super admin |
+| `/analytics`                | Analytics: enrollment, academic performance, workload; CSV per table | Super admin, University admin |
+| `/audit-logs`               | Audit trail (read-only): sign-ins and sensitive changes; CSV export | Super admin |
 | `/account/password`         | Change my password (other sessions are signed out) | Every signed-in user |
 | `/forgot-password`          | Request a password reset link by email (rate limited) | Guests |
 | `/rooms`                    | Rooms                      | Super admin, University admin (Faculty admin read-only) |
 | `/timetable`                | My weekly timetable        | Student, Lecturer |
-| `/enrollments`              | Enrollment management      | Super admin, University admin (Faculty admin read-only) |
+| `/enrollments`              | Enrollment management; export CSV | Super admin, University admin (Faculty admin read-only + export) |
 | `/registration`             | Course registration (self-service) | Student |
 | `/offerings`                | Offerings & sections       | Super admin, University admin (Faculty admin read-only) |
 | `/offerings/{id}`           | Manage sections + lecturers | Super admin, University admin |

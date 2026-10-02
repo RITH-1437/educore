@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Notifications\InvoiceIssued;
 use App\Notifications\PaymentRecorded;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -43,6 +44,17 @@ class InvoiceService
      */
     public function paginate(array $filters): LengthAwarePaginator
     {
+        return $this->query($filters)->paginate(15)->withQueryString();
+    }
+
+    /**
+     * The filtered, ordered invoice list (shared by the list and the CSV export).
+     *
+     * @param  array<string, mixed>  $filters  search, status, student_id
+     * @return Builder<Invoice>
+     */
+    public function query(array $filters): Builder
+    {
         $this->refreshOverdue();
 
         return Invoice::query()
@@ -54,9 +66,7 @@ class InvoiceService
                 ->orWhere('title', 'ilike', "%{$search}%")
                 ->orWhereHas('student', fn ($s) => $s->where('student_number', 'ilike', "%{$search}%")->orWhereRaw("concat(first_name, ' ', last_name) ilike ?", ["%{$search}%"]))))
             ->latest('issued_date')
-            ->latest('id')
-            ->paginate(15)
-            ->withQueryString();
+            ->latest('id');
     }
 
     /**

@@ -2,7 +2,7 @@
 
 - **Date:** 2026-10-02
 - **Module:** 9.23 Analytics & Reporting (business-overview §9.23)
-- **Status:** `[Implemented]` (exports, faculty-scoped views and trends over time `[Future]`)
+- **Status:** `[Implemented]` (CSV exports in `docs/31_CSV-Exports-Report.md`; PDF exports, faculty-scoped views and trends over time `[Future]`)
 - **Depends on:** every academic and administrative module (read-only)
 
 ## 1. Scope
@@ -13,7 +13,7 @@ academic performance (grade and semester-GPA distributions, attendance and
 results per course) for a chosen semester, and the current administrative
 workload (documents, internships, invoices, finance per currency).
 
-Not built: CSV / PDF exports, a Faculty Admin view scoped to their unit (needs
+Not built: PDF exports (CSV exports were added later — `docs/31_CSV-Exports-Report.md`), a Faculty Admin view scoped to their unit (needs
 unit scoping on the user record — `skills/analytics-reporting` §12 forbids
 returning institution-wide data to them), multi-semester trend charts,
 predictive analytics (out of scope by the business overview).

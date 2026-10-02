@@ -4,6 +4,7 @@ use App\Enums\Role;
 use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\AnalyticsPageController;
 use App\Http\Controllers\AnnouncementsController;
+use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\AuditLogsController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
@@ -235,6 +236,7 @@ Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,stud
 Route::middleware(['auth', 'role:student'])->get('/my-invoices', [InvoicesController::class, 'mine'])->name('invoices.mine');
 Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function () {
     Route::get('/invoices', [InvoicesController::class, 'index'])->name('invoices.index');
+    Route::get('/invoices/export', [ExportController::class, 'invoices'])->name('invoices.export');
     Route::get('/invoices/create', [InvoicesController::class, 'create'])->name('invoices.create');
     Route::post('/invoices', [InvoicesController::class, 'store'])->name('invoices.store');
     Route::get('/invoices/{invoice}/edit', [InvoicesController::class, 'edit'])->name('invoices.edit');
@@ -283,6 +285,7 @@ Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,stud
 
 // Analytics (module 9.23): managers only.
 Route::middleware(['auth', 'role:super-admin,university-admin'])->get('/analytics', AnalyticsPageController::class)->name('analytics');
+Route::middleware(['auth', 'role:super-admin,university-admin'])->get('/analytics/export', [ExportController::class, 'analytics'])->name('analytics.export');
 
 // Notification settings (modules 9.20 / 9.21): every signed-in user, own only.
 Route::middleware('auth')->group(function () {
@@ -314,6 +317,7 @@ Route::middleware(['auth', 'role:student,lecturer'])->get('/timetable', [Timetab
 // (`EnrollmentPolicy`). Student self-service lives under /registration.
 Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->group(function () {
     Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');
+    Route::get('/enrollments/export', [ExportController::class, 'enrollments'])->name('enrollments.export');
 });
 
 Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function () {
@@ -451,5 +455,6 @@ Route::middleware(['auth', 'role:super-admin'])
 // Audit trail (module 9.24): Super Admin only, read-only — no write routes.
 Route::middleware(['auth', 'role:super-admin'])->prefix('/audit-logs')->name('audit-logs.')->group(function () {
     Route::get('/', [AuditLogsController::class, 'index'])->name('index');
+    Route::get('/export', [ExportController::class, 'auditLogs'])->name('export');
     Route::get('/{auditLog}', [AuditLogsController::class, 'show'])->name('show');
 });

@@ -13,10 +13,10 @@
 
 | Measure | Result |
 |---|---:|
-| Application API route definitions (`routes/api.php`) | 192 |
-| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 211 |
-| Swagger operations after documentation corrections | 211 |
-| Swagger document paths | 130 |
+| Application API route definitions (`routes/api.php`) | 196 |
+| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 215 |
+| Swagger operations after documentation corrections | 215 |
+| Swagger document paths | 134 |
 | Swagger document schemas | 159 |
 | Undocumented application operations | 0 |
 | Extra Swagger operations not in the application API routes | 0 |
@@ -350,6 +350,7 @@ documented operations.
 | DELETE | `/api/sections/{section}/lecturers/{lecturer}` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/lecturers/{lecturer}/sections` | Sanctum + staff, or the lecturer themself | Documented |
 | GET | `/api/enrollments` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/enrollments/export` | Sanctum + super-admin, university-admin or faculty-admin (CSV, audited) | Documented |
 | POST | `/api/enrollments` | Sanctum + managers (any student) or a student (self) | Documented |
 | GET | `/api/enrollments/{enrollment}` | Sanctum + staff, or the enrolled student | Documented |
 | DELETE | `/api/enrollments/{enrollment}` | Sanctum + managers, or the enrolled student (drop, keeps history) | Documented |
@@ -411,6 +412,7 @@ documented operations.
 | GET | `/api/documents/{document}/download` | Sanctum + staff, or the requesting student (PDF stream) | Documented |
 | GET | `/api/verifications/{token}` | Public; `throttle:verification` (30/min/IP) | Documented |
 | GET | `/api/invoices` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/invoices/export` | Sanctum + super-admin or university-admin (CSV, audited) | Documented |
 | POST | `/api/invoices` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/invoices/{invoice}` | Sanctum + managers, or the invoiced student | Documented |
 | PUT, PATCH | `/api/invoices/{invoice}` | Sanctum + super-admin or university-admin | Both documented |
@@ -445,6 +447,7 @@ documented operations.
 | GET | `/api/analytics/enrollment` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
 | GET | `/api/analytics/academic` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
 | GET | `/api/analytics/administrative` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
+| GET | `/api/analytics/export` | Sanctum + super-admin or university-admin (`view-analytics`; CSV, audited) | Documented |
 | GET | `/api/grading-scale` | Sanctum, any role | Documented |
 | PUT | `/api/grading-scale` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/courses/{course}/grading-config` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
@@ -452,6 +455,7 @@ documented operations.
 | GET | `/api/error-logs` | Sanctum + super-admin only | Documented |
 | GET | `/api/error-logs/{errorLog}` | Sanctum + super-admin only | Documented |
 | GET | `/api/audit-logs` | Sanctum + super-admin only (read-only) | Documented |
+| GET | `/api/audit-logs/export` | Sanctum + super-admin only (CSV, audited) | Documented |
 | GET | `/api/audit-logs/{auditLog}` | Sanctum + super-admin only (read-only) | Documented |
 
 ## Authentication and Authorization Check

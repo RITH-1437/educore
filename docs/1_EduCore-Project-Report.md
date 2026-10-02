@@ -167,7 +167,7 @@ management, administrative workflows, communication, and student services.
 7. Digitize document request workflows with QR verification. [Implemented] (verification by printed code / URL; a scannable QR image is [Future])
 8. Provide invoice and payment-record management. [Implemented]
 9. Improve communication through email and Telegram notifications. [Implemented]
-10. Provide academic analytics and reporting. [Implemented] (exports [Future])
+10. Provide academic analytics and reporting. [Implemented] (CSV exports; PDF exports [Future])
 11. Support the internship workflow. [Implemented]
 12. Build a modular-monolith architecture that supports future expansion. [Implemented]
 
@@ -610,7 +610,7 @@ flowchart TB
 
 ### 9.21 Analytics & Reporting [Implemented]
 
-> **Status:** `docs/27_Analytics-and-Reporting-Report.md`. **Not built:** exports, faculty-scoped views, multi-semester trends [Future].
+> **Status:** `docs/27_Analytics-and-Reporting-Report.md`; CSV exports in `docs/31_CSV-Exports-Report.md`. **Not built:** PDF exports, faculty-scoped views, multi-semester trends [Future].
 
 - Student analytics: total/active/graduated/withdrawn.
 - Academic analytics: GPA distribution, course pass rate, attendance, course performance.
@@ -622,7 +622,7 @@ Derived from centralized data. No predictive analytics in the initial scope.
 
 ### 9.22 Audit Logs [Implemented]
 
-> **Status:** append-only in the application and the database, Super Admin viewer — `docs/28_Audit-Logs-and-Security-Report.md`. **Not built:** retention / export [Future].
+> **Status:** append-only in the application and the database, Super Admin viewer — `docs/28_Audit-Logs-and-Security-Report.md`. CSV export in `docs/31_CSV-Exports-Report.md`. **Not built:** retention [Future].
 
 Append-only record of important actions (grade changes, document approvals, payment
 records, authorization changes, login failures). Never logs secrets.

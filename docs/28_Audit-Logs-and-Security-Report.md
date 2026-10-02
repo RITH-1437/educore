@@ -2,7 +2,7 @@
 
 - **Date:** 2026-10-02
 - **Module:** 9.24 Audit Logs & Security (business-overview §9.24)
-- **Status:** `[Implemented]` (audit retention / export and failure alerting `[Future]`)
+- **Status:** `[Implemented]` (CSV export in `docs/31_CSV-Exports-Report.md`; audit retention and failure alerting `[Future]`)
 - **Depends on:** every module that changes sensitive data
 
 ## 1. Scope
@@ -14,7 +14,8 @@ account deactivated after signing in now loses its session and API tokens on
 its next request, and the trail is protected against tampering in the database
 itself.
 
-Not built: retention / archiving and export of the trail, alerting on
+Not built: retention / archiving of the trail (CSV export was added later —
+`docs/31_CSV-Exports-Report.md`), alerting on
 repeated notification failures, audit entries for low-risk CRUD (faculties,
 courses, rooms…), two-factor sign-in.
 

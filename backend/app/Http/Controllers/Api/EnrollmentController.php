@@ -51,16 +51,28 @@ class EnrollmentController extends Controller
     {
         $this->authorize('viewAny', Enrollment::class);
 
+        return EnrollmentResource::collection($this->enrollments->paginate([
+            ...self::filters($request),
+            'per_page' => min(max($request->integer('per_page') ?: 15, 1), 100),
+        ]));
+    }
+
+    /**
+     * List filters from `search` and `filters[...]` (shared with the CSV export).
+     *
+     * @return array{search: mixed, student_id: ?int, section_id: ?int, semester_id: ?int, status: ?string}
+     */
+    public static function filters(Request $request): array
+    {
         $filters = is_array($request->query('filters')) ? $request->query('filters') : [];
 
-        return EnrollmentResource::collection($this->enrollments->paginate([
-            'search' => $request->query('search'),
+        return [
+            'search' => is_string($request->query('search')) ? $request->query('search') : null,
             'student_id' => isset($filters['student_id']) ? (int) $filters['student_id'] : null,
             'section_id' => isset($filters['section_id']) ? (int) $filters['section_id'] : null,
             'semester_id' => isset($filters['semester_id']) ? (int) $filters['semester_id'] : null,
             'status' => in_array($filters['status'] ?? null, Enrollment::STATUSES, true) ? $filters['status'] : null,
-            'per_page' => min(max($request->integer('per_page') ?: 15, 1), 100),
-        ]));
+        ];
     }
 
     #[OA\Post(

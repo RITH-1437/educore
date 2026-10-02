@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\AuditLogResource;
 use App\Models\AuditLog;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use OpenApi\Attributes as OA;
@@ -70,6 +71,16 @@ class AuditLogController extends Controller
     /** Shared with the web page. */
     public function search(Request $request): LengthAwarePaginator
     {
+        return $this->searchQuery($request)->paginate(25)->withQueryString();
+    }
+
+    /**
+     * The filtered, ordered trail (shared by the list and the CSV export).
+     *
+     * @return Builder<AuditLog>
+     */
+    public function searchQuery(Request $request): Builder
+    {
         $v = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
             'filters.area' => ['nullable', 'string', 'max:50', 'regex:/^[a-z_]+$/'],
@@ -92,9 +103,7 @@ class AuditLogController extends Controller
                 ->orWhere('action', 'ilike', "%{$s}%")
                 ->orWhereHas('actor', fn ($a) => $a->where('name', 'ilike', "%{$s}%")->orWhere('email', 'ilike', "%{$s}%"))))
             ->latest('created_at')
-            ->latest('id')
-            ->paginate(25)
-            ->withQueryString();
+            ->latest('id');
     }
 
     /**

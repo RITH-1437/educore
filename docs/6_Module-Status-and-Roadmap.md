@@ -38,8 +38,8 @@
 | 9.20 | Email Notifications | `[Implemented]` (password emails `[Future]`) |
 | 9.21 | Telegram Notifications | `[Implemented]` (class reminders `[Future]`) |
 | 9.22 | Internship Management | `[Implemented]` (opportunity postings, letter document `[Future]`) |
-| 9.23 | Analytics & Reporting | `[Implemented]` (exports, faculty-scoped views `[Future]`) |
-| 9.24 | Audit Logs & Security | `[Implemented]` (retention / export `[Future]`) |
+| 9.23 | Analytics & Reporting | `[Implemented]` (CSV exports in report 31; PDF exports, faculty-scoped views `[Future]`) |
+| 9.24 | Audit Logs & Security | `[Implemented]` (CSV export in report 31; retention `[Future]`) |
 
 > No module is documented as implemented unless it is genuinely tested and running
 > (the documentation skill forbids overclaiming).
@@ -435,12 +435,12 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` Flaky `GradingTest` fixed (explicit academic-year codes moved outside
   the factory's random 1950–2099 range).
 - `[Done]` 9.23 Analytics & Reporting. Report:
-  `docs/27_Analytics-and-Reporting-Report.md`. `[Open]` CSV / PDF exports,
+  `docs/27_Analytics-and-Reporting-Report.md`. `[Done]` CSV exports. `[Open]` PDF exports,
   Faculty Admin views (unit scoping), trends across semesters; the charts were
   not inspected in a browser when shipped.
 - `[Done]` 9.24 Audit Logs & Security. Report:
-  `docs/28_Audit-Logs-and-Security-Report.md`. `[Open]` Audit retention /
-  export, alerting on repeated notification failures, auditing low-risk
+  `docs/28_Audit-Logs-and-Security-Report.md`. `[Done]` Audit CSV export. `[Open]` Audit retention,
+  alerting on repeated notification failures, auditing low-risk
   structure CRUD, two-factor sign-in.
 - `[Done]` Password change and emailed password reset (web + API; other
   sessions / tokens end; audited; rate limited). Report:
@@ -457,3 +457,6 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` Grade finalization lock, student certificate and internship letter
   templates. Report: `docs/30_Grade-Finalization-and-Document-Templates-Report.md`. Existing databases: re-run
   `DocumentTypeSeeder` to add the two document types.
+- `[Done]` CSV exports: invoices, enrollments, audit trail and analytics
+  tables, streamed, same filters and access as the lists, every export
+  audited, formula cells neutralized. Report: `docs/31_CSV-Exports-Report.md`.

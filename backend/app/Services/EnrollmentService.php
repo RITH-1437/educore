@@ -11,6 +11,7 @@ use App\Models\Section;
 use App\Models\Student;
 use App\Notifications\EnrollmentConfirmed;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
@@ -38,6 +39,17 @@ class EnrollmentService
      */
     public function paginate(array $filters): LengthAwarePaginator
     {
+        return $this->query($filters)->paginate($filters['per_page'] ?? 15);
+    }
+
+    /**
+     * The filtered, ordered enrollment list (shared by the list and the CSV export).
+     *
+     * @param  array<string, mixed>  $filters  search, student_id, section_id, semester_id, status
+     * @return Builder<Enrollment>
+     */
+    public function query(array $filters): Builder
+    {
         $search = trim((string) ($filters['search'] ?? ''));
 
         return Enrollment::query()
@@ -51,8 +63,7 @@ class EnrollmentService
                 ->orWhere('first_name', 'ilike', "%{$search}%")
                 ->orWhere('last_name', 'ilike', "%{$search}%")))
             ->orderByDesc('enrolled_at')
-            ->orderByDesc('id')
-            ->paginate($filters['per_page'] ?? 15);
+            ->orderByDesc('id');
     }
 
     public function enroll(Student $student, Section $section): Enrollment

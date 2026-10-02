@@ -6,8 +6,8 @@
 | **Target market** | Designed for Cambodian university environments |
 | **Architecture** | Modular Monolith (MVC backend) |
 | **Development team** | Rin Nairith & Yong Lyhor |
-| **Status** | In development — foundation [Implemented], modules [Planned] |
-| **Report version** | 2.0 (rewritten; modernized formal baseline) |
+| **Status** | All business-overview §9 modules [Implemented] (2026-10-02); remaining gaps listed per module and in `docs/6_Module-Status-and-Roadmap.md` §6 |
+| **Report version** | 2.1 (status refreshed 2026-10-02 after modules 9.1–9.25) |
 
 > **Reading notes**
 > - **Status labels** are used throughout: `[Implemented]`, `[Planned]`,
@@ -158,17 +158,17 @@ management, administrative workflows, communication, and student services.
 
 ### 4.2 Specific Objectives
 
-1. Centralize university academic information. [Planned]
-2. Digitize student and lecturer management. [Planned]
-3. Manage faculties, departments, programs, courses, and sections. [Planned]
-4. Provide students with a centralized academic portal. [Planned]
-5. Provide lecturers with tools for attendance, assignments, exams, and grades. [Planned]
-6. Provide administrators with centralized management tools. [Planned]
-7. Digitize document request workflows with QR verification. [Planned]
-8. Provide invoice and payment-record management. [Planned]
-9. Improve communication through email and Telegram notifications. [Planned]
-10. Provide academic analytics and reporting. [Planned]
-11. Support the internship workflow. [Planned]
+1. Centralize university academic information. [Implemented]
+2. Digitize student and lecturer management. [Implemented]
+3. Manage faculties, departments, programs, courses, and sections. [Implemented]
+4. Provide students with a centralized academic portal. [Implemented]
+5. Provide lecturers with tools for attendance, assignments, exams, and grades. [Implemented]
+6. Provide administrators with centralized management tools. [Implemented]
+7. Digitize document request workflows with QR verification. [Implemented] (verification by printed code / URL; a scannable QR image is [Future])
+8. Provide invoice and payment-record management. [Implemented]
+9. Improve communication through email and Telegram notifications. [Implemented]
+10. Provide academic analytics and reporting. [Implemented] (exports [Future])
+11. Support the internship workflow. [Implemented]
 12. Build a modular-monolith architecture that supports future expansion. [Implemented]
 
 ---
@@ -333,14 +333,17 @@ flowchart TB
     Auth --> AdminAdmin
 ```
 
-All modules are `[Planned]` unless marked otherwise; the foundation beneath them is
-`[Implemented]`.
+All modules are `[Implemented]` as of 2026-10-02 (plus 9.25 System Error Logs,
+an addition). Each has a numbered report in `docs/` (7–28); §9 below notes, per
+module, what was deliberately left out.
 
 ---
 
 ## 9. Module Details
 
-### 9.1 Authentication & Authorization [Planned]
+### 9.1 Authentication & Authorization [Implemented]
+
+> **Status:** sign-in by email + password (web session and Sanctum API token), five roles enforced by route middleware and policies, inactive accounts refused and their sessions / tokens revoked (9.24). **Not built:** password change and password reset [Planned]; sign-in by student / staff ID [Future]; editable permission sets (roles are fixed) [Future].
 
 - **Login** with student ID / staff ID + password.
 - **Logout, password change, password reset, session/account management.**
@@ -363,7 +366,9 @@ sequenceDiagram
     A->>B: GET /api/user (Bearer token)
 ```
 
-### 9.2 Student Management [Planned]
+### 9.2 Student Management [Implemented]
+
+> **Status:** profiles, status lifecycle, program history — `docs/13_Student-Management-Report.md`. **Not built:** student photo [Future].
 
 Manages: student ID, name, gender, DOB, contact, address, photo, program, department,
 faculty, academic year, enrollment status.
@@ -377,23 +382,31 @@ flowchart LR
     ST --> W[Withdrawn]
 ```
 
-### 9.3 Lecturer Management [Planned]
+### 9.3 Lecturer Management [Implemented]
+
+> **Status:** `docs/12_Lecturer-Management-Report.md`; section assignment with 9.8.
 
 Manages: profile, employee info, department, academic position, assigned courses,
 teaching schedules, contact, status.
 
-### 9.4 Faculty & Department Management [Planned]
+### 9.4 Faculty & Department Management [Implemented]
+
+> **Status:** `docs/7_Faculty-and-Department-Report.md`; programs `docs/10_Program-Management-Report.md`.
 
 Manages faculties, departments, programs, and program structures (see §6).
 
-### 9.5 Course Management [Planned]
+### 9.5 Course Management [Implemented]
+
+> **Status:** `docs/11_Course-Management-Report.md`.
 
 Per course: code, name, description, credits, department, program, semester,
 prerequisites, sections, schedule.
 
 Example: `CS301 Software Engineering — 3 credits — Prerequisites: CS201, CS202`.
 
-### 9.6 Academic Year & Semester Management [Planned]
+### 9.6 Academic Year & Semester Management [Implemented]
+
+> **Status:** see `docs/5_Build-Steps-Report.md` and the roadmap.
 
 Supports academic years, semesters, and enrollment/registration/examination periods.
 
@@ -406,12 +419,16 @@ flowchart TB
     S1 --> X1[Examination period]
 ```
 
-### 9.7 Section Management [Planned]
+### 9.7 Section Management [Implemented]
+
+> **Status:** `docs/14_Class-and-Section-Report.md`.
 
 A course offering can have multiple sections (A, B, C…) each with lecturer, students,
 room, schedule, capacity, and semester. Capacity is enforced at enrollment.
 
-### 9.8 Course Registration / Enrollment [Planned]
+### 9.8 Course Registration / Enrollment [Implemented]
+
+> **Status:** `docs/15_Enrollment-Report.md`.
 
 ```mermaid
 flowchart TB
@@ -426,7 +443,9 @@ flowchart TB
 Validation checks: course availability, prerequisites, duplicate registration,
 semester, maximum credits, student status.
 
-### 9.9 Timetable Management [Planned]
+### 9.9 Timetable Management [Implemented]
+
+> **Status:** `docs/16_Timetable-Report.md`.
 
 ```mermaid
 flowchart LR
@@ -438,7 +457,9 @@ flowchart LR
     TT[Timetable builder] --> Conflicts
 ```
 
-### 9.10 Attendance Management [Planned]
+### 9.10 Attendance Management [Implemented]
+
+> **Status:** `docs/17_Attendance-Report.md`.
 
 ```mermaid
 flowchart LR
@@ -448,12 +469,16 @@ flowchart LR
     Calc --> Stu[Student views: e.g. 92%]
 ```
 
-### 9.11 Assignment Management [Planned]
+### 9.11 Assignment Management [Implemented]
+
+> **Status:** `docs/18_Assignments-Report.md`. **Not built:** lecturer-attached materials [Planned].
 
 - Lecturer: create assignments, set deadlines, upload files, view and grade submissions.
 - Student: view assignments, download materials, submit work, view results.
 
-### 9.12 Examination Management [Planned]
+### 9.12 Examination Management [Implemented]
+
+> **Status:** `docs/19_Examinations-Report.md`; course weighting with 9.13.
 
 Supports midterm, final, quizzes; exam schedules and results. Grading weights are
 configurable by the university.
@@ -467,7 +492,9 @@ pie
     "Attendance" : 10
 ```
 
-### 9.13 Grades & GPA [Planned]
+### 9.13 Grades & GPA [Implemented]
+
+> **Status:** `docs/20_Grades-and-GPA-Report.md`. **Not built:** the `finalized` lock step after approval [Planned].
 
 ```mermaid
 flowchart LR
@@ -479,7 +506,9 @@ flowchart LR
 
 Example scale (configurable): `A=4.0, B+=3.5, B=3.0, C+=2.5, C=2.0, D=1.0, F=0.0`.
 
-### 9.14 Student Academic Dashboard [Planned]
+### 9.14 Student Academic Dashboard [Implemented]
+
+> **Status:** `docs/21_Student-Academic-Dashboard-Report.md`.
 
 A single-page academic summary:
 
@@ -494,7 +523,9 @@ flowchart TB
     end
 ```
 
-### 9.15 Document Management [Planned]
+### 9.15 Document Management [Implemented]
+
+> **Status:** enrollment certificate, transcript and semester result as PDFs — `docs/22_Documents-and-Verification-Report.md`. **Not built:** student certificate and internship letter templates [Planned]; document fees [Future].
 
 Students request documents digitally (enrollment certificate, student certificate,
 academic transcript, academic result, internship letter, others).
@@ -508,7 +539,9 @@ flowchart TB
     Gen --> DL[Student downloads]
 ```
 
-### 9.16 Digital Document Verification [Planned]
+### 9.16 Digital Document Verification [Implemented]
+
+> **Status:** printed verification URL + code, public page with SHA-256 checksum — `docs/22_Documents-and-Verification-Report.md`. **Not built:** scannable QR image [Future].
 
 Generated documents carry a unique QR code linking to a verification page.
 
@@ -520,7 +553,9 @@ flowchart LR
     Check --> V[Valid / Invalid]
 ```
 
-### 9.17 Invoice & Payment Records [Planned]
+### 9.17 Invoice & Payment Records [Implemented]
+
+> **Status:** `docs/23_Invoices-and-Payments-Report.md`. **Not built:** invoice PDFs / receipts, automatic tuition billing [Future].
 
 ```mermaid
 flowchart LR
@@ -534,7 +569,9 @@ flowchart LR
 > **Boundary:** this records payments; it does **not** include an online payment
 > gateway in the initial scope. (`skills/invoices-payments/SKILL.md`)
 
-### 9.18 Announcement Management [Planned]
+### 9.18 Announcement Management [Implemented]
+
+> **Status:** `docs/24_Announcements-Report.md`. **Not built:** attachments, read receipts [Future].
 
 Targets: all students, faculty, department, program, class, course.
 
@@ -545,7 +582,9 @@ flowchart LR
     Target --> NTF[Email / Telegram]
 ```
 
-### 9.19 Notification System [Planned]
+### 9.19 Notification System [Implemented]
+
+> **Status:** email + Telegram, queued, with user preferences — `docs/25_Notifications-Report.md`. **Not built:** class-start reminders, password emails, in-app inbox [Future].
 
 - **Email:** announcements, document status, registration confirmation, password-related,
   administrative notifications.
@@ -553,7 +592,9 @@ flowchart LR
   academic notifications.
 - Designed so additional channels can be added later.
 
-### 9.20 Internship Management [Planned]
+### 9.20 Internship Management [Implemented]
+
+> **Status:** `docs/26_Internship-Management-Report.md`. **Not built:** published opportunity postings [Future].
 
 ```mermaid
 flowchart TB
@@ -567,7 +608,9 @@ flowchart TB
     Eval --> Fin[Final evaluation]
 ```
 
-### 9.21 Analytics & Reporting [Planned]
+### 9.21 Analytics & Reporting [Implemented]
+
+> **Status:** `docs/27_Analytics-and-Reporting-Report.md`. **Not built:** exports, faculty-scoped views, multi-semester trends [Future].
 
 - Student analytics: total/active/graduated/withdrawn.
 - Academic analytics: GPA distribution, course pass rate, attendance, course performance.
@@ -577,7 +620,9 @@ flowchart TB
 
 Derived from centralized data. No predictive analytics in the initial scope.
 
-### 9.22 Audit Logs [Planned]
+### 9.22 Audit Logs [Implemented]
+
+> **Status:** append-only in the application and the database, Super Admin viewer — `docs/28_Audit-Logs-and-Security-Report.md`. **Not built:** retention / export [Future].
 
 Append-only record of important actions (grade changes, document approvals, payment
 records, authorization changes, login failures). Never logs secrets.
@@ -717,6 +762,12 @@ gantt
 | Month 4 | Examinations, grades, documents, financial records |
 | Month 5 | Communication, analytics, internship, audit |
 | Month 6 | Testing, security, production hardening |
+
+**Progress (2026-10-02):** every module of business-overview §9 is
+implemented and tested (380 feature tests), documented in reports 7–28, with
+all 206 API operations in the OpenAPI document. The largest open item is unit
+scoping for Faculty / Department Admin (read-only everywhere until the user
+record carries a faculty or department); see `docs/6_Module-Status-and-Roadmap.md` §6.
 
 ---
 
@@ -949,7 +1000,7 @@ Only after these are approved should implementation proceed.
 | CI/CD | GitHub Actions |
 | Development | Agile |
 | MVP target | ~12 weeks (program 4–6 months) |
-| Status | Foundation [Implemented]; modules [Planned] |
+| Status | Foundation and all §9 modules [Implemented] (2026-10-02); gaps listed in §9 and the roadmap |
 
 ---
 

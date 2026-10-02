@@ -99,8 +99,9 @@ stateDiagram-v2
 | Companies: list | all | all | active only | 403 (lecturer) |
 | Companies: create / update | ✓ | 403 | 403 | 403 |
 
-Faculty Admin reads only, as in the other modules: without unit scoping on the
-user record, faculty-level approval would be university-wide.
+Faculty Admin reads only, as in the other modules, and only their faculty's
+students' internships (`docs/32_Faculty-Admin-Scoping-Report.md`). Faculty-level approval is a
+future unit-level write.
 
 ## 5. Endpoints
 

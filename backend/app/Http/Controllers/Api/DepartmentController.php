@@ -99,7 +99,7 @@ class DepartmentController extends Controller
     {
         $this->authorize('viewAny', Department::class);
 
-        $departments = $this->departments->paginate(DepartmentListFilters::fromInput($request->query()));
+        $departments = $this->departments->paginate(DepartmentListFilters::fromInput($request->query()), $request->user());
 
         return DepartmentResource::collection($departments);
     }
@@ -479,11 +479,12 @@ class DepartmentController extends Controller
             ),
         ]
     )]
-    public function tree(): JsonResponse
+    public function tree(Request $request): JsonResponse
     {
         $this->authorize('viewAny', Faculty::class);
 
         $tree = Faculty::query()
+            ->visibleTo($request->user())
             ->active()
             ->with(['departments' => fn ($query) => $query->active()])
             ->orderBy('name')

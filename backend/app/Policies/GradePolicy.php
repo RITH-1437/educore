@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Enums\Role;
+use App\Models\Course;
 use App\Models\Section;
 use App\Models\Student;
 use App\Models\User;
@@ -21,7 +22,7 @@ class GradePolicy
     /** A section's grade sheet. */
     public function viewSection(User $user, Section $section): bool
     {
-        return $this->staff($user) || $this->teaches($user, $section);
+        return $this->staffOver($user, $section) || $this->teaches($user, $section);
     }
 
     /** Compute drafts and submit them. */
@@ -50,7 +51,7 @@ class GradePolicy
 
     public function viewStudent(User $user, Student $student): bool
     {
-        return $this->staff($user)
+        return $this->staffOverStudent($user, $student)
             || ($user->isRole(Role::Student->value) && $user->student?->getKey() === $student->getKey());
     }
 
@@ -67,8 +68,8 @@ class GradePolicy
     }
 
     /** Read a course's weights. */
-    public function viewConfig(User $user): bool
+    public function viewConfig(User $user, Course $course): bool
     {
-        return $this->staff($user);
+        return $this->staff($user) && $course->isVisibleTo($user);
     }
 }

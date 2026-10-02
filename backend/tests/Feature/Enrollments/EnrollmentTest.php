@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Models\Course;
 use App\Models\CourseOffering;
 use App\Models\Enrollment;
+use App\Models\Faculty;
 use App\Models\Role as RoleModel;
 use App\Models\Section;
 use App\Models\Semester;
@@ -88,7 +89,11 @@ class EnrollmentTest extends TestCase
         $this->actingAs($this->student->user)->getJson('/api/enrollments')->assertForbidden();
         $this->actingAs($this->student->user)->getJson("/api/students/{$this->student->id}/enrollments")->assertOk()->assertJsonCount(1, 'data');
         $this->actingAs($this->student->user)->getJson("/api/students/{$other->id}/enrollments")->assertForbidden();
+        $this->facultyAdmin->update(['faculty_id' => $this->facultyOfSection($this->section)]);
         $this->actingAs($this->facultyAdmin)->getJson('/api/enrollments')->assertOk()->assertJsonCount(2, 'data');
+        $this->actingAs($this->facultyAdmin)->getJson("/api/enrollments/{$theirs->id}")->assertOk();
+        $this->actingAs($this->facultyAdminFor(Faculty::factory()->create()))->getJson('/api/enrollments')->assertOk()->assertJsonCount(0, 'data');
+        $this->actingAs($this->facultyAdminFor(null))->getJson("/api/enrollments/{$mine->id}")->assertForbidden();
         $this->actingAs($this->facultyAdmin)->postJson('/api/enrollments', ['student_id' => $this->student->id, 'section_id' => $this->section->id])->assertForbidden();
     }
 

@@ -4,7 +4,9 @@ namespace Tests\Feature\Exports;
 
 use App\Enums\Role;
 use App\Models\AuditLog;
+use App\Models\Course;
 use App\Models\Enrollment;
+use App\Models\Faculty;
 use App\Models\Role as RoleModel;
 use App\Models\Semester;
 use App\Models\Student;
@@ -92,7 +94,10 @@ class CsvExportTest extends TestCase
     public function test_enrollments_export_for_staff_with_filters(): void
     {
         $confirmed = Enrollment::factory()->create(['student_id' => $this->student->id]);
-        Enrollment::factory()->completed()->create();
+        $completed = Enrollment::factory()->completed()->create();
+        // The Faculty Admin's faculty owns both sections' courses.
+        Course::query()->whereKey($completed->section->offering->course_id)->update(['department_id' => $confirmed->section->offering->course->department_id]);
+        $this->facultyAdmin->update(['faculty_id' => $this->facultyOfSection($confirmed->section)]);
 
         $rows = $this->rows($this->actingAs($this->facultyAdmin)->get('/api/enrollments/export')->assertOk());
         $this->assertSame(['Student ID', 'Student', 'Course', 'Course name', 'Section', 'Semester', 'Credits', 'Status', 'Enrolled at', 'Dropped at'], $rows[0]);
@@ -105,6 +110,7 @@ class CsvExportTest extends TestCase
         $this->assertTrue(AuditLog::query()->where('action', 'export.enrollments')->exists());
 
         $this->actingAs($this->student->user)->get('/api/enrollments/export')->assertForbidden();
+        $this->assertCount(1, $this->rows($this->actingAs($this->facultyAdminFor(Faculty::factory()->create()))->get('/api/enrollments/export')->assertOk()));
         $this->assertCount(3, $this->rows($this->actingAs($this->facultyAdmin)->get('/enrollments/export')->assertOk()));
     }
 

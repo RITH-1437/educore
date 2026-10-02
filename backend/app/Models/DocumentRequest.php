@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToFaculty;
+use App\Support\FacultyScope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -32,6 +35,8 @@ use Illuminate\Support\Carbon;
  */
 class DocumentRequest extends Model
 {
+    use BelongsToFaculty;
+
     public const STATUS_PENDING = 'pending';
 
     public const STATUS_APPROVED = 'approved';
@@ -80,5 +85,15 @@ class DocumentRequest extends Model
     public function document(): HasOne
     {
         return $this->hasOne(Document::class);
+    }
+
+    /**
+     * Unit ownership (`App\Support\FacultyScope`).
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeInFaculty(Builder $query, int $facultyId): void
+    {
+        $query->whereIn('student_id', FacultyScope::studentIds($facultyId));
     }
 }

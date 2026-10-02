@@ -61,8 +61,11 @@ class CourseOfferingManagementTest extends TestCase
         $this->actingAs($this->student)->getJson('/api/offerings')->assertForbidden();
         $this->actingAs($this->student)->get('/offerings')->assertForbidden();
 
-        $this->actingAs($this->facultyAdmin)->getJson('/api/offerings')->assertOk();
+        $this->facultyAdmin->update(['faculty_id' => $this->course->department->faculty_id]);
+        $elsewhere = CourseOffering::factory()->create(['semester_id' => $this->semester->id]);
+        $this->actingAs($this->facultyAdmin)->getJson('/api/offerings')->assertOk()->assertJsonCount(1, 'data');
         $this->actingAs($this->facultyAdmin)->get("/offerings/{$offering->id}")->assertOk();
+        $this->actingAs($this->facultyAdmin)->getJson("/api/offerings/{$elsewhere->id}")->assertForbidden();
         $this->actingAs($this->facultyAdmin)->postJson('/api/offerings', $this->offeringPayload())->assertForbidden();
         $this->actingAs($this->facultyAdmin)->postJson("/api/offerings/{$offering->id}/sections", ['code' => 'A', 'capacity' => 30])->assertForbidden();
     }

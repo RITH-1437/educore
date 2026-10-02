@@ -6,6 +6,7 @@ use App\Dto\UniversityStructure\ProgramListFilters;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Course;
 use App\Models\Program;
+use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -34,9 +35,11 @@ class ProgramService
     /**
      * @return LengthAwarePaginator<int, Program>
      */
-    public function paginate(ProgramListFilters $filters): LengthAwarePaginator
+    /** `$viewer` limits a Faculty Admin to their faculty (`BelongsToFaculty`). */
+    public function paginate(ProgramListFilters $filters, ?User $viewer = null): LengthAwarePaginator
     {
         return Program::query()
+            ->when($viewer, fn ($query) => $query->visibleTo($viewer))
             ->with('department.faculty:id,code,name')
             ->search($filters->search)
             ->when($filters->departmentId, fn ($query, $id) => $query->where('department_id', $id))

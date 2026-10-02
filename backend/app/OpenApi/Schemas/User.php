@@ -31,6 +31,8 @@ use OpenApi\Attributes as OA;
             example: '2025-11-02T04:12:11.000000Z'
         ),
         new OA\Property(property: 'role', ref: '#/components/schemas/Role', nullable: true),
+        new OA\Property(property: 'faculty_id', type: 'integer', format: 'int64', nullable: true, description: 'Faculty Admin only: the faculty they administer.'),
+        new OA\Property(property: 'faculty', type: 'string', nullable: true, description: 'That faculty\'s name, when loaded.'),
     ]
 )]
 class User {}

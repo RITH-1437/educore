@@ -20,7 +20,7 @@ class StudentPolicy
      */
     public function view(User $user, Student $student): bool
     {
-        return $this->staff($user)
+        return ($this->staff($user) && $student->isVisibleTo($user))
             || ($user->isRole(Role::Student->value) && $student->user_id === $user->getKey());
     }
 
@@ -45,8 +45,8 @@ class StudentPolicy
     }
 
     /**
-     * Faculty Admin reads but does not manage: the user row has no
-     * faculty/department scope yet, so "manage in scope" cannot be enforced.
+     * Faculty Admin reads (within their faculty: `view` and the unit-scoped
+     * list) but does not manage.
      */
     private function staff(User $user): bool
     {

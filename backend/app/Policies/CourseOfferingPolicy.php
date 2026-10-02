@@ -17,9 +17,10 @@ class CourseOfferingPolicy
         return $this->staff($user);
     }
 
+    /** A Faculty Admin only sees offerings of their faculty's courses. */
     public function view(User $user, CourseOffering $offering): bool
     {
-        return $this->staff($user);
+        return $this->staff($user) && $offering->isVisibleTo($user);
     }
 
     public function create(User $user): bool

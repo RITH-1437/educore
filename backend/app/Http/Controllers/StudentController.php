@@ -39,7 +39,7 @@ class StudentController extends Controller
 
         $filters = StudentListFilters::fromInput($request->query());
 
-        $students = $this->students->paginate($filters)
+        $students = $this->students->paginate($filters, $request->user())
             ->withQueryString()
             ->appends($filters->toQueryString());
 
@@ -131,14 +131,15 @@ class StudentController extends Controller
     /**
      * @return array<string, mixed>
      */
+    /** Filter / form options; a Faculty Admin only gets their own faculty's. */
     private function lookups(): array
     {
         return [
             'faculties' => FacultyResource::collection(
-                Faculty::query()->where('is_active', true)->orderBy('name')->get()
+                Faculty::query()->visibleTo(request()->user())->where('is_active', true)->orderBy('name')->get()
             ),
             // Active programs with their faculty, for the faculty → program cascade.
-            'programs' => Program::query()
+            'programs' => Program::query()->visibleTo(request()->user())
                 ->where('is_active', true)
                 ->with('department:id,code,name,faculty_id')
                 ->orderBy('code')

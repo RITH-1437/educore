@@ -14,6 +14,7 @@ use App\Models\CourseOffering;
 use App\Models\Enrollment;
 use App\Models\Exam;
 use App\Models\ExamResult;
+use App\Models\Faculty;
 use App\Models\GpaRecord;
 use App\Models\Grade;
 use App\Models\Lecturer;
@@ -320,10 +321,14 @@ class GradingTest extends TestCase
     public function test_role_matrix(): void
     {
         $base = "/api/sections/{$this->section->id}/grades";
-        $faculty = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::FacultyAdmin->value)->create()->id]);
+        $faculty = $this->facultyAdminFor($this->facultyOfSection($this->section));
+        $this->placeInFaculty($this->bob, $faculty->faculty_id);
+        $otherFaculty = $this->facultyAdminFor(Faculty::factory()->create());
         $outsider = Lecturer::factory()->create();
 
         $this->actingAs($faculty)->getJson($base)->assertOk();
+        $this->actingAs($otherFaculty)->getJson($base)->assertForbidden();
+        $this->actingAs($otherFaculty)->getJson("/api/students/{$this->bob->id}/gpa")->assertForbidden();
         $this->actingAs($faculty)->postJson($base)->assertForbidden();
         $this->actingAs($outsider->user)->getJson($base)->assertForbidden();
         $this->actingAs($outsider->user)->postJson($base)->assertForbidden();

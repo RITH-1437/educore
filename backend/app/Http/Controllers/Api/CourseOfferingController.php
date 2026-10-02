@@ -61,7 +61,7 @@ class CourseOfferingController extends Controller
             'course_id' => isset($filters['course_id']) ? (int) $filters['course_id'] : null,
             'status' => in_array($status, CourseOffering::STATUSES, true) ? $status : null,
             'per_page' => min(max($request->integer('per_page') ?: 15, 1), 100),
-        ]));
+        ], $request->user()));
     }
 
     #[OA\Post(

@@ -3,8 +3,10 @@
 namespace App\Models;
 
 // use Database\Factories\UserFactory;
+use App\Enums\Role as RoleSlug;
 use App\Notifications\ResetPasswordLink;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -25,6 +27,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
+        'faculty_id',
         'phone',
         'avatar_key',
         'is_active',
@@ -105,5 +108,21 @@ class User extends Authenticatable
     public function isRole(string $slug): bool
     {
         return $this->role?->slug === $slug;
+    }
+
+    /** The faculty a Faculty Admin administers (null for every other role). */
+    public function faculty(): BelongsTo
+    {
+        return $this->belongsTo(Faculty::class);
+    }
+
+    /**
+     * The faculty this user's data access is limited to: null = no unit limit
+     * (every role except Faculty Admin); for a Faculty Admin their faculty id,
+     * or 0 when none is assigned, which matches nothing (fail closed).
+     */
+    public function facultyScope(): ?int
+    {
+        return $this->isRole(RoleSlug::FacultyAdmin->value) ? (int) ($this->faculty_id ?? 0) : null;
     }
 }

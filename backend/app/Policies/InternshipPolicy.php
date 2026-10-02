@@ -22,7 +22,7 @@ class InternshipPolicy
 
     public function view(User $user, Internship $internship): bool
     {
-        return $this->staff($user) || $this->owns($user, $internship);
+        return ($this->staff($user) && $internship->isVisibleTo($user)) || $this->owns($user, $internship);
     }
 
     public function apply(User $user): bool

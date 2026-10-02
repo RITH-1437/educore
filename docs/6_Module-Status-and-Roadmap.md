@@ -165,8 +165,8 @@ Lecturer-role account linked, in one transaction; profile/account `is_active`
 mirrored; delete keeps the account inactive and is refused while
 `section_lecturers` rows exist), `LecturerPolicy` (lecturer reads own profile,
 Faculty Admin read-only), `Lecturers/Index|Edit`, `/api/lecturers` with OpenAPI
-annotations, `LecturerSeeder`, 23 feature tests. Department-scoped visibility
-waits for unit scoping on the user record. Report:
+annotations, `LecturerSeeder`, 23 feature tests. Faculty-scoped visibility
+for Faculty Admin arrived with report 32. Report:
 `docs/12_Lecturer-Management-Report.md`.
 
 ### Phase B — Academic core
@@ -426,7 +426,7 @@ A module is not done until its report exists and its tests pass — never label
   (9.24).
 - `[Done]` 9.22 Internship Management. Report:
   `docs/26_Internship-Management-Report.md`. `[Open]` Opportunity postings,
-  supervisor logins, Faculty Admin approval (needs unit scoping). `[Done]`
+  supervisor logins, Faculty Admin approval (unit-level writes). `[Done]`
   Internship letter document.
 - `[Done]` `educore/backend:dev` rebuilt: the image predated the
   production-only config caching fix, so containers started from it cached
@@ -436,7 +436,7 @@ A module is not done until its report exists and its tests pass — never label
   the factory's random 1950–2099 range).
 - `[Done]` 9.23 Analytics & Reporting. Report:
   `docs/27_Analytics-and-Reporting-Report.md`. `[Done]` CSV exports. `[Open]` PDF exports,
-  Faculty Admin views (unit scoping), trends across semesters; the charts were
+  Faculty Admin analytics (scoping exists now, report 32), trends across semesters; the charts were
   not inspected in a browser when shipped.
 - `[Done]` 9.24 Audit Logs & Security. Report:
   `docs/28_Audit-Logs-and-Security-Report.md`. `[Done]` Audit CSV export. `[Open]` Audit retention,
@@ -453,10 +453,15 @@ A module is not done until its report exists and its tests pass — never label
   missing — backend, queue and scheduler raced on the shared bind mount
   ("symlink(): File exists"). Image rebuilt.
 - All modules of business-overview §9 are now implemented. Remaining open
-  items are listed above (unit scoping for Faculty Admin is the largest).
+  items are listed above.
 - `[Done]` Grade finalization lock, student certificate and internship letter
   templates. Report: `docs/30_Grade-Finalization-and-Document-Templates-Report.md`. Existing databases: re-run
   `DocumentTypeSeeder` to add the two document types.
 - `[Done]` CSV exports: invoices, enrollments, audit trail and analytics
   tables, streamed, same filters and access as the lists, every export
   audited, formula cells neutralized. Report: `docs/31_CSV-Exports-Report.md`.
+- `[Done]` Faculty Admin unit scoping: `users.faculty_id`, read access limited
+  to the assigned faculty across structure, people, academic activity,
+  enrollments, documents and internships; unassigned = no unit data.
+  Report: `docs/32_Faculty-Admin-Scoping-Report.md`. `[Open]` Unit-level writes for Faculty Admin,
+  department-level admins, Faculty Admin analytics.

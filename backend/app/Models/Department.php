@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToFaculty;
 use Database\Factories\DepartmentFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -27,6 +28,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Department extends Model
 {
+    use BelongsToFaculty;
+
     /** @use HasFactory<DepartmentFactory> */
     use HasFactory;
 
@@ -94,5 +97,15 @@ class Department extends Model
     public function isActive(): bool
     {
         return $this->is_active;
+    }
+
+    /**
+     * Unit ownership (`App\Support\FacultyScope`).
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeInFaculty(Builder $query, int $facultyId): void
+    {
+        $query->where('faculty_id', $facultyId);
     }
 }

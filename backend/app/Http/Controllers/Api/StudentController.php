@@ -59,7 +59,7 @@ class StudentController extends Controller
         $this->authorize('viewAny', Student::class);
 
         return StudentResource::collection(
-            $this->students->paginate(StudentListFilters::fromInput($request->query()))
+            $this->students->paginate(StudentListFilters::fromInput($request->query()), $request->user())
         );
     }
 

@@ -20,7 +20,7 @@ class AssignmentPolicy
     /** List a section's assignments (students see only published ones). */
     public function viewSection(User $user, Section $section): bool
     {
-        return $this->staff($user) || $this->teaches($user, $section) || $this->enrolledIn($user, $section);
+        return $this->staffOver($user, $section) || $this->teaches($user, $section) || $this->enrolledIn($user, $section);
     }
 
     public function create(User $user, Section $section): bool
@@ -30,7 +30,7 @@ class AssignmentPolicy
 
     public function view(User $user, Assignment $assignment): bool
     {
-        return $this->staff($user)
+        return $this->staffOver($user, $assignment->section)
             || $this->teaches($user, $assignment->section)
             || ($assignment->is_published && $this->enrolledIn($user, $assignment->section));
     }
@@ -53,7 +53,7 @@ class AssignmentPolicy
 
     public function viewSubmissions(User $user, Assignment $assignment): bool
     {
-        return $this->staff($user) || $this->teaches($user, $assignment->section);
+        return $this->staffOver($user, $assignment->section) || $this->teaches($user, $assignment->section);
     }
 
     public function submit(User $user, Assignment $assignment): bool

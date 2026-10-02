@@ -36,12 +36,12 @@ class UserService
     {
         $user = DB::transaction(function () use ($data) {
             $user = $this->users->create($data);
-            $this->audit->record('user.created', $user, after: $user->only(['name', 'email', 'role_id', 'is_active']));
+            $this->audit->record('user.created', $user, after: $user->only(['name', 'email', 'role_id', 'faculty_id', 'is_active']));
 
             return $user;
         });
 
-        return UserData::fromModel($user->load('role'), withRole: true);
+        return UserData::fromModel($user->load('role', 'faculty:id,name'), withRole: true);
     }
 
     public function update(User $user, UpdateUserData $data): UserData
@@ -54,7 +54,7 @@ class UserService
             $this->audit->changes('user.updated', $user->refresh(), $before);
         });
 
-        return UserData::fromModel($user->fresh()->load('role'), withRole: true);
+        return UserData::fromModel($user->fresh()->load('role', 'faculty:id,name'), withRole: true);
     }
 
     public function delete(User $user): void

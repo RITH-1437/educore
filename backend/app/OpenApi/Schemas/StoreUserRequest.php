@@ -23,6 +23,7 @@ use OpenApi\Attributes as OA;
             description: 'Identifier of an existing role.'
         ),
         new OA\Property(property: 'is_active', type: 'boolean', example: true),
+        new OA\Property(property: 'faculty_id', type: 'integer', format: 'int64', nullable: true, description: 'Faculty a Faculty Admin administers (limits what they can see). Only allowed when `role_id` is the Faculty Admin role; omitted or null clears it.'),
         new OA\Property(property: 'password', type: 'string', format: 'password', minLength: 8, example: 'secret-password'),
         new OA\Property(property: 'password_confirmation', type: 'string', format: 'password', example: 'secret-password'),
     ]

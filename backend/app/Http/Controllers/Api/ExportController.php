@@ -103,7 +103,7 @@ class ExportController extends Controller
     {
         $this->authorize('viewAny', Enrollment::class);
         $filters = EnrollmentController::filters($request);
-        $query = $this->enrollments->query($filters);
+        $query = $this->enrollments->query($filters, $request->user());
         $this->audited('enrollments', $filters, $query->count());
 
         return CsvExport::download(CsvExport::filename('enrollments'),

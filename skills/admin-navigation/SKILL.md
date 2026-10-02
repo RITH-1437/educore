@@ -84,7 +84,7 @@ once its module is `[Implemented]`.
 ### Faculty Admin
 
 Dashboard · Academic structure (read-only: University, Faculties & departments,
-Programs). Academic items follow once unit scoping exists on the user record.
+Programs), limited to their assigned faculty (`users.faculty_id`, `docs/32_Faculty-Admin-Scoping-Report.md`).
 
 ### Lecturer
 

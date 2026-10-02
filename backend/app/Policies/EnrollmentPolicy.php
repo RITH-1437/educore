@@ -20,7 +20,7 @@ class EnrollmentPolicy
 
     public function view(User $user, Enrollment $enrollment): bool
     {
-        return $this->staff($user) || $this->owns($user, $enrollment);
+        return ($this->staff($user) && $enrollment->isVisibleTo($user)) || $this->owns($user, $enrollment);
     }
 
     /**

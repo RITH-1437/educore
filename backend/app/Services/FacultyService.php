@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Dto\UniversityStructure\FacultyListFilters;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Faculty;
+use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 
@@ -23,9 +24,11 @@ class FacultyService
     /**
      * @return LengthAwarePaginator<int, Faculty>
      */
-    public function paginate(FacultyListFilters $filters): LengthAwarePaginator
+    /** `$viewer` limits a Faculty Admin to their faculty (`BelongsToFaculty`). */
+    public function paginate(FacultyListFilters $filters, ?User $viewer = null): LengthAwarePaginator
     {
         return Faculty::query()
+            ->when($viewer, fn ($query) => $query->visibleTo($viewer))
             ->with('university:id,code,name')
             ->withCount('departments')
             ->withCount([

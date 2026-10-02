@@ -26,12 +26,12 @@ class AttendancePolicy
 
     public function viewSection(User $user, Section $section): bool
     {
-        return $this->staff($user) || $this->teaches($user, $section);
+        return $this->staffOver($user, $section) || $this->teaches($user, $section);
     }
 
     public function viewStudent(User $user, Student $student): bool
     {
-        return $this->staff($user)
+        return $this->staffOverStudent($user, $student)
             || ($user->isRole(Role::Student->value) && $user->student?->getKey() === $student->getKey());
     }
 }

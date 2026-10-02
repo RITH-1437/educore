@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToFaculty;
+use App\Support\FacultyScope;
 use Database\Factories\CourseFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,6 +33,8 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Course extends Model
 {
+    use BelongsToFaculty;
+
     /** @use HasFactory<CourseFactory> */
     use HasFactory;
 
@@ -141,5 +145,15 @@ class Course extends Model
     public function isArchived(): bool
     {
         return $this->status === self::STATUS_ARCHIVED;
+    }
+
+    /**
+     * Unit ownership (`App\Support\FacultyScope`).
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeInFaculty(Builder $query, int $facultyId): void
+    {
+        $query->whereIn('department_id', FacultyScope::departmentIds($facultyId));
     }
 }

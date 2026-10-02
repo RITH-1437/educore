@@ -28,7 +28,7 @@ class DocumentRequestPolicy
     /** See a request and download its document. */
     public function view(User $user, DocumentRequest $request): bool
     {
-        return $this->staff($user)
+        return ($this->staff($user) && $request->isVisibleTo($user))
             || ($user->isRole(Role::Student->value) && $user->student?->getKey() === $request->student_id);
     }
 

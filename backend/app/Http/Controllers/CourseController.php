@@ -40,7 +40,7 @@ class CourseController extends Controller
 
         $filters = CourseListFilters::fromInput($request->query());
 
-        $courses = $this->courses->paginate($filters)
+        $courses = $this->courses->paginate($filters, $request->user())
             ->withQueryString()
             ->appends($filters->toQueryString());
 
@@ -165,16 +165,17 @@ class CourseController extends Controller
      *
      * @return array<string, mixed>
      */
+    /** Filter / form options; a Faculty Admin only gets their own faculty's. */
     private function lookups(): array
     {
         return [
             'faculties' => FacultyResource::collection(
-                Faculty::query()->where('is_active', true)->orderBy('name')->get()
+                Faculty::query()->visibleTo(request()->user())->where('is_active', true)->orderBy('name')->get()
             ),
             'departments' => DepartmentResource::collection(
-                Department::query()->where('is_active', true)->orderBy('name')->get()
+                Department::query()->visibleTo(request()->user())->where('is_active', true)->orderBy('name')->get()
             ),
-            'programs' => Program::query()->orderBy('code')->get(['id', 'code', 'name'])
+            'programs' => Program::query()->visibleTo(request()->user())->orderBy('code')->get(['id', 'code', 'name'])
                 ->map(fn (Program $program) => ['id' => $program->id, 'code' => $program->code, 'name' => $program->name])
                 ->values(),
             'levels' => Course::LEVELS,

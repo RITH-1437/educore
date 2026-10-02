@@ -2,11 +2,10 @@
 
 namespace Tests\Feature\Internships;
 
-use App\Enums\Role;
+use App\Models\Faculty;
 use App\Models\Internship;
 use App\Models\InternshipCompany;
 use App\Models\InternshipReport;
-use App\Models\Role as RoleModel;
 use App\Models\Student;
 use App\Models\User;
 use App\Notifications\InternshipStatusChanged;
@@ -136,7 +135,9 @@ class InternshipTest extends TestCase
     {
         $id = $this->apply();
         $other = Student::factory()->create();
-        $faculty = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::FacultyAdmin->value)->create()->id]);
+        $faculty = $this->facultyAdminFor(Faculty::factory()->create());
+        $this->placeInFaculty($this->student, $faculty->faculty_id);
+        $outsideFaculty = $this->facultyAdminFor(Faculty::factory()->create());
 
         $this->actingAs($other->user)->getJson("/api/internships/{$id}")->assertForbidden();
         $this->actingAs($other->user)->postJson("/api/internships/{$id}/submit")->assertForbidden();
@@ -146,6 +147,8 @@ class InternshipTest extends TestCase
 
         $this->actingAs($faculty)->getJson('/api/internships')->assertOk()->assertJsonCount(1, 'data');
         $this->actingAs($faculty)->getJson("/api/internships/{$id}")->assertOk();
+        $this->actingAs($outsideFaculty)->getJson('/api/internships')->assertOk()->assertJsonCount(0, 'data');
+        $this->actingAs($outsideFaculty)->getJson("/api/internships/{$id}")->assertForbidden();
         $this->actingAs($faculty)->postJson("/api/internships/{$id}/review")->assertForbidden();
 
         $this->actingAs($this->student->user)->postJson("/api/internships/{$id}/fly")->assertNotFound();

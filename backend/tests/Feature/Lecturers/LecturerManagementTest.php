@@ -96,7 +96,11 @@ class LecturerManagementTest extends TestCase
     public function test_faculty_admin_may_read_but_not_write(): void
     {
         $lecturer = $this->makeLecturer();
+        $this->facultyAdmin->update(['faculty_id' => $this->department->faculty_id]);
+        $elsewhere = Lecturer::factory()->create();
 
+        $this->actingAs($this->facultyAdmin)->getJson("/api/lecturers/{$elsewhere->id}")->assertForbidden();
+        $this->actingAs($this->facultyAdmin)->getJson('/api/lecturers')->assertOk()->assertJsonCount(1, 'data');
         $this->actingAs($this->facultyAdmin)->get('/lecturers')->assertOk();
         $this->actingAs($this->facultyAdmin)->getJson('/api/lecturers')->assertOk();
         $this->actingAs($this->facultyAdmin)->getJson("/api/lecturers/{$lecturer->id}")->assertOk();
@@ -106,7 +110,7 @@ class LecturerManagementTest extends TestCase
         $this->actingAs($this->facultyAdmin)->postJson("/api/lecturers/{$lecturer->id}/deactivate")->assertForbidden();
         $this->actingAs($this->facultyAdmin)->deleteJson("/api/lecturers/{$lecturer->id}")->assertForbidden();
 
-        $this->assertDatabaseCount('lecturers', 1);
+        $this->assertDatabaseCount('lecturers', 2);
     }
 
     // ------------------------------------------------------------ screens ---

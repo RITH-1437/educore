@@ -191,7 +191,7 @@ flowchart TB
 |---|---|---|
 | **Super Admin** | Platform owner | User/role/permission management, university configuration, audit logs, monitoring |
 | **University Admin** | University-level administration | Faculties, departments, programs, students, lecturers, courses, semesters, announcements, documents, payment records, reports |
-| **Faculty / Department Admin** | Unit-level academic operations | Their unit's students, lecturers, courses, sections, schedules; monitor attendance/performance; review requests |
+| **Faculty / Department Admin** | Unit-level academic operations | Their unit's students, lecturers, courses, sections, schedules; monitor attendance/performance; review requests (implemented: read-only, limited to the assigned faculty) |
 | **Lecturer** | Teaching management | View assigned sections, take attendance, create assignments, manage exams, submit grades, publish course announcements, upload materials |
 | **Student** | Own academic life | View profile/academic info, register courses, view timetable/attendance/assignments/exams/grades/GPA, request documents, view invoices/payments, receive announcements |
 
@@ -764,10 +764,10 @@ gantt
 | Month 6 | Testing, security, production hardening |
 
 **Progress (2026-10-02):** every module of business-overview §9 is
-implemented and tested (380 feature tests), documented in reports 7–28, with
-all 206 API operations in the OpenAPI document. The largest open item is unit
-scoping for Faculty / Department Admin (read-only everywhere until the user
-record carries a faculty or department); see `docs/6_Module-Status-and-Roadmap.md` §6.
+implemented and tested (399 feature tests), documented in reports 7–32, with
+all 215 API operations in the OpenAPI document. Faculty / Department Admin
+reads are limited to their assigned faculty (`docs/32_Faculty-Admin-Scoping-Report.md`);
+their unit-level writes remain open — see `docs/6_Module-Status-and-Roadmap.md` §6.
 
 ---
 

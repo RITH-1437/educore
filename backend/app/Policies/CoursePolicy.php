@@ -13,9 +13,10 @@ class CoursePolicy
         return $this->viewCatalog($user);
     }
 
+    /** A Faculty Admin only sees their own faculty's records. */
     public function view(User $user, Course $course): bool
     {
-        return $this->viewCatalog($user);
+        return $this->viewCatalog($user) && $course->isVisibleTo($user);
     }
 
     public function create(User $user): bool

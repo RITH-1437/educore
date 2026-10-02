@@ -38,7 +38,7 @@ class LecturerController extends Controller
 
         $filters = LecturerListFilters::fromInput($request->query());
 
-        $lecturers = $this->lecturers->paginate($filters)
+        $lecturers = $this->lecturers->paginate($filters, $request->user())
             ->withQueryString()
             ->appends($filters->toQueryString());
 
@@ -132,14 +132,15 @@ class LecturerController extends Controller
     /**
      * @return array<string, mixed>
      */
+    /** Filter / form options; a Faculty Admin only gets their own faculty's. */
     private function lookups(): array
     {
         return [
             'faculties' => FacultyResource::collection(
-                Faculty::query()->where('is_active', true)->orderBy('name')->get()
+                Faculty::query()->visibleTo(request()->user())->where('is_active', true)->orderBy('name')->get()
             ),
             'departments' => DepartmentResource::collection(
-                Department::query()->where('is_active', true)->orderBy('name')->get()
+                Department::query()->visibleTo(request()->user())->where('is_active', true)->orderBy('name')->get()
             ),
             'employmentTypes' => Lecturer::EMPLOYMENT_TYPES,
         ];

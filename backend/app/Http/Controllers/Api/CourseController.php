@@ -57,7 +57,7 @@ class CourseController extends Controller
         $this->authorize('viewAny', Course::class);
 
         return CourseResource::collection(
-            $this->courses->paginate(CourseListFilters::fromInput($request->query()))
+            $this->courses->paginate(CourseListFilters::fromInput($request->query()), $request->user())
         );
     }
 

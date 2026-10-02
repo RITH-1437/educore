@@ -36,7 +36,7 @@ class EnrollmentController extends Controller
         ];
 
         return Inertia::render('Enrollments/Index', [
-            'enrollments' => EnrollmentResource::collection($this->enrollments->paginate($filters)->withQueryString()),
+            'enrollments' => EnrollmentResource::collection($this->enrollments->paginate($filters, $request->user())->withQueryString()),
             'semesters' => Semester::query()->with('academicYear:id,code')->orderByDesc('academic_year_id')->orderBy('sequence')->get()
                 ->map(fn (Semester $semester) => ['id' => $semester->id, 'label' => $semester->academicYear?->code.' · '.$semester->name])->values(),
             // Sections currently open for registration, with seats left.

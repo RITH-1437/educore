@@ -79,7 +79,11 @@ class CourseManagementTest extends TestCase
         $course = Course::factory()->create(['department_id' => $this->department->id]);
         $other = Course::factory()->create(['department_id' => $this->department->id]);
         $program = Program::factory()->create(['department_id' => $this->department->id]);
+        $this->facultyAdmin->update(['faculty_id' => $this->department->faculty_id]);
+        $elsewhere = Course::factory()->create();
 
+        $this->actingAs($this->facultyAdmin)->getJson('/api/courses')->assertOk()->assertJsonMissing(['id' => $elsewhere->id]);
+        $this->actingAs($this->facultyAdmin)->getJson("/api/courses/{$elsewhere->id}")->assertForbidden();
         $this->actingAs($this->facultyAdmin)->get('/courses')->assertOk();
         $this->actingAs($this->facultyAdmin)->getJson('/api/courses')->assertOk();
         $this->actingAs($this->facultyAdmin)->getJson("/api/courses/{$course->id}")->assertOk();
@@ -95,7 +99,7 @@ class CourseManagementTest extends TestCase
             ->postJson("/api/programs/{$program->id}/courses", ['course_id' => $course->id])
             ->assertForbidden();
 
-        $this->assertDatabaseCount('courses', 2);
+        $this->assertDatabaseCount('courses', 3);
         $this->assertDatabaseCount('course_programs', 0);
     }
 

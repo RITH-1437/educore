@@ -98,7 +98,7 @@ class FacultyController extends Controller
     {
         $this->authorize('viewAny', Faculty::class);
 
-        $faculties = $this->faculties->paginate(FacultyListFilters::fromInput($request->query()));
+        $faculties = $this->faculties->paginate(FacultyListFilters::fromInput($request->query()), $request->user());
 
         return FacultyResource::collection($faculties);
     }

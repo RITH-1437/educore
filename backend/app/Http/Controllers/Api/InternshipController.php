@@ -410,6 +410,8 @@ class InternshipController extends Controller
         if (! $user->can('viewAny', Internship::class)) {
             abort_unless($user->can('apply', Internship::class), 403);
             $query->where('student_id', $user->student->getKey());
+        } else {
+            $query->visibleTo($user);
         }
 
         return $query->paginate(15)->withQueryString();

@@ -261,7 +261,7 @@ class DocumentController extends Controller
         $query = DocumentRequest::query()->with(self::RELATIONS)->latest('submitted_at')->latest('id');
 
         if ($user->can('viewAny', DocumentRequest::class)) {
-            $query->when($status, fn ($q) => $q->where('status', $status));
+            $query->visibleTo($user)->when($status, fn ($q) => $q->where('status', $status));
         } elseif ($user->can('create', DocumentRequest::class)) {
             $query->where('student_id', $user->student->getKey())->when($status, fn ($q) => $q->where('status', $status));
         } else {

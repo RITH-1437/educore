@@ -2,14 +2,13 @@
 
 namespace Tests\Feature\Exams;
 
-use App\Enums\Role;
 use App\Models\Course;
 use App\Models\CourseOffering;
 use App\Models\Enrollment;
 use App\Models\Exam;
 use App\Models\ExamResult;
+use App\Models\Faculty;
 use App\Models\Lecturer;
-use App\Models\Role as RoleModel;
 use App\Models\Section;
 use App\Models\Semester;
 use App\Models\Student;
@@ -179,12 +178,16 @@ class ExamTest extends TestCase
     public function test_roles(): void
     {
         $exam = Exam::factory()->create(['section_id' => $this->section->id]);
-        $faculty = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::FacultyAdmin->value)->create()->id]);
+        $faculty = $this->facultyAdminFor($this->facultyOfSection($this->section));
+        $this->placeInFaculty($this->student, $this->facultyOfSection($this->section));
+        $otherFaculty = $this->facultyAdminFor(Faculty::factory()->create());
         $outsider = Lecturer::factory()->create();
 
         $this->actingAs($faculty)->getJson("/api/exams/{$exam->id}")->assertOk()->assertJsonCount(1, 'results');
         $this->actingAs($faculty)->postJson("/api/sections/{$this->section->id}/exams", $this->payload())->assertForbidden();
         $this->actingAs($faculty)->getJson("/api/students/{$this->student->id}/exams")->assertOk();
+        $this->actingAs($otherFaculty)->getJson("/api/exams/{$exam->id}")->assertForbidden();
+        $this->actingAs($otherFaculty)->getJson("/api/students/{$this->student->id}/exams")->assertForbidden();
 
         $this->actingAs($outsider->user)->getJson("/api/sections/{$this->section->id}/exams")->assertForbidden();
         $this->actingAs($outsider->user)->putJson("/api/exams/{$exam->id}", $this->payload())->assertForbidden();

@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToFaculty;
+use App\Support\FacultyScope;
 use Database\Factories\StudentFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -35,6 +37,8 @@ use Illuminate\Support\Carbon;
  */
 class Student extends Model
 {
+    use BelongsToFaculty;
+
     /** @use HasFactory<StudentFactory> */
     use HasFactory;
 
@@ -157,5 +161,15 @@ class Student extends Model
                 ->orWhere('national_id', 'ilike', "%{$search}%")
                 ->orWhereHas('user', fn (Builder $user) => $user->where('email', 'ilike', "%{$search}%"));
         });
+    }
+
+    /**
+     * Unit ownership (`App\Support\FacultyScope`).
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeInFaculty(Builder $query, int $facultyId): void
+    {
+        $query->whereIn('id', FacultyScope::studentIds($facultyId));
     }
 }

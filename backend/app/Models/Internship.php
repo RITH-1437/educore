@@ -2,6 +2,9 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToFaculty;
+use App\Support\FacultyScope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -35,6 +38,8 @@ use Illuminate\Support\Carbon;
  */
 class Internship extends Model
 {
+    use BelongsToFaculty;
+
     public const STATUS_DRAFT = 'draft';
 
     public const STATUS_SUBMITTED = 'submitted';
@@ -101,5 +106,15 @@ class Internship extends Model
     public function evaluations(): HasMany
     {
         return $this->hasMany(InternshipEvaluation::class)->orderBy('evaluator_type');
+    }
+
+    /**
+     * Unit ownership (`App\Support\FacultyScope`).
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeInFaculty(Builder $query, int $facultyId): void
+    {
+        $query->whereIn('student_id', FacultyScope::studentIds($facultyId));
     }
 }

@@ -7,7 +7,7 @@ most important relationships. 50 business tables + 8 framework tables.
 
 | # | Table | Purpose | Module | Primary Entity | Important Relationships |
 |---|---|---|---|---|---|
-| 1 | `users` | Accounts with login/credentials & RBAC role | Identity & Access | User | → `roles` (N–1), → `students` (1–1), → `lecturers` (1–1), → `audit_logs` (1–N as actor) |
+| 1 | `users` | Accounts with login/credentials & RBAC role | Identity & Access | User | → `roles` (N–1), → `faculties` (N–1, Faculty Admin scope), → `students` (1–1), → `lecturers` (1–1), → `audit_logs` (1–N as actor) |
 | 2 | `roles` | The 5 system roles (super-admin, admin, registrar, lecturer, student) | Identity & Access | Role | ← `users` (1–N), → `permissions` (N–N via `permission_role`) |
 | 3 | `permissions` | Granular permission catalog | Identity & Access | Permission | → `roles` (N–N via `permission_role`) |
 | 4 | `permission_role` | Pivot linking roles ↔ permissions | Identity & Access | Pivot | `role_id` → `roles`, `permission_id` → `permissions` |

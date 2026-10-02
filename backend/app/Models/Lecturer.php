@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToFaculty;
+use App\Support\FacultyScope;
 use Database\Factories\LecturerFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -31,6 +33,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class Lecturer extends Model
 {
+    use BelongsToFaculty;
+
     /** @use HasFactory<LecturerFactory> */
     use HasFactory;
 
@@ -104,5 +108,15 @@ class Lecturer extends Model
                 ->orWhere('specialization', 'ilike', "%{$search}%")
                 ->orWhereHas('user', fn (Builder $user) => $user->where('email', 'ilike', "%{$search}%"));
         });
+    }
+
+    /**
+     * Unit ownership (`App\Support\FacultyScope`).
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeInFaculty(Builder $query, int $facultyId): void
+    {
+        $query->whereIn('department_id', FacultyScope::departmentIds($facultyId));
     }
 }

@@ -19,7 +19,8 @@ Staff can download what they see as a CSV file:
 
 Not built: PDF exports, scheduled / emailed reports, exports for other lists
 (students, courses…), a Faculty Admin analytics export (analytics is not
-unit-scoped yet).
+unit-scoped yet). Enrollment exports by a Faculty Admin are limited to their
+faculty (`docs/32_Faculty-Admin-Scoping-Report.md`).
 
 ## 2. Design
 

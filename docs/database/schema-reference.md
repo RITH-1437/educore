@@ -26,6 +26,7 @@ Columns:
 | password | varchar(255) | no | | Hashed |
 | remember_token | varchar(100) | yes | | Sanctum/session remember |
 | role_id | bigint | no | | FK → roles.id |
+| faculty_id | bigint | yes | | FK → faculties.id; Faculty Admin only — the faculty whose data they may read (`docs/32_Faculty-Admin-Scoping-Report.md`) |
 | phone | varchar(50) | yes | | Contact |
 | avatar_key | varchar(255) | yes | | MinIO key |
 | is_active | boolean | no | true | Account usable |
@@ -35,6 +36,7 @@ Columns:
 Relationships:
 
 - belongs to `roles` (1–1)
+- belongs to `faculties` (N–1, optional; Faculty Admin only)
 - has one `students`, has one `lecturers`
 - has many `audit_logs`, `announcements` (author), `document_requests.processed_by`, `payments.received_by`
 
@@ -42,11 +44,12 @@ Constraints:
 
 - UQ `email`
 - FK `role_id` → `roles.id` RESTRICT
+- FK `faculty_id` → `faculties.id` SET NULL (`fk_users_faculty`)
 - `is_active` not null
 
 Indexes:
 
-- PK `id`; UQ `email`; IDX `role_id`
+- PK `id`; UQ `email`; IDX `role_id`; IDX `faculty_id` (`idx_users_faculty`)
 
 Business Rules:
 

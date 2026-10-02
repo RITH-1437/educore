@@ -300,7 +300,7 @@ class GradeController extends Controller
     )]
     public function config(Course $course): JsonResponse
     {
-        $this->authorize('viewConfig', Grade::class);
+        $this->authorize('viewConfig', [Grade::class, $course]);
 
         return response()->json(['data' => self::configPayload($this->grading->configFor($course))]);
     }

@@ -13,9 +13,10 @@ class FacultyPolicy
         return $this->viewStructure($user);
     }
 
+    /** A Faculty Admin only sees their own faculty's records. */
     public function view(User $user, Faculty $faculty): bool
     {
-        return $this->viewStructure($user);
+        return $this->viewStructure($user) && $faculty->isVisibleTo($user);
     }
 
     public function create(User $user): bool

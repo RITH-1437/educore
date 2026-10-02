@@ -77,7 +77,11 @@ class StudentManagementTest extends TestCase
     public function test_faculty_admin_reads_but_cannot_write(): void
     {
         $student = $this->makeStudent();
+        $this->facultyAdmin->update(['faculty_id' => $this->program->department->faculty_id]);
+        $elsewhere = Student::factory()->create();
 
+        $this->actingAs($this->facultyAdmin)->getJson("/api/students/{$elsewhere->id}")->assertForbidden();
+        $this->actingAs($this->facultyAdmin)->getJson('/api/students')->assertOk()->assertJsonCount(1, 'data');
         $this->actingAs($this->facultyAdmin)->get('/students')->assertOk();
         $this->actingAs($this->facultyAdmin)->getJson("/api/students/{$student->id}")->assertOk();
         $this->actingAs($this->facultyAdmin)->postJson('/api/students', $this->createPayload())->assertForbidden();

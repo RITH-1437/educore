@@ -38,7 +38,7 @@ class ProgramController extends Controller
 
         $filters = ProgramListFilters::fromInput($request->query());
 
-        $programs = $this->programs->paginate($filters)
+        $programs = $this->programs->paginate($filters, $request->user())
             ->withQueryString()
             ->appends($filters->toQueryString());
 
@@ -167,14 +167,15 @@ class ProgramController extends Controller
      *
      * @return array<string, mixed>
      */
+    /** Filter / form options; a Faculty Admin only gets their own faculty's. */
     private function lookups(): array
     {
         return [
             'faculties' => FacultyResource::collection(
-                Faculty::query()->where('is_active', true)->orderBy('name')->get()
+                Faculty::query()->visibleTo(request()->user())->where('is_active', true)->orderBy('name')->get()
             ),
             'departments' => DepartmentResource::collection(
-                Department::query()->where('is_active', true)->orderBy('name')->get()
+                Department::query()->visibleTo(request()->user())->where('is_active', true)->orderBy('name')->get()
             ),
         ];
     }

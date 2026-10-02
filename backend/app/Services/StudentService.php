@@ -57,9 +57,11 @@ class StudentService
     /**
      * @return LengthAwarePaginator<int, Student>
      */
-    public function paginate(StudentListFilters $filters): LengthAwarePaginator
+    /** `$viewer` limits a Faculty Admin to their faculty (`BelongsToFaculty`). */
+    public function paginate(StudentListFilters $filters, ?User $viewer = null): LengthAwarePaginator
     {
         return Student::query()
+            ->when($viewer, fn ($query) => $query->visibleTo($viewer))
             ->with(['user:id,name,email,phone,is_active', 'currentProgram.program.department.faculty:id,code,name'])
             ->search($filters->search)
             ->when($filters->status, fn ($query, $status) => $query->where('status', $status))

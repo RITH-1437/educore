@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToFaculty;
+use App\Support\FacultyScope;
 use Database\Factories\CourseOfferingFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,6 +24,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class CourseOffering extends Model
 {
+    use BelongsToFaculty;
+
     /** @use HasFactory<CourseOfferingFactory> */
     use HasFactory;
 
@@ -51,5 +56,15 @@ class CourseOffering extends Model
     public function sections(): HasMany
     {
         return $this->hasMany(Section::class)->orderBy('code');
+    }
+
+    /**
+     * Unit ownership (`App\Support\FacultyScope`).
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeInFaculty(Builder $query, int $facultyId): void
+    {
+        $query->whereIn('course_id', FacultyScope::courseIds($facultyId));
     }
 }

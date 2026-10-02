@@ -9,6 +9,7 @@ use App\Models\CourseOffering;
 use App\Models\Lecturer;
 use App\Models\Section;
 use App\Models\Semester;
+use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -47,11 +48,13 @@ class CourseOfferingService
      * @param  array{search?: ?string, semester_id?: ?int, academic_year_id?: ?int, course_id?: ?int, status?: ?string, per_page?: int}  $filters
      * @return LengthAwarePaginator<int, CourseOffering>
      */
-    public function paginate(array $filters): LengthAwarePaginator
+    /** `$viewer` limits a Faculty Admin to their faculty (`BelongsToFaculty`). */
+    public function paginate(array $filters, ?User $viewer = null): LengthAwarePaginator
     {
         $search = trim((string) ($filters['search'] ?? ''));
 
         return CourseOffering::query()
+            ->when($viewer, fn ($query) => $query->visibleTo($viewer))
             ->with(['course:id,code,name,credits,department_id', 'semester:id,name,code,academic_year_id,status', 'semester.academicYear:id,code,name'])
             ->withCount('sections')
             ->withSum('sections', 'capacity')

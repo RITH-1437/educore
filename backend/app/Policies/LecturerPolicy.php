@@ -19,7 +19,7 @@ class LecturerPolicy
      */
     public function view(User $user, Lecturer $lecturer): bool
     {
-        return $this->staff($user)
+        return ($this->staff($user) && $lecturer->isVisibleTo($user))
             || ($user->isRole(Role::Lecturer->value) && $lecturer->user_id === $user->getKey());
     }
 

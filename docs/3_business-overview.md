@@ -314,6 +314,11 @@ academic years, semesters, announcements, document requests, and payment records
 **Permissions:** manage their unit's students, lecturers, courses, sections, schedules, and
 monitor attendance and performance; handle unit-level requests.
 
+**Delivered:** [Implemented] read access limited to the assigned faculty (structure,
+courses, sections, lecturers, students, enrollments, grades, documents, internships);
+unit-level writes (creating sections, handling requests) are [Future]. See
+[32_Faculty-Admin-Scoping-Report.md](32_Faculty-Admin-Scoping-Report.md).
+
 **Typical workflows:**
 
 - Create sections and schedules for their unit.
@@ -408,7 +413,7 @@ users, main business activities, and expected outputs.
 ### 9.4 Faculty & Department Management [Implemented]
 
 - **Purpose:** model the university's organizational structure.
-- **Primary users:** University Admin (write), Super Admin (write), Faculty Admin (read-only).
+- **Primary users:** University Admin (write), Super Admin (write), Faculty Admin (read-only, own faculty).
 - **Main business activities:** create/manage universities, faculties, departments, and their relationships.
 - **Expected outputs:** a clear, reusable hierarchical structure.
 - **Delivered:** university record with a single `is_current` row, faculties and

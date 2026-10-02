@@ -305,7 +305,8 @@ against the running stack: 1 university, exactly 1 current, 3 faculties,
 
 1. **Faculty Admin gets global read, never scoped access.** Its user row carries
    no `faculty_id`, so per-unit scoping would be a fiction. Read-everything is
-   honest; write is refused everywhere.
+   honest; write is refused everywhere. *Superseded:* `users.faculty_id` and
+   faculty-scoped reads arrived with `docs/32_Faculty-Admin-Scoping-Report.md`.
 2. **Archive is not delete.** Archiving flips `is_active`; hard delete is only
    for rows nothing references. `departments` gained `deleted_at` for exactly
    this reason.

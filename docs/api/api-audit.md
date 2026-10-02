@@ -268,8 +268,8 @@ documented operations.
 | POST | `/api/reset-password` | Public; `throttle:password-reset` | Documented |
 | GET | `/api/user` | `auth:sanctum` | Documented |
 | GET | `/api/health` | Public | Documented |
-| GET | `/api/users` | Sanctum + super-admin | Documented |
-| POST | `/api/users` | Sanctum + super-admin | Documented |
+| GET | `/api/users` | Sanctum + super-admin (responses include `faculty_id`, `faculty`) | Documented |
+| POST | `/api/users` | Sanctum + super-admin (optional `faculty_id`, Faculty Admin role only) | Documented |
 | GET | `/api/users/{user}` | Sanctum + super-admin | Documented |
 | PUT, PATCH | `/api/users/{user}` | Sanctum + super-admin | Both documented |
 | DELETE | `/api/users/{user}` | Sanctum + super-admin | Documented |
@@ -540,3 +540,12 @@ Re-ran Swagger generation and a scripted method/path comparison of
    Inertia/web-session endpoints; the current Axios API service has no callers.
 5. Add an automated Swagger-generation and route-vs-spec comparison check to CI
    to prevent missing schemas or endpoint drift from returning.
+
+## Faculty Admin unit scoping (2026-10-02)
+
+No endpoints were added. Every read endpoint marked "faculty-admin" above now
+limits a Faculty Admin to their assigned faculty (lists filtered, other
+faculties' records `403`; no faculty assigned = empty lists). Shared
+reference endpoints (universities, rooms, academic years / semesters,
+grading scale, internship companies, document types) are unchanged. See
+`docs/32_Faculty-Admin-Scoping-Report.md`.

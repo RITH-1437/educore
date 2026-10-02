@@ -125,28 +125,28 @@ limit used by enrollment (`backend/config/academics.php`).
 | --------------------------- | -------------------------- | ------------- |
 | `/admin/dashboard`          | Admin dashboard            | — |
 | `/dashboard`                | Student academic dashboard (GPA, credits, attendance, today's classes, due work, exams, grades); other roles see their workspace preview | — |
-| `/users`                    | Users management           | Super admin   |
+| `/users`                    | Users management (assign a Faculty Admin's faculty) | Super admin   |
 | `/academic-years`           | Academic years & semesters | Super admin, University admin |
 | `/universities`             | University record          | Super admin, University admin |
 | `/universities/{id}/edit`   | Edit university            | Super admin, University admin |
 | `/faculties`                | Faculties + departments    | Super admin, University admin |
-| `/programs`                 | Programs (degree tracks)   | Super admin, University admin (Faculty admin read-only) |
+| `/programs`                 | Programs (degree tracks)   | Super admin, University admin (Faculty admin read-only, own faculty) |
 | `/programs/{id}/edit`       | Edit program               | Super admin, University admin |
-| `/courses`                  | Course catalog             | Super admin, University admin (Faculty admin read-only) |
+| `/courses`                  | Course catalog             | Super admin, University admin (Faculty admin read-only, own faculty) |
 | `/courses/{id}/edit`        | Edit course + prerequisites | Super admin, University admin |
 | `/attendance`               | Take attendance (my sections) | Lecturer |
-| `/attendance/sections/{id}` | Attendance register + rates | Super admin, University admin, Faculty admin (read), the section's lecturers |
+| `/attendance/sections/{id}` | Attendance register + rates | Super admin, University admin, Faculty admin (read, own faculty), the section's lecturers |
 | `/my-attendance`            | My attendance per course   | Student |
-| `/coursework/sections/{id}` | Section assignments, submissions, grading | Super admin, University admin, Faculty admin (read), the section's lecturers, enrolled students (submit) |
+| `/coursework/sections/{id}` | Section assignments, submissions, grading | Super admin, University admin, Faculty admin (read, own faculty), the section's lecturers, enrolled students (submit) |
 | `/my-assignments`           | My assignments + uploads   | Student |
-| `/exams/sections/{id}`      | Section exams + results grid | Super admin, University admin, Faculty admin (read), the section's lecturers; enrolled students (schedule, released results) |
+| `/exams/sections/{id}`      | Section exams + results grid | Super admin, University admin, Faculty admin (read, own faculty), the section's lecturers; enrolled students (schedule, released results) |
 | `/my-exams`                 | My exam schedule + results | Student |
-| `/grades`                   | Sections awaiting grade approval | Super admin, University admin (Faculty admin read-only) |
-| `/grades/sections/{id}`     | Section grade sheet: compute, submit, approve, return, finalize, reopen | Super admin (reopen), University admin (approve, finalize), Faculty admin (read), the section's lecturers (compute, submit) |
+| `/grades`                   | Sections awaiting grade approval | Super admin, University admin (Faculty admin read-only, own faculty) |
+| `/grades/sections/{id}`     | Section grade sheet: compute, submit, approve, return, finalize, reopen | Super admin (reopen), University admin (approve, finalize), Faculty admin (read, own faculty), the section's lecturers (compute, submit) |
 | `/grading-scale`            | Grading scale              | Super admin, University admin (Faculty admin and lecturers read-only) |
 | `/my-grades`                | My grades + semester / cumulative GPA | Student |
 | `/my-documents`             | Request documents, download PDFs | Student |
-| `/documents`                | Document request queue: approve, reject, generate, revoke | Super admin, University admin (Faculty admin read-only) |
+| `/documents`                | Document request queue: approve, reject, generate, revoke | Super admin, University admin (Faculty admin read-only, own faculty) |
 | `/verify/{code}`            | Public document verification (no sign-in, rate limited) | — |
 | `/invoices`                 | Invoices: create, edit, record / reverse payments, cancel, export CSV | Super admin, University admin |
 | `/my-invoices`              | My invoices, payments and balance | Student |
@@ -154,21 +154,21 @@ limit used by enrollment (`backend/config/academics.php`).
 | `/announcements/manage`     | Write, publish, archive announcements | Super admin, University admin (any audience), Lecturer (own sections / courses) |
 | `/notifications`            | My notification settings (email opt-out, Telegram chat) | Every signed-in user (own only) |
 | `/my-internships`           | Apply for an internship, follow it, submit reports | Student |
-| `/internships`              | Internship queue: review, approve, start, complete, evaluate | Super admin, University admin (Faculty admin read-only) |
-| `/internship-companies`     | Host companies | Super admin, University admin (Faculty admin read-only) |
+| `/internships`              | Internship queue: review, approve, start, complete, evaluate | Super admin, University admin (Faculty admin read-only, own faculty) |
+| `/internship-companies`     | Host companies | Super admin, University admin (Faculty admin read-only, own faculty) |
 | `/analytics`                | Analytics: enrollment, academic performance, workload; CSV per table | Super admin, University admin |
 | `/audit-logs`               | Audit trail (read-only): sign-ins and sensitive changes; CSV export | Super admin |
 | `/account/password`         | Change my password (other sessions are signed out) | Every signed-in user |
 | `/forgot-password`          | Request a password reset link by email (rate limited) | Guests |
-| `/rooms`                    | Rooms                      | Super admin, University admin (Faculty admin read-only) |
+| `/rooms`                    | Rooms                      | Super admin, University admin (Faculty admin read-only, own faculty) |
 | `/timetable`                | My weekly timetable        | Student, Lecturer |
-| `/enrollments`              | Enrollment management; export CSV | Super admin, University admin (Faculty admin read-only + export) |
+| `/enrollments`              | Enrollment management; export CSV | Super admin, University admin (Faculty admin read-only + export, own faculty) |
 | `/registration`             | Course registration (self-service) | Student |
-| `/offerings`                | Offerings & sections       | Super admin, University admin (Faculty admin read-only) |
+| `/offerings`                | Offerings & sections       | Super admin, University admin (Faculty admin read-only, own faculty) |
 | `/offerings/{id}`           | Manage sections + lecturers | Super admin, University admin |
-| `/students`                 | Student profiles, status, program | Super admin, University admin (Faculty admin read-only) |
+| `/students`                 | Student profiles, status, program | Super admin, University admin (Faculty admin read-only, own faculty) |
 | `/students/{id}/edit`       | Manage student             | Super admin, University admin |
-| `/lecturers`                | Lecturer profiles + accounts | Super admin, University admin (Faculty admin read-only) |
+| `/lecturers`                | Lecturer profiles + accounts | Super admin, University admin (Faculty admin read-only, own faculty) |
 | `/lecturers/{id}/edit`      | Edit lecturer              | Super admin, University admin |
 | `/error-logs`                | System error logs (404/5xx, read-only) | Super admin only (no write) |
 

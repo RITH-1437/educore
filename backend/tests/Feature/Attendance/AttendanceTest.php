@@ -2,13 +2,12 @@
 
 namespace Tests\Feature\Attendance;
 
-use App\Enums\Role;
 use App\Models\AttendanceSession;
 use App\Models\Course;
 use App\Models\CourseOffering;
 use App\Models\Enrollment;
+use App\Models\Faculty;
 use App\Models\Lecturer;
-use App\Models\Role as RoleModel;
 use App\Models\Room;
 use App\Models\ScheduleEntry;
 use App\Models\Section;
@@ -164,7 +163,7 @@ class AttendanceTest extends TestCase
     public function test_who_may_record_and_read(): void
     {
         $otherLecturer = Lecturer::factory()->create();
-        $faculty = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::FacultyAdmin->value)->create()->id]);
+        $faculty = $this->facultyAdminFor($this->facultyOfSection($this->section));
         $student = $this->enrollments[0]->student;
 
         $this->actingAs($otherLecturer->user)->postJson("/api/sections/{$this->section->id}/attendance", $this->payload(self::MONDAY, ['present', 'present', 'present']))->assertForbidden();
@@ -173,6 +172,7 @@ class AttendanceTest extends TestCase
         $this->actingAs($this->admin)->postJson("/api/sections/{$this->section->id}/attendance", $this->payload(self::MONDAY, ['present', 'present', 'present']))->assertOk();
 
         $this->actingAs($faculty)->getJson("/api/sections/{$this->section->id}/attendance?date=".self::MONDAY)->assertOk();
+        $this->actingAs($this->facultyAdminFor(Faculty::factory()->create()))->getJson("/api/sections/{$this->section->id}/attendance?date=".self::MONDAY)->assertForbidden();
         $this->actingAs($otherLecturer->user)->getJson("/api/sections/{$this->section->id}/attendance/summary")->assertForbidden();
 
         $this->actingAs($student->user)->getJson("/api/students/{$student->id}/attendance")->assertOk()->assertJsonPath('data.0.present', 1);

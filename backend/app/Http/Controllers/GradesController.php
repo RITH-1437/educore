@@ -50,6 +50,7 @@ class GradesController extends Controller
             ->when($status === 'submitted', fn ($q) => $q->havingRaw("count(*) filter (where grades.status = 'submitted') > 0"));
 
         $sections = Section::query()
+            ->visibleTo($request->user())
             ->joinSub($counts, 'counts', 'counts.section_id', '=', 'sections.id')
             ->with('offering.course:id,code,name', 'offering.semester.academicYear:id,code')
             ->orderByDesc('counts.submitted')

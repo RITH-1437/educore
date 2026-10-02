@@ -9,6 +9,7 @@ use App\Models\Enrollment;
 use App\Models\Grade;
 use App\Models\Section;
 use App\Models\Student;
+use App\Models\User;
 use App\Notifications\EnrollmentConfirmed;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -37,22 +38,24 @@ class EnrollmentService
      * @param  array{student_id?: ?int, section_id?: ?int, semester_id?: ?int, status?: ?string, search?: ?string, per_page?: int}  $filters
      * @return LengthAwarePaginator<int, Enrollment>
      */
-    public function paginate(array $filters): LengthAwarePaginator
+    public function paginate(array $filters, ?User $viewer = null): LengthAwarePaginator
     {
-        return $this->query($filters)->paginate($filters['per_page'] ?? 15);
+        return $this->query($filters, $viewer)->paginate($filters['per_page'] ?? 15);
     }
 
     /**
      * The filtered, ordered enrollment list (shared by the list and the CSV export).
      *
      * @param  array<string, mixed>  $filters  search, student_id, section_id, semester_id, status
+     * @param  User|null  $viewer  limits a Faculty Admin to their faculty (`BelongsToFaculty`)
      * @return Builder<Enrollment>
      */
-    public function query(array $filters): Builder
+    public function query(array $filters, ?User $viewer = null): Builder
     {
         $search = trim((string) ($filters['search'] ?? ''));
 
         return Enrollment::query()
+            ->when($viewer, fn ($query) => $query->visibleTo($viewer))
             ->with(['student:id,student_number,first_name,last_name', 'section.offering.course:id,code,name,credits', 'semester:id,name,academic_year_id', 'semester.academicYear:id,code'])
             ->when($filters['student_id'] ?? null, fn ($q, $id) => $q->where('student_id', $id))
             ->when($filters['section_id'] ?? null, fn ($q, $id) => $q->where('section_id', $id))

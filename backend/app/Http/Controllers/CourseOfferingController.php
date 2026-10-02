@@ -45,10 +45,10 @@ class CourseOfferingController extends Controller
 
         return Inertia::render('Offerings/Index', [
             'offerings' => CourseOfferingResource::collection(
-                $this->offerings->paginate($filters)->withQueryString()
+                $this->offerings->paginate($filters, $request->user())->withQueryString()
             ),
             'semesters' => $this->semesterOptions(),
-            'courses' => Course::query()->where('status', Course::STATUS_ACTIVE)->orderBy('code')->get(['id', 'code', 'name'])
+            'courses' => Course::query()->visibleTo($request->user())->where('status', Course::STATUS_ACTIVE)->orderBy('code')->get(['id', 'code', 'name'])
                 ->map(fn (Course $course) => ['id' => $course->id, 'code' => $course->code, 'name' => $course->name])->values(),
             'statuses' => CourseOffering::STATUSES,
             'filters' => $filters,

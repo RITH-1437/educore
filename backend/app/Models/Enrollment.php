@@ -2,7 +2,10 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\BelongsToFaculty;
+use App\Support\FacultyScope;
 use Database\Factories\EnrollmentFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -27,6 +30,8 @@ use Illuminate\Support\Carbon;
  */
 class Enrollment extends Model
 {
+    use BelongsToFaculty;
+
     /** @use HasFactory<EnrollmentFactory> */
     use HasFactory;
 
@@ -81,5 +86,15 @@ class Enrollment extends Model
     public function isOpen(): bool
     {
         return in_array($this->status, self::OPEN_STATUSES, true);
+    }
+
+    /**
+     * Unit ownership (`App\Support\FacultyScope`).
+     *
+     * @param  Builder<self>  $query
+     */
+    public function scopeInFaculty(Builder $query, int $facultyId): void
+    {
+        $query->where(fn (Builder $q) => $q->whereIn('section_id', FacultyScope::sectionIds($facultyId))->orWhereIn('student_id', FacultyScope::studentIds($facultyId)));
     }
 }

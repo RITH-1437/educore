@@ -56,7 +56,7 @@ class LecturerController extends Controller
         $this->authorize('viewAny', Lecturer::class);
 
         return LecturerResource::collection(
-            $this->lecturers->paginate(LecturerListFilters::fromInput($request->query()))
+            $this->lecturers->paginate(LecturerListFilters::fromInput($request->query()), $request->user())
         );
     }
 

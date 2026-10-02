@@ -21,7 +21,7 @@ class ExamPolicy
     /** List a section's exams (students: schedule + own released results). */
     public function viewSection(User $user, Section $section): bool
     {
-        return $this->staff($user) || $this->teaches($user, $section) || $this->enrolledIn($user, $section);
+        return $this->staffOver($user, $section) || $this->teaches($user, $section) || $this->enrolledIn($user, $section);
     }
 
     public function create(User $user, Section $section): bool
@@ -48,12 +48,12 @@ class ExamPolicy
     /** Every student's result. */
     public function viewResults(User $user, Exam $exam): bool
     {
-        return $this->staff($user) || $this->teaches($user, $exam->section);
+        return $this->staffOver($user, $exam->section) || $this->teaches($user, $exam->section);
     }
 
     public function viewStudent(User $user, Student $student): bool
     {
-        return $this->staff($user)
+        return $this->staffOverStudent($user, $student)
             || ($user->isRole(Role::Student->value) && $user->student?->getKey() === $student->getKey());
     }
 }

@@ -13,9 +13,10 @@ class DepartmentPolicy
         return $this->viewStructure($user);
     }
 
+    /** A Faculty Admin only sees their own faculty's records. */
     public function view(User $user, Department $department): bool
     {
-        return $this->viewStructure($user);
+        return $this->viewStructure($user) && $department->isVisibleTo($user);
     }
 
     public function create(User $user): bool

@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Documents;
 
-use App\Enums\Role;
 use App\Models\Course;
 use App\Models\CourseOffering;
 use App\Models\Document;
@@ -10,11 +9,11 @@ use App\Models\DocumentRequest;
 use App\Models\DocumentType;
 use App\Models\DocumentVerification;
 use App\Models\Enrollment;
+use App\Models\Faculty;
 use App\Models\Grade;
 use App\Models\Internship;
 use App\Models\InternshipCompany;
 use App\Models\Lecturer;
-use App\Models\Role as RoleModel;
 use App\Models\Section;
 use App\Models\Semester;
 use App\Models\Student;
@@ -179,7 +178,10 @@ class DocumentTest extends TestCase
         $id = $this->actingAs($this->student->user)->postJson('/api/document-requests', ['document_type_id' => $type])->json('data.id');
         $other = Student::factory()->create();
         $this->actingAs($other->user)->postJson('/api/document-requests', ['document_type_id' => $type])->assertCreated();
-        $faculty = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::FacultyAdmin->value)->create()->id]);
+        $faculty = $this->facultyAdminFor(Faculty::factory()->create());
+        $this->placeInFaculty($this->student, $faculty->faculty_id);
+        $this->placeInFaculty($other, $faculty->faculty_id);
+        $outsideFaculty = $this->facultyAdminFor(Faculty::factory()->create());
         $lecturer = Lecturer::factory()->create()->user;
 
         // A student sees only their own requests and cannot process any.
@@ -190,6 +192,9 @@ class DocumentTest extends TestCase
         // Faculty Admin reads everything but cannot process; lecturers have no access.
         $this->actingAs($faculty)->getJson('/api/document-requests?filters[status]=pending')->assertOk()->assertJsonCount(2, 'data');
         $this->actingAs($faculty)->postJson("/api/document-requests/{$id}/approve")->assertForbidden();
+        // Another faculty's admin sees none of these students' requests.
+        $this->actingAs($outsideFaculty)->getJson('/api/document-requests')->assertOk()->assertJsonCount(0, 'data');
+        $this->actingAs($outsideFaculty)->getJson("/api/document-requests/{$id}")->assertForbidden();
         $this->actingAs($lecturer)->getJson('/api/document-requests')->assertForbidden();
         $this->actingAs($this->admin)->postJson('/api/document-requests', ['document_type_id' => $type])->assertForbidden();
         $this->actingAs($this->admin)->getJson('/api/document-requests?filters[status]=bogus')->assertJsonValidationErrors('filters.status');

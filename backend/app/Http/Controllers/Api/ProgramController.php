@@ -59,7 +59,7 @@ class ProgramController extends Controller
         $this->authorize('viewAny', Program::class);
 
         return ProgramResource::collection(
-            $this->programs->paginate(ProgramListFilters::fromInput($request->query()))
+            $this->programs->paginate(ProgramListFilters::fromInput($request->query()), $request->user())
         );
     }
 

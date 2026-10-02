@@ -74,7 +74,11 @@ class ProgramManagementTest extends TestCase
     public function test_faculty_admin_may_read_but_not_write(): void
     {
         $program = Program::factory()->create(['department_id' => $this->department->id]);
+        $this->facultyAdmin->update(['faculty_id' => $this->department->faculty_id]);
+        $elsewhere = Program::factory()->create();
 
+        $this->actingAs($this->facultyAdmin)->getJson("/api/programs/{$elsewhere->id}")->assertForbidden();
+        $this->actingAs($this->facultyAdmin)->getJson('/api/programs')->assertOk()->assertJsonMissing(['code' => $elsewhere->code]);
         $this->actingAs($this->facultyAdmin)->get('/programs')->assertOk();
         $this->actingAs($this->facultyAdmin)->getJson('/api/programs')->assertOk();
         $this->actingAs($this->facultyAdmin)->getJson("/api/programs/{$program->id}")->assertOk();
@@ -85,7 +89,7 @@ class ProgramManagementTest extends TestCase
         $this->actingAs($this->facultyAdmin)->postJson("/api/programs/{$program->id}/archive")->assertForbidden();
         $this->actingAs($this->facultyAdmin)->deleteJson("/api/programs/{$program->id}")->assertForbidden();
 
-        $this->assertDatabaseCount('programs', 1);
+        $this->assertDatabaseCount('programs', 2);
     }
 
     // ------------------------------------------------------------ screens ---

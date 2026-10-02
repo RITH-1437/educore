@@ -54,7 +54,7 @@ class EnrollmentController extends Controller
         return EnrollmentResource::collection($this->enrollments->paginate([
             ...self::filters($request),
             'per_page' => min(max($request->integer('per_page') ?: 15, 1), 100),
-        ]));
+        ], $request->user()));
     }
 
     /**

@@ -32,6 +32,11 @@ Authorization decides what an authenticated user may do. Identity is handled in
 - Scope queries to the user where relevant (a lecturer only sees their
   sections; a student only their own records) — use query scopes +
   policies, not filters the client can tamper with.
+- Faculty Admin scope: `users.faculty_id` → `User::facultyScope()`. Unit-owned
+  models use `BelongsToFaculty` (`visibleTo($user)` for lists,
+  `isVisibleTo($user)` in policies); ownership rules live in
+  `App\Support\FacultyScope`. New unit-owned lists must pass the viewer
+  (`docs/32_Faculty-Admin-Scoping-Report.md`).
 - **Never trust frontend authorization.** Hiding a button is UX only; the API
   must reject unauthorized access with `403`.
 

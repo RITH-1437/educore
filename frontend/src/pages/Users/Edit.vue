@@ -1,5 +1,6 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3'
+import { computed } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseSelect from '../../components/BaseSelect.vue'
@@ -9,6 +10,7 @@ import StatusBadge from '../../components/StatusBadge.vue'
 const props = defineProps({
   user: { type: Object, required: true },
   roles: { type: Array, required: true },
+  faculties: { type: Array, default: () => [] },
 })
 
 const form = useForm({
@@ -16,12 +18,15 @@ const form = useForm({
   email: props.user.email,
   phone: props.user.phone ?? '',
   role_id: props.user.role?.id ?? props.roles[0]?.id,
+  faculty_id: props.user.faculty_id ?? '',
   is_active: props.user.is_active,
   password: '',
   password_confirmation: '',
 })
 
-const submit = () => form.put(`/users/${props.user.id}`, { preserveScroll: true })
+const isFacultyAdmin = computed(() => props.roles.find((role) => role.id === form.role_id)?.slug === 'faculty-admin')
+// The faculty is only sent for a Faculty Admin; other roles never keep one.
+const submit = () => form.transform((data) => ({ ...data, faculty_id: isFacultyAdmin.value ? data.faculty_id || null : null })).put(`/users/${props.user.id}`, { preserveScroll: true })
 </script>
 
 <template>
@@ -43,6 +48,9 @@ const submit = () => form.put(`/users/${props.user.id}`, { preserveScroll: true 
       <BaseInput v-model="form.email" name="email" label="Email" type="email" :error="form.errors.email" required />
 
       <BaseSelect v-model="form.role_id" label="Role" :options="roles.map((role) => ({ value: role.id, label: role.name }))" placeholder="Select a role" :error="form.errors.role_id" required />
+
+      <!-- Only a Faculty Admin has a faculty: it limits what they can see. -->
+      <BaseSelect v-if="isFacultyAdmin" v-model="form.faculty_id" label="Faculty" :options="faculties.map((f) => ({ value: f.id, label: f.name }))" placeholder="No faculty (sees no unit data)" :error="form.errors.faculty_id" />
 
       <BaseInput v-model="form.phone" name="phone" label="Phone (optional)" :error="form.errors.phone" />
 

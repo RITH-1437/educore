@@ -39,7 +39,7 @@ class FacultyController extends Controller
 
         $filters = FacultyListFilters::fromInput($request->query());
 
-        $faculties = $this->faculties->paginate($filters)
+        $faculties = $this->faculties->paginate($filters, $request->user())
             ->withQueryString()
             ->appends($filters->toQueryString());
 

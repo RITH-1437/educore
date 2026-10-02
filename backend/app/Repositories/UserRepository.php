@@ -31,6 +31,7 @@ class UserRepository
                 });
             })
             ->when($filters->roleId, fn ($query, $roleId) => $query->where('role_id', $roleId))
+            ->when($filters->role, fn ($query, $role) => $query->whereHas('role', fn ($q) => $q->where('slug', $role)))
             ->orderByDesc('id')
             ->paginate($filters->perPage);
     }

@@ -1,7 +1,7 @@
 <script setup>
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3'
-import { computed, ref } from 'vue'
-import { Plus, Search } from '@lucide/vue'
+import { computed, ref, watch } from 'vue'
+import { Pencil, Plus, Search, Trash2, X } from '@lucide/vue'
 import BaseBadge from '../../components/BaseBadge.vue'
 import BaseButton from '../../components/BaseButton.vue'
 import PageHeader from '../../components/PageHeader.vue'
@@ -16,7 +16,7 @@ import Pagination from '../../components/Pagination.vue'
 
 const props = defineProps({
   universities: { type: Object, required: true },
-  filters: { type: Object, default: () => ({ search: '' }) },
+  filters: { type: Object, default: () => ({ search: '', status: '' }) },
 })
 
 const page = usePage()
@@ -27,6 +27,22 @@ const page = usePage()
 const canManage = computed(() => ['super-admin', 'university-admin'].includes(page.props.auth?.user?.role?.slug ?? ''))
 
 const search = ref(props.filters.search ?? '')
+const status = ref(props.filters.status ?? '')
+
+const STATUS_OPTIONS = [
+  { value: '', label: 'All states' },
+  { value: 'current', label: 'Current' },
+  { value: 'other', label: 'Other' },
+]
+
+watch(
+  () => props.filters,
+  (f) => {
+    search.value = f.search ?? ''
+    status.value = f.status ?? ''
+  },
+)
+
 const showCreate = ref(false)
 
 const createForm = useForm({
@@ -51,7 +67,25 @@ const columns = [
 const isEmpty = computed(() => (props.universities?.data ?? []).length === 0)
 
 const applyFilters = () =>
-  router.get('/universities', { search: search.value || undefined }, { preserveState: true, replace: true })
+  router.get(
+    '/universities',
+    {
+      search: search.value || undefined,
+      status: status.value || undefined,
+    },
+    { preserveState: true, replace: true },
+  )
+
+const clearFilters = () => {
+  search.value = ''
+  status.value = ''
+  router.get('/universities', {}, { preserveState: true, replace: true })
+}
+
+const filterByStatus = (val) => {
+  status.value = val
+  applyFilters()
+}
 
 const openCreate = () => {
   createForm.reset()
@@ -81,9 +115,9 @@ const destroy = async (university) => {
 <template>
   <Head title="University - EduCore" />
   <div class="space-y-6">
-    <PageHeader eyebrow="University structure" title="University" description="The single institution record that owns every faculty, program and course.">
+    <PageHeader title="University" description="The single institution record that owns every faculty, program and course.">
       <template #actions>
-        <BaseButton href="/faculties" variant="secondary">Manage faculties</BaseButton>
+        <BaseButton href="/faculties" variant="secondary" class="hover:!border-primary hover:!bg-primary hover:!text-white dark:hover:!border-dark-primary dark:hover:!bg-dark-primary dark:hover:!text-white">Manage faculties</BaseButton>
         <BaseButton v-if="canManage" @click="openCreate"><Plus class="h-4 w-4" aria-hidden="true" /> New university</BaseButton>
       </template>
     </PageHeader>
@@ -91,8 +125,33 @@ const destroy = async (university) => {
     <BaseCard padding="sm">
       <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="applyFilters">
         <BaseInput v-model="search" label="Search" placeholder="Code or name" class="w-full sm:max-w-xs" />
-        <BaseButton type="submit" variant="secondary"><Search class="h-4 w-4" aria-hidden="true" /> Search</BaseButton>
+        <div class="w-full sm:w-44">
+          <label for="state-filter" class="block text-small font-medium text-ink dark:text-dark-ink">State</label>
+          <select
+            id="state-filter"
+            v-model="status"
+            class="mt-1.5 block w-full rounded-md border border-border-default bg-surface px-3 py-2 text-small text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-dark-border dark:bg-dark-surface dark:text-dark-ink"
+            @change="applyFilters"
+          >
+            <option v-for="opt in STATUS_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+          </select>
+        </div>
+        <div class="flex gap-2">
+          <BaseButton type="submit" variant="secondary"><Search class="h-4 w-4" aria-hidden="true" /> Search</BaseButton>
+          <BaseButton v-if="search || status" type="button" variant="ghost" @click="clearFilters">Clear</BaseButton>
+        </div>
       </form>
+
+      <!-- Active filter badge -->
+      <div v-if="status" class="mt-3 flex items-center gap-2 border-t border-border-default pt-2.5 text-caption dark:border-dark-border">
+        <span class="text-muted dark:text-dark-muted">Filtered by state:</span>
+        <span class="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 font-semibold text-primary dark:bg-dark-primary/15 dark:text-dark-primary">
+          {{ status === 'current' ? 'Current' : 'Other' }}
+          <button type="button" class="hover:text-primary-dark" aria-label="Remove filter" @click="filterByStatus('')">
+            <X class="h-3 w-3" aria-hidden="true" />
+          </button>
+        </span>
+      </div>
     </BaseCard>
 
     <BaseTable
@@ -120,22 +179,45 @@ const destroy = async (university) => {
         <span class="font-semibold text-ink dark:text-dark-ink">{{ row.faculties_count ?? 0 }}</span>
       </template>
       <template #cell-is_current="{ row }">
-        <BaseBadge :variant="row.is_current ? 'success' : 'muted'" :dot="row.is_current">
-          {{ row.is_current ? 'Current' : 'Other' }}
-        </BaseBadge>
+        <button
+          type="button"
+          class="transition-opacity hover:opacity-80"
+          :title="`Filter by ${row.is_current ? 'Current' : 'Other'}`"
+          @click="filterByStatus(row.is_current ? 'current' : 'other')"
+        >
+          <BaseBadge :variant="row.is_current ? 'success' : 'muted'" :dot="row.is_current">
+            {{ row.is_current ? 'Current' : 'Other' }}
+          </BaseBadge>
+        </button>
       </template>
       <template #cell-actions="{ row }">
-        <div v-if="canManage" class="flex justify-end gap-3">
-          <Link :href="`/universities/${row.id}/edit`" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">Edit</Link>
+        <div v-if="canManage" class="flex items-center justify-end gap-1">
           <button
             v-if="!row.is_current"
             type="button"
-            class="text-small font-semibold text-success hover:underline"
+            class="mr-1 inline-flex min-h-7 items-center rounded px-2 text-caption font-semibold text-success hover:bg-success/10 hover:underline"
+            title="Set as current university"
             @click="makeCurrent(row)"
           >
             Make current
           </button>
-          <button type="button" class="text-small font-semibold text-error hover:underline" @click="destroy(row)">Delete</button>
+          <Link
+            :href="`/universities/${row.id}/edit`"
+            class="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary dark:text-dark-muted dark:hover:bg-dark-primary/15 dark:hover:text-dark-primary"
+            title="Edit university"
+            aria-label="Edit university"
+          >
+            <Pencil class="h-4 w-4" aria-hidden="true" />
+          </Link>
+          <button
+            type="button"
+            class="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-error/10 hover:text-error focus-visible:outline-2 focus-visible:outline-error dark:text-dark-muted dark:hover:bg-error/20 dark:hover:text-red-400"
+            title="Delete university"
+            aria-label="Delete university"
+            @click="destroy(row)"
+          >
+            <Trash2 class="h-4 w-4" aria-hidden="true" />
+          </button>
         </div>
         <span v-else class="block text-right text-caption text-muted dark:text-dark-muted">Read only</span>
       </template>

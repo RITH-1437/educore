@@ -34,7 +34,12 @@ class UserController extends Controller
 
         return Inertia::render('Users/Index', [
             'users' => UserResource::collection($users),
-            'filters' => ['search' => $filters->search],
+            'filters' => [
+                'search' => $filters->search,
+                'role' => $filters->role,
+                'role_id' => $filters->roleId,
+            ],
+            'roles' => $this->rolesForSelect(),
         ]);
     }
 

@@ -38,7 +38,10 @@ class UniversityController extends Controller
 
         return Inertia::render('Universities/Index', [
             'universities' => UniversityResource::collection($universities),
-            'filters' => ['search' => $filters->search],
+            'filters' => [
+                'search' => $filters->search,
+                'status' => $filters->isCurrent === null ? '' : ($filters->isCurrent ? 'current' : 'other'),
+            ],
         ]);
     }
 

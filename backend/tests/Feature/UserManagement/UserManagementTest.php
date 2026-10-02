@@ -217,4 +217,16 @@ class UserManagementTest extends TestCase
         $this->getJson('/api/user', ['Authorization' => "Bearer {$token}"])
             ->assertUnauthorized();
     }
+
+    public function test_super_admin_can_filter_users_by_role_slug(): void
+    {
+        $this->actingAs($this->admin)
+            ->get('/users?role=student')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Users/Index')
+                ->has('users.data', 1)
+                ->where('users.data.0.id', $this->student->id)
+                ->where('filters.role', 'student'));
+    }
 }

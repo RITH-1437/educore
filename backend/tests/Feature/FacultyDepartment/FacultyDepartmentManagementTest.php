@@ -151,6 +151,29 @@ class FacultyDepartmentManagementTest extends TestCase
                 ->has('filters.search'));
     }
 
+    public function test_super_admin_can_filter_universities_by_status(): void
+    {
+        $otherUniversity = University::factory()->create(['is_current' => false]);
+
+        $this->actingAs($this->superAdmin)
+            ->get('/universities?status=current')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Universities/Index')
+                ->has('universities.data', 1)
+                ->where('universities.data.0.id', $this->university->id)
+                ->where('filters.status', 'current'));
+
+        $this->actingAs($this->superAdmin)
+            ->get('/universities?status=other')
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Universities/Index')
+                ->has('universities.data', 1)
+                ->where('universities.data.0.id', $otherUniversity->id)
+                ->where('filters.status', 'other'));
+    }
+
     public function test_super_admin_can_view_the_faculty_edit_screen(): void
     {
         $faculty = Faculty::factory()->create(['university_id' => $this->university->id]);

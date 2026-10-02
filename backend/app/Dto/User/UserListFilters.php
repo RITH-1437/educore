@@ -17,11 +17,12 @@ final readonly class UserListFilters
     public function __construct(
         public ?string $search = null,
         public ?int $roleId = null,
+        public ?string $role = null,
         public int $perPage = self::DEFAULT_PER_PAGE,
     ) {}
 
     /**
-     * Build filters from a plain input array (`search`, `role_id`, `per_page`).
+     * Build filters from a plain input array (`search`, `role_id`, `role`, `per_page`).
      *
      * @param  array<string, mixed>  $input
      */
@@ -29,11 +30,13 @@ final readonly class UserListFilters
     {
         $search = trim((string) ($input['search'] ?? ''));
         $roleId = (int) ($input['role_id'] ?? 0);
+        $role = trim((string) ($input['role'] ?? ''));
         $perPage = (int) ($input['per_page'] ?? 0);
 
         return new self(
             search: $search === '' ? null : $search,
             roleId: $roleId > 0 ? $roleId : null,
+            role: $role === '' ? null : $role,
             perPage: min(max($perPage ?: self::DEFAULT_PER_PAGE, 1), self::MAX_PER_PAGE),
         );
     }
@@ -48,6 +51,7 @@ final readonly class UserListFilters
         return array_filter([
             'search' => $this->search,
             'role_id' => $this->roleId,
+            'role' => $this->role,
             'per_page' => $this->perPage !== self::DEFAULT_PER_PAGE ? $this->perPage : null,
         ], fn ($value) => $value !== null);
     }

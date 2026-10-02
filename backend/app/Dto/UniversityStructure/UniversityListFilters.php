@@ -36,14 +36,23 @@ final readonly class UniversityListFilters
     public static function fromInput(array $input): self
     {
         $search = trim((string) ($input['search'] ?? ''));
-        $isCurrent = $input['filters']['is_current'] ?? null;
+        $rawCurrent = $input['filters']['is_current'] ?? $input['status'] ?? $input['state'] ?? $input['is_current'] ?? null;
+        if (is_string($rawCurrent)) {
+            $normalized = strtolower(trim($rawCurrent));
+            if (in_array($normalized, ['current', 'active', 'true', '1'], true)) {
+                $rawCurrent = true;
+            } elseif (in_array($normalized, ['other', 'non-current', 'inactive', 'false', '0'], true)) {
+                $rawCurrent = false;
+            }
+        }
+        $isCurrent = self::toNullableBool($rawCurrent);
         $sortBy = (string) ($input['sort_by'] ?? 'name');
         $sortDir = strtolower((string) ($input['sort_dir'] ?? 'asc'));
         $perPage = (int) ($input['per_page'] ?? 0);
 
         return new self(
             search: $search === '' ? null : $search,
-            isCurrent: self::toNullableBool($isCurrent),
+            isCurrent: $isCurrent,
             sortBy: in_array($sortBy, self::SORTABLE, true) ? $sortBy : 'name',
             sortDir: in_array($sortDir, ['asc', 'desc'], true) ? $sortDir : 'asc',
             perPage: min(max($perPage ?: self::DEFAULT_PER_PAGE, 1), self::MAX_PER_PAGE),
@@ -63,7 +72,7 @@ final readonly class UniversityListFilters
         ], fn ($value) => $value !== null);
 
         if ($this->isCurrent !== null) {
-            $query['filters'] = ['is_current' => $this->isCurrent ? '1' : '0'];
+            $query['status'] = $this->isCurrent ? 'current' : 'other';
         }
 
         return $query;

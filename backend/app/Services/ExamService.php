@@ -29,6 +29,10 @@ use Illuminate\Validation\ValidationException;
  */
 class ExamService
 {
+    public function __construct(
+        private readonly AuditLogger $audit,
+    ) {}
+
     /** Enrollment statuses that may hold exam results. */
     public const RESULT_STATUSES = [Enrollment::STATUS_PENDING, Enrollment::STATUS_CONFIRMED, Enrollment::STATUS_COMPLETED];
 
@@ -138,7 +142,10 @@ class ExamService
             $this->assertOpenSemester($result->exam->section->loadMissing('offering.semester'));
             $this->assertScore($result->exam, $score, 'score');
 
+            $before = $result->getAttributes();
             $result->update(['score' => $score, 'remarks' => $remarks, 'recorded_by' => $by->getKey()]);
+            // Closes the 9.13 open item: corrections are now audited.
+            $this->audit->changes('exam_result.corrected', $result, $before);
 
             return $result->refresh();
         });

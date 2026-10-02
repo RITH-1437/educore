@@ -33,6 +33,10 @@ use Illuminate\Validation\ValidationException;
  */
 class InvoiceService
 {
+    public function __construct(
+        private readonly AuditLogger $audit,
+    ) {}
+
     /**
      * @param  array<string, mixed>  $filters  status, search, student_id
      * @return LengthAwarePaginator<int, Invoice>
@@ -84,6 +88,7 @@ class InvoiceService
             $invoice->items()->createMany($items);
             $this->syncStatus($invoice);
             $student->user?->notify(new InvoiceIssued($invoice->refresh()));
+            $this->audit->record('invoice.created', $invoice, after: $invoice->only(['invoice_number', 'student_id', 'currency', 'subtotal', 'discount', 'total', 'due_date']));
 
             return $invoice;
         });
@@ -105,6 +110,7 @@ class InvoiceService
                 throw new BusinessRuleException('An invoice with recorded payments cannot be edited; reverse the payments first or issue a new invoice.');
             }
 
+            $before = $invoice->getAttributes();
             [$items, $subtotal, $discount] = $this->prepareItems($data['items'], $data['discount'] ?? 0);
             $issued = Carbon::parse($data['issued_date'] ?? $invoice->issued_date);
             $this->assertDates($issued, Carbon::parse($data['due_date']));
@@ -123,6 +129,7 @@ class InvoiceService
             $invoice->items()->delete();
             $invoice->items()->createMany($items);
             $this->syncStatus($invoice);
+            $this->audit->changes('invoice.updated', $invoice->refresh(), $before);
 
             return $invoice->refresh();
         });
@@ -141,6 +148,7 @@ class InvoiceService
                 throw new BusinessRuleException('Payments have been recorded; reverse them before cancelling the invoice.');
             }
 
+            $this->audit->record('invoice.cancelled', $invoice, ['status' => $invoice->status], ['status' => Invoice::STATUS_CANCELLED], $reason);
             $invoice->update([
                 'status' => Invoice::STATUS_CANCELLED,
                 'notes' => trim(($invoice->notes ? $invoice->notes."\n" : '').'Cancelled '.today()->toDateString().($reason ? ": {$reason}" : '')),
@@ -188,6 +196,7 @@ class InvoiceService
             $invoice->update(['amount_paid' => (Invoice::cents($invoice->amount_paid) + $amount) / 100]);
             $this->syncStatus($invoice);
             $invoice->student->user?->notify(new PaymentRecorded($payment->refresh()));
+            $this->audit->record('payment.recorded', $payment, after: $payment->only(['invoice_id', 'amount', 'paid_on', 'method', 'reference']));
 
             return $payment;
         });
@@ -222,6 +231,7 @@ class InvoiceService
             $invoice->update(['amount_paid' => (Invoice::cents($invoice->amount_paid) - Invoice::cents($payment->amount)) / 100]);
             $this->syncStatus($invoice);
             $invoice->student->user?->notify(new PaymentRecorded($reversal->refresh()));
+            $this->audit->record('payment.reversed', $payment, $payment->only(['invoice_id', 'amount', 'paid_on', 'method']), ['reversal_id' => $reversal->id], $reason);
 
             return $reversal;
         });

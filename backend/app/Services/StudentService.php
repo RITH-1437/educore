@@ -50,6 +50,7 @@ class StudentService
     ];
 
     public function __construct(
+        private readonly AuditLogger $audit,
         private readonly UserRepository $users,
     ) {}
 
@@ -157,8 +158,10 @@ class StudentService
                 $this->close($current, $closing, $effectiveOn, $notes);
             }
 
+            $previous = $student->status;
             $student->update(['status' => $status]);
             $student->user()->update(['is_active' => in_array($status, Student::SIGN_IN_STATUSES, true)]);
+            $this->audit->record('student.status_changed', $student, ['status' => $previous], ['status' => $status], $notes);
 
             return $student->refresh();
         });
@@ -205,6 +208,7 @@ class StudentService
                 'status' => StudentProgram::STATUS_ACTIVE,
                 'notes' => $notes,
             ]);
+            $this->audit->record('student.program_changed', $student, ['program_id' => $current?->program_id], ['program_id' => $programId], $notes);
 
             return $student->refresh();
         });

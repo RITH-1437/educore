@@ -39,6 +39,10 @@ use Throwable;
  */
 class InternshipService
 {
+    public function __construct(
+        private readonly AuditLogger $audit,
+    ) {}
+
     // -------------------------------------------------------------- companies
 
     /**
@@ -272,6 +276,7 @@ class InternshipService
                 throw new BusinessRuleException('The student already has an active internship.');
             }
 
+            $previous = $internship->status;
             $log = $note !== null && $note !== ''
                 ? trim(($internship->notes ? $internship->notes."\n" : '').now()->toDateString().' '.str_replace('_', ' ', $to).($by ? " by {$by->name}" : '').": {$note}")
                 : $internship->notes;
@@ -282,6 +287,8 @@ class InternshipService
                 'notes' => $log,
                 ...($by ? ['reviewed_by' => $by->getKey(), 'reviewed_at' => now()] : []),
             ]);
+
+            $this->audit->record("internship.{$to}", $internship, ['status' => $previous], ['status' => $to], $note);
 
             if ($notify) {
                 $internship->student->user?->notify(new InternshipStatusChanged($internship->refresh()));

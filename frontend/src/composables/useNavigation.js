@@ -21,6 +21,7 @@ import {
   Receipt,
   Scale,
   School,
+  ShieldCheck,
   TableProperties,
   UserCheck,
   UserRound,
@@ -52,7 +53,7 @@ const navForRole = (role) => {
       },
       { label: 'Academics', items: [{ label: 'Courses', href: '/courses', icon: Library }, { label: 'Offerings & sections', href: '/offerings', icon: TableProperties }, { label: 'Enrollments', href: '/enrollments', icon: ListChecks }, { label: 'Rooms', href: '/rooms', icon: MapPin }, { label: 'Grades', href: '/grades', icon: Award }, { label: 'Grading scale', href: '/grading-scale', icon: Scale }] },
       { label: 'Operations', items: [{ label: 'Announcements', href: '/announcements', icon: Megaphone }, { label: 'Documents', href: '/documents', icon: FileText }, { label: 'Internships', href: '/internships', icon: Briefcase }, { label: 'Invoices', href: '/invoices', icon: Receipt }] },
-      { label: 'System', items: [{ label: 'Error logs', href: '/error-logs', icon: FileWarning }] },
+      { label: 'System', items: [{ label: 'Audit logs', href: '/audit-logs', icon: ShieldCheck }, { label: 'Error logs', href: '/error-logs', icon: FileWarning }] },
     ]
   }
 
@@ -143,6 +144,7 @@ const SECTION_LABELS = {
   'my-internships': 'My internship',
   'internship-companies': 'Internship companies',
   'error-logs': 'Error logs',
+  'audit-logs': 'Audit logs',
 }
 
 const ACTION_LABELS = { create: 'New', edit: 'Edit' }

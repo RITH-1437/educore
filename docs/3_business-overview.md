@@ -650,12 +650,19 @@ users, main business activities, and expected outputs.
   the domain tables. Exports, faculty-scoped views and trends are [Future].
   See [27_Analytics-and-Reporting-Report.md](27_Analytics-and-Reporting-Report.md).
 
-### 9.24 Audit Logs & Security [Planned]
+### 9.24 Audit Logs & Security [Implemented]
 
 - **Purpose:** record important administrative and academic actions.
 - **Primary users:** Super Admin.
 - **Main business activities:** log who did what, to what record, and when; review for accountability.
 - **Expected outputs:** an append-only audit trail of sensitive actions.
+- **Delivered:** an audit trail of sign-ins and sensitive changes (users,
+  student status, enrollment, exam corrections, grades and grading rules,
+  documents, invoices and payments, announcements, internships) with
+  before / after values and no secrets, append-only in the application and in
+  the database; a Super Admin viewer; deactivated accounts lose their
+  sessions and API tokens immediately. Retention / export is [Future].
+  See [28_Audit-Logs-and-Security-Report.md](28_Audit-Logs-and-Security-Report.md).
 
 ### 9.25 System Error Logs [Implemented]
 

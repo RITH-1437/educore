@@ -91,8 +91,14 @@ snake_case; types follow `database-conventions.md`.
 - One open application per student (partial unique index).
 
 ### `audit_logs.action`
-Free-form snake_case (e.g. `grade.finalized`, `document.approved`).
-`audit_logs` is append-only.
+Dotted `<subject>.<verb>` in snake_case (e.g. `grades.approved`,
+`document_request.rejected`, `auth.failed`); the part before the dot is the
+"area" the viewer filters on. `audit_logs` is append-only: the `AuditLog`
+model refuses updates / deletes and trigger `trg_audit_logs_append_only`
+(migration `2026_10_02_090000`) refuses UPDATE and DELETE in the database,
+except nulling `actor_id` through `fk_audit_logs_actor` (ON DELETE SET NULL).
+`before_values` / `after_values` hold only the changed attributes, never
+secrets (module 9.24).
 
 ## Dates & academic periods
 

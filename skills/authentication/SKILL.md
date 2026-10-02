@@ -55,6 +55,14 @@ can do) is separate — see `skills/authorization/SKILL.md`.
   redirects to `/login` (Inertia route or REST-driven navigation). Do not store passwords, do not store PII beyond the
   minimal user object needed for display/permissions.
 
+## Inactive accounts (implemented)
+
+- Sign-in refuses inactive accounts with the generic credentials error.
+- `EnsureAccountIsActive` (web + api groups) ends a session / deletes the
+  presented token as soon as an already signed-in account is deactivated, and
+  audits it (`auth.access_revoked`). Sign-in, logout, failures and lockouts are
+  audited too (`docs/28_Audit-Logs-and-Security-Report.md`).
+
 ## Rate limiting
 
 - `throttle` middleware on `/api/login` and password-reset endpoints

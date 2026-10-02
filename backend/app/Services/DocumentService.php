@@ -36,6 +36,7 @@ use Throwable;
 class DocumentService
 {
     public function __construct(
+        private readonly AuditLogger $audit,
         private readonly GradingService $grading,
         private readonly GpaService $gpa,
     ) {}
@@ -88,12 +89,12 @@ class DocumentService
 
     public function approve(DocumentRequest $request, User $by): DocumentRequest
     {
-        return $this->notifyStudent($this->transition($request, DocumentRequest::STATUS_PENDING, ['status' => DocumentRequest::STATUS_APPROVED, 'processed_by' => $by->getKey(), 'processed_at' => now()]));
+        return $this->afterTransition($this->transition($request, DocumentRequest::STATUS_PENDING, ['status' => DocumentRequest::STATUS_APPROVED, 'processed_by' => $by->getKey(), 'processed_at' => now()]));
     }
 
     public function reject(DocumentRequest $request, User $by, string $reason): DocumentRequest
     {
-        return $this->notifyStudent($this->transition($request, DocumentRequest::STATUS_PENDING, ['status' => DocumentRequest::STATUS_REJECTED, 'rejection_reason' => $reason, 'processed_by' => $by->getKey(), 'processed_at' => now()]));
+        return $this->afterTransition($this->transition($request, DocumentRequest::STATUS_PENDING, ['status' => DocumentRequest::STATUS_REJECTED, 'rejection_reason' => $reason, 'processed_by' => $by->getKey(), 'processed_at' => now()]));
     }
 
     /**
@@ -134,7 +135,7 @@ class DocumentService
                     'status' => Document::STATUS_VALID,
                 ]);
                 $locked->update(['status' => DocumentRequest::STATUS_GENERATED]);
-                $this->notifyStudent($locked->refresh());
+                $this->afterTransition($locked->refresh());
 
                 return $document->refresh();
             });
@@ -152,12 +153,15 @@ class DocumentService
         }
 
         $document->update(['status' => Document::STATUS_REVOKED]);
+        $this->audit->record('document.revoked', $document, ['status' => Document::STATUS_VALID], ['status' => Document::STATUS_REVOKED]);
 
         return $document->refresh();
     }
 
     public function download(Document $document): StreamedResponse
     {
+        $this->audit->record('document.downloaded', $document);
+
         return Storage::disk($this->disk())->download($document->file_key, $document->file_name, ['Content-Type' => 'application/pdf']);
     }
 
@@ -297,9 +301,10 @@ class DocumentService
         ]];
     }
 
-    /** Tell the student their request moved (critical email; queued after commit). */
-    private function notifyStudent(DocumentRequest $request): DocumentRequest
+    /** Audit the decision and tell the student (critical email; queued after commit). */
+    private function afterTransition(DocumentRequest $request): DocumentRequest
     {
+        $this->audit->record("document_request.{$request->status}", $request, after: $request->only(['status', 'document_type_id', 'semester_id', 'rejection_reason']));
         $request->loadMissing('student.user')->student->user?->notify(new DocumentRequestUpdated($request));
 
         return $request;

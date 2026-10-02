@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\AnnouncementController;
 use App\Http\Controllers\Api\AssignmentController;
 use App\Http\Controllers\Api\AttendanceController;
+use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\CourseOfferingController;
@@ -327,6 +328,10 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->group(
 Route::middleware(['auth:sanctum', 'role:super-admin'])->group(function () {
     Route::get('/error-logs', [ErrorLogController::class, 'index'])->name('api.error-logs.index');
     Route::get('/error-logs/{errorLog}', [ErrorLogController::class, 'show'])->name('api.error-logs.show');
+
+    // Audit trail (module 9.24): read-only; rows are written by `AuditLogger`.
+    Route::get('/audit-logs', [AuditLogController::class, 'index'])->name('api.audit-logs.index');
+    Route::get('/audit-logs/{auditLog}', [AuditLogController::class, 'show'])->name('api.audit-logs.show');
 });
 
 // Analytics (module 9.23): institution-wide, so managers only (`view-analytics`).

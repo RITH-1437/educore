@@ -28,6 +28,7 @@ use Illuminate\Validation\ValidationException;
 class EnrollmentService
 {
     public function __construct(
+        private readonly AuditLogger $audit,
         private readonly TimetableService $timetable,
     ) {}
 
@@ -114,6 +115,8 @@ class EnrollmentService
                 ])->refresh();
             }
 
+            $this->audit->record('enrollment.created', $enrollment, after: $enrollment->only(['student_id', 'section_id', 'semester_id', 'status']));
+
             // Queued, sent after commit (module 9.20).
             $student->user?->notify(new EnrollmentConfirmed($enrollment));
 
@@ -135,10 +138,12 @@ class EnrollmentService
             $hasRecords = DB::table('attendance_records')->where('enrollment_id', $enrollment->getKey())->exists()
                 || DB::table('grades')->where('enrollment_id', $enrollment->getKey())->exists();
 
+            $before = $enrollment->getAttributes();
             $enrollment->update([
                 'status' => $hasRecords ? Enrollment::STATUS_WITHDRAWN : Enrollment::STATUS_DROPPED,
                 'dropped_at' => now(),
             ]);
+            $this->audit->changes("enrollment.{$enrollment->status}", $enrollment, $before);
 
             return $enrollment->refresh();
         });
@@ -155,7 +160,9 @@ class EnrollmentService
                 throw new BusinessRuleException('Only a confirmed enrollment can be completed.');
             }
 
+            $before = $enrollment->getAttributes();
             $enrollment->update(['status' => Enrollment::STATUS_COMPLETED]);
+            $this->audit->changes('enrollment.completed', $enrollment, $before);
 
             return $enrollment->refresh();
         });

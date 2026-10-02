@@ -39,6 +39,10 @@ use Illuminate\Validation\ValidationException;
  */
 class AnnouncementService
 {
+    public function __construct(
+        private readonly AuditLogger $audit,
+    ) {}
+
     /**
      * Published announcements the user belongs to, newest first.
      *
@@ -140,6 +144,7 @@ class AnnouncementService
             ])->refresh();
 
             if ($publish) {
+                $this->audit->record('announcement.published', $announcement, after: $announcement->only(['title', 'audience_type', 'audience_id']));
                 SendAnnouncementNotifications::dispatch($announcement);
             }
 
@@ -174,6 +179,7 @@ class AnnouncementService
             // The publisher must still be allowed to reach the audience.
             $this->assertAudience($by, $announcement->audience_type, $announcement->audience_id);
             $announcement->update(['publish_state' => Announcement::STATE_PUBLISHED, 'published_at' => now()]);
+            $this->audit->record('announcement.published', $announcement, after: $announcement->only(['title', 'audience_type', 'audience_id']));
             // Delivery to the audience is queued and runs after commit (9.20 / 9.21).
             SendAnnouncementNotifications::dispatch($announcement);
 
@@ -188,6 +194,7 @@ class AnnouncementService
         }
 
         $announcement->update(['publish_state' => Announcement::STATE_ARCHIVED]);
+        $this->audit->record('announcement.archived', $announcement, ['publish_state' => Announcement::STATE_PUBLISHED], ['publish_state' => Announcement::STATE_ARCHIVED]);
 
         return $announcement->refresh();
     }

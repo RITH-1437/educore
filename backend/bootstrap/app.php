@@ -1,6 +1,7 @@
 <?php
 
 use App\Exceptions\BusinessRuleException;
+use App\Http\Middleware\EnsureAccountIsActive;
 use App\Http\Middleware\EnsureUserHasRole;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Services\ErrorLogRecorder;
@@ -21,6 +22,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->web(append: [
             HandleInertiaRequests::class,
+            // Module 9.24: a deactivated account loses its session / token.
+            EnsureAccountIsActive::class,
+        ]);
+        $middleware->api(append: [
+            EnsureAccountIsActive::class,
         ]);
 
         $middleware->alias([

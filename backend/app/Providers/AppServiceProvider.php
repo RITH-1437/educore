@@ -8,8 +8,14 @@ use App\Models\AttendanceSession;
 use App\Models\User;
 use App\Policies\AssignmentPolicy;
 use App\Policies\AttendancePolicy;
+use App\Services\AuditLogger;
+use Illuminate\Auth\Events\Failed;
+use Illuminate\Auth\Events\Lockout;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
@@ -32,6 +38,13 @@ class AppServiceProvider extends ServiceProvider
         // Not discoverable by name: attendance is authorized per section/student.
         Gate::policy(AttendanceSession::class, AttendancePolicy::class);
         Gate::policy(AssignmentSubmission::class, AssignmentPolicy::class);
+
+        // Audit trail of sign-in activity (module 9.24): who signed in or out,
+        // failed attempts (the email tried, never the password) and lockouts.
+        Event::listen(Login::class, fn (Login $e) => app(AuditLogger::class)->record('auth.login', $e->user, description: "Guard: {$e->guard}", actor: $e->user));
+        Event::listen(Logout::class, fn (Logout $e) => $e->user ? app(AuditLogger::class)->record('auth.logout', $e->user, actor: $e->user) : null);
+        Event::listen(Failed::class, fn (Failed $e) => app(AuditLogger::class)->record('auth.failed', $e->user, description: 'Sign-in failed for '.($e->credentials['email'] ?? 'an unknown email').'.'));
+        Event::listen(Lockout::class, fn (Lockout $e) => app(AuditLogger::class)->record('auth.lockout', null, description: 'Too many sign-in attempts for '.($e->request->input('email') ?? 'an unknown email').'.'));
 
         // Institution-wide analytics (module 9.23): managers only — Faculty Admin
         // would need unit scoping first (`skills/analytics-reporting` §12).

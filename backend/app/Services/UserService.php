@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\DB;
 class UserService
 {
     public function __construct(
+        private readonly AuditLogger $audit,
         private readonly UserRepository $users,
     ) {}
 
@@ -33,20 +34,34 @@ class UserService
 
     public function create(CreateUserData $data): UserData
     {
-        $user = DB::transaction(fn () => $this->users->create($data));
+        $user = DB::transaction(function () use ($data) {
+            $user = $this->users->create($data);
+            $this->audit->record('user.created', $user, after: $user->only(['name', 'email', 'role_id', 'is_active']));
+
+            return $user;
+        });
 
         return UserData::fromModel($user->load('role'), withRole: true);
     }
 
     public function update(User $user, UpdateUserData $data): UserData
     {
-        DB::transaction(fn () => $this->users->update($user, $data));
+        DB::transaction(function () use ($user, $data) {
+            $before = $user->getAttributes();
+            $this->users->update($user, $data);
+            // Role, activation and password changes are all captured here; a
+            // password change is recorded as a fact, never as a value.
+            $this->audit->changes('user.updated', $user->refresh(), $before);
+        });
 
         return UserData::fromModel($user->fresh()->load('role'), withRole: true);
     }
 
     public function delete(User $user): void
     {
-        DB::transaction(fn () => $this->users->delete($user));
+        DB::transaction(function () use ($user) {
+            $this->audit->record('user.deleted', $user, $user->only(['name', 'email', 'role_id', 'is_active']));
+            $this->users->delete($user);
+        });
     }
 }

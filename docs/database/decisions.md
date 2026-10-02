@@ -158,3 +158,10 @@ actions (and reused by `AUDITABLE_MODELS`); DB triggers are rejected.
 **Why.** Triggers fire on direct SQL too (noisy writes during seeding),
 don't know the acting user session, and can't capture domain context. PHP-side
 auditing is per `audit-logging` skill.
+
+**Amendment (2026-10-02, module 9.24).** Writing stays in the application
+(`AuditLogger`, inside the services' transactions). One trigger *is* added,
+for protection only: `trg_audit_logs_append_only` refuses UPDATE and DELETE on
+`audit_logs` (allowing just the FK's `actor_id → NULL` on user removal). It
+writes nothing, so the reasons above do not apply; it makes the append-only
+rule hold even for direct SQL.

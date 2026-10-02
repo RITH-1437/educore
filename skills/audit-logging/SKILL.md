@@ -5,6 +5,15 @@ description: EduCore audit logging - sensitive action tracking, who/what/when, i
 
 # EduCore — Audit Logging
 
+## 0. Implementation (module 9.24)
+
+`App\Services\AuditLogger::record()` / `changes()` called explicitly inside the
+services' transactions; auth events via listeners in `AppServiceProvider`;
+`AuditLog` model + trigger `trg_audit_logs_append_only` keep the table
+append-only; Super Admin viewer at `/audit-logs`. See
+`docs/28_Audit-Logs-and-Security-Report.md`. New sensitive actions must call
+`AuditLogger` with a dotted `<subject>.<verb>` action.
+
 ## 1. Purpose
 
 Record sensitive/administrative actions: who did what, to what record, when,

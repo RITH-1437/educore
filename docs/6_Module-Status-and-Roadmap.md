@@ -39,7 +39,7 @@
 | 9.21 | Telegram Notifications | `[Implemented]` (class reminders `[Future]`) |
 | 9.22 | Internship Management | `[Implemented]` (opportunity postings, letter document `[Future]`) |
 | 9.23 | Analytics & Reporting | `[Implemented]` (exports, faculty-scoped views `[Future]`) |
-| 9.24 | Audit Logs & Security | `[Future]` |
+| 9.24 | Audit Logs & Security | `[Implemented]` (retention / export `[Future]`) |
 
 > No module is documented as implemented unless it is genuinely tested and running
 > (the documentation skill forbids overclaiming).
@@ -47,8 +47,8 @@
 ```mermaid
 pie showData
   title Module delivery status
-  "Implemented (incl. schema)" : 48
-  "Planned / In progress" : 2
+  "Implemented (incl. schema)" : 49
+  "Planned / In progress" : 1
 ```
 
 ---
@@ -297,8 +297,15 @@ grade / attendance / GPA definitions of 9.11 and 9.14), gate `view-analytics`
 (managers), `Analytics/Index` with KPI tiles and single-hue bar charts
 (`components/charts/BarChart.vue`, palette-validated, table toggle), 4 API
 operations, 4 feature tests. Report: `docs/27_Analytics-and-Reporting-Report.md`.
-**9.24 Audit Logs & Security** — table `audit_logs`; log sensitive access;
-hardening pass (locking, Superset-free reporting, deployment).
+**9.24 Audit Logs & Security** `[Implemented]` — table `audit_logs` (+ an
+append-only trigger migration). Delivered: `AuditLogger` called inside the
+services' transactions (sign-in events, users, students, lecturers,
+enrollment, exam corrections, grades and grading rules, documents, finance,
+announcements, internships) with changed-attributes-only snapshots and no
+secrets; `AuditLog` model + PostgreSQL trigger refusing UPDATE / DELETE;
+`EnsureAccountIsActive` revoking sessions / tokens of deactivated accounts;
+Super Admin viewer `AuditLogs/Index|Show`, 2 API operations, 7 feature tests.
+Report: `docs/28_Audit-Logs-and-Security-Report.md`.
 
 ---
 
@@ -363,8 +370,8 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` 9.3 Lecturer Management (`lecturers`). Report:
   `docs/12_Lecturer-Management-Report.md`.
 - `[Done]` Sign-in refuses inactive accounts (`users.is_active`) with the
-  generic error, web and API. `[Open]` sessions/tokens issued before a
-  deactivation stay valid until logout or expiry.
+  generic error, web and API. `[Done]` (9.24) Sessions / tokens issued before
+  a deactivation are revoked on the next request.
 - `[Done]` 9.2 Student Management (`students`, `student_programs`). Report:
   `docs/13_Student-Management-Report.md`.
 - `[Done]` 9.8 Class / Section (`course_offerings`, `sections`,
@@ -383,14 +390,14 @@ A module is not done until its report exists and its tests pass — never label
   `[Open]` Lecturer-attached materials are not built.
 - `[Done]` 9.13 Examinations (`exams`, `exam_results`). Report:
   `docs/19_Examinations-Report.md`.
-- `[Open]` Exam result corrections are not audited yet (9.24 Audit Logs).
+- `[Done]` Exam result corrections are audited (9.24).
 - `[Done]` 9.14 Grades & GPA (`grading_scales`, `course_grading_configs`,
   `grades`, `gpa_records`); prerequisites now require an approved passing grade
   when a grade exists. Report: `docs/20_Grades-and-GPA-Report.md`.
 - `[Done]` API re-audit 2026-10-02: six PATCH aliases documented; R-01 marked
   resolved (`docs/api/api-audit.md`).
-- `[Open]` Grade changes are not audited yet (9.24); the `finalized` grade lock
-  step is not built. `[Done]` The transcript document ships with 9.16.
+- `[Done]` Grade submissions, approvals and returns are audited (9.24).
+  `[Open]` The `finalized` grade lock step is not built. `[Done]` The transcript document ships with 9.16.
 - `[Done]` 9.15 Student Academic Dashboard. Report:
   `docs/21_Student-Academic-Dashboard-Report.md`. `[Open]` Its announcements
   card shipped with 9.19; lecturer / faculty-admin dashboards are still previews.
@@ -431,5 +438,9 @@ A module is not done until its report exists and its tests pass — never label
   `docs/27_Analytics-and-Reporting-Report.md`. `[Open]` CSV / PDF exports,
   Faculty Admin views (unit scoping), trends across semesters; the charts were
   not inspected in a browser when shipped.
-- `[Next]` 9.24 Audit Logs & Security (`[Future]`
-  in the business overview).
+- `[Done]` 9.24 Audit Logs & Security. Report:
+  `docs/28_Audit-Logs-and-Security-Report.md`. `[Open]` Audit retention /
+  export, alerting on repeated notification failures, auditing low-risk
+  structure CRUD, two-factor sign-in.
+- All modules of business-overview §9 are now implemented. Remaining open
+  items are listed above (unit scoping for Faculty Admin is the largest).

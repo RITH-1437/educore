@@ -36,6 +36,7 @@ class LecturerService
     ];
 
     public function __construct(
+        private readonly AuditLogger $audit,
         private readonly UserRepository $users,
     ) {}
 
@@ -117,12 +118,18 @@ class LecturerService
 
     public function deactivate(Lecturer $lecturer): Lecturer
     {
-        return $this->setActive($lecturer, false);
+        $lecturer = $this->setActive($lecturer, false);
+        $this->audit->record('lecturer.deactivated', $lecturer, ['is_active' => true], ['is_active' => false]);
+
+        return $lecturer;
     }
 
     public function reactivate(Lecturer $lecturer): Lecturer
     {
-        return $this->setActive($lecturer, true);
+        $lecturer = $this->setActive($lecturer, true);
+        $this->audit->record('lecturer.reactivated', $lecturer, ['is_active' => false], ['is_active' => true]);
+
+        return $lecturer;
     }
 
     /**

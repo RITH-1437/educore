@@ -60,6 +60,7 @@ class GradingService
     ];
 
     public function __construct(
+        private readonly AuditLogger $audit,
         private readonly AttendanceService $attendance,
         private readonly GpaService $gpa,
     ) {}
@@ -106,6 +107,7 @@ class GradingService
         }
 
         return DB::transaction(function () use ($sorted) {
+            $before = $this->scaleSnapshot();
             $name = $this->activeScaleName();
             GradingScale::query()->where('name', $name)->delete();
 
@@ -123,8 +125,23 @@ class GradingService
                 ]);
             }
 
+            $this->audit->record('grading_scale.updated', null, ['bands' => $before], ['bands' => $this->scaleSnapshot()]);
+
             return $this->activeScale();
         });
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    private function scaleSnapshot(): array
+    {
+        return $this->activeScale()->map(fn (GradingScale $band) => [
+            'grade' => $band->grade,
+            'min_percentage' => (float) $band->min_percentage,
+            'grade_point' => (float) $band->grade_point,
+            'is_pass' => $band->is_pass,
+        ])->values()->all();
     }
 
     /**
@@ -163,7 +180,13 @@ class GradingService
             throw ValidationException::withMessages(['weights' => 'The weights must add up to 100% (currently '.round($sum, 2).'%).']);
         }
 
-        return DB::transaction(fn () => CourseGradingConfig::query()->updateOrCreate(['course_id' => $course->getKey()], $weights)->refresh());
+        return DB::transaction(function () use ($course, $weights) {
+            $before = $this->weights($this->configFor($course));
+            $config = CourseGradingConfig::query()->updateOrCreate(['course_id' => $course->getKey()], $weights)->refresh();
+            $this->audit->record('grading_config.updated', $course, $before, $this->weights($config));
+
+            return $config;
+        });
     }
 
     /**
@@ -304,6 +327,8 @@ class GradingService
                 $grade->update(['status' => Grade::STATUS_SUBMITTED, 'submitted_at' => now(), 'graded_by' => $by->getKey()]);
             }
 
+            $this->audit->record('grades.submitted', $section, after: ['grades' => $this->gradeSnapshot($drafts)]);
+
             return $drafts->count();
         });
     }
@@ -331,6 +356,8 @@ class GradingService
                 $grade->enrollment->student->user?->notify(new GradePublished($grade));
             }
 
+            $this->audit->record('grades.approved', $section, after: ['grades' => $this->gradeSnapshot($grades)]);
+
             $grades->pluck('enrollment.student')->unique('id')->each(fn ($student) => $this->gpa->recalculate($student));
 
             return $grades->count();
@@ -347,9 +374,13 @@ class GradingService
                 throw new BusinessRuleException('There are no submitted or approved grades to return.');
             }
 
+            $before = $grades->mapWithKeys(fn (Grade $grade) => [$grade->id => $grade->status])->all();
+
             foreach ($grades as $grade) {
                 $grade->update(['status' => Grade::STATUS_DRAFT, 'submitted_at' => null, 'approved_at' => null]);
             }
+
+            $this->audit->record('grades.returned', $section, ['statuses' => $before], ['grades' => $this->gradeSnapshot($grades)]);
 
             $grades->pluck('enrollment.student')->unique('id')->each(fn ($student) => $this->gpa->recalculate($student));
 
@@ -389,6 +420,23 @@ class GradingService
     }
 
     // ---------------------------------------------------------------- helpers
+
+    /**
+     * Who got what, for the audit trail.
+     *
+     * @param  iterable<Grade>  $grades
+     * @return list<array<string, mixed>>
+     */
+    private function gradeSnapshot(iterable $grades): array
+    {
+        return collect($grades)->map(fn (Grade $grade) => [
+            'grade_id' => $grade->id,
+            'enrollment_id' => $grade->enrollment_id,
+            'letter_grade' => $grade->letter_grade,
+            'total_score' => $grade->total_score === null ? null : (float) $grade->total_score,
+            'status' => $grade->status,
+        ])->values()->all();
+    }
 
     private function gradesOf(Section $section): Builder
     {

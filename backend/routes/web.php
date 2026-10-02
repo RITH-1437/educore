@@ -5,6 +5,7 @@ use App\Http\Controllers\AcademicYearController;
 use App\Http\Controllers\AnalyticsPageController;
 use App\Http\Controllers\AnnouncementsController;
 use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\AuditLogsController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseOfferingController;
@@ -430,3 +431,9 @@ Route::middleware(['auth', 'role:super-admin'])
         Route::get('/', [ErrorLogController::class, 'index'])->name('index');
         Route::get('/{errorLog}', [ErrorLogController::class, 'show'])->name('show');
     });
+
+// Audit trail (module 9.24): Super Admin only, read-only — no write routes.
+Route::middleware(['auth', 'role:super-admin'])->prefix('/audit-logs')->name('audit-logs.')->group(function () {
+    Route::get('/', [AuditLogsController::class, 'index'])->name('index');
+    Route::get('/{auditLog}', [AuditLogsController::class, 'show'])->name('show');
+});

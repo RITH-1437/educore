@@ -399,8 +399,9 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` Grade submissions, approvals and returns are audited (9.24).
   `[Done]` The `finalized` grade lock step (finalize; Super Admin reopen with reason). `[Done]` The transcript document ships with 9.16.
 - `[Done]` 9.15 Student Academic Dashboard. Report:
-  `docs/21_Student-Academic-Dashboard-Report.md`. `[Open]` Its announcements
-  card shipped with 9.19; lecturer / faculty-admin dashboards are still previews.
+  `docs/21_Student-Academic-Dashboard-Report.md`. Its announcements card
+  shipped with 9.19. `[Done]` Faculty Admin dashboard (report 34). `[Open]`
+  Lecturer and University Admin dashboards are still previews.
 - `[Done]` 9.16 / 9.17 Document Management & Verification. Report:
   `docs/22_Documents-and-Verification-Report.md`. `[Done]` Transition audit
   trail (9.24, `docs/28_Audit-Logs-and-Security-Report.md`). `[Open]` QR image
@@ -438,9 +439,10 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` Flaky `GradingTest` fixed (explicit academic-year codes moved outside
   the factory's random 1950–2099 range).
 - `[Done]` 9.23 Analytics & Reporting. Report:
-  `docs/27_Analytics-and-Reporting-Report.md`. `[Done]` CSV exports. `[Open]` PDF exports,
-  Faculty Admin analytics (scoping exists now, report 32), trends across semesters; the charts were
-  not inspected in a browser when shipped.
+  `docs/27_Analytics-and-Reporting-Report.md`. `[Done]` CSV exports. `[Done]` A
+  faculty's headline numbers on the Faculty Admin dashboard (report 34).
+  `[Open]` PDF exports, the analytics page for Faculty Admins, trends across
+  semesters; the charts were not inspected in a browser when shipped.
 - `[Done]` 9.24 Audit Logs & Security. Report:
   `docs/28_Audit-Logs-and-Security-Report.md`. `[Done]` Audit CSV export. `[Open]` Audit retention,
   alerting on repeated notification failures, auditing low-risk
@@ -467,8 +469,9 @@ A module is not done until its report exists and its tests pass — never label
   to the assigned faculty across structure, people, academic activity,
   enrollments, documents and internships; unassigned = no unit data.
   Report: `docs/32_Faculty-Admin-Scoping-Report.md`. `[Done]` Request handling
-  (report 33). `[Open]` Sections / schedules for their unit, department-level
-  admins, Faculty Admin analytics.
+  (report 33). `[Done]` Dashboard (report 34). `[Open]` Sections / schedules
+  for their unit, department-level admins, the analytics page for Faculty
+  Admins.
 - `[Done]` Audit fix (2026-10-03): `/enrollments`, `/offerings/{offering}`,
   `/lecturers` and `/students` sent university-wide form options (students,
   open sections, lecturers, unlinked accounts) to a Faculty Admin; they are
@@ -492,5 +495,13 @@ A module is not done until its report exists and its tests pass — never label
   generate document requests and review / approve / reject / start / complete
   / cancel / evaluate / edit internships of their faculty's students; revoke
   and companies stay with managers; abilities now require the record. Report:
-  `docs/33_Faculty-Admin-Request-Handling-Report.md`. `[Open]` Faculty Admin sections and schedules, notifying
-  Faculty Admins of new requests.
+  `docs/33_Faculty-Admin-Request-Handling-Report.md`. `[Done]` Waiting requests
+  and internships are counted on their dashboard (report 34). `[Open]` Faculty
+  Admin sections and schedules, email / Telegram notices of new requests.
+- `[Done]` Faculty Admin dashboard (2026-10-03): `/dashboard` shows the
+  document requests and internships waiting for them (each count opens the
+  queue filtered to that status) and their faculty's headline numbers for the
+  current semester on the analytics definitions; `GET
+  /api/faculties/{faculty}/dashboard` serves managers and the faculty's admin.
+  Report: `docs/34_Faculty-Admin-Dashboard-Report.md`. `[Open]` Lecturer and
+  University Admin dashboards (still previews).

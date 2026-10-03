@@ -172,9 +172,9 @@ class FacultyAdminScopingTest extends TestCase
         $this->actingAs($nobody)->getJson('/api/universities')->assertOk();
 
         $this->actingAs($nobody)->get('/dashboard')->assertOk()
-            ->assertInertia(fn (Assert $page) => $page->where('description', fn ($text) => str_contains($text, 'No faculty is assigned')));
+            ->assertInertia(fn (Assert $page) => $page->component('FacultyAdmin/Dashboard')->where('dashboard', null));
         $this->actingAs($this->facultyAdmin)->get('/dashboard')->assertOk()
-            ->assertInertia(fn (Assert $page) => $page->where('description', fn ($text) => str_contains($text, 'Faculty of Engineering')));
+            ->assertInertia(fn (Assert $page) => $page->where('dashboard.faculty.name', 'Faculty of Engineering'));
     }
 
     public function test_deleting_a_faculty_unassigns_its_admins(): void

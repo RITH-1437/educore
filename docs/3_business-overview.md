@@ -318,10 +318,12 @@ monitor attendance and performance; handle unit-level requests.
 courses, sections, lecturers, students, enrollments, grades, documents, internships),
 and handling their students' requests: approve / reject / generate document
 requests and review / approve / evaluate internships (revoking documents and
-managing companies stay with University Admin). Creating sections and schedules
-for their unit is [Future]. See
-[32_Faculty-Admin-Scoping-Report.md](32_Faculty-Admin-Scoping-Report.md) and
-[33_Faculty-Admin-Request-Handling-Report.md](33_Faculty-Admin-Request-Handling-Report.md).
+managing companies stay with University Admin). Their dashboard shows the
+requests and internships waiting for them and the faculty's headline numbers.
+Creating sections and schedules for their unit is [Future]. See
+[32_Faculty-Admin-Scoping-Report.md](32_Faculty-Admin-Scoping-Report.md),
+[33_Faculty-Admin-Request-Handling-Report.md](33_Faculty-Admin-Request-Handling-Report.md) and
+[34_Faculty-Admin-Dashboard-Report.md](34_Faculty-Admin-Dashboard-Report.md).
 
 **Typical workflows:**
 
@@ -667,10 +669,12 @@ users, main business activities, and expected outputs.
   headline numbers, enrollment by program, attendance and results per course,
   grade and GPA distributions — plus the current workload (documents,
   internships, invoices, finance per currency), all computed live in SQL from
-  the domain tables, each table downloadable as CSV. PDF exports,
-  faculty-scoped views and trends are [Future].
-  See [27_Analytics-and-Reporting-Report.md](27_Analytics-and-Reporting-Report.md) and
-  [31_CSV-Exports-Report.md](31_CSV-Exports-Report.md).
+  the domain tables, each table downloadable as CSV. A Faculty Admin sees
+  their faculty's headline numbers on their dashboard; PDF exports, a
+  faculty-scoped analytics page and trends are [Future].
+  See [27_Analytics-and-Reporting-Report.md](27_Analytics-and-Reporting-Report.md),
+  [31_CSV-Exports-Report.md](31_CSV-Exports-Report.md) and
+  [34_Faculty-Admin-Dashboard-Report.md](34_Faculty-Admin-Dashboard-Report.md).
 
 ### 9.24 Audit Logs & Security [Implemented]
 

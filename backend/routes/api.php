@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\ErrorLogController;
 use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\ExportController;
 use App\Http\Controllers\Api\FacultyController;
+use App\Http\Controllers\Api\FacultyDashboardController;
 use App\Http\Controllers\Api\GradeController;
 use App\Http\Controllers\Api\InternshipController;
 use App\Http\Controllers\Api\InvoiceController;
@@ -65,6 +66,8 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
 
     Route::get('/faculties', [FacultyController::class, 'index'])->name('api.faculties.index');
     Route::get('/faculties/{faculty}', [FacultyController::class, 'show'])->name('api.faculties.show');
+    // Waiting requests and headline numbers; `FacultyPolicy::view` keeps a Faculty Admin to their own.
+    Route::get('/faculties/{faculty}/dashboard', FacultyDashboardController::class)->name('api.faculties.dashboard');
 
     Route::get('/departments', [DepartmentController::class, 'index'])->name('api.departments.index');
     Route::get('/departments/{department}', [DepartmentController::class, 'show'])->name('api.departments.show');

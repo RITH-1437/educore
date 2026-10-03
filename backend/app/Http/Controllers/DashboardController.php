@@ -6,6 +6,7 @@ use App\Models\AcademicYear;
 use App\Models\Role;
 use App\Models\Semester;
 use App\Models\User;
+use App\Services\FacultyDashboardService;
 use App\Services\StudentDashboardService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -93,7 +94,7 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function roleDashboard(Request $request, StudentDashboardService $students): Response
+    public function roleDashboard(Request $request, StudentDashboardService $students, FacultyDashboardService $faculties): Response
     {
         $user = $request->user();
 
@@ -105,20 +106,20 @@ class DashboardController extends Controller
             ]);
         }
 
+        // Faculty Admins get their faculty's dashboard (report 34); none assigned = no unit data.
+        if ($user->isRole('faculty-admin')) {
+            return Inertia::render('FacultyAdmin/Dashboard', [
+                'dashboard' => $user->faculty ? $faculties->build($user->faculty) : null,
+                'userName' => $user->name,
+            ]);
+        }
+
         $role = $user->role?->slug;
         $dashboard = match ($role) {
             'university-admin' => [
                 'title' => 'University Admin Dashboard',
                 'description' => 'A preview of university-wide academic operations and administration.',
                 'areas' => ['Academic calendar', 'Faculties and departments', 'Programs and courses', 'Students and lecturers', 'Announcements and reports'],
-            ],
-            'faculty-admin' => [
-                'title' => 'Faculty / Department Admin Dashboard',
-                // Data access is limited to the assigned faculty; none assigned = no unit data.
-                'description' => $user->faculty
-                    ? "{$user->faculty->name}: read its departments, programs, courses, students and lecturers, and process its students' document requests and internships."
-                    : 'No faculty is assigned to your account yet, so unit data stays hidden. Ask a Super Admin to assign one.',
-                'areas' => ['Departments', 'Programs and courses', 'Students and lecturers', 'Schedules and attendance', 'Document requests and internships'],
             ],
             'lecturer' => [
                 'title' => 'Lecturer Dashboard',

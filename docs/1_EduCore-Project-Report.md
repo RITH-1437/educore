@@ -764,12 +764,13 @@ gantt
 | Month 6 | Testing, security, production hardening |
 
 **Progress (2026-10-03):** every module of business-overview §9 is
-implemented and tested (402 feature tests), documented in reports 7–33, with
-all 215 API operations in the OpenAPI document. Faculty / Department Admins
-read their assigned faculty (`docs/32_Faculty-Admin-Scoping-Report.md`) and
+implemented and tested (404 feature tests), documented in reports 7–34, with
+all 216 API operations in the OpenAPI document. Faculty / Department Admins
+read their assigned faculty (`docs/32_Faculty-Admin-Scoping-Report.md`),
 process its students' document requests and internships
-(`docs/33_Faculty-Admin-Request-Handling-Report.md`); sections and schedules for their unit
-remain open — see `docs/6_Module-Status-and-Roadmap.md` §6.
+(`docs/33_Faculty-Admin-Request-Handling-Report.md`) and see what waits for
+them on their dashboard (`docs/34_Faculty-Admin-Dashboard-Report.md`); sections
+and schedules for their unit remain open — see `docs/6_Module-Status-and-Roadmap.md` §6.
 
 ---
 

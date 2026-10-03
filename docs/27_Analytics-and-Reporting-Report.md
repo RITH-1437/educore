@@ -41,6 +41,12 @@ an empty system never divides by zero. Academic figures are bounded to one
 semester (`semester_id`, default: the open semester with the latest start);
 administrative figures are the current workload.
 
+`facultyOverview()` (2026-10-03) returns active students, active lecturers,
+running sections and students enrolled for one faculty, on the same helpers
+and the ownership rules of `App\Support\FacultyScope`; the Faculty Admin
+dashboard shows them (`docs/34_Faculty-Admin-Dashboard-Report.md`). The
+analytics page itself stays with managers.
+
 ```mermaid
 flowchart LR
   F[Semester filter] --> S[AnalyticsService]

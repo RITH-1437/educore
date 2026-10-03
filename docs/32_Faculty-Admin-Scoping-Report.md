@@ -26,7 +26,9 @@ academic years / semesters, grading scale, internship companies, document
 types, announcements (audience-based already).
 
 Not built: department-level admins (scope is one faculty), several faculties
-per admin, Faculty Admin analytics (still managers only), unit-level writes.
+per admin, Faculty Admin analytics (the page stays with managers; headline
+numbers reached their dashboard in report 34), unit-level writes (request
+handling followed in report 33).
 
 ## 2. Data model
 
@@ -132,7 +134,8 @@ No new endpoints. Changed contracts:
 UI: the Users create / edit forms show a **Faculty** select when the role is
 Faculty Admin (empty = "No faculty (sees no unit data)"); the users list
 shows the faculty under the role. The Faculty Admin dashboard names their
-faculty, or says none is assigned.
+faculty, or says none is assigned (since report 34 it also counts the work
+waiting for them and the faculty's headline numbers).
 
 ## 6. Authorization matrix (Faculty Admin)
 
@@ -154,7 +157,7 @@ faculty, or says none is assigned.
   role change), structure / people lists and records scoped, academic
   activity scoped by course faculty (offerings, sections, schedules, grade
   sheets, enrollments, approvals queue), unassigned admin sees nothing while
-  shared reference data stays readable, dashboard text, faculty deletion
+  shared reference data stays readable, the dashboard (faculty or none), faculty deletion
   unassigns, and (`test_manager_only_form_options_are_not_sent_to_faculty_admins`)
   the four form-option props above are empty for a Faculty Admin but still
   sent to managers.

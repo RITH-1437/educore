@@ -13,11 +13,11 @@
 
 | Measure | Result |
 |---|---:|
-| Application API route definitions (`routes/api.php`) | 196 |
-| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 215 |
-| Swagger operations after documentation corrections | 215 |
-| Swagger document paths | 134 |
-| Swagger document schemas | 159 |
+| Application API route definitions (`routes/api.php`) | 197 |
+| HTTP method/path operations, expanding combined `PUT|PATCH` routes | 216 |
+| Swagger operations after documentation corrections | 216 |
+| Swagger document paths | 135 |
+| Swagger document schemas | 160 |
 | Undocumented application operations | 0 |
 | Extra Swagger operations not in the application API routes | 0 |
 | Swagger generation errors after corrections | 0 |
@@ -292,6 +292,7 @@ documented operations.
 | GET | `/api/faculties` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
 | POST | `/api/faculties` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/faculties/{faculty}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/faculties/{faculty}/dashboard` | Sanctum + super-admin or university-admin, or the faculty's own faculty-admin (report 34) | Documented |
 | PUT, PATCH | `/api/faculties/{faculty}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/faculties/{faculty}` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/faculties/{faculty}/archive` | Sanctum + super-admin or university-admin | Documented |
@@ -556,3 +557,12 @@ No endpoints were added. Document approve / reject / generate, internship
 manager transitions, edits, evaluations and report reviews now also accept the
 student's Faculty Admin; revoke and company endpoints stay with managers. See
 `docs/33_Faculty-Admin-Request-Handling-Report.md`.
+
+## Faculty dashboard (2026-10-03)
+
+One endpoint added: `GET /api/faculties/{faculty}/dashboard` (`FacultyDashboard`
+schema), the document requests and internships of the faculty's students
+waiting to be processed and its headline numbers for the current semester.
+`FacultyPolicy::view` decides: managers read any faculty, a Faculty Admin only
+their own (`403` for another faculty or when none is assigned). See
+`docs/34_Faculty-Admin-Dashboard-Report.md`.

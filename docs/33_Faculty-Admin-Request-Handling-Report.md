@@ -27,7 +27,8 @@ Faculty Admin still processes nothing. Every other role is unchanged.
 
 Not built: Faculty Admin creating sections and schedules for their unit,
 notifying Faculty Admins of new requests from their students (they see them in
-the queue), department-level admins.
+the queue, and since `docs/34_Faculty-Admin-Dashboard-Report.md` counted on
+their dashboard), department-level admins.
 
 ## 2. Authorization
 
@@ -144,4 +145,5 @@ Full suite: 402 passed. Swagger regenerated; route list and Swagger match
 - **Companies stay shared.** Host companies are reference data used by every
   faculty, so only managers create or edit them.
 - **No new notifications.** Faculty Admins find their students' new requests
-  in the scoped queues; notifying them is a possible follow-up.
+  in the scoped queues (counted on their dashboard since report 34); notifying
+  them is a possible follow-up.

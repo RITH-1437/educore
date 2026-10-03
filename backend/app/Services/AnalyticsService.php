@@ -8,8 +8,10 @@ use App\Models\Enrollment;
 use App\Models\Grade;
 use App\Models\Internship;
 use App\Models\Invoice;
+use App\Models\Lecturer;
 use App\Models\Semester;
 use App\Models\Student;
+use App\Support\FacultyScope;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -63,14 +65,32 @@ class AnalyticsService
         return [
             'students_active' => Student::query()->where('status', Student::STATUS_ACTIVE)->count(),
             'lecturers_active' => DB::table('lecturers')->where('is_active', true)->count(),
-            'sections' => DB::table('sections')->join('course_offerings', 'course_offerings.id', '=', 'sections.course_offering_id')
-                ->where('course_offerings.semester_id', $semester->id)->whereIn('sections.status', ['open', 'active', 'closed', 'completed'])->count(),
+            'sections' => $this->sections($semester)->count(),
             'enrollments' => $this->enrollments($semester)->count(),
             'students_enrolled' => (int) $this->enrollments($semester)->distinct()->count('enrollments.student_id'),
             'attendance_rate' => $this->rate((int) ($attendance->attended ?? 0), (int) ($attendance->counted ?? 0)),
             'grades_approved' => (int) ($grades->graded ?? 0),
             'pass_rate' => $this->rate((int) ($grades->passed ?? 0), (int) ($grades->graded ?? 0)),
             'average_gpa' => ($avg = DB::table('gpa_records')->where('semester_id', $semester->id)->where('cumulative', false)->avg('gpa_value')) === null ? null : round((float) $avg, 2),
+        ];
+    }
+
+    /**
+     * The people and teaching numbers of overview() for one faculty
+     * (`docs/34_Faculty-Admin-Dashboard-Report.md`), on the ownership rules of
+     * `App\Support\FacultyScope`: students through their programs, lecturers
+     * through their department, sections through their course. Semester
+     * figures are null when there is no semester.
+     *
+     * @return array{students_active: int, lecturers_active: int, sections: int|null, students_enrolled: int|null}
+     */
+    public function facultyOverview(int $facultyId, ?Semester $semester): array
+    {
+        return [
+            'students_active' => Student::query()->inFaculty($facultyId)->where('status', Student::STATUS_ACTIVE)->count(),
+            'lecturers_active' => Lecturer::query()->inFaculty($facultyId)->where('is_active', true)->count(),
+            'sections' => $semester ? $this->sections($semester)->whereIn('sections.course_offering_id', FacultyScope::offeringIds($facultyId))->count() : null,
+            'students_enrolled' => $semester ? (int) $this->enrollments($semester)->whereIn('enrollments.student_id', FacultyScope::studentIds($facultyId))->distinct()->count('enrollments.student_id') : null,
         ];
     }
 
@@ -196,6 +216,13 @@ class AnalyticsService
     }
 
     // ---------------------------------------------------------------- helpers
+
+    /** Sections of the semester that run (not draft or archived). */
+    private function sections(Semester $semester): Builder
+    {
+        return DB::table('sections')->join('course_offerings', 'course_offerings.id', '=', 'sections.course_offering_id')
+            ->where('course_offerings.semester_id', $semester->id)->whereIn('sections.status', ['open', 'active', 'closed', 'completed']);
+    }
 
     private function enrollments(Semester $semester): Builder
     {

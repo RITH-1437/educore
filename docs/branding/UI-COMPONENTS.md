@@ -249,7 +249,14 @@ Semantic states for actions: `info` = informational, `warning` = attention,
 - Clear hierarchy: primary sections with Lucide icons + readable labels.
 - Active route: `primary` tint + `primary` left indicator + weight 600 text.
 - Hover: surface tint; collapsed: icons only with tooltips.
-- Collapse/expand consistently; remember preference.
+- Collapse/expand consistently; remember preference, read before the first
+  render (no open-then-close animation on page load).
+- Scrolling: the nav scrolls on its own in **both** states and never scrolls
+  the page behind it (`overscroll-contain`); thin token scrollbar
+  (`scrollbar-thin`) when expanded, hidden (`no-scrollbar`) when collapsed.
+  Collapsed tooltips are one element outside the scroll area, following the
+  hovered or keyboard-focused item, so scrolling never clips them. The current
+  page's item is kept in view.
 - Dark mode: `dark-surface` background, `dark-surface-2` active tint.
 
 ### Top navigation / header

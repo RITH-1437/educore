@@ -52,7 +52,10 @@ policies decide what is **allowed**. Never rely on hiding for security
 9. **Breadcrumbs** are `Dashboard → Section → (New | Edit | Details)`. Add the
    section label to `SECTION_LABELS` when adding a top-level route.
 10. **Collapsed mode** shows icon + tooltip; mobile uses the drawer. Do not add
-    hover-only information.
+    hover-only information. The nav scrolls in both modes: never make it
+    `overflow-visible` to let tooltips out (that left collapsed items
+    unreachable and over the Expand button); tooltips render outside the
+    scroll area (`docs/branding/UI-COMPONENTS.md` §8).
 11. A new sidebar item is part of the module's deliverables
     (`AGENTS.md` documentation rule): update the module report and the
     `docs/9_Dashboard-UI-Refinement-Report.md` navigation table if the grouping

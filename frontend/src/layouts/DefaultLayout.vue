@@ -14,12 +14,22 @@ const page = usePage()
 const { pageTitle } = useNavigation()
 const { theme, toggle: toggleTheme } = useTheme()
 
+const readCollapsed = () => {
+  try {
+    return localStorage.getItem(COLLAPSE_KEY) === '1'
+  } catch {
+    return false
+  }
+}
+
+// Read before the first render: starting expanded and collapsing on mount
+// animated the sidebar open and shut on every page load.
+const desktopQuery = window.matchMedia('(min-width: 1024px)')
 const sidebar = ref(null)
-const collapsed = ref(false)
+const collapsed = ref(readCollapsed())
 const mobileOpen = ref(false)
-const desktop = ref(true)
+const desktop = ref(desktopQuery.matches)
 const navigating = ref(false)
-let desktopQuery = null
 let opener = null
 const removers = []
 
@@ -79,14 +89,6 @@ watch(mobileOpen, async (open) => {
 })
 
 onMounted(() => {
-  try {
-    collapsed.value = localStorage.getItem(COLLAPSE_KEY) === '1'
-  } catch {
-    collapsed.value = false
-  }
-
-  desktopQuery = window.matchMedia('(min-width: 1024px)')
-  desktop.value = desktopQuery.matches
   const onChange = (event) => {
     desktop.value = event.matches
     if (event.matches) closeDrawer()

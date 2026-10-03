@@ -505,3 +505,13 @@ A module is not done until its report exists and its tests pass — never label
   /api/faculties/{faculty}/dashboard` serves managers and the faculty's admin.
   Report: `docs/34_Faculty-Admin-Dashboard-Report.md`. `[Open]` Lecturer and
   University Admin dashboards (still previews).
+- `[Done]` Sidebar scrolling and collapse (2026-10-03): the collapsed sidebar
+  could not scroll (its nav was `overflow-visible` so tooltips could show), so
+  on 1366×768 and even 1920×1080 screens the lower items were unreachable and
+  drawn over the Expand button, and the wheel scrolled the page instead; every
+  page load also opened and re-collapsed it. The nav now scrolls in both
+  states without moving the page, tooltips render outside the scroll area,
+  the collapsed state is read before the first render, the expanded
+  scrollbar is thin, and the current page's item is kept in view. Checked in
+  headless Chrome at 1366×768, 1920×1080 and the 390×844 drawer, light and
+  dark, mouse and keyboard (`docs/branding/UI-COMPONENTS.md` §8).

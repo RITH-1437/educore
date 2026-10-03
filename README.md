@@ -250,6 +250,11 @@ docker compose --project-directory . -f docker/docker-compose.yml logs minio-ini
   then `... up -d backend queue scheduler`. Rebuild whenever
   `docker/php/entrypoint.sh` or `docker/php/Dockerfile` changes.
 
+- **Tests fail: `database "educore_test" does not exist`** — the init script
+  only runs when the PostgreSQL volume is first created. For an older volume,
+  create the test database once:
+  `docker compose --project-directory . -f docker/docker-compose.yml exec postgres createdb -U educore educore_test`.
+
 - **Backend unhealthy / `Connection refused`** — PostgreSQL may still be
   booting; wait a few seconds and check `docker compose ps`.
 - **`APP_KEY` error** — remove `backend/.env` (git-ignored) and restart the
@@ -341,9 +346,12 @@ The `backend/` folder is a standard Laravel 12 application.
 - Notifications: email via `MAIL_MAILER` (`log` in development — messages land
   in `storage/logs/laravel.log`); Telegram via `TELEGRAM_BOT_TOKEN` in `.env`
   (empty disables the channel; never commit a real token).
-- Tests: PHPUnit (`php artisan test`). Linted and run by CI. Note: the suite uses
-  `RefreshDatabase` against the configured database, so it **wipes local data** —
-  re-run `php artisan db:seed` afterwards if you need the demo admin account.
+- Tests: PHPUnit (`php artisan test`). Linted and run by CI. The suite runs
+  against its own `educore_test` database (`phpunit.xml`; created by
+  `docker/postgres/init/01-create-test-database.sh`), and `tests/TestCase`
+  refuses to refresh any database whose name does not end in `_test`, so your
+  development data is never touched. Tests log nowhere (`LOG_CHANNEL=null`):
+  `storage/logs/laravel.log` only holds development entries.
 
 ## Frontend (Vue 3 + Inertia + Vite)
 

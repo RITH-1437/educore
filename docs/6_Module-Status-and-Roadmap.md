@@ -470,3 +470,8 @@ A module is not done until its report exists and its tests pass — never label
   open sections, lecturers, unlinked accounts) to a Faculty Admin; they are
   now sent only to users allowed to act. Report:
   `docs/32_Faculty-Admin-Scoping-Report.md` §4.
+- `[Done]` Test infrastructure (2026-10-03): tests no longer write into the
+  shared development log (`LOG_CHANNEL=null` in `phpunit.xml`; 3,371 test
+  entries removed from `laravel.log`, development entries kept), and
+  `docker/postgres/init/01-create-test-database.sh` creates `educore_test` on a
+  fresh volume (previously created by hand; README §13 covers older volumes).

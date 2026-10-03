@@ -94,7 +94,8 @@ another service.
 | `docker/frontend/entrypoint.sh` | First-boot `npm install` for the frontend |
 | `docker/frontend/.dockerignore` | Ignore rules for the frontend image build |
 | `docker/nginx/default.conf` | Reverse proxy config |
-| `docker/postgres/init/.gitkeep` | Mount point for future SQL init scripts |
+| `docker/postgres/init/.gitkeep` | Mount point for SQL / shell init scripts (run once, on first volume init) |
+| `docker/postgres/init/01-create-test-database.sh` | Creates `educore_test` for the PHPUnit suite (2026-10-03) |
 
 ## Modified
 

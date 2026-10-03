@@ -100,6 +100,10 @@ Examples:
   development database.
 - `tests/TestCase::setUpTraits()` refuses to refresh any database
   whose name does not end in `_test`.
+- `educore_test` is created by `docker/postgres/init/01-create-test-database.sh`
+  on first volume init (older volumes: `createdb -U educore educore_test` once).
+- `phpunit.xml` forces `LOG_CHANNEL=null`: the containers share
+  `storage/logs`, so test runs must not write into the development log.
 
 ## Environment variables
 

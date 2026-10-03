@@ -405,10 +405,10 @@ documented operations.
 | GET | `/api/document-requests` | Sanctum + staff (all) or a student (own) | Documented |
 | POST | `/api/document-requests` | Sanctum + student with a profile (self only) | Documented |
 | GET | `/api/document-requests/{documentRequest}` | Sanctum + staff, or the requesting student | Documented |
-| POST | `/api/document-requests/{documentRequest}/approve` | Sanctum + super-admin or university-admin | Documented |
-| POST | `/api/document-requests/{documentRequest}/reject` | Sanctum + super-admin or university-admin | Documented |
-| POST | `/api/document-requests/{documentRequest}/generate` | Sanctum + super-admin or university-admin | Documented |
-| POST | `/api/documents/{document}/revoke` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/document-requests/{documentRequest}/approve` | Sanctum + super-admin or university-admin, or the student's Faculty Admin (report 33) | Documented |
+| POST | `/api/document-requests/{documentRequest}/reject` | Sanctum + super-admin or university-admin, or the student's Faculty Admin (report 33) | Documented |
+| POST | `/api/document-requests/{documentRequest}/generate` | Sanctum + super-admin or university-admin, or the student's Faculty Admin (report 33) | Documented |
+| POST | `/api/documents/{document}/revoke` | Sanctum + super-admin or university-admin (`revoke`, not delegated) | Documented |
 | GET | `/api/documents/{document}/download` | Sanctum + staff, or the requesting student (PDF stream) | Documented |
 | GET | `/api/verifications/{token}` | Public; `throttle:verification` (30/min/IP) | Documented |
 | GET | `/api/invoices` | Sanctum + super-admin or university-admin | Documented |
@@ -437,11 +437,11 @@ documented operations.
 | GET | `/api/internships` | Sanctum + staff (all) or a student (own) | Documented |
 | POST | `/api/internships` | Sanctum + student with a profile (self only) | Documented |
 | GET | `/api/internships/{internship}` | Sanctum + staff, or the student | Documented |
-| PUT, PATCH | `/api/internships/{internship}` | Sanctum + the student (draft) or managers (until final) | Both documented |
-| POST | `/api/internships/{internship}/{action}` | Sanctum; `submit` / student `cancel`: the student; others: managers | Documented |
+| PUT, PATCH | `/api/internships/{internship}` | Sanctum + the student (draft), or managers / the student's Faculty Admin (until final) | Both documented |
+| POST | `/api/internships/{internship}/{action}` | Sanctum; `submit` / student `cancel`: the student; others: managers or the student's Faculty Admin | Documented |
 | POST | `/api/internships/{internship}/reports` | Sanctum + the student (multipart) | Documented |
-| POST | `/api/internships/{internship}/evaluations` | Sanctum + super-admin or university-admin | Documented |
-| POST | `/api/internship-reports/{report}/review` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/internships/{internship}/evaluations` | Sanctum + super-admin or university-admin, or the student's Faculty Admin | Documented |
+| POST | `/api/internship-reports/{report}/review` | Sanctum + super-admin or university-admin, or the student's Faculty Admin | Documented |
 | GET | `/api/internship-reports/{report}/file` | Sanctum + staff, or the student | Documented |
 | GET | `/api/analytics/overview` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
 | GET | `/api/analytics/enrollment` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
@@ -549,3 +549,10 @@ faculties' records `403`; no faculty assigned = empty lists). Shared
 reference endpoints (universities, rooms, academic years / semesters,
 grading scale, internship companies, document types) are unchanged. See
 `docs/32_Faculty-Admin-Scoping-Report.md`.
+
+## Faculty Admin request handling (2026-10-03)
+
+No endpoints were added. Document approve / reject / generate, internship
+manager transitions, edits, evaluations and report reviews now also accept the
+student's Faculty Admin; revoke and company endpoints stay with managers. See
+`docs/33_Faculty-Admin-Request-Handling-Report.md`.

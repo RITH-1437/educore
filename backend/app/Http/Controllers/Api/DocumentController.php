@@ -123,13 +123,13 @@ class DocumentController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Approved.', content: new OA\JsonContent(ref: '#/components/schemas/DocumentRequestResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a manager, or a Faculty Admin outside the student\'s faculty.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Not pending.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
         ]
     )]
     public function approve(Request $request, DocumentRequest $documentRequest): DocumentRequestResource
     {
-        $this->authorize('process', DocumentRequest::class);
+        $this->authorize('process', $documentRequest);
 
         return new DocumentRequestResource($this->documents->approve($documentRequest, $request->user())->load(self::RELATIONS));
     }
@@ -146,14 +146,14 @@ class DocumentController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Rejected.', content: new OA\JsonContent(ref: '#/components/schemas/DocumentRequestResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a manager, or a Faculty Admin outside the student\'s faculty.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Not pending.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Reason missing.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
     )]
     public function reject(RejectDocumentRequestRequest $request, DocumentRequest $documentRequest): DocumentRequestResource
     {
-        $this->authorize('process', DocumentRequest::class);
+        $this->authorize('process', $documentRequest);
 
         return new DocumentRequestResource($this->documents->reject($documentRequest, $request->user(), $request->validated('rejection_reason'))->load(self::RELATIONS));
     }
@@ -169,13 +169,13 @@ class DocumentController extends Controller
         responses: [
             new OA\Response(response: 201, description: 'Generated.', content: new OA\JsonContent(ref: '#/components/schemas/DocumentRequestResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a manager, or a Faculty Admin outside the student\'s faculty.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Not approved, or no data for the document.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
         ]
     )]
     public function generate(Request $request, DocumentRequest $documentRequest): JsonResponse
     {
-        $this->authorize('process', DocumentRequest::class);
+        $this->authorize('process', $documentRequest);
 
         $this->documents->generate($documentRequest, $request->user());
 
@@ -193,13 +193,13 @@ class DocumentController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Revoked.', content: new OA\JsonContent(ref: '#/components/schemas/DocumentRequestResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin (revoking is not delegated to Faculty Admins).', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Already revoked.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
         ]
     )]
     public function revoke(Document $document): DocumentRequestResource
     {
-        $this->authorize('process', DocumentRequest::class);
+        $this->authorize('revoke', DocumentRequest::class);
 
         $this->documents->revoke($document);
 

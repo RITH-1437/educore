@@ -149,7 +149,10 @@ class InternshipTest extends TestCase
         $this->actingAs($faculty)->getJson("/api/internships/{$id}")->assertOk();
         $this->actingAs($outsideFaculty)->getJson('/api/internships')->assertOk()->assertJsonCount(0, 'data');
         $this->actingAs($outsideFaculty)->getJson("/api/internships/{$id}")->assertForbidden();
-        $this->actingAs($faculty)->postJson("/api/internships/{$id}/review")->assertForbidden();
+        // Processing is scoped too (docs/33): another faculty's admin is refused; the student's
+        // own Faculty Admin passes authorization, but a draft cannot be reviewed yet (409).
+        $this->actingAs($outsideFaculty)->postJson("/api/internships/{$id}/review")->assertForbidden();
+        $this->actingAs($faculty)->postJson("/api/internships/{$id}/review")->assertStatus(409);
 
         $this->actingAs($this->student->user)->postJson("/api/internships/{$id}/fly")->assertNotFound();
     }

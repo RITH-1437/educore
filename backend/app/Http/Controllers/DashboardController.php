@@ -116,9 +116,9 @@ class DashboardController extends Controller
                 'title' => 'Faculty / Department Admin Dashboard',
                 // Data access is limited to the assigned faculty; none assigned = no unit data.
                 'description' => $user->faculty
-                    ? "Read-only view of {$user->faculty->name}: its departments, programs, courses, students and lecturers."
+                    ? "{$user->faculty->name}: read its departments, programs, courses, students and lecturers, and process its students' document requests and internships."
                     : 'No faculty is assigned to your account yet, so unit data stays hidden. Ask a Super Admin to assign one.',
-                'areas' => ['Departments', 'Programs and courses', 'Students and lecturers', 'Schedules and attendance'],
+                'areas' => ['Departments', 'Programs and courses', 'Students and lecturers', 'Schedules and attendance', 'Document requests and internships'],
             ],
             'lecturer' => [
                 'title' => 'Lecturer Dashboard',

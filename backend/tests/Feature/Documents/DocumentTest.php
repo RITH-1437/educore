@@ -189,9 +189,10 @@ class DocumentTest extends TestCase
         $this->actingAs($other->user)->getJson("/api/document-requests/{$id}")->assertForbidden();
         $this->actingAs($this->student->user)->postJson("/api/document-requests/{$id}/approve")->assertForbidden();
 
-        // Faculty Admin reads everything but cannot process; lecturers have no access.
+        // Faculty Admin reads and processes their faculty's requests (docs/33); lecturers have no access.
         $this->actingAs($faculty)->getJson('/api/document-requests?filters[status]=pending')->assertOk()->assertJsonCount(2, 'data');
-        $this->actingAs($faculty)->postJson("/api/document-requests/{$id}/approve")->assertForbidden();
+        $this->actingAs($outsideFaculty)->postJson("/api/document-requests/{$id}/approve")->assertForbidden();
+        $this->actingAs($faculty)->postJson("/api/document-requests/{$id}/approve")->assertOk()->assertJsonPath('data.status', 'approved');
         // Another faculty's admin sees none of these students' requests.
         $this->actingAs($outsideFaculty)->getJson('/api/document-requests')->assertOk()->assertJsonCount(0, 'data');
         $this->actingAs($outsideFaculty)->getJson("/api/document-requests/{$id}")->assertForbidden();

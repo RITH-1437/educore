@@ -19,6 +19,7 @@ const props = defineProps({
   filters: { type: Object, default: () => ({}) },
   statuses: { type: Array, default: () => [] },
   canProcess: { type: Boolean, default: false },
+  canRevoke: { type: Boolean, default: false },
 })
 
 const { confirm } = useConfirm()
@@ -57,7 +58,7 @@ const columns = [
 <template>
   <Head title="Documents - EduCore" />
   <div class="space-y-6">
-    <PageHeader eyebrow="Operations" title="Document requests" :description="canProcess ? 'Approve, reject and generate official documents. Generated PDFs are built from approved records only.' : 'Document requests across the university (read-only).'" />
+    <PageHeader eyebrow="Operations" title="Document requests" :description="!canProcess ? 'Document requests (read-only).' : canRevoke ? 'Approve, reject and generate official documents. Generated PDFs are built from approved records only.' : 'Approve, reject and generate documents for your faculty’s students. Revoking an issued document is done by a University Admin.'" />
 
     <div class="max-w-xs">
       <BaseSelect v-model="status" :options="statusOptions" label="Status" @update:model-value="applyFilter" />
@@ -87,8 +88,8 @@ const columns = [
             <IconButton v-if="row.status === 'pending'" :icon="Check" variant="success" label="Approve request" @click="approve(row)" />
             <IconButton v-if="row.status === 'pending'" :icon="X" variant="danger" label="Reject request" @click="openReject(row)" />
             <IconButton v-if="row.status === 'approved'" :icon="FileCheck2" variant="primary" label="Generate PDF" @click="generate(row)" />
-            <IconButton v-if="row.document?.status === 'valid'" :icon="Ban" variant="danger" label="Revoke document" @click="revoke(row)" />
           </template>
+          <IconButton v-if="canRevoke && row.document?.status === 'valid'" :icon="Ban" variant="danger" label="Revoke document" @click="revoke(row)" />
         </div>
       </template>
     </BaseTable>

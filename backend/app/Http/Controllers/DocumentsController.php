@@ -36,7 +36,9 @@ class DocumentsController extends Controller
             'requests' => DocumentRequestResource::collection($this->api->listFor($request)),
             'filters' => ['status' => $request->input('filters.status')],
             'statuses' => DocumentRequest::STATUSES,
-            'canProcess' => $request->user()->can('process', DocumentRequest::class),
+            // Rows are limited to the viewer's scope, so every visible request can be processed.
+            'canProcess' => $request->user()->can('processAny', DocumentRequest::class),
+            'canRevoke' => $request->user()->can('revoke', DocumentRequest::class),
         ]);
     }
 
@@ -73,7 +75,7 @@ class DocumentsController extends Controller
 
     public function approve(Request $request, DocumentRequest $documentRequest): RedirectResponse
     {
-        $this->authorize('process', DocumentRequest::class);
+        $this->authorize('process', $documentRequest);
 
         $this->documents->approve($documentRequest, $request->user());
 
@@ -82,7 +84,7 @@ class DocumentsController extends Controller
 
     public function reject(RejectDocumentRequestRequest $request, DocumentRequest $documentRequest): RedirectResponse
     {
-        $this->authorize('process', DocumentRequest::class);
+        $this->authorize('process', $documentRequest);
 
         $this->documents->reject($documentRequest, $request->user(), $request->validated('rejection_reason'));
 
@@ -91,7 +93,7 @@ class DocumentsController extends Controller
 
     public function generate(Request $request, DocumentRequest $documentRequest): RedirectResponse
     {
-        $this->authorize('process', DocumentRequest::class);
+        $this->authorize('process', $documentRequest);
 
         $this->documents->generate($documentRequest, $request->user());
 
@@ -100,7 +102,7 @@ class DocumentsController extends Controller
 
     public function revoke(Document $document): RedirectResponse
     {
-        $this->authorize('process', DocumentRequest::class);
+        $this->authorize('revoke', DocumentRequest::class);
 
         $this->documents->revoke($document);
 

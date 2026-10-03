@@ -37,6 +37,9 @@ Authorization decides what an authenticated user may do. Identity is handled in
   `isVisibleTo($user)` in policies); ownership rules live in
   `App\Support\FacultyScope`. New unit-owned lists must pass the viewer
   (`docs/32_Faculty-Admin-Scoping-Report.md`).
+- Abilities a Faculty Admin may use *within* their faculty take the record and
+  must be authorized with it (`authorize('process', $documentRequest)`), never
+  at class level (`docs/33_Faculty-Admin-Request-Handling-Report.md`).
 - **Never trust frontend authorization.** Hiding a button is UX only; the API
   must reject unauthorized access with `403`.
 

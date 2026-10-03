@@ -133,7 +133,8 @@ a URL; downloads stream through `GET /documents/{document}/download` (web) or
 | Request a document | 403 | 403 | 403 | ✓ | ✓ (own) | — |
 | List requests | all | all (read) | 403 | own | own | — |
 | View / download | ✓ | ✓ | 403 | ✓ | 403 | — |
-| Approve / reject / generate / revoke | ✓ | 403 | 403 | 403 | 403 | — |
+| Approve / reject / generate | ✓ | own faculty's students (report 33) | 403 | 403 | 403 | — |
+| Revoke | ✓ | 403 | 403 | 403 | 403 | — |
 | Verify by code | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ |
 
 ## 7. Endpoints

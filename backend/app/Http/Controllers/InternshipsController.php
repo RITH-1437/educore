@@ -72,7 +72,7 @@ class InternshipsController extends Controller
         return Inertia::render('Internships/Show', [
             'internship' => (new InternshipResource($internship->load(Api::DETAIL)))->resolve(),
             'companies' => Api::companyList(true),
-            'canProcess' => $request->user()->can('process', Internship::class),
+            'canProcess' => $request->user()->can('process', $internship),
             'isOwner' => $request->user()->can('act', $internship),
             'ratings' => InternshipEvaluation::RATINGS,
             'reportTypes' => InternshipReport::TYPES,
@@ -81,7 +81,7 @@ class InternshipsController extends Controller
 
     public function update(InternshipRequest $request, Internship $internship): RedirectResponse
     {
-        $manager = $request->user()->can('process', Internship::class);
+        $manager = $request->user()->can('process', $internship);
         abort_unless($manager || $request->user()->can('act', $internship), 403);
 
         $this->internships->update($internship, $request->validated(), $manager);
@@ -107,7 +107,7 @@ class InternshipsController extends Controller
 
     public function reviewReport(Request $request, InternshipReport $report): RedirectResponse
     {
-        $this->authorize('process', Internship::class);
+        $this->authorize('process', $report->internship);
 
         $this->internships->reviewReport($report, $request->validate(['reviewer_comment' => ['nullable', 'string', 'max:2000']])['reviewer_comment'] ?? null);
 
@@ -123,7 +123,7 @@ class InternshipsController extends Controller
 
     public function evaluate(Request $request, Internship $internship): RedirectResponse
     {
-        $this->authorize('process', Internship::class);
+        $this->authorize('process', $internship);
 
         $this->internships->evaluate($internship, Api::evaluationData($request), $request->user());
 
@@ -136,13 +136,13 @@ class InternshipsController extends Controller
 
         return Inertia::render('Internships/Companies', [
             'companies' => Api::companyList(false),
-            'canManage' => $request->user()->can('process', Internship::class),
+            'canManage' => $request->user()->can('manageCompanies', Internship::class),
         ]);
     }
 
     public function storeCompany(InternshipCompanyRequest $request): RedirectResponse
     {
-        $this->authorize('process', Internship::class);
+        $this->authorize('manageCompanies', Internship::class);
 
         $this->internships->saveCompany(null, $request->validated());
 
@@ -151,7 +151,7 @@ class InternshipsController extends Controller
 
     public function updateCompany(InternshipCompanyRequest $request, InternshipCompany $company): RedirectResponse
     {
-        $this->authorize('process', Internship::class);
+        $this->authorize('manageCompanies', Internship::class);
 
         $this->internships->saveCompany($company, $request->validated());
 

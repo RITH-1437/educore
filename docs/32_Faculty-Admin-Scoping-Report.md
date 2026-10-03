@@ -16,9 +16,9 @@ Now:
 - A Faculty Admin **reads only their faculty's data**: lists contain only
   their records and opening another faculty's record returns `403`.
 - A Faculty Admin **without a faculty sees no unit data** (fail closed).
-- Faculty Admins **stay read-only** everywhere, as agreed with the project
-  owner. Unit-level writes (sections, schedules, approving their students'
-  requests) are `[Future]`.
+- Faculty Admins **stay read-only** in this step, as agreed with the project
+  owner. Handling their students' requests followed in
+  `docs/33_Faculty-Admin-Request-Handling-Report.md`; sections and schedules for their unit are `[Future]`.
 - Every other role is unaffected.
 
 Not scoped (shared reference data, readable as before): university, rooms,
@@ -143,7 +143,8 @@ faculty, or says none is assigned.
 | Students and their academic records | read | 403 / not listed | nothing |
 | Enrollments (list, record, CSV) | read | 403 / not listed | nothing |
 | Document requests, internships | read | 403 / not listed | nothing |
-| Any create / update / approve | 403 | 403 | 403 |
+| Process document requests (not revoke) and internships (not companies) | ✓ (report 33) | 403 | 403 |
+| Any other create / update / approve | 403 | 403 | 403 |
 | University, rooms, semesters, grading scale, companies | read | read | read |
 
 ## 7. Tests

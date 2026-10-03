@@ -763,11 +763,13 @@ gantt
 | Month 5 | Communication, analytics, internship, audit |
 | Month 6 | Testing, security, production hardening |
 
-**Progress (2026-10-02):** every module of business-overview §9 is
-implemented and tested (399 feature tests), documented in reports 7–32, with
-all 215 API operations in the OpenAPI document. Faculty / Department Admin
-reads are limited to their assigned faculty (`docs/32_Faculty-Admin-Scoping-Report.md`);
-their unit-level writes remain open — see `docs/6_Module-Status-and-Roadmap.md` §6.
+**Progress (2026-10-03):** every module of business-overview §9 is
+implemented and tested (402 feature tests), documented in reports 7–33, with
+all 215 API operations in the OpenAPI document. Faculty / Department Admins
+read their assigned faculty (`docs/32_Faculty-Admin-Scoping-Report.md`) and
+process its students' document requests and internships
+(`docs/33_Faculty-Admin-Request-Handling-Report.md`); sections and schedules for their unit
+remain open — see `docs/6_Module-Status-and-Roadmap.md` §6.
 
 ---
 

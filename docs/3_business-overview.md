@@ -315,9 +315,13 @@ academic years, semesters, announcements, document requests, and payment records
 monitor attendance and performance; handle unit-level requests.
 
 **Delivered:** [Implemented] read access limited to the assigned faculty (structure,
-courses, sections, lecturers, students, enrollments, grades, documents, internships);
-unit-level writes (creating sections, handling requests) are [Future]. See
-[32_Faculty-Admin-Scoping-Report.md](32_Faculty-Admin-Scoping-Report.md).
+courses, sections, lecturers, students, enrollments, grades, documents, internships),
+and handling their students' requests: approve / reject / generate document
+requests and review / approve / evaluate internships (revoking documents and
+managing companies stay with University Admin). Creating sections and schedules
+for their unit is [Future]. See
+[32_Faculty-Admin-Scoping-Report.md](32_Faculty-Admin-Scoping-Report.md) and
+[33_Faculty-Admin-Request-Handling-Report.md](33_Faculty-Admin-Request-Handling-Report.md).
 
 **Typical workflows:**
 
@@ -568,11 +572,13 @@ users, main business activities, and expected outputs.
 - **Delivered:** student requests for an enrollment certificate, student
   certificate, academic transcript, one-semester academic result or
   internship letter; approve / reject (with reason) /
-  generate / revoke by University Admin; PDFs rendered only from enrollments,
+  generate by University Admin or, for their faculty's students, the Faculty
+  Admin; revoke by University Admin; PDFs rendered only from enrollments,
   approved grades and GPA, stored privately in MinIO and downloaded through an
   authorized route. Document fees are not billed yet. See
   [22_Documents-and-Verification-Report.md](22_Documents-and-Verification-Report.md) and
-  [30_Grade-Finalization-and-Document-Templates-Report.md](30_Grade-Finalization-and-Document-Templates-Report.md).
+  [30_Grade-Finalization-and-Document-Templates-Report.md](30_Grade-Finalization-and-Document-Templates-Report.md),
+  [33_Faculty-Admin-Request-Handling-Report.md](33_Faculty-Admin-Request-Handling-Report.md).
 
 ### 9.17 Digital Document Verification [Implemented]
 
@@ -647,7 +653,8 @@ users, main business activities, and expected outputs.
   under review → approved / rejected → in progress → completed, or cancelled),
   one open application per student, initial / progress / final reports with
   private files, supervisor and faculty evaluations, status notifications and
-  a decision log, and an internship letter document (9.16). Published
+  a decision log, and an internship letter document (9.16); a Faculty Admin
+  processes their faculty's students' internships (report 33). Published
   opportunity postings are [Future]. See [26_Internship-Management-Report.md](26_Internship-Management-Report.md).
 
 ### 9.23 Analytics & Reporting [Implemented]

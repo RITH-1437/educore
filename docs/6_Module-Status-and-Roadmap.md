@@ -426,8 +426,8 @@ A module is not done until its report exists and its tests pass — never label
   (9.24).
 - `[Done]` 9.22 Internship Management. Report:
   `docs/26_Internship-Management-Report.md`. `[Open]` Opportunity postings,
-  supervisor logins, Faculty Admin approval (unit-level writes). `[Done]`
-  Internship letter document.
+  supervisor logins. `[Done]` Internship letter document. `[Done]` Faculty
+  Admin approval for their faculty's students (report 33).
 - `[Done]` `educore/backend:dev` rebuilt: the image predated the
   production-only config caching fix, so containers started from it cached
   config and pointed the test suite at the development database (the
@@ -463,8 +463,9 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` Faculty Admin unit scoping: `users.faculty_id`, read access limited
   to the assigned faculty across structure, people, academic activity,
   enrollments, documents and internships; unassigned = no unit data.
-  Report: `docs/32_Faculty-Admin-Scoping-Report.md`. `[Open]` Unit-level writes for Faculty Admin,
-  department-level admins, Faculty Admin analytics.
+  Report: `docs/32_Faculty-Admin-Scoping-Report.md`. `[Done]` Request handling
+  (report 33). `[Open]` Sections / schedules for their unit, department-level
+  admins, Faculty Admin analytics.
 - `[Done]` Audit fix (2026-10-03): `/enrollments`, `/offerings/{offering}`,
   `/lecturers` and `/students` sent university-wide form options (students,
   open sections, lecturers, unlinked accounts) to a Faculty Admin; they are
@@ -484,3 +485,9 @@ A module is not done until its report exists and its tests pass — never label
   with a required label as tooltip and accessible name; words remain only on
   form / dialog submits, choice controls, navigation and data links.
   Vocabulary and exceptions: `docs/branding/UI-COMPONENTS.md` §2.
+- `[Done]` Faculty Admin request handling (2026-10-03): approve / reject /
+  generate document requests and review / approve / reject / start / complete
+  / cancel / evaluate / edit internships of their faculty's students; revoke
+  and companies stay with managers; abilities now require the record. Report:
+  `docs/33_Faculty-Admin-Request-Handling-Report.md`. `[Open]` Faculty Admin sections and schedules, notifying
+  Faculty Admins of new requests.

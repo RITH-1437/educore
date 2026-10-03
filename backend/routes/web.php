@@ -217,18 +217,19 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function
 });
 
 // Documents (`DocumentRequestPolicy`): students request and download their
-// own; managers approve / reject / generate / revoke; Faculty Admin reads.
+// own; managers and (for their faculty's students) Faculty Admins approve /
+// reject / generate; only managers revoke.
 Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/my-documents', [DocumentsController::class, 'mine'])->name('documents.mine');
     Route::post('/my-documents', [DocumentsController::class, 'store'])->name('documents.store');
 });
 Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->get('/documents', [DocumentsController::class, 'index'])->name('documents.index');
-Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function () {
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->group(function () {
     Route::post('/document-requests/{documentRequest}/approve', [DocumentsController::class, 'approve'])->name('documents.approve');
     Route::post('/document-requests/{documentRequest}/reject', [DocumentsController::class, 'reject'])->name('documents.reject');
     Route::post('/document-requests/{documentRequest}/generate', [DocumentsController::class, 'generate'])->name('documents.generate');
-    Route::post('/documents/{document}/revoke', [DocumentsController::class, 'revoke'])->name('documents.revoke');
 });
+Route::middleware(['auth', 'role:super-admin,university-admin'])->post('/documents/{document}/revoke', [DocumentsController::class, 'revoke'])->name('documents.revoke');
 Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,student'])->get('/documents/{document}/download', [DocumentsController::class, 'download'])->name('documents.download');
 
 // Finance (`InvoicePolicy`): managers manage invoices and payment records; a
@@ -259,8 +260,9 @@ Route::middleware(['auth', 'role:super-admin,university-admin,lecturer'])->group
     Route::post('/announcements/{announcement}/archive', [AnnouncementsController::class, 'archive'])->name('announcements.archive');
 });
 
-// Internships (`InternshipPolicy`): students apply and report; managers review,
-// approve, evaluate and keep companies; Faculty Admin reads.
+// Internships (`InternshipPolicy`): students apply and report; managers and
+// (for their faculty's students) Faculty Admins review, approve and evaluate;
+// only managers keep the companies.
 Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/my-internships', [InternshipsController::class, 'mine'])->name('internships.mine');
     Route::post('/my-internships', [InternshipsController::class, 'store'])->name('internships.store');
@@ -272,6 +274,8 @@ Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->
 Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function () {
     Route::post('/internship-companies', [InternshipsController::class, 'storeCompany'])->name('internship-companies.store');
     Route::put('/internship-companies/{company}', [InternshipsController::class, 'updateCompany'])->name('internship-companies.update');
+});
+Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->group(function () {
     Route::post('/internships/{internship}/evaluations', [InternshipsController::class, 'evaluate'])->name('internships.evaluate');
     Route::post('/internship-reports/{report}/review', [InternshipsController::class, 'reviewReport'])->name('internship-reports.review');
 });

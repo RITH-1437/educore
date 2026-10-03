@@ -95,13 +95,13 @@ stateDiagram-v2
 | List | all | all (read) | own | own / 403 |
 | View, download report files | ✓ | ✓ | ✓ | 403 |
 | Apply, edit draft, submit, withdraw before approval, submit reports | — | — | ✓ | 403 |
-| Review, approve, reject, start, complete, cancel, edit, review reports, evaluate | ✓ | 403 | 403 | 403 |
+| Review, approve, reject, start, complete, cancel, edit, review reports, evaluate | ✓ | own faculty's students (report 33) | 403 | 403 |
 | Companies: list | all | all | active only | 403 (lecturer) |
 | Companies: create / update | ✓ | 403 | 403 | 403 |
 
-Faculty Admin reads only, as in the other modules, and only their faculty's
-students' internships (`docs/32_Faculty-Admin-Scoping-Report.md`). Faculty-level approval is a
-future unit-level write.
+Faculty Admin reads only their faculty's students' internships
+(`docs/32_Faculty-Admin-Scoping-Report.md`) and processes them
+(`docs/33_Faculty-Admin-Request-Handling-Report.md`); companies stay with managers.
 
 ## 5. Endpoints
 

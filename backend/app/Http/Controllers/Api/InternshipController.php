@@ -69,7 +69,7 @@ class InternshipController extends Controller
     )]
     public function storeCompany(InternshipCompanyRequest $request): JsonResponse
     {
-        $this->authorize('process', Internship::class);
+        $this->authorize('manageCompanies', Internship::class);
 
         return response()->json(['data' => $this->internships->saveCompany(null, $request->validated())], 201);
     }
@@ -108,7 +108,7 @@ class InternshipController extends Controller
     )]
     public function updateCompany(InternshipCompanyRequest $request, InternshipCompany $company): JsonResponse
     {
-        $this->authorize('process', Internship::class);
+        $this->authorize('manageCompanies', Internship::class);
 
         return response()->json(['data' => $this->internships->saveCompany($company, $request->validated())]);
     }
@@ -193,7 +193,7 @@ class InternshipController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Updated.', content: new OA\JsonContent(ref: '#/components/schemas/InternshipResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not the student or a manager.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not the student, a manager, or the student\'s Faculty Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Not editable in this status.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
@@ -210,14 +210,14 @@ class InternshipController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Updated.', content: new OA\JsonContent(ref: '#/components/schemas/InternshipResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not the student or a manager.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not the student, a manager, or the student\'s Faculty Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Not editable in this status.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
     )]
     public function update(InternshipRequest $request, Internship $internship): InternshipResource
     {
-        $manager = $request->user()->can('process', Internship::class);
+        $manager = $request->user()->can('process', $internship);
         abort_unless($manager || $request->user()->can('act', $internship), 403);
 
         return new InternshipResource($this->internships->update($internship, $request->validated(), $manager)->load(self::DETAIL));
@@ -226,7 +226,7 @@ class InternshipController extends Controller
     #[OA\Post(
         path: '/internships/{internship}/{action}',
         summary: 'Move an internship through its workflow',
-        description: '`submit` (student, from draft) · `review` (manager, submitted → under review) · `approve` (manager, optional `note`) · `reject` (manager, `reason` required) · `start` (manager, approved → in progress) · `complete` (manager, needs a final report, optional `note`) · `cancel` (student before approval, or manager with `reason` — early termination). Illegal transitions return 409.',
+        description: '`submit` (student, from draft) · `review` (manager, submitted → under review) · `approve` (manager, optional `note`) · `reject` (manager, `reason` required) · `start` (manager, approved → in progress) · `complete` (manager, needs a final report, optional `note`) · `cancel` (student before approval, or manager with `reason` — early termination). Illegal transitions return 409. Manager actions: Super Admin, University Admin, or a Faculty Admin for a student of their faculty.',
         operationId: 'transitionInternship',
         tags: ['Internships'],
         security: [['sanctum' => []]],
@@ -298,12 +298,12 @@ class InternshipController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Reviewed; the updated internship.', content: new OA\JsonContent(ref: '#/components/schemas/InternshipResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a manager or the student\'s Faculty Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
         ]
     )]
     public function reviewReport(Request $request, InternshipReport $report): InternshipResource
     {
-        $this->authorize('process', Internship::class);
+        $this->authorize('process', $report->internship);
         $comment = $request->validate(['reviewer_comment' => ['nullable', 'string', 'max:2000']])['reviewer_comment'] ?? null;
 
         $this->internships->reviewReport($report, $comment);
@@ -344,14 +344,14 @@ class InternshipController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Saved; the updated internship.', content: new OA\JsonContent(ref: '#/components/schemas/InternshipResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a manager or the student\'s Faculty Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Not started yet.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
     )]
     public function evaluate(Request $request, Internship $internship): InternshipResource
     {
-        $this->authorize('process', Internship::class);
+        $this->authorize('process', $internship);
 
         $this->internships->evaluate($internship, self::evaluationData($request), $request->user());
 
@@ -364,14 +364,14 @@ class InternshipController extends Controller
     public function runTransition(Request $request, Internship $internship, string $action): Internship
     {
         $user = $request->user();
-        $manager = $user->can('process', Internship::class);
+        $manager = $user->can('process', $internship);
         $text = fn (string $field) => $request->validate([$field => ['nullable', 'string', 'max:1000']])[$field] ?? null;
 
         // The student acts on their own application; everything else is a manager decision.
         match ($action) {
             'submit' => $this->authorize('act', $internship),
             'cancel' => $manager ?: $this->authorize('act', $internship),
-            default => $this->authorize('process', Internship::class),
+            default => $this->authorize('process', $internship),
         };
 
         return match ($action) {

@@ -8,9 +8,11 @@ use App\Models\User;
 
 /**
  * Internships (`skills/internship` §8): a student manages their own
- * application and reports; Super Admin / University Admin review, approve,
- * evaluate and manage companies; Faculty Admin reads (unit scoping is not on
- * the user record yet, so faculty-level approval would be university-wide).
+ * application and reports; Super Admin / University Admin process every
+ * internship and keep the companies; a Faculty Admin processes the internships
+ * of their faculty's students — review, approve, reject, start, complete,
+ * cancel, evaluate, review reports, edit
+ * (`docs/33_Faculty-Admin-Request-Handling-Report.md`).
  */
 class InternshipPolicy
 {
@@ -36,10 +38,20 @@ class InternshipPolicy
         return $this->owns($user, $internship);
     }
 
-    /** Review, approve, reject, start, complete, cancel, evaluate, review reports, edit. */
-    public function process(User $user): bool
+    /**
+     * Review, approve, reject, start, complete, cancel, evaluate, review reports,
+     * edit: managers, or a Faculty Admin when the student is in their faculty.
+     * The internship is required — a class-level check would be university-wide.
+     */
+    public function process(User $user, Internship $internship): bool
     {
-        return $user->isRole(Role::SuperAdmin->value) || $user->isRole(Role::UniversityAdmin->value);
+        return $this->manages($user) || ($user->isRole(Role::FacultyAdmin->value) && $internship->isVisibleTo($user));
+    }
+
+    /** Host companies are shared reference data: managers only. */
+    public function manageCompanies(User $user): bool
+    {
+        return $this->manages($user);
     }
 
     /** Company list for the application form and the staff screen. */
@@ -48,9 +60,14 @@ class InternshipPolicy
         return $this->staff($user) || $this->apply($user);
     }
 
+    private function manages(User $user): bool
+    {
+        return $user->isRole(Role::SuperAdmin->value) || $user->isRole(Role::UniversityAdmin->value);
+    }
+
     private function staff(User $user): bool
     {
-        return $this->process($user) || $user->isRole(Role::FacultyAdmin->value);
+        return $this->manages($user) || $user->isRole(Role::FacultyAdmin->value);
     }
 
     private function owns(User $user, Internship $internship): bool

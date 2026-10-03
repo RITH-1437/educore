@@ -1,9 +1,8 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { Head, Link, router } from '@inertiajs/vue3'
+import { Head, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
-import { Pencil, Plus, Search, Trash2 } from '@lucide/vue'
-import BaseButton from '../../components/BaseButton.vue'
+import { CircleCheckBig, CirclePlay, Pencil, Plus, Search, Star, Trash2 } from '@lucide/vue'
 import BaseBadge from '../../components/BaseBadge.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
@@ -68,7 +67,7 @@ const deleteYear = async (academicYear) => {
   <div class="space-y-6">
     <PageHeader eyebrow="Platform management" title="Academic years" description="The university calendar every course offering hangs from.">
       <template #actions>
-        <BaseButton href="/academic-years/create"><Plus class="h-4 w-4" aria-hidden="true" /> New academic year</BaseButton>
+        <IconButton :icon="Plus" href="/academic-years/create" size="md" variant="primary" label="New academic year" />
       </template>
     </PageHeader>
 
@@ -76,7 +75,7 @@ const deleteYear = async (academicYear) => {
       <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="applyFilters">
         <BaseInput v-model="search" type="search" label="Search" placeholder="Code or name" class="w-full sm:max-w-xs" />
         <BaseSelect v-model="status" label="Status" :options="STATUSES" @change="applyFilters" />
-        <BaseButton type="submit" variant="secondary"><Search class="h-4 w-4" aria-hidden="true" /> Filter</BaseButton>
+        <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
       </form>
     </BaseCard>
 
@@ -90,11 +89,11 @@ const deleteYear = async (academicYear) => {
         <span v-else class="text-muted dark:text-dark-muted" aria-label="Not current">—</span>
       </template>
       <template #cell-actions="{ row }">
-        <div class="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
+        <div class="flex flex-wrap items-center justify-end gap-1">
           <IconButton :icon="Pencil" :href="`/academic-years/${row.id}/edit`" :label="`Edit ${row.code}`" />
-          <button v-if="row.status === 'planned'" type="button" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary" @click="changeStatus(row, 'active')">Activate</button>
-          <button v-else-if="row.status === 'active'" type="button" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary" @click="changeStatus(row, 'completed')">Complete</button>
-          <button v-if="row.status === 'active' && !row.is_current" type="button" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary" @click="makeCurrent(row)">Make current</button>
+          <IconButton v-if="row.status === 'planned'" :icon="CirclePlay" variant="success" :label="`Activate ${row.code}`" @click="changeStatus(row, 'active')" />
+          <IconButton v-else-if="row.status === 'active'" :icon="CircleCheckBig" variant="success" :label="`Complete ${row.code}`" @click="changeStatus(row, 'completed')" />
+          <IconButton v-if="row.status === 'active' && !row.is_current" :icon="Star" :label="`Make ${row.code} the current year`" @click="makeCurrent(row)" />
           <IconButton :icon="Trash2" variant="danger" :label="`Delete ${row.code}`" @click="deleteYear(row)" />
         </div>
       </template>

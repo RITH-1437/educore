@@ -1,6 +1,7 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { ArrowRight } from '@lucide/vue'
 import { Head } from '@inertiajs/vue3'
-import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
@@ -36,7 +37,7 @@ const NEXT_STEP = {
         <StatusBadge v-bind="statusBadge(current.status)" />
       </div>
       <p class="mt-3 text-small text-ink dark:text-dark-ink">{{ NEXT_STEP[current.status] }}</p>
-      <div class="mt-4"><BaseButton :href="`/internships/${current.id}`">Open internship</BaseButton></div>
+      <div class="mt-4"><IconButton :icon="ArrowRight" :href="`/internships/${current.id}`" size="md" variant="primary" label="Open internship" /></div>
     </BaseCard>
 
     <BaseCard v-else title="Apply for an internship" padding="lg">

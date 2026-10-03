@@ -1,8 +1,9 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { UserMinus, UserPlus } from '@lucide/vue'
 import { Head, router } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import BaseBadge from '../../components/BaseBadge.vue'
-import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import PageHeader from '../../components/PageHeader.vue'
@@ -57,7 +58,7 @@ const drop = async (enrollment) => {
               <p class="text-small font-semibold text-ink dark:text-dark-ink">{{ enrollment.section?.course?.code }} · {{ enrollment.section?.code }}</p>
               <p class="text-caption text-muted dark:text-dark-muted">{{ enrollment.section?.course?.name }} · {{ enrollment.section?.course?.credits }} cr</p>
             </div>
-            <BaseButton size="sm" variant="ghost" class="text-error dark:text-red-300" @click="drop(enrollment)">Drop</BaseButton>
+            <IconButton :icon="UserMinus" variant="danger" :label="`Drop ${enrollment.section?.course?.code ?? 'course'}`" @click="drop(enrollment)" />
           </li>
         </ul>
         <EmptyState v-else title="No courses yet" description="Pick sections from the list." />
@@ -72,7 +73,7 @@ const drop = async (enrollment) => {
               <p class="text-caption text-muted dark:text-dark-muted">{{ section.course.credits }} cr · {{ section.seats }} seats left<template v-if="section.lecturer"> · {{ section.lecturer }}</template></p>
             </div>
             <BaseBadge v-if="blocker(section)" :variant="section.enrolled ? 'success' : 'muted'" size="sm">{{ blocker(section) }}</BaseBadge>
-            <BaseButton v-else size="sm" @click="enroll(section)">Enroll</BaseButton>
+            <IconButton v-else :icon="UserPlus" variant="primary" :label="`Enroll in ${section.course.code} section ${section.code}`" @click="enroll(section)" />
           </li>
         </ul>
         <EmptyState v-else title="Nothing open right now" description="Registration opens when the semester's sections are published." />

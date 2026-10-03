@@ -1,5 +1,7 @@
 <script setup>
-import { Head, Link, router, useForm } from '@inertiajs/vue3'
+import IconButton from '../../components/IconButton.vue'
+import { ArrowLeft, CirclePlay, CircleStop, Plus, Trash2 } from '@lucide/vue'
+import { Head, router, useForm } from '@inertiajs/vue3'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseSelect from '../../components/BaseSelect.vue'
@@ -69,7 +71,7 @@ const deleteSemester = async (semester) => {
           <BaseBadge v-if="academicYear.is_current" variant="primary">Current year</BaseBadge>
         </p>
       </div>
-      <Link href="/academic-years" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">Back to calendar</Link>
+      <IconButton :icon="ArrowLeft" href="/academic-years" size="md" label="Back to calendar" />
     </header>
 
     <div v-if="flash?.error" class="rounded-lg border border-error/20 bg-error/5 px-4 py-3 text-small text-error" role="alert">
@@ -116,30 +118,12 @@ const deleteSemester = async (semester) => {
                   {{ semester.start_date ?? '—' }} → {{ semester.end_date ?? '—' }}
                 </td>
                 <td class="px-3 py-3"><StatusBadge :status="semester.status" /></td>
-                <td class="px-3 py-3 text-right">
-                  <button
-                    v-if="semester.status === 'planned'"
-                    type="button"
-                    class="font-medium text-primary hover:underline dark:text-dark-primary"
-                    @click="changeSemesterStatus(semester, 'open')"
-                  >
-                    Open
-                  </button>
-                  <button
-                    v-else-if="semester.status === 'open'"
-                    type="button"
-                    class="font-medium text-warning hover:underline"
-                    @click="changeSemesterStatus(semester, 'closed')"
-                  >
-                    Close
-                  </button>
-                  <button
-                    type="button"
-                    class="ml-3 font-medium text-error hover:underline"
-                    @click="deleteSemester(semester)"
-                  >
-                    Delete
-                  </button>
+                <td class="px-3 py-3">
+                  <div class="flex items-center justify-end gap-1">
+                    <IconButton v-if="semester.status === 'planned'" :icon="CirclePlay" variant="success" :label="`Open ${semester.name}`" @click="changeSemesterStatus(semester, 'open')" />
+                    <IconButton v-else-if="semester.status === 'open'" :icon="CircleStop" :label="`Close ${semester.name}`" @click="changeSemesterStatus(semester, 'closed')" />
+                    <IconButton :icon="Trash2" variant="danger" :label="`Delete ${semester.name}`" @click="deleteSemester(semester)" />
+                  </div>
                 </td>
               </tr>
               <tr v-if="semesters.length === 0">
@@ -162,7 +146,9 @@ const deleteSemester = async (semester) => {
             </div>
             <BaseSelect v-model="semesterForm.status" label="Initial status" :options="semesterStatuses" placeholder="Use planned" :error="semesterForm.errors.status" />
             <p class="text-caption text-muted dark:text-dark-muted">Dates must fall inside {{ academicYear.start_date }} → {{ academicYear.end_date }}.</p>
-            <BaseButton type="submit" :loading="semesterForm.processing">Add semester</BaseButton>
+            <div class="flex justify-end">
+              <IconButton :icon="Plus" type="submit" size="md" variant="primary" label="Add semester" :loading="semesterForm.processing" />
+            </div>
           </form>
         </BaseCard>
       </div>

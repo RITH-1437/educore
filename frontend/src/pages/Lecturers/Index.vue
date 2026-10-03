@@ -1,8 +1,8 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3'
+import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { Pencil, Search, Trash2, UserPlus } from '@lucide/vue'
+import { FunnelX, Pencil, Plus, Search, Trash2, UserCheck, UserX } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
@@ -145,7 +145,7 @@ const destroy = async (lecturer) => {
   <div class="space-y-6">
     <PageHeader eyebrow="People" title="Lecturers" description="Teaching staff profiles, their home department and their login account. Teaching assignments arrive with sections.">
       <template v-if="canManage" #actions>
-        <BaseButton @click="openCreate"><UserPlus class="h-4 w-4" aria-hidden="true" /> New lecturer</BaseButton>
+        <IconButton :icon="Plus" size="md" variant="primary" label="New lecturer" @click="openCreate" />
       </template>
     </PageHeader>
 
@@ -156,8 +156,8 @@ const destroy = async (lecturer) => {
         <BaseSelect v-model="employmentType" label="Type" :options="typeOptions" placeholder="All types" />
         <BaseSelect v-model="activeState" label="Status" :options="stateOptions" placeholder="All" />
         <div class="flex gap-2">
-          <BaseButton type="submit" variant="secondary"><Search class="h-4 w-4" aria-hidden="true" /> Filter</BaseButton>
-          <BaseButton v-if="hasFilters" variant="ghost" @click="clearFilters">Clear</BaseButton>
+          <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
+          <IconButton v-if="hasFilters" :icon="FunnelX" size="md" label="Clear filters" @click="clearFilters" />
         </div>
       </form>
     </BaseCard>
@@ -170,7 +170,7 @@ const destroy = async (lecturer) => {
       :empty-description="hasFilters ? 'Try different filters or clear them.' : 'Add the first lecturer and their login account.'"
     >
       <template #empty-action>
-        <BaseButton v-if="!hasFilters && canManage" @click="openCreate">+ New lecturer</BaseButton>
+        <IconButton v-if="!hasFilters && canManage" :icon="Plus" size="md" variant="primary" label="New lecturer" @click="openCreate" />
       </template>
       <template #cell-staff_number="{ row }"><span class="font-mono text-small">{{ row.staff_number }}</span></template>
       <template #cell-name="{ row }">
@@ -184,10 +184,10 @@ const destroy = async (lecturer) => {
       <template #cell-employment_type="{ row }"><span class="whitespace-nowrap">{{ typeLabel(row.employment_type) }}</span></template>
       <template #cell-is_active="{ row }"><StatusBadge :status="row.is_active ? 'active' : 'inactive'" /></template>
       <template #cell-actions="{ row }">
-        <div v-if="canManage" class="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
+        <div v-if="canManage" class="flex flex-wrap items-center justify-end gap-1">
           <IconButton :icon="Pencil" :href="`/lecturers/${row.id}/edit`" label="Edit lecturer" />
-          <button v-if="row.is_active" type="button" class="text-small font-semibold text-warning hover:underline" @click="deactivate(row)">Deactivate</button>
-          <button v-else type="button" class="text-small font-semibold text-success hover:underline" @click="reactivate(row)">Reactivate</button>
+          <IconButton v-if="row.is_active" :icon="UserX" label="Deactivate lecturer" @click="deactivate(row)" />
+          <IconButton v-else :icon="UserCheck" variant="success" label="Reactivate lecturer" @click="reactivate(row)" />
           <IconButton :icon="Trash2" variant="danger" label="Delete lecturer" @click="destroy(row)" />
         </div>
         <span v-else class="block text-right text-caption text-muted dark:text-dark-muted">Read only</span>

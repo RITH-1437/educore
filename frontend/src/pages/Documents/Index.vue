@@ -1,4 +1,6 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { Ban, Check, Download, FileCheck2, X } from '@lucide/vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -79,13 +81,13 @@ const columns = [
         </div>
       </template>
       <template #cell-actions="{ row }">
-        <div class="flex flex-wrap justify-end gap-2">
-          <a v-if="row.document" :href="`/documents/${row.document.id}/download`" class="self-center text-small font-medium text-primary underline-offset-2 hover:underline dark:text-dark-primary">PDF</a>
+        <div class="flex flex-wrap justify-end gap-1">
+          <IconButton v-if="row.document" :icon="Download" :href="`/documents/${row.document.id}/download`" native label="Download PDF" />
           <template v-if="canProcess">
-            <BaseButton v-if="row.status === 'pending'" size="sm" @click="approve(row)">Approve</BaseButton>
-            <BaseButton v-if="row.status === 'pending'" size="sm" variant="ghost" @click="openReject(row)">Reject</BaseButton>
-            <BaseButton v-if="row.status === 'approved'" size="sm" @click="generate(row)">Generate</BaseButton>
-            <BaseButton v-if="row.document?.status === 'valid'" size="sm" variant="ghost" @click="revoke(row)">Revoke</BaseButton>
+            <IconButton v-if="row.status === 'pending'" :icon="Check" variant="success" label="Approve request" @click="approve(row)" />
+            <IconButton v-if="row.status === 'pending'" :icon="X" variant="danger" label="Reject request" @click="openReject(row)" />
+            <IconButton v-if="row.status === 'approved'" :icon="FileCheck2" variant="primary" label="Generate PDF" @click="generate(row)" />
+            <IconButton v-if="row.document?.status === 'valid'" :icon="Ban" variant="danger" label="Revoke document" @click="revoke(row)" />
           </template>
         </div>
       </template>

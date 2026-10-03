@@ -1,8 +1,8 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3'
+import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { Pencil, Plus, Search, Trash2 } from '@lucide/vue'
+import { Archive, ArchiveRestore, FunnelX, Pencil, Plus, Search, Trash2 } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
@@ -131,7 +131,7 @@ const destroy = async (course) => {
   <div class="space-y-6">
     <PageHeader eyebrow="Academics" title="Courses" description="The course catalog: credits, prerequisites and the programs each course belongs to. Offerings and sections arrive with the timetable modules.">
       <template v-if="canManage" #actions>
-        <BaseButton @click="openCreate"><Plus class="h-4 w-4" aria-hidden="true" /> New course</BaseButton>
+        <IconButton :icon="Plus" size="md" variant="primary" label="New course" @click="openCreate" />
       </template>
     </PageHeader>
 
@@ -142,9 +142,9 @@ const destroy = async (course) => {
         <BaseSelect v-model="programId" label="Program" :options="programOptions" placeholder="All programs" />
         <BaseSelect v-model="level" label="Level" :options="levelOptions" placeholder="All levels" />
         <BaseSelect v-model="status" label="Status" :options="statusOptions" placeholder="All" />
-        <div class="flex gap-2">
-          <BaseButton type="submit" variant="secondary"><Search class="h-4 w-4" aria-hidden="true" /> Filter</BaseButton>
-          <BaseButton v-if="hasFilters" variant="ghost" @click="clearFilters">Clear</BaseButton>
+        <div class="flex gap-1">
+          <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
+          <IconButton v-if="hasFilters" :icon="FunnelX" size="md" label="Clear filters" @click="clearFilters" />
         </div>
       </form>
     </BaseCard>
@@ -157,7 +157,7 @@ const destroy = async (course) => {
       :empty-description="hasFilters ? 'Try different filters or clear them.' : 'Create the first course under a department.'"
     >
       <template #empty-action>
-        <BaseButton v-if="!hasFilters && canManage" @click="openCreate">+ New course</BaseButton>
+        <IconButton v-if="!hasFilters && canManage" :icon="Plus" size="md" variant="primary" label="New course" @click="openCreate" />
       </template>
       <template #cell-code="{ row }"><span class="font-semibold">{{ row.code }}</span></template>
       <template #cell-name="{ row }">
@@ -173,10 +173,10 @@ const destroy = async (course) => {
       </template>
       <template #cell-status="{ row }"><StatusBadge :status="row.status" /></template>
       <template #cell-actions="{ row }">
-        <div v-if="canManage" class="flex flex-wrap items-center justify-end gap-x-4 gap-y-1">
+        <div v-if="canManage" class="flex flex-wrap items-center justify-end gap-1">
           <IconButton :icon="Pencil" :href="`/courses/${row.id}/edit`" :label="`Edit ${row.code}`" />
-          <button v-if="row.status !== 'archived'" type="button" class="text-small font-semibold text-warning hover:underline" @click="archive(row)">Archive</button>
-          <button v-else type="button" class="text-small font-semibold text-success hover:underline" @click="reactivate(row)">Reactivate</button>
+          <IconButton v-if="row.status !== 'archived'" :icon="Archive" :label="`Archive ${row.code}`" @click="archive(row)" />
+          <IconButton v-else :icon="ArchiveRestore" variant="success" :label="`Reactivate ${row.code}`" @click="reactivate(row)" />
           <IconButton :icon="Trash2" variant="danger" :label="`Delete ${row.code}`" @click="destroy(row)" />
         </div>
         <span v-else class="block text-right text-caption text-muted dark:text-dark-muted">Read only</span>

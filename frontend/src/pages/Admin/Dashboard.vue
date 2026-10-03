@@ -1,19 +1,10 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import Chart from 'chart.js/auto'
 import { Head, Link, router } from '@inertiajs/vue3'
-import {
-  ArrowRight,
-  BookOpen,
-  CalendarDays,
-  GraduationCap,
-  Landmark,
-  Presentation,
-  TriangleAlert,
-  Users,
-} from '@lucide/vue'
+import { ArrowRight, BookOpen, CalendarDays, CalendarPlus, GraduationCap, Landmark, Presentation, TriangleAlert, UserPlus, Users } from '@lucide/vue'
 import BaseBadge from '../../components/BaseBadge.vue'
-import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import PageHeader from '../../components/PageHeader.vue'
@@ -38,8 +29,8 @@ const metrics = computed(() => [
 const attention = computed(() => {
   const items = []
   const inactive = props.stats.total_users - props.stats.active_users
-  if (!props.currentAcademicYear) items.push({ text: 'No current academic year is set.', href: '/academic-years', action: 'Set one' })
-  if (inactive > 0) items.push({ text: `${inactive} ${inactive === 1 ? 'account is' : 'accounts are'} inactive.`, href: '/users', action: 'Review accounts' })
+  if (!props.currentAcademicYear) items.push({ text: 'No current academic year is set.', href: '/academic-years', action: 'Set the current academic year' })
+  if (inactive > 0) items.push({ text: `${inactive} ${inactive === 1 ? 'account is' : 'accounts are'} inactive.`, href: '/users', action: 'Review inactive accounts' })
   return items
 })
 
@@ -140,8 +131,8 @@ onBeforeUnmount(() => { if (roleChart) roleChart.destroy() })
   <div class="space-y-8">
     <PageHeader title="Platform overview" description="A snapshot of accounts, the academic calendar, and what needs your attention.">
       <template #actions>
-        <BaseButton href="/academic-years/create" variant="secondary" class="hover:!border-primary hover:!bg-primary hover:!text-white dark:hover:!border-dark-primary dark:hover:!bg-dark-primary dark:hover:!text-white"><CalendarDays class="h-4 w-4" aria-hidden="true" /> New academic year</BaseButton>
-        <BaseButton href="/users/create"><Users class="h-4 w-4" aria-hidden="true" /> Create account</BaseButton>
+        <IconButton :icon="CalendarPlus" href="/academic-years/create" size="md" label="New academic year" />
+        <IconButton :icon="UserPlus" href="/users/create" size="md" variant="primary" label="Create account" />
       </template>
     </PageHeader>
 
@@ -150,7 +141,7 @@ onBeforeUnmount(() => { if (roleChart) roleChart.destroy() })
       <ul class="mt-3 divide-y divide-warning/20">
         <li v-for="item in attention" :key="item.text" class="flex flex-wrap items-center justify-between gap-2 py-2 first:pt-0 last:pb-0">
           <span class="text-small text-ink dark:text-dark-ink">{{ item.text }}</span>
-          <Link :href="item.href" class="inline-flex min-h-8 items-center gap-1 text-small font-semibold text-primary hover:underline dark:text-dark-primary">{{ item.action }} <ArrowRight class="h-4 w-4" aria-hidden="true" /></Link>
+          <IconButton :icon="ArrowRight" :href="item.href" :label="item.action" />
         </li>
       </ul>
     </section>
@@ -162,7 +153,7 @@ onBeforeUnmount(() => { if (roleChart) roleChart.destroy() })
     <section class="grid gap-6 xl:grid-cols-[1.6fr_1fr]">
       <BaseCard title="Recently created accounts" padding="lg" class="min-w-0 motion-safe:animate-section-in" :style="delay(4)">
         <template #description>Latest platform accounts with their role and status.</template>
-        <template #actions><Link href="/users" class="inline-flex min-h-8 items-center gap-1 whitespace-nowrap text-small font-semibold text-primary hover:underline dark:text-dark-primary">View all <ArrowRight class="h-4 w-4" aria-hidden="true" /></Link></template>
+        <template #actions><IconButton :icon="ArrowRight" href="/users" label="View all accounts" /></template>
         <div v-if="recentUsers.length" class="-mx-2 overflow-x-auto">
           <table class="min-w-full">
             <caption class="sr-only">Recently created accounts</caption>

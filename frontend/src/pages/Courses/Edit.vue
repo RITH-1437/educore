@@ -1,5 +1,7 @@
 <script setup>
-import { Head, Link, router, useForm } from '@inertiajs/vue3'
+import IconButton from '../../components/IconButton.vue'
+import { ArchiveRestore, ArrowLeft, Eye } from '@lucide/vue'
+import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
@@ -57,14 +59,14 @@ const reactivate = () => router.post(`/courses/${props.course.id}/reactivate`, {
   <div class="mx-auto max-w-4xl space-y-6">
     <PageHeader eyebrow="Academics" :title="`${course.code} — ${course.name}`" description="Edit the course, manage its prerequisites and see where it is used.">
       <template #actions>
-        <BaseButton href="/courses" variant="secondary">Back to courses</BaseButton>
+        <IconButton :icon="ArrowLeft" href="/courses" size="md" label="Back to courses" />
       </template>
     </PageHeader>
 
     <div class="flex flex-wrap items-center gap-3">
       <StatusBadge :status="course.status" />
       <span class="text-small text-muted dark:text-dark-muted">{{ course.department?.name }}</span>
-      <BaseButton v-if="archived" size="sm" variant="secondary" @click="reactivate">Reactivate</BaseButton>
+      <IconButton v-if="archived" :icon="ArchiveRestore" variant="success" label="Reactivate course" @click="reactivate" />
     </div>
 
     <ErrorAlert v-if="Object.keys(form.errors).length" title="Check the form" message="Correct the highlighted fields and try again." />
@@ -94,7 +96,7 @@ const reactivate = () => router.post(`/courses/${props.course.id}/reactivate`, {
               {{ program.is_required ? 'Required' : 'Elective' }}<template v-if="program.suggested_semester"> · suggested semester {{ program.suggested_semester }}</template>
             </p>
           </div>
-          <Link :href="`/programs/${program.id}/edit`" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">Open program</Link>
+          <IconButton :icon="Eye" :href="`/programs/${program.id}/edit`" :label="`Open program ${program.code}`" />
         </li>
       </ul>
       <EmptyState v-else title="Not in any curriculum" description="Add it to a program from the program's curriculum section." />

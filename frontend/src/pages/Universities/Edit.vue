@@ -1,5 +1,7 @@
 <script setup>
-import { Head, Link, router, useForm } from '@inertiajs/vue3'
+import IconButton from '../../components/IconButton.vue'
+import { ArrowLeft, Star, Trash2 } from '@lucide/vue'
+import { Head, router, useForm } from '@inertiajs/vue3'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
@@ -47,10 +49,8 @@ const destroy = async () => {
         </p>
       </div>
       <div class="flex flex-wrap gap-3">
-        <Link href="/universities" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">
-          Back to universities
-        </Link>
-        <BaseButton variant="secondary" @click="makeCurrent" :disabled="university.is_current">Make current</BaseButton>
+        <IconButton :icon="ArrowLeft" href="/universities" size="md" label="Back to universities" />
+        <IconButton :icon="Star" size="md" :label="university.is_current ? 'Already the current university' : 'Make current'" :disabled="university.is_current" @click="makeCurrent" />
       </div>
     </header>
 
@@ -117,7 +117,7 @@ const destroy = async () => {
 
         <div class="flex flex-wrap items-center gap-3">
           <BaseButton type="submit" :loading="form.processing">Save changes</BaseButton>
-          <BaseButton variant="ghost" @click="destroy">Delete</BaseButton>
+          <IconButton :icon="Trash2" size="md" variant="danger" label="Delete university" @click="destroy" />
         </div>
       </form>
     </BaseCard>

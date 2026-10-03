@@ -71,14 +71,14 @@ const columns = [
   <div class="space-y-6">
     <PageHeader eyebrow="Timetable" title="Rooms" description="Teaching spaces used by section schedules. A room cannot host two classes at once in a semester, and must seat the students already enrolled.">
       <template v-if="canManage" #actions>
-        <BaseButton @click="openCreate"><Plus class="h-4 w-4" aria-hidden="true" /> New room</BaseButton>
+        <IconButton :icon="Plus" size="md" variant="primary" label="New room" @click="openCreate" />
       </template>
     </PageHeader>
 
     <BaseCard padding="sm">
       <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="applySearch">
         <BaseInput v-model="search" label="Search" placeholder="Code, name or building" class="w-full sm:max-w-sm" />
-        <BaseButton type="submit" variant="secondary"><Search class="h-4 w-4" aria-hidden="true" /> Search</BaseButton>
+        <IconButton :icon="Search" type="submit" size="md" label="Search rooms" />
       </form>
     </BaseCard>
 

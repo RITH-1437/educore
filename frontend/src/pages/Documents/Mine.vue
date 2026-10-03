@@ -1,4 +1,6 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { Download } from '@lucide/vue'
 import { Head, useForm } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -65,7 +67,7 @@ const submit = () =>
             </div>
             <p v-if="request.status === 'rejected'" class="mt-2 text-small text-error">Rejected: {{ request.rejection_reason }}</p>
             <div v-if="request.document" class="mt-3 flex flex-wrap items-center gap-3">
-              <a :href="`/documents/${request.document.id}/download`" class="text-small font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-primary dark:text-dark-primary">Download PDF</a>
+              <IconButton :icon="Download" :href="`/documents/${request.document.id}/download`" native label="Download PDF" />
               <StatusBadge v-bind="documentBadge(request.document.status)" />
               <span class="text-caption text-muted dark:text-dark-muted">{{ fileSize(request.document.file_size) }} · code <span class="font-mono">{{ request.document.verification_token.slice(0, 12) }}…</span></span>
             </div>

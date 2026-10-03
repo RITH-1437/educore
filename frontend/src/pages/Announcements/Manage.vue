@@ -1,5 +1,5 @@
 <script setup>
-import { Pencil, Trash2 } from '@lucide/vue'
+import { Archive, Megaphone, Pencil, Plus, Send, Trash2 } from '@lucide/vue'
 import IconButton from '../../components/IconButton.vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
@@ -83,8 +83,8 @@ const remove = async (item) => {
   <div class="space-y-6">
     <PageHeader eyebrow="Communication" title="Manage announcements" :description="canTargetGroups ? 'Write to everyone, a role group or one faculty, department, program, section or course.' : 'Write to the sections and courses you teach.'">
       <template #actions>
-        <BaseButton href="/announcements" variant="secondary">View feed</BaseButton>
-        <BaseButton :disabled="!audienceOptions.length" @click="openCreate">New announcement</BaseButton>
+        <IconButton :icon="Megaphone" href="/announcements" size="md" label="View feed" />
+        <IconButton :icon="Plus" size="md" variant="primary" label="New announcement" :disabled="!audienceOptions.length" @click="openCreate" />
       </template>
     </PageHeader>
 
@@ -111,13 +111,13 @@ const remove = async (item) => {
               </p>
               <p class="mt-2 line-clamp-2 text-small text-muted dark:text-dark-muted">{{ item.body }}</p>
             </div>
-            <div class="flex flex-wrap gap-2">
+            <div class="flex flex-wrap gap-1">
               <template v-if="item.publish_state === 'draft'">
-                <BaseButton size="sm" @click="publish(item)">Publish</BaseButton>
+                <IconButton :icon="Send" variant="success" label="Publish announcement" @click="publish(item)" />
                 <IconButton :icon="Pencil" label="Edit draft" @click="openEdit(item)" />
                 <IconButton :icon="Trash2" variant="danger" label="Delete draft" @click="remove(item)" />
               </template>
-              <BaseButton v-else-if="item.publish_state === 'published'" size="sm" variant="ghost" @click="archive(item)">Archive</BaseButton>
+              <IconButton v-else-if="item.publish_state === 'published'" :icon="Archive" label="Archive announcement" @click="archive(item)" />
             </div>
           </div>
         </BaseCard>

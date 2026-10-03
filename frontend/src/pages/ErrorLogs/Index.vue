@@ -1,16 +1,15 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
-import { AlertCircle, FileText, Filter, Search, Server, XCircle } from '@lucide/vue'
+import { AlertCircle, FileText, FunnelX, Search, Server } from '@lucide/vue'
 import BaseBadge from '../../components/BaseBadge.vue'
-import BaseButton from '../../components/BaseButton.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseSelect from '../../components/BaseSelect.vue'
 import BaseTable from '../../components/BaseTable.vue'
 import Pagination from '../../components/Pagination.vue'
-import StatusBadge from '../../components/StatusBadge.vue'
 
 const props = defineProps({
   errorLogs: { type: Object, required: true },
@@ -106,9 +105,7 @@ const getStatusBadgeVariant = (code) => {
   <div class="space-y-6">
     <PageHeader eyebrow="Diagnostics" title="System error logs" description="Recorded HTTP 404 and 5xx responses. No mutation endpoints — append-only.">
       <template #actions>
-        <BaseButton variant="secondary" @click="clearFilters" :disabled="!hasActiveFilters">
-          <XCircle class="h-4 w-4" aria-hidden="true" /> Clear filters
-        </BaseButton>
+        <IconButton :icon="FunnelX" size="md" label="Clear filters" :disabled="!hasActiveFilters" @click="clearFilters" />
       </template>
     </PageHeader>
 
@@ -165,9 +162,7 @@ const getStatusBadgeVariant = (code) => {
           placeholder="All methods"
           class="w-full sm:w-40"
         />
-        <BaseButton type="submit" variant="secondary">
-          <Search class="h-4 w-4" aria-hidden="true" /> Apply
-        </BaseButton>
+        <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
       </form>
     </BaseCard>
 

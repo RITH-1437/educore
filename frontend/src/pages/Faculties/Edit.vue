@@ -1,4 +1,6 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { ArrowLeft } from '@lucide/vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -45,9 +47,7 @@ const submit = () => form.put(`/faculties/${props.faculty.id}`, { preserveScroll
           Renaming keeps every department, program, course and lecturer pointing at the same faculty id.
         </p>
       </div>
-      <Link href="/faculties" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">
-        Back to faculties
-      </Link>
+      <IconButton :icon="ArrowLeft" href="/faculties" size="md" label="Back to faculties" />
     </header>
 
     <div class="flex items-center gap-3">

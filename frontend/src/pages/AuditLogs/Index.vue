@@ -1,9 +1,9 @@
 <script setup>
-import ExportLink from '../../components/ExportLink.vue'
+import IconButton from '../../components/IconButton.vue'
+import { Download, Eye, Search } from '@lucide/vue'
 import { exportUrl } from '../../utils/exports'
 import { Head, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import BaseButton from '../../components/BaseButton.vue'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseSelect from '../../components/BaseSelect.vue'
 import BaseTable from '../../components/BaseTable.vue'
@@ -44,7 +44,7 @@ const columns = [
   <Head title="Audit logs - EduCore" />
   <div class="space-y-6">
     <PageHeader eyebrow="System" title="Audit logs" description="Append-only record of sign-ins and sensitive changes: who did what, to which record, and when. Entries cannot be edited or deleted. Exports are audited too.">
-      <template #actions><ExportLink :href="csvUrl" /></template>
+      <template #actions><IconButton :icon="Download" :href="csvUrl" native size="md" label="Export CSV" /></template>
     </PageHeader>
 
     <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] lg:items-end" @submit.prevent="apply">
@@ -52,7 +52,7 @@ const columns = [
       <BaseSelect v-model="area" :options="areaOptions" label="Area" />
       <BaseInput v-model="from" name="from" label="From" type="date" />
       <BaseInput v-model="to" name="to" label="To" type="date" />
-      <BaseButton type="submit" variant="secondary">Filter</BaseButton>
+      <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
     </form>
 
     <BaseTable :columns="columns" :rows="logs.data" caption="Audit log entries" empty-title="No entries" empty-description="Sensitive actions appear here as they happen.">
@@ -66,7 +66,7 @@ const columns = [
         <p v-if="row.ip_address" class="font-mono text-caption text-muted dark:text-dark-muted">{{ row.ip_address }}</p>
       </template>
       <template #cell-target="{ row }"><span class="text-muted dark:text-dark-muted">{{ row.target ? `${row.target.type} #${row.target.id}` : '—' }}</span></template>
-      <template #cell-actions="{ row }"><BaseButton :href="`/audit-logs/${row.id}`" size="sm" variant="secondary">View</BaseButton></template>
+      <template #cell-actions="{ row }"><div class="flex justify-end"><IconButton :icon="Eye" :href="`/audit-logs/${row.id}`" label="View entry" /></div></template>
     </BaseTable>
 
     <Pagination :links="logs.meta?.links ?? []" />

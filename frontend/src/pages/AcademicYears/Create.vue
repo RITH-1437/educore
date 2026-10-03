@@ -1,4 +1,6 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { ArrowLeft } from '@lucide/vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseInput from '../../components/BaseInput.vue'
@@ -33,9 +35,7 @@ const submit = () => form.post('/academic-years', { preserveScroll: true })
           The calendar span that owns every semester, offering and grade of that year.
         </p>
       </div>
-      <Link href="/academic-years" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">
-        Back to academic years
-      </Link>
+      <IconButton :icon="ArrowLeft" href="/academic-years" size="md" label="Back to academic years" />
     </header>
 
     <BaseCard padding="lg">

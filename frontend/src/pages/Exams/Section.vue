@@ -1,5 +1,5 @@
 <script setup>
-import { Pencil, Trash2 } from '@lucide/vue'
+import { Eye, EyeOff, Pencil, Plus, Trash2 } from '@lucide/vue'
 import IconButton from '../../components/IconButton.vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
@@ -102,7 +102,7 @@ const fieldError = (i, field) => results.errors[`results.${i}.${field}`]
   <div class="space-y-6">
     <PageHeader eyebrow="Examinations" :title="`${section.course.code} · Section ${section.code}`" :description="`${section.course.name} · ${section.semester}`">
       <template v-if="canManage && !section.locked" #actions>
-        <BaseButton @click="openCreate">New exam</BaseButton>
+        <IconButton :icon="Plus" size="md" variant="primary" label="New exam" @click="openCreate" />
       </template>
     </PageHeader>
 
@@ -151,8 +151,8 @@ const fieldError = (i, field) => results.errors[`results.${i}.${field}`]
 
             <div v-if="canManage && !section.locked" class="mt-4 flex flex-wrap gap-2">
               <IconButton :icon="Pencil" :label="`Edit ${exam.title}`" @click="openEdit(exam)" />
-              <BaseButton v-if="!exam.is_published" size="sm" variant="ghost" @click="release(exam, true)">Release results</BaseButton>
-              <BaseButton v-else size="sm" variant="ghost" @click="release(exam, false)">Hide results</BaseButton>
+              <IconButton v-if="!exam.is_published" :icon="Eye" variant="success" :label="`Release results of ${exam.title}`" @click="release(exam, true)" />
+              <IconButton v-else :icon="EyeOff" :label="`Hide results of ${exam.title}`" @click="release(exam, false)" />
               <IconButton v-if="!exam.results_count" :icon="Trash2" variant="danger" :label="`Delete ${exam.title}`" @click="remove(exam)" />
             </div>
           </BaseCard>

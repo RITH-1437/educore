@@ -1,7 +1,8 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { Building2, Eye } from '@lucide/vue'
 import { Head, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import BaseButton from '../../components/BaseButton.vue'
 import BaseSelect from '../../components/BaseSelect.vue'
 import BaseTable from '../../components/BaseTable.vue'
 import PageHeader from '../../components/PageHeader.vue'
@@ -33,7 +34,7 @@ const columns = [
   <div class="space-y-6">
     <PageHeader eyebrow="Operations" title="Internships" description="Applications waiting for review come first.">
       <template #actions>
-        <BaseButton href="/internship-companies" variant="secondary">Companies</BaseButton>
+        <IconButton :icon="Building2" href="/internship-companies" size="md" label="Companies" />
       </template>
     </PageHeader>
 
@@ -52,7 +53,7 @@ const columns = [
       </template>
       <template #cell-dates="{ row }">{{ formatDate(row.start_date) }} – {{ formatDate(row.end_date) }}</template>
       <template #cell-status="{ row }"><StatusBadge v-bind="statusBadge(row.status)" /></template>
-      <template #cell-actions="{ row }"><BaseButton :href="`/internships/${row.id}`" size="sm" variant="secondary">Open</BaseButton></template>
+      <template #cell-actions="{ row }"><div class="flex justify-end"><IconButton :icon="Eye" :href="`/internships/${row.id}`" label="Open internship" /></div></template>
     </BaseTable>
 
     <Pagination :links="internships.meta?.links ?? []" />

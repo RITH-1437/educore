@@ -1,5 +1,5 @@
 <script setup>
-import { Trash2 } from '@lucide/vue'
+import { Plus, Trash2 } from '@lucide/vue'
 import IconButton from '../../components/IconButton.vue'
 import { Head, useForm } from '@inertiajs/vue3'
 import BaseButton from '../../components/BaseButton.vue'
@@ -70,7 +70,7 @@ const fieldError = (i, field) => form.errors[`bands.${i}.${field}`]
         <ErrorAlert v-if="form.errors.bands" title="Could not save" :message="form.errors.bands" />
 
         <div class="flex flex-wrap justify-between gap-2 border-t border-border-default pt-4 dark:border-dark-border">
-          <BaseButton variant="secondary" @click="add">Add band</BaseButton>
+          <IconButton :icon="Plus" size="md" label="Add band" @click="add" />
           <BaseButton type="submit" :loading="form.processing">Save scale</BaseButton>
         </div>
       </form>

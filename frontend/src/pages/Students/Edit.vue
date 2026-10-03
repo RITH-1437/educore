@@ -1,4 +1,6 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { ArrowLeft, Trash2 } from '@lucide/vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -41,7 +43,7 @@ const destroy = async () => {
   <div class="mx-auto max-w-5xl space-y-6">
     <PageHeader eyebrow="People" :title="student.full_name" :description="`${student.student_number} · ${student.current_program?.program?.name ?? 'No active program'}`">
       <template #actions>
-        <BaseButton href="/students" variant="secondary">Back to students</BaseButton>
+        <IconButton :icon="ArrowLeft" href="/students" size="md" label="Back to students" />
       </template>
     </PageHeader>
 
@@ -54,7 +56,7 @@ const destroy = async () => {
         <StudentForm :form="form" mode="edit" :faculties="faculties" :programs="programs" :genders="genders" />
         <div class="flex flex-wrap items-center justify-between gap-3">
           <BaseButton type="submit" :loading="form.processing">Save changes</BaseButton>
-          <BaseButton variant="danger" size="sm" @click="destroy">Delete profile</BaseButton>
+          <IconButton :icon="Trash2" size="md" variant="danger" label="Delete profile" @click="destroy" />
         </div>
       </form>
     </BaseCard>

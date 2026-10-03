@@ -1,4 +1,6 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { Eye, Scale } from '@lucide/vue'
 import { Head, router } from '@inertiajs/vue3'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseTable from '../../components/BaseTable.vue'
@@ -27,7 +29,7 @@ const columns = [
   <div class="space-y-6">
     <PageHeader eyebrow="Academics" title="Grades" :description="canApprove ? 'Review submitted section grades and approve them so they count toward GPA.' : 'Section grades submitted by lecturers.'">
       <template #actions>
-        <BaseButton href="/grading-scale" variant="secondary">Grading scale</BaseButton>
+        <IconButton :icon="Scale" href="/grading-scale" size="md" label="Grading scale" />
       </template>
     </PageHeader>
 
@@ -57,7 +59,7 @@ const columns = [
         </div>
       </template>
       <template #cell-actions="{ row }">
-        <BaseButton :href="`/grades/sections/${row.id}`" size="sm" variant="secondary">Open</BaseButton>
+        <IconButton :icon="Eye" :href="`/grades/sections/${row.id}`" label="Open grade sheet" />
       </template>
     </BaseTable>
 

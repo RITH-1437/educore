@@ -1,8 +1,8 @@
 <script setup>
+import IconButton from '../IconButton.vue'
 import { computed } from 'vue'
 import { Link, router, useForm } from '@inertiajs/vue3'
-import { X } from '@lucide/vue'
-import BaseButton from '../BaseButton.vue'
+import { Plus, Trash2 } from '@lucide/vue'
 import BaseCard from '../BaseCard.vue'
 import BaseInput from '../BaseInput.vue'
 import BaseSelect from '../BaseSelect.vue'
@@ -88,9 +88,7 @@ const remove = (course) => router.delete(`${base.value}/${course.id}`, { preserv
               <span v-else class="text-small">{{ course.suggested_semester ?? '—' }}</span>
             </td>
             <td v-if="canManage" class="px-2 py-3 text-right">
-              <button type="button" class="inline-flex min-h-9 items-center gap-1 rounded-md px-2 text-small font-semibold text-error hover:bg-error/5 focus-visible:outline-2 focus-visible:outline-error dark:text-red-300" :aria-label="`Remove ${course.code} from the curriculum`" @click="remove(course)">
-                <X class="h-4 w-4" aria-hidden="true" /> Remove
-              </button>
+              <IconButton :icon="Trash2" variant="danger" :label="`Remove ${course.code} from the curriculum`" @click="remove(course)" />
             </td>
           </tr>
         </tbody>
@@ -101,7 +99,7 @@ const remove = (course) => router.delete(`${base.value}/${course.id}`, { preserv
     <form v-if="canManage" class="mt-6 grid gap-3 border-t border-border-default pt-5 dark:border-dark-border sm:grid-cols-[2fr_1fr_auto] sm:items-end" @submit.prevent="add">
       <BaseSelect v-model="form.course_id" label="Add a course" :options="courseOptions" placeholder="Select a course" :error="form.errors.course_id" />
       <BaseInput v-model="form.suggested_semester" name="suggested_semester" label="Semester" type="number" min="1" max="16" placeholder="Optional" :error="form.errors.suggested_semester" />
-      <BaseButton type="submit" :loading="form.processing" :disabled="!form.course_id">Add</BaseButton>
+      <IconButton :icon="Plus" type="submit" size="md" variant="primary" label="Add course to curriculum" :loading="form.processing" :disabled="!form.course_id" />
       <label class="flex min-h-11 items-center gap-2 text-small text-ink dark:text-dark-ink sm:col-span-3">
         <input v-model="form.is_required" type="checkbox" class="h-4 w-4 rounded-sm border-border-muted accent-primary focus-visible:outline-2 focus-visible:outline-primary" />
         Required for the degree

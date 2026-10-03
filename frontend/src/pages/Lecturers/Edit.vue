@@ -1,4 +1,6 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { ArrowLeft, Eye, UserCheck, UserX } from '@lucide/vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -51,15 +53,13 @@ const toggleActive = () =>
   <div class="mx-auto max-w-4xl space-y-6">
     <PageHeader eyebrow="People" :title="lecturer.full_name" :description="`${lecturer.staff_number} · ${lecturer.department?.name ?? ''}`">
       <template #actions>
-        <BaseButton href="/lecturers" variant="secondary">Back to lecturers</BaseButton>
+        <IconButton :icon="ArrowLeft" href="/lecturers" size="md" label="Back to lecturers" />
       </template>
     </PageHeader>
 
     <div class="flex flex-wrap items-center gap-3">
       <StatusBadge :status="lecturer.is_active ? 'active' : 'inactive'" />
-      <BaseButton size="sm" :variant="lecturer.is_active ? 'secondary' : 'success'" @click="toggleActive">
-        {{ lecturer.is_active ? 'Deactivate' : 'Reactivate' }}
-      </BaseButton>
+      <IconButton :icon="lecturer.is_active ? UserX : UserCheck" :variant="lecturer.is_active ? 'default' : 'success'" :label="lecturer.is_active ? 'Deactivate lecturer' : 'Reactivate lecturer'" @click="toggleActive" />
     </div>
 
     <ErrorAlert v-if="Object.keys(form.errors).length" title="Check the form" message="Correct the highlighted fields and try again." />
@@ -85,7 +85,7 @@ const toggleActive = () =>
             </p>
             <p class="text-caption text-muted dark:text-dark-muted">{{ section.offering?.semester?.academic_year }} · {{ section.offering?.semester?.name }} · {{ section.capacity }} seats</p>
           </div>
-          <BaseButton :href="`/offerings/${section.offering?.id}`" size="sm" variant="secondary">Open offering</BaseButton>
+          <IconButton :icon="Eye" :href="`/offerings/${section.offering?.id}`" label="Open offering" />
         </li>
       </ul>
       <p v-else class="text-small text-muted dark:text-dark-muted">Not assigned to any section yet.</p>

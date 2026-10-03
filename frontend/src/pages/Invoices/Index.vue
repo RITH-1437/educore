@@ -1,9 +1,9 @@
 <script setup>
-import ExportLink from '../../components/ExportLink.vue'
+import IconButton from '../../components/IconButton.vue'
+import { Download, Eye, Plus, Search } from '@lucide/vue'
 import { exportUrl } from '../../utils/exports'
 import { Head, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import BaseButton from '../../components/BaseButton.vue'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseSelect from '../../components/BaseSelect.vue'
 import BaseTable from '../../components/BaseTable.vue'
@@ -41,15 +41,15 @@ const columns = [
   <div class="space-y-6">
     <PageHeader eyebrow="Operations" title="Invoices" description="Charges and payment records per student. Payments are recorded by staff; there is no online payment.">
       <template #actions>
-        <ExportLink :href="csvUrl" />
-        <BaseButton href="/invoices/create">New invoice</BaseButton>
+        <IconButton :icon="Download" :href="csvUrl" native size="md" label="Export CSV" />
+        <IconButton :icon="Plus" href="/invoices/create" size="md" variant="primary" label="New invoice" />
       </template>
     </PageHeader>
 
     <form class="grid gap-3 sm:grid-cols-[2fr_1fr_auto] sm:items-end" @submit.prevent="apply">
       <BaseInput v-model="search" name="search" label="Search" placeholder="Invoice number, title, student…" />
       <BaseSelect v-model="status" :options="statusOptions" label="Status" />
-      <BaseButton type="submit" variant="secondary">Filter</BaseButton>
+      <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
     </form>
 
     <BaseTable :columns="columns" :rows="invoices.data" caption="Invoices" empty-title="No invoices" empty-description="Create an invoice to bill a student.">
@@ -66,7 +66,7 @@ const columns = [
       <template #cell-balance="{ row }"><span class="font-semibold tabular-nums">{{ money(row.status === 'cancelled' ? 0 : row.balance, row.currency) }}</span></template>
       <template #cell-status="{ row }"><StatusBadge v-bind="invoiceBadge(row.status)" /></template>
       <template #cell-actions="{ row }">
-        <BaseButton :href="`/invoices/${row.id}`" size="sm" variant="secondary">Open</BaseButton>
+        <div class="flex justify-end"><IconButton :icon="Eye" :href="`/invoices/${row.id}`" :label="`Open ${row.invoice_number}`" /></div>
       </template>
     </BaseTable>
 

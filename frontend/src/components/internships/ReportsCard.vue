@@ -1,4 +1,6 @@
 <script setup>
+import IconButton from '../IconButton.vue'
+import { ClipboardCheck, Pencil } from '@lucide/vue'
 import { useForm } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import BaseButton from '../BaseButton.vue'
@@ -53,7 +55,7 @@ const review = () => reviewForm.post(`/internship-reports/${reviewing.value.id}/
         </div>
         <div class="flex items-center gap-2">
           <StatusBadge :status="report.status === 'reviewed' ? 'completed' : 'pending'" :label="report.status === 'reviewed' ? 'Reviewed' : 'Submitted'" />
-          <BaseButton v-if="canReview" size="sm" variant="ghost" @click="openReview(report)">{{ report.status === 'reviewed' ? 'Edit review' : 'Review' }}</BaseButton>
+          <IconButton v-if="canReview" :icon="report.status === 'reviewed' ? Pencil : ClipboardCheck" :label="report.status === 'reviewed' ? 'Edit review' : 'Review report'" @click="openReview(report)" />
         </div>
       </li>
     </ul>

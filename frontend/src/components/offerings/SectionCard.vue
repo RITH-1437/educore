@@ -2,7 +2,7 @@
 import IconButton from '../IconButton.vue'
 import { computed, ref } from 'vue'
 import { router, useForm } from '@inertiajs/vue3'
-import { Trash2, X } from '@lucide/vue'
+import { Award, ClipboardList, FileCheck, Pencil, Trash2, UserCheck, UserPlus, X } from '@lucide/vue'
 import BaseBadge from '../BaseBadge.vue'
 import BaseButton from '../BaseButton.vue'
 import BaseCard from '../BaseCard.vue'
@@ -89,18 +89,18 @@ const destroy = async () => {
     <form v-if="canManage" class="mt-4 grid gap-3 border-t border-border-default pt-4 dark:border-dark-border sm:grid-cols-[2fr_1fr_auto] sm:items-end" @submit.prevent="addLecturer">
       <BaseSelect v-model="assign.lecturer_id" label="Assign lecturer" :options="lecturerOptions" placeholder="Select an active lecturer" :error="assign.errors.lecturer_id" />
       <BaseSelect v-model="assign.role" label="Role" :options="roleOptions" :error="assign.errors.role" />
-      <BaseButton type="submit" size="md" :disabled="!assign.lecturer_id" :loading="assign.processing">Assign</BaseButton>
+      <IconButton :icon="UserPlus" type="submit" size="md" variant="primary" label="Assign lecturer" :disabled="!assign.lecturer_id" :loading="assign.processing" />
     </form>
 
     <div class="mt-4">
-      <BaseButton :href="`/attendance/sections/${section.id}`" size="sm" variant="ghost">Attendance register</BaseButton>
-      <BaseButton :href="`/coursework/sections/${section.id}`" size="sm" variant="ghost">Assignments</BaseButton>
-      <BaseButton :href="`/exams/sections/${section.id}`" size="sm" variant="ghost">Exams</BaseButton>
-      <BaseButton :href="`/grades/sections/${section.id}`" size="sm" variant="ghost">Grades</BaseButton>
+      <IconButton :icon="UserCheck" :href="`/attendance/sections/${section.id}`" label="Attendance register" />
+      <IconButton :icon="ClipboardList" :href="`/coursework/sections/${section.id}`" label="Assignments" />
+      <IconButton :icon="FileCheck" :href="`/exams/sections/${section.id}`" label="Exams" />
+      <IconButton :icon="Award" :href="`/grades/sections/${section.id}`" label="Grades" />
     </div>
 
     <div v-if="canManage" class="mt-4 flex gap-3">
-      <BaseButton v-if="!editing" size="sm" variant="secondary" @click="editing = true">Edit section</BaseButton>
+      <IconButton v-if="!editing" :icon="Pencil" :label="`Edit section ${section.code}`" @click="editing = true" />
       <IconButton :icon="Trash2" variant="danger" :label="`Delete section ${section.code}`" @click="destroy" />
     </div>
   </BaseCard>

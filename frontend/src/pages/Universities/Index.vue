@@ -1,7 +1,8 @@
 <script setup>
-import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3'
+import IconButton from '../../components/IconButton.vue'
+import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
-import { Pencil, Plus, Search, Trash2, X } from '@lucide/vue'
+import { FunnelX, Pencil, Plus, School, Search, Star, Trash2, X } from '@lucide/vue'
 import BaseBadge from '../../components/BaseBadge.vue'
 import BaseButton from '../../components/BaseButton.vue'
 import PageHeader from '../../components/PageHeader.vue'
@@ -117,8 +118,8 @@ const destroy = async (university) => {
   <div class="space-y-6">
     <PageHeader title="University" description="The single institution record that owns every faculty, program and course.">
       <template #actions>
-        <BaseButton href="/faculties" variant="secondary" class="hover:!border-primary hover:!bg-primary hover:!text-white dark:hover:!border-dark-primary dark:hover:!bg-dark-primary dark:hover:!text-white">Manage faculties</BaseButton>
-        <BaseButton v-if="canManage" @click="openCreate"><Plus class="h-4 w-4" aria-hidden="true" /> New university</BaseButton>
+        <IconButton :icon="School" href="/faculties" size="md" label="Manage faculties" />
+        <IconButton v-if="canManage" :icon="Plus" size="md" variant="primary" label="New university" @click="openCreate" />
       </template>
     </PageHeader>
 
@@ -136,9 +137,9 @@ const destroy = async (university) => {
             <option v-for="opt in STATUS_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
           </select>
         </div>
-        <div class="flex gap-2">
-          <BaseButton type="submit" variant="secondary"><Search class="h-4 w-4" aria-hidden="true" /> Search</BaseButton>
-          <BaseButton v-if="search || status" type="button" variant="ghost" @click="clearFilters">Clear</BaseButton>
+        <div class="flex gap-1">
+          <IconButton :icon="Search" type="submit" size="md" label="Search universities" />
+          <IconButton v-if="search || status" :icon="FunnelX" size="md" label="Clear filters" @click="clearFilters" />
         </div>
       </form>
 
@@ -161,7 +162,7 @@ const destroy = async (university) => {
       empty-description="Create the institution record to start building the academic structure."
     >
       <template #empty-action>
-        <BaseButton v-if="isEmpty && !search && canManage" @click="openCreate">+ New university</BaseButton>
+        <IconButton v-if="isEmpty && !search && canManage" :icon="Plus" size="md" variant="primary" label="New university" @click="openCreate" />
       </template>
       <template #cell-code="{ row }">
         <span class="font-semibold text-ink dark:text-dark-ink">{{ row.code }}</span>
@@ -192,32 +193,9 @@ const destroy = async (university) => {
       </template>
       <template #cell-actions="{ row }">
         <div v-if="canManage" class="flex items-center justify-end gap-1">
-          <button
-            v-if="!row.is_current"
-            type="button"
-            class="mr-1 inline-flex min-h-7 items-center rounded px-2 text-caption font-semibold text-success hover:bg-success/10 hover:underline"
-            title="Set as current university"
-            @click="makeCurrent(row)"
-          >
-            Make current
-          </button>
-          <Link
-            :href="`/universities/${row.id}/edit`"
-            class="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary dark:text-dark-muted dark:hover:bg-dark-primary/15 dark:hover:text-dark-primary"
-            title="Edit university"
-            aria-label="Edit university"
-          >
-            <Pencil class="h-4 w-4" aria-hidden="true" />
-          </Link>
-          <button
-            type="button"
-            class="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-error/10 hover:text-error focus-visible:outline-2 focus-visible:outline-error dark:text-dark-muted dark:hover:bg-error/20 dark:hover:text-red-400"
-            title="Delete university"
-            aria-label="Delete university"
-            @click="destroy(row)"
-          >
-            <Trash2 class="h-4 w-4" aria-hidden="true" />
-          </button>
+          <IconButton v-if="!row.is_current" :icon="Star" variant="success" :label="`Make ${row.name} the current university`" @click="makeCurrent(row)" />
+          <IconButton :icon="Pencil" :href="`/universities/${row.id}/edit`" :label="`Edit ${row.name}`" />
+          <IconButton :icon="Trash2" variant="danger" :label="`Delete ${row.name}`" @click="destroy(row)" />
         </div>
         <span v-else class="block text-right text-caption text-muted dark:text-dark-muted">Read only</span>
       </template>

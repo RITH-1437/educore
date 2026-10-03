@@ -1,4 +1,6 @@
 <script setup>
+import IconButton from '../IconButton.vue'
+import { ChartColumn, Table2 } from '@lucide/vue'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import Chart from 'chart.js/auto'
 
@@ -123,8 +125,8 @@ onBeforeUnmount(() => {
         </tbody>
       </table>
     </div>
-    <button type="button" class="mt-2 text-caption font-medium text-primary underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-primary dark:text-dark-primary" :aria-pressed="showTable" @click="showTable = !showTable">
-      {{ showTable ? 'Show as chart' : 'Show as table' }}
-    </button>
+    <div class="mt-2 flex justify-end">
+      <IconButton :icon="showTable ? ChartColumn : Table2" :label="showTable ? 'Show as chart' : 'Show as table'" @click="showTable = !showTable" />
+    </div>
   </div>
 </template>

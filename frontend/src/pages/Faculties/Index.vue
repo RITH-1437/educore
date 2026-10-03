@@ -1,8 +1,8 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3'
+import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { Building2, Pencil, Search, Trash2 } from '@lucide/vue'
+import { Archive, ArchiveRestore, FolderPlus, Pencil, Plus, Search, Trash2 } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import { useConfirm } from '../../composables/useConfirm'
@@ -182,10 +182,8 @@ const deleteDepartment = async (department) => {
   <div class="space-y-6">
     <PageHeader eyebrow="University structure" title="Faculties & departments" description="The top of the academic hierarchy. Departments belong to exactly one faculty and may be archived rather than deleted.">
       <template v-if="canManage" #actions>
-        <BaseButton variant="secondary" @click="openDepartmentModal(null)">
-          <Building2 class="h-4 w-4" aria-hidden="true" /> New department
-        </BaseButton>
-        <BaseButton @click="openFacultyModal">+ New faculty</BaseButton>
+        <IconButton :icon="FolderPlus" size="md" label="New department" @click="openDepartmentModal(null)" />
+        <IconButton :icon="Plus" size="md" variant="primary" label="New faculty" @click="openFacultyModal" />
       </template>
     </PageHeader>
 
@@ -194,7 +192,7 @@ const deleteDepartment = async (department) => {
         <BaseInput v-model="search" label="Search faculties" placeholder="Code or name" class="w-full lg:max-w-xs" />
         <BaseSelect v-model="universityId" label="University" :options="universityOptions" placeholder="All universities" class="w-full lg:max-w-xs" />
         <BaseSelect v-model="isActive" label="State" :options="activeFilterOptions" />
-        <BaseButton type="submit" variant="secondary"><Search class="h-4 w-4" aria-hidden="true" /> Search</BaseButton>
+        <IconButton :icon="Search" type="submit" size="md" label="Search faculties" />
       </form>
     </BaseCard>
 
@@ -231,11 +229,11 @@ const deleteDepartment = async (department) => {
           <StatusBadge :status="row.is_active ? 'active' : 'archived'" />
         </template>
         <template #cell-actions="{ row }">
-          <div v-if="canManage" class="flex items-center justify-end gap-3">
+          <div v-if="canManage" class="flex items-center justify-end gap-1">
             <IconButton :icon="Pencil" :href="`/faculties/${row.id}/edit`" :label="`Edit ${row.name}`" />
-            <button type="button" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary" @click="openDepartmentModal(row.id)">Add dept</button>
-            <button v-if="row.is_active" type="button" class="text-small font-semibold text-warning hover:underline" @click="archiveFaculty(row)">Archive</button>
-            <button v-else type="button" class="text-small font-semibold text-success hover:underline" @click="reactivateFaculty(row)">Reactivate</button>
+            <IconButton :icon="FolderPlus" :label="`Add a department to ${row.name}`" @click="openDepartmentModal(row.id)" />
+            <IconButton v-if="row.is_active" :icon="Archive" :label="`Archive ${row.name}`" @click="archiveFaculty(row)" />
+            <IconButton v-else :icon="ArchiveRestore" variant="success" :label="`Reactivate ${row.name}`" @click="reactivateFaculty(row)" />
             <IconButton :icon="Trash2" variant="danger" :label="`Delete ${row.name}`" @click="deleteFaculty(row)" />
           </div>
           <span v-else class="block text-right text-caption text-muted dark:text-dark-muted">Read only</span>
@@ -264,30 +262,10 @@ const deleteDepartment = async (department) => {
               <span class="text-small text-muted dark:text-dark-muted">{{ department.name }}</span>
               <StatusBadge :status="department.is_active ? 'active' : 'archived'" />
             </div>
-            <div v-if="canManage" class="flex gap-3">
-              <button
-                v-if="department.is_active"
-                type="button"
-                class="text-small font-semibold text-warning hover:underline"
-                @click="archiveDepartment(department)"
-              >
-                Archive
-              </button>
-              <button
-                v-else
-                type="button"
-                class="text-small font-semibold text-success hover:underline"
-                @click="reactivateDepartment(department)"
-              >
-                Reactivate
-              </button>
-              <button
-                type="button"
-                class="text-small font-semibold text-error hover:underline"
-                @click="deleteDepartment(department)"
-              >
-                Delete
-              </button>
+            <div v-if="canManage" class="flex gap-1">
+              <IconButton v-if="department.is_active" :icon="Archive" :label="`Archive ${department.name}`" @click="archiveDepartment(department)" />
+              <IconButton v-else :icon="ArchiveRestore" variant="success" :label="`Reactivate ${department.name}`" @click="reactivateDepartment(department)" />
+              <IconButton :icon="Trash2" variant="danger" :label="`Delete ${department.name}`" @click="deleteDepartment(department)" />
             </div>
             <span v-else class="text-caption text-muted dark:text-dark-muted">Read only</span>
           </li>

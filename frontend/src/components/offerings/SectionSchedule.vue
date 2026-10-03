@@ -1,8 +1,8 @@
 <script setup>
+import IconButton from '../IconButton.vue'
 import { computed } from 'vue'
 import { router, useForm } from '@inertiajs/vue3'
-import { X } from '@lucide/vue'
-import BaseButton from '../BaseButton.vue'
+import { Plus, X } from '@lucide/vue'
 import BaseInput from '../BaseInput.vue'
 import BaseSelect from '../BaseSelect.vue'
 
@@ -41,7 +41,7 @@ const remove = (entry) => router.delete(`/schedule-entries/${entry.id}`, { prese
       <BaseInput v-model="form.start_time" name="start_time" label="Start" type="time" :error="form.errors.start_time" />
       <BaseInput v-model="form.end_time" name="end_time" label="End" type="time" :error="form.errors.end_time" />
       <BaseSelect v-model="form.room_id" label="Room" :options="roomOptions" placeholder="Select a room" :error="form.errors.room_id" />
-      <BaseButton type="submit" size="md" :disabled="!form.room_id" :loading="form.processing">Add time</BaseButton>
+      <IconButton :icon="Plus" type="submit" size="md" variant="primary" label="Add time slot" :disabled="!form.room_id" :loading="form.processing" />
     </form>
   </div>
 </template>

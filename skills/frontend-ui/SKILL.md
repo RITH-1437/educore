@@ -59,7 +59,7 @@ Keep in `frontend/src/components` and reuse everywhere:
 | `BaseDropdown` / `BaseTooltip` / `BaseBadge` | Small interaction primitives |
 | `EmptyState` / `LoadingSpinner` / `ErrorAlert` | Status visuals |
 | `StatusBadge` | Status → color mapping (e.g. Paid/Pending) |
-| `IconButton` | Icon-only row/card action (Edit = `Pencil`, Delete = `Trash2` danger) with required label → aria-label + tooltip |
+| `IconButton` | The default for **every action** (icon-first; vocabulary and exceptions in `docs/branding/UI-COMPONENTS.md` §2): required label → aria-label + tooltip; variants default / primary / success / danger, sizes sm / md, `href` / `native` / `type="submit"` / `loading` |
 | `Pagination` | Page navigation |
 
 - Add components when a pattern repeats; do not create a component for a single

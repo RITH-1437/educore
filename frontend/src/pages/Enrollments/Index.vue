@@ -1,10 +1,9 @@
 <script setup>
-import ExportLink from '../../components/ExportLink.vue'
+import IconButton from '../../components/IconButton.vue'
 import { exportUrl } from '../../utils/exports'
 import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { Search, UserPlus } from '@lucide/vue'
-import BaseButton from '../../components/BaseButton.vue'
+import { CircleCheckBig, Download, Search, UserMinus, UserPlus } from '@lucide/vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseSelect from '../../components/BaseSelect.vue'
@@ -64,14 +63,14 @@ const columns = [
   <Head title="Enrollments - EduCore" />
   <div class="space-y-6">
     <PageHeader eyebrow="Academics" title="Enrollments" description="Course registrations. Every enrollment — admin or student — passes the same checks: active student, open registration, prerequisites, credit limit and seats.">
-      <template #actions><ExportLink :href="csvUrl" /></template>
+      <template #actions><IconButton :icon="Download" :href="csvUrl" native size="md" label="Export CSV" /></template>
     </PageHeader>
 
     <BaseCard v-if="canManage" title="Enroll a student" padding="lg">
       <form class="grid gap-4 lg:grid-cols-[2fr_3fr_auto] lg:items-end" @submit.prevent="enroll">
         <BaseSelect v-model="form.student_id" label="Student" :options="studentOptions" placeholder="Select an active student" :error="form.errors.student_id" />
         <BaseSelect v-model="form.section_id" label="Section" :options="sectionOptions" placeholder="Select an open section" :error="form.errors.section_id" />
-        <BaseButton type="submit" :loading="form.processing" :disabled="!form.student_id || !form.section_id"><UserPlus class="h-4 w-4" aria-hidden="true" /> Enroll</BaseButton>
+        <IconButton :icon="UserPlus" type="submit" size="md" variant="primary" label="Enroll student" :loading="form.processing" :disabled="!form.student_id || !form.section_id" />
       </form>
     </BaseCard>
 
@@ -80,7 +79,7 @@ const columns = [
         <BaseInput v-model="search" label="Search" placeholder="Student ID or name" />
         <BaseSelect v-model="semesterId" label="Semester" :options="semesterOptions" placeholder="All semesters" />
         <BaseSelect v-model="status" label="Status" :options="statusOptions" placeholder="All" />
-        <BaseButton type="submit" variant="secondary"><Search class="h-4 w-4" aria-hidden="true" /> Filter</BaseButton>
+        <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
       </form>
     </BaseCard>
 
@@ -94,8 +93,8 @@ const columns = [
       <template #cell-status="{ row }"><StatusBadge :status="row.status" /></template>
       <template #cell-actions="{ row }">
         <div v-if="canManage && ['pending', 'confirmed'].includes(row.status)" class="flex justify-end gap-4">
-          <button v-if="row.status === 'confirmed'" type="button" class="text-small font-semibold text-success hover:underline" @click="complete(row)">Complete</button>
-          <button type="button" class="text-small font-semibold text-error hover:underline dark:text-red-300" @click="drop(row)">Drop</button>
+          <IconButton v-if="row.status === 'confirmed'" :icon="CircleCheckBig" variant="success" label="Mark completed" @click="complete(row)" />
+          <IconButton :icon="UserMinus" variant="danger" label="Drop enrollment" @click="drop(row)" />
         </div>
       </template>
     </BaseTable>

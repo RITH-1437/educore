@@ -1,4 +1,6 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { CalendarCheck2, CalendarX2 } from '@lucide/vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -88,7 +90,7 @@ const toggleCancel = async () => {
           <span v-else>Not taken yet. Unmarked students are not counted.</span>
         </template>
         <template v-if="canRecord && session && !section.locked" #actions>
-          <BaseButton size="sm" variant="ghost" @click="toggleCancel">{{ session.status === 'cancelled' ? 'Restore class' : 'Cancel class' }}</BaseButton>
+          <IconButton :icon="session.status === 'cancelled' ? CalendarCheck2 : CalendarX2" :variant="session.status === 'cancelled' ? 'success' : 'danger'" :label="session.status === 'cancelled' ? 'Restore class' : 'Cancel class'" @click="toggleCancel" />
         </template>
 
         <EmptyState v-if="!roster.length" title="No students enrolled" description="Students appear here once they enroll in this section." />

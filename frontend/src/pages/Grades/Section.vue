@@ -1,4 +1,6 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { Calculator, Check, Lock, LockOpen, Send, Undo2 } from '@lucide/vue'
 import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -66,12 +68,12 @@ const errors = computed(() => page.props.errors?.grades)
   <div class="space-y-6">
     <PageHeader eyebrow="Grades & GPA" :title="`${section.course.code} · Section ${section.code}`" :description="`${section.course.name} · ${section.semester} · ${section.course.credits} credits`">
       <template #actions>
-        <BaseButton v-if="canGrade && counts.students" variant="secondary" :loading="form.processing" @click="compute">Compute drafts</BaseButton>
-        <BaseButton v-if="canGrade && counts.draft" @click="submit">Submit for approval</BaseButton>
-        <BaseButton v-if="canApprove && counts.submitted" @click="approve">Approve</BaseButton>
-        <BaseButton v-if="canApprove && counts.approved" variant="secondary" @click="finalize">Finalize</BaseButton>
-        <BaseButton v-if="canApprove && (counts.submitted || counts.approved)" variant="ghost" @click="sendBack">Return to draft</BaseButton>
-        <BaseButton v-if="canReopen && counts.finalized" variant="ghost" @click="openReopen">Reopen</BaseButton>
+        <IconButton v-if="canGrade && counts.students" :icon="Calculator" size="md" label="Compute drafts" :loading="form.processing" @click="compute" />
+        <IconButton v-if="canGrade && counts.draft" :icon="Send" size="md" variant="primary" label="Submit for approval" @click="submit" />
+        <IconButton v-if="canApprove && counts.submitted" :icon="Check" size="md" variant="success" label="Approve grades" @click="approve" />
+        <IconButton v-if="canApprove && counts.approved" :icon="Lock" size="md" label="Finalize grades" @click="finalize" />
+        <IconButton v-if="canApprove && (counts.submitted || counts.approved)" :icon="Undo2" size="md" variant="danger" label="Return to draft" @click="sendBack" />
+        <IconButton v-if="canReopen && counts.finalized" :icon="LockOpen" size="md" label="Reopen finalized grades" @click="openReopen" />
       </template>
     </PageHeader>
 

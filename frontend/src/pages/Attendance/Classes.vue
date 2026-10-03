@@ -1,7 +1,8 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { Award, ClipboardList, FileCheck, UserCheck } from '@lucide/vue'
 import { Head } from '@inertiajs/vue3'
 import BaseBadge from '../../components/BaseBadge.vue'
-import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import PageHeader from '../../components/PageHeader.vue'
@@ -28,11 +29,11 @@ defineProps({
           <BaseBadge :variant="section.role === 'primary' ? 'primary' : 'muted'" size="sm">{{ section.role }}</BaseBadge>
         </div>
         <p class="mt-3 text-caption text-muted dark:text-dark-muted">{{ section.semester }} · {{ section.students }} students</p>
-        <div class="mt-4 flex flex-wrap gap-2">
-          <BaseButton :href="`/attendance/sections/${section.id}`" size="sm">Take attendance</BaseButton>
-          <BaseButton :href="`/coursework/sections/${section.id}`" size="sm" variant="secondary">Assignments</BaseButton>
-          <BaseButton :href="`/exams/sections/${section.id}`" size="sm" variant="secondary">Exams</BaseButton>
-          <BaseButton :href="`/grades/sections/${section.id}`" size="sm" variant="secondary">Grades</BaseButton>
+        <div class="mt-4 flex flex-wrap gap-1">
+          <IconButton :icon="UserCheck" :href="`/attendance/sections/${section.id}`" variant="primary" label="Take attendance" />
+          <IconButton :icon="ClipboardList" :href="`/coursework/sections/${section.id}`" label="Assignments" />
+          <IconButton :icon="FileCheck" :href="`/exams/sections/${section.id}`" label="Exams" />
+          <IconButton :icon="Award" :href="`/grades/sections/${section.id}`" label="Grades" />
         </div>
       </BaseCard>
     </div>

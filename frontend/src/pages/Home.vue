@@ -1,9 +1,9 @@
 <script setup>
-import { Head, Link, usePage } from '@inertiajs/vue3'
+import IconButton from '../components/IconButton.vue'
+import { Head, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import { ArrowRight, LayoutDashboard } from '@lucide/vue'
 import BaseBadge from '../components/BaseBadge.vue'
-import BaseButton from '../components/BaseButton.vue'
 import BaseCard from '../components/BaseCard.vue'
 
 const user = computed(() => usePage().props.auth?.user ?? null)
@@ -26,7 +26,7 @@ const dashboardUrl = computed(() => user.value?.role?.slug === 'super-admin' ? '
           <p class="mt-1 text-small text-muted dark:text-dark-muted">Continue to your role-specific dashboard preview.</p>
           <BaseBadge class="mt-3" variant="success" dot>{{ user?.is_active ? 'Active account' : 'Inactive account' }}</BaseBadge>
         </div>
-        <Link :href="dashboardUrl"><BaseButton>Open dashboard <ArrowRight class="h-4 w-4" aria-hidden="true" /></BaseButton></Link>
+        <IconButton :icon="ArrowRight" :href="dashboardUrl" size="md" variant="primary" label="Open dashboard" />
       </div>
     </BaseCard>
   </div>

@@ -86,16 +86,17 @@ sequenceDiagram
 
 ## 4. UI
 
-- `components/ExportLink.vue` — a plain `<a>` (not an Inertia link, so the
-  browser downloads the file) styled like a small secondary button with a
-  download icon.
+- Export buttons are `IconButton`s with the `Download` icon and `native`
+  (a plain `<a>`, not an Inertia link, so the browser downloads the file);
+  the first release used a separate `ExportLink` component, folded into
+  `IconButton` by the icon-first sweep (2026-10-03).
 - `utils/exports.js` — `exportUrl(path, params)` builds the query string;
   nested `filters` become `filters[key]`.
-- Invoices, Enrollments and Audit logs: **Export CSV** in the page header,
-  using the *applied* filters (what the list shows, not unsubmitted input).
-- Analytics: a **CSV** link on each chart / table card for the selected
-  semester, plus **Finance CSV** and **Workload CSV** beside "Current
-  workload".
+- Invoices, Enrollments and Audit logs: an **Export CSV** icon in the page
+  header, using the *applied* filters (what the list shows, not unsubmitted
+  input).
+- Analytics: a download icon on each chart / table card for the selected
+  semester, plus finance and workload downloads beside "Current workload".
 
 ## 5. Tests
 

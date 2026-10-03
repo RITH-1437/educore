@@ -1,8 +1,8 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
 import { computed, ref, watch } from 'vue'
-import { Head, Link, router } from '@inertiajs/vue3'
-import { Pencil, Search, Trash2, UserPlus, X } from '@lucide/vue'
-import BaseButton from '../../components/BaseButton.vue'
+import { Head, router } from '@inertiajs/vue3'
+import { FunnelX, Pencil, Plus, Search, Trash2, X } from '@lucide/vue'
 import PageHeader from '../../components/PageHeader.vue'
 import { useConfirm } from '../../composables/useConfirm'
 import BaseCard from '../../components/BaseCard.vue'
@@ -76,7 +76,7 @@ const deleteUser = async (user) => {
   <Head title="Users & roles - EduCore" />
   <div class="space-y-6">
     <PageHeader eyebrow="Platform management" title="Users & roles" description="Manage platform accounts, access roles, and account status.">
-      <template #actions><BaseButton href="/users/create"><UserPlus class="h-4 w-4" aria-hidden="true" /> New user</BaseButton></template>
+      <template #actions><IconButton :icon="Plus" href="/users/create" size="md" variant="primary" label="New user" /></template>
     </PageHeader>
 
     <BaseCard padding="sm">
@@ -94,9 +94,9 @@ const deleteUser = async (user) => {
             <option v-for="r in roles" :key="r.slug || r.id" :value="r.slug">{{ r.name }}</option>
           </select>
         </div>
-        <div class="flex gap-2">
-          <BaseButton type="submit" variant="secondary"><Search class="h-4 w-4" aria-hidden="true" /> Search</BaseButton>
-          <BaseButton v-if="search || selectedRole" type="button" variant="ghost" @click="clearFilters">Clear</BaseButton>
+        <div class="flex gap-1">
+          <IconButton :icon="Search" type="submit" size="md" label="Search accounts" />
+          <IconButton v-if="search || selectedRole" :icon="FunnelX" size="md" label="Clear filters" @click="clearFilters" />
         </div>
       </form>
 
@@ -130,23 +130,8 @@ const deleteUser = async (user) => {
       <template #cell-created_at="{ row }"><span class="text-muted dark:text-dark-muted">{{ row.created_at ? new Date(row.created_at).toLocaleDateString() : '—' }}</span></template>
       <template #cell-actions="{ row }">
         <div class="flex items-center justify-end gap-1">
-          <Link
-            :href="`/users/${row.id}/edit`"
-            class="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary dark:text-dark-muted dark:hover:bg-dark-primary/15 dark:hover:text-dark-primary"
-            title="Edit user"
-            aria-label="Edit user"
-          >
-            <Pencil class="h-4 w-4" aria-hidden="true" />
-          </Link>
-          <button
-            type="button"
-            class="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted transition-colors hover:bg-error/10 hover:text-error focus-visible:outline-2 focus-visible:outline-error dark:text-dark-muted dark:hover:bg-error/20 dark:hover:text-red-400"
-            title="Delete user"
-            aria-label="Delete user"
-            @click="deleteUser(row)"
-          >
-            <Trash2 class="h-4 w-4" aria-hidden="true" />
-          </button>
+          <IconButton :icon="Pencil" :href="`/users/${row.id}/edit`" :label="`Edit ${row.name}`" />
+          <IconButton :icon="Trash2" variant="danger" :label="`Delete ${row.name}`" @click="deleteUser(row)" />
         </div>
       </template>
     </BaseTable>

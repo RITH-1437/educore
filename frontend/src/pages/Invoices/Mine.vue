@@ -1,7 +1,7 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
 import { Head } from '@inertiajs/vue3'
-import { AlertTriangle, Receipt, Wallet } from '@lucide/vue'
-import BaseButton from '../../components/BaseButton.vue'
+import { AlertTriangle, Eye, Receipt, Wallet } from '@lucide/vue'
 import BaseTable from '../../components/BaseTable.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import StatCard from '../../components/StatCard.vue'
@@ -44,7 +44,7 @@ const columns = [
       <template #cell-total="{ row }"><span class="tabular-nums">{{ money(row.total, row.currency) }}</span></template>
       <template #cell-balance="{ row }"><span class="font-semibold tabular-nums">{{ money(row.status === 'cancelled' ? 0 : row.balance, row.currency) }}</span></template>
       <template #cell-status="{ row }"><StatusBadge v-bind="invoiceBadge(row.status)" /></template>
-      <template #cell-actions="{ row }"><BaseButton :href="`/invoices/${row.id}`" size="sm" variant="secondary">View</BaseButton></template>
+      <template #cell-actions="{ row }"><div class="flex justify-end"><IconButton :icon="Eye" :href="`/invoices/${row.id}`" :label="`View ${row.invoice_number}`" /></div></template>
     </BaseTable>
   </div>
 </template>

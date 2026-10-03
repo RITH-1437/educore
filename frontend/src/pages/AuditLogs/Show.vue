@@ -1,7 +1,8 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { ArrowLeft } from '@lucide/vue'
 import { Head } from '@inertiajs/vue3'
 import { computed } from 'vue'
-import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import { actionLabel, show, when } from '../../utils/audit'
@@ -27,7 +28,7 @@ const rows = computed(() => {
   <Head :title="`Audit #${log.id} - EduCore`" />
   <div class="mx-auto max-w-4xl space-y-6">
     <PageHeader eyebrow="Audit log" :title="actionLabel(log.action)" :description="when(log.created_at)">
-      <template #actions><BaseButton href="/audit-logs" variant="secondary">Back</BaseButton></template>
+      <template #actions><IconButton :icon="ArrowLeft" href="/audit-logs" size="md" label="Back to audit logs" /></template>
     </PageHeader>
 
     <BaseCard padding="lg">

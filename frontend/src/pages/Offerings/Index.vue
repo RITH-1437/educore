@@ -1,7 +1,8 @@
 <script setup>
-import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3'
+import IconButton from '../../components/IconButton.vue'
+import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { Plus, Search } from '@lucide/vue'
+import { Eye, Plus, Search, Settings2 } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
@@ -57,7 +58,7 @@ const submit = () => form.post('/offerings', { preserveScroll: true, onSuccess: 
   <div class="space-y-6">
     <PageHeader eyebrow="Academics" title="Offerings & sections" description="Courses offered in a semester, split into sections with capacity and assigned lecturers. Rooms and weekly schedules arrive with the timetable.">
       <template v-if="canManage" #actions>
-        <BaseButton @click="form.reset(); form.clearErrors(); showCreate = true"><Plus class="h-4 w-4" aria-hidden="true" /> New offering</BaseButton>
+        <IconButton :icon="Plus" size="md" variant="primary" label="New offering" @click="form.reset(); form.clearErrors(); showCreate = true" />
       </template>
     </PageHeader>
 
@@ -66,7 +67,7 @@ const submit = () => form.post('/offerings', { preserveScroll: true, onSuccess: 
         <BaseInput v-model="search" label="Search" placeholder="Course code or name" />
         <BaseSelect v-model="semesterId" label="Semester" :options="semesterOptions" placeholder="All semesters" />
         <BaseSelect v-model="status" label="Status" :options="statusOptions" placeholder="All" />
-        <BaseButton type="submit" variant="secondary"><Search class="h-4 w-4" aria-hidden="true" /> Filter</BaseButton>
+        <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
       </form>
     </BaseCard>
 
@@ -88,7 +89,7 @@ const submit = () => form.post('/offerings', { preserveScroll: true, onSuccess: 
       <template #cell-total_capacity="{ row }"><span class="tabular-nums">{{ row.total_capacity ?? 0 }}</span></template>
       <template #cell-status="{ row }"><StatusBadge :status="row.status" /></template>
       <template #cell-actions="{ row }">
-        <Link :href="`/offerings/${row.id}`" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">{{ canManage ? 'Manage' : 'View' }}</Link>
+        <div class="flex justify-end"><IconButton :icon="canManage ? Settings2 : Eye" :href="`/offerings/${row.id}`" :label="canManage ? 'Manage offering' : 'View offering'" /></div>
       </template>
     </BaseTable>
 

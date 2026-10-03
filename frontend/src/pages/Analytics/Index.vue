@@ -1,5 +1,6 @@
 <script setup>
-import ExportLink from '../../components/ExportLink.vue'
+import IconButton from '../../components/IconButton.vue'
+import { Download, FileSpreadsheet } from '@lucide/vue'
 import { exportUrl } from '../../utils/exports'
 import { Head, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
@@ -70,34 +71,34 @@ const label = (s) => s.replaceAll('_', ' ').replace(/^./, (c) => c.toUpperCase()
 
       <div class="grid gap-6 xl:grid-cols-2">
         <BaseCard title="Enrollment by program" padding="lg">
-          <template #actions><ExportLink :href="csv('enrollment_by_program')" label="CSV" aria-label="Download enrollment by program as CSV" /></template>
+          <template #actions><IconButton :icon="Download" :href="csv('enrollment_by_program')" native label="Download enrollment by program as CSV" /></template>
           <EmptyState v-if="!enrollment.by_program.length" title="No enrollments" description="Students' registrations in this semester appear here." />
           <BarChart v-else horizontal label="Enrollments by program" value-label="Enrollments" :labels="enrollment.by_program.map((p) => p.code)" :details="enrollment.by_program.map((p) => `${p.name} (${p.students} students)`)" :values="enrollment.by_program.map((p) => p.enrollments)" />
         </BaseCard>
 
         <BaseCard title="Attendance by course" padding="lg">
-          <template #actions><ExportLink :href="csv('attendance_by_course')" label="CSV" aria-label="Download attendance by course as CSV" /></template>
+          <template #actions><IconButton :icon="Download" :href="csv('attendance_by_course')" native label="Download attendance by course as CSV" /></template>
           <template #description>Lowest first — courses under 75% need attention.</template>
           <EmptyState v-if="!academic.attendance_by_course.length" title="No attendance yet" description="Rates appear once sessions are recorded." />
           <BarChart v-else horizontal label="Attendance rate by course" value-label="Attendance" suffix="%" :max="100" :labels="academic.attendance_by_course.map((c) => c.code)" :details="academic.attendance_by_course.map((c) => c.name)" :values="academic.attendance_by_course.map((c) => c.rate)" />
         </BaseCard>
 
         <BaseCard title="Grade distribution" padding="lg">
-          <template #actions><ExportLink :href="csv('grade_distribution')" label="CSV" aria-label="Download grade distribution as CSV" /></template>
+          <template #actions><IconButton :icon="Download" :href="csv('grade_distribution')" native label="Download grade distribution as CSV" /></template>
           <template #description>Approved course grades on the active scale.</template>
           <EmptyState v-if="!hasGrades" title="No approved grades" description="The distribution appears once section grades are approved." />
           <BarChart v-else label="Grades by letter" value-label="Students" :labels="academic.grade_distribution.map((g) => g.grade)" :values="academic.grade_distribution.map((g) => g.total)" />
         </BaseCard>
 
         <BaseCard title="Semester GPA distribution" padding="lg">
-          <template #actions><ExportLink :href="csv('gpa_distribution')" label="CSV" aria-label="Download semester gpa distribution as CSV" /></template>
+          <template #actions><IconButton :icon="Download" :href="csv('gpa_distribution')" native label="Download semester GPA distribution as CSV" /></template>
           <EmptyState v-if="!hasGpa" title="No GPAs yet" description="Semester GPAs are computed when grades are approved." />
           <BarChart v-else label="Students by semester GPA band" value-label="Students" :labels="academic.gpa_distribution.map((g) => g.band)" :values="academic.gpa_distribution.map((g) => g.total)" />
         </BaseCard>
       </div>
 
       <BaseCard v-if="academic.courses.length" title="Results by course" padding="lg">
-        <template #actions><ExportLink :href="csv('course_results')" label="CSV" aria-label="Download results by course as CSV" /></template>
+        <template #actions><IconButton :icon="Download" :href="csv('course_results')" native label="Download results by course as CSV" /></template>
         <div class="-mx-2 overflow-x-auto">
           <table class="min-w-full text-small">
             <caption class="sr-only">Results by course</caption>
@@ -129,8 +130,8 @@ const label = (s) => s.replaceAll('_', ' ').replace(/^./, (c) => c.toUpperCase()
       <div class="flex flex-wrap items-center justify-between gap-3">
         <h2 id="workload-heading" class="text-h4 font-semibold text-ink dark:text-dark-ink">Current workload</h2>
         <div class="flex flex-wrap gap-2">
-          <ExportLink :href="csv('finance')" label="Finance CSV" />
-          <ExportLink :href="csv('workload')" label="Workload CSV" />
+          <IconButton :icon="Download" :href="csv('finance')" native size="md" label="Download finance as CSV" />
+          <IconButton :icon="FileSpreadsheet" :href="csv('workload')" native size="md" label="Download workload as CSV" />
         </div>
       </div>
 

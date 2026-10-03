@@ -1,4 +1,6 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { ArrowLeft } from '@lucide/vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -36,7 +38,7 @@ const submit = () => form.transform((data) => ({ ...data, faculty_id: isFacultyA
         <h1 class="text-h1 font-display font-semibold text-ink dark:text-dark-ink">New user</h1>
         <p class="mt-2 text-small text-muted dark:text-dark-muted">Create a portal account and assign its access role.</p>
       </div>
-      <Link href="/users" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">Back to users</Link>
+      <IconButton :icon="ArrowLeft" href="/users" size="md" label="Back to users" />
     </header>
 
     <BaseCard padding="lg">

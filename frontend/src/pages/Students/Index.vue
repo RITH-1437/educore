@@ -1,7 +1,8 @@
 <script setup>
-import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3'
+import IconButton from '../../components/IconButton.vue'
+import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { Search, UserPlus } from '@lucide/vue'
+import { FunnelX, Plus, Search, Settings2 } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
@@ -95,7 +96,7 @@ const submitCreate = () =>
   <div class="space-y-6">
     <PageHeader eyebrow="People" title="Students" description="Student profiles, their login account, status and program. Enrollments and grades arrive with their modules.">
       <template v-if="canManage" #actions>
-        <BaseButton @click="openCreate"><UserPlus class="h-4 w-4" aria-hidden="true" /> New student</BaseButton>
+        <IconButton :icon="Plus" size="md" variant="primary" label="New student" @click="openCreate" />
       </template>
     </PageHeader>
 
@@ -106,8 +107,8 @@ const submitCreate = () =>
         <BaseSelect v-model="programId" label="Program" :options="programOptions" placeholder="All programs" />
         <BaseSelect v-model="status" label="Status" :options="statusOptions" placeholder="All" />
         <div class="flex gap-2">
-          <BaseButton type="submit" variant="secondary"><Search class="h-4 w-4" aria-hidden="true" /> Filter</BaseButton>
-          <BaseButton v-if="hasFilters" variant="ghost" @click="clearFilters">Clear</BaseButton>
+          <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
+          <IconButton v-if="hasFilters" :icon="FunnelX" size="md" label="Clear filters" @click="clearFilters" />
         </div>
       </form>
     </BaseCard>
@@ -120,7 +121,7 @@ const submitCreate = () =>
       :empty-description="hasFilters ? 'Try different filters or clear them.' : 'Add the first student and their login account.'"
     >
       <template #empty-action>
-        <BaseButton v-if="!hasFilters && canManage" @click="openCreate">+ New student</BaseButton>
+        <IconButton v-if="!hasFilters && canManage" :icon="Plus" size="md" variant="primary" label="New student" @click="openCreate" />
       </template>
       <template #cell-student_number="{ row }"><span class="font-mono text-small">{{ row.student_number }}</span></template>
       <template #cell-name="{ row }">
@@ -134,7 +135,7 @@ const submitCreate = () =>
       <template #cell-enrollment_date="{ row }"><span class="whitespace-nowrap text-muted dark:text-dark-muted">{{ row.enrollment_date ?? '—' }}</span></template>
       <template #cell-status="{ row }"><StatusBadge :status="row.status" /></template>
       <template #cell-actions="{ row }">
-        <Link v-if="canManage" :href="`/students/${row.id}/edit`" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">Manage</Link>
+        <div v-if="canManage" class="flex justify-end"><IconButton :icon="Settings2" :href="`/students/${row.id}/edit`" :label="`Manage ${row.full_name}`" /></div>
         <span v-else class="block text-right text-caption text-muted dark:text-dark-muted">Read only</span>
       </template>
     </BaseTable>

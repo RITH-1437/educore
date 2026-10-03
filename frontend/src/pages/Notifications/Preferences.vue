@@ -1,4 +1,6 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { BellRing } from '@lucide/vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
@@ -67,7 +69,7 @@ const toggleClass = 'mt-1 size-4 rounded border-border-default text-primary focu
       </BaseCard>
 
       <div class="flex flex-wrap justify-between gap-3">
-        <BaseButton variant="secondary" :disabled="form.isDirty" @click="sendTest">Send me a test</BaseButton>
+        <IconButton :icon="BellRing" size="md" label="Send me a test notification" :disabled="form.isDirty" @click="sendTest" />
         <BaseButton type="submit" :loading="form.processing" :disabled="!form.isDirty">Save settings</BaseButton>
       </div>
     </form>

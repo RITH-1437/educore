@@ -478,3 +478,9 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` Analytics KPI cards follow the dashboard overview (2026-10-03): no
   icons, rows of four, one detail line each, linked to their lists
   (`docs/27_Analytics-and-Reporting-Report.md` §3, UI-COMPONENTS §9).
+- `[Done]` Icon-first actions (2026-10-03): every action across the app is an
+  `IconButton` (add, edit, delete, archive / restore, manage, view, back,
+  filter / clear, export, workflow steps such as approve, finalize, generate),
+  with a required label as tooltip and accessible name; words remain only on
+  form / dialog submits, choice controls, navigation and data links.
+  Vocabulary and exceptions: `docs/branding/UI-COMPONENTS.md` §2.

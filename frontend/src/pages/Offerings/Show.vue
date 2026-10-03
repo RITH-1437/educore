@@ -1,4 +1,6 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { ArrowLeft, Plus, Trash2 } from '@lucide/vue'
 import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -46,7 +48,7 @@ const destroy = async () => {
   <div class="space-y-6">
     <PageHeader eyebrow="Offerings & sections" :title="`${offering.course?.code} — ${offering.course?.name}`" :description="`${offering.semester?.academic_year?.code ?? ''} · ${offering.semester?.name} · ${offering.course?.credits} credits`">
       <template #actions>
-        <BaseButton href="/offerings" variant="secondary">Back to offerings</BaseButton>
+        <IconButton :icon="ArrowLeft" href="/offerings" size="md" label="Back to offerings" />
       </template>
     </PageHeader>
 
@@ -64,7 +66,7 @@ const destroy = async () => {
         <BaseButton type="submit" :loading="details.processing">Save</BaseButton>
       </form>
       <div class="mt-4">
-        <BaseButton size="sm" variant="ghost" class="text-error dark:text-red-300" @click="destroy">Delete offering</BaseButton>
+        <IconButton :icon="Trash2" variant="danger" label="Delete offering" @click="destroy" />
       </div>
     </BaseCard>
 
@@ -90,7 +92,7 @@ const destroy = async () => {
           <BaseInput v-model="section.code" name="section_code" label="Code" :error="section.errors.code" required />
           <BaseInput v-model="section.name" name="section_name" label="Name" placeholder="Optional, e.g. Morning" :error="section.errors.name" />
           <BaseInput v-model="section.capacity" name="section_capacity" label="Capacity" type="number" min="1" :error="section.errors.capacity" required />
-          <BaseButton type="submit" :loading="section.processing">Add section</BaseButton>
+          <IconButton :icon="Plus" type="submit" size="md" variant="primary" label="Add section" :loading="section.processing" />
         </form>
       </BaseCard>
     </section>

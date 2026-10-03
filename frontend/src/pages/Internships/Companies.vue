@@ -1,5 +1,5 @@
 <script setup>
-import { Pencil } from '@lucide/vue'
+import { Briefcase, Pencil, Plus } from '@lucide/vue'
 import IconButton from '../../components/IconButton.vue'
 import { Head, useForm } from '@inertiajs/vue3'
 import { ref } from 'vue'
@@ -47,8 +47,8 @@ const columns = [
   <div class="space-y-6">
     <PageHeader eyebrow="Operations" title="Internship companies" description="Host companies students can choose when applying.">
       <template #actions>
-        <BaseButton href="/internships" variant="secondary">Internships</BaseButton>
-        <BaseButton v-if="canManage" @click="open()">Add company</BaseButton>
+        <IconButton :icon="Briefcase" href="/internships" size="md" label="Internships" />
+        <IconButton v-if="canManage" :icon="Plus" size="md" variant="primary" label="Add company" @click="open()" />
       </template>
     </PageHeader>
 

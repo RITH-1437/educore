@@ -1,7 +1,8 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { SquarePen } from '@lucide/vue'
 import { Head } from '@inertiajs/vue3'
 import BaseBadge from '../../components/BaseBadge.vue'
-import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import PageHeader from '../../components/PageHeader.vue'
@@ -19,7 +20,7 @@ defineProps({
   <div class="mx-auto max-w-3xl space-y-6">
     <PageHeader eyebrow="Communication" title="Announcements" description="News addressed to you, your program, department, faculty, classes and courses.">
       <template v-if="canManage" #actions>
-        <BaseButton href="/announcements/manage">Write an announcement</BaseButton>
+        <IconButton :icon="SquarePen" href="/announcements/manage" size="md" variant="primary" label="Write an announcement" />
       </template>
     </PageHeader>
 

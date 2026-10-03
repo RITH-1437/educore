@@ -21,7 +21,8 @@ Reusable primitives live under `frontend/src/components` (see
 
 | Component | Purpose |
 |---|---|
-| `BaseButton` | All button variants |
+| `BaseButton` | Text buttons: form submits, dialog footers (see §2) |
+| `IconButton` | Icon-only actions — the default for every action (see §2 "Icon-first actions") |
 | `BaseInput` / `BaseSelect` / `BaseTextarea` | Form primitives with label + error slot |
 | `BaseTable` | Data tables: slots, sorting, pagination footer |
 | `BaseModal` | Modal scaffold (`v-model` open state) |
@@ -58,6 +59,50 @@ Variants (see token values in `DESIGN-TOKENS.md`):
 
 **States:** disabled → opacity `.5`, no pointer; loading → spinner replaces/joins
 label, button disabled.
+
+### Icon-first actions (2026-10-03)
+
+EduCore shows **actions as icons wherever an icon reads clearly**
+(`components/IconButton.vue`). The `label` is required: it is the accessible
+name and the tooltip, and names the object (`Archive CS101`, `Approve
+grades`), so the action never depends on recognising the icon.
+
+| Variant | Use | Look |
+|---|---|---|
+| `default` | most actions (edit, view, archive, filter, export…) | muted icon, `primary` on hover |
+| `primary` | the page's main create action (`Plus`) and add-to-list submits | filled `primary`, white icon |
+| `success` | positive steps: approve, publish, complete, reactivate / restore | muted, `success` on hover |
+| `danger` | destructive: delete, remove, reject, revoke, drop, reverse, cancel | muted, `error` on hover |
+
+Sizes: `sm` 32px in rows, cards and forms · `md` 40px in page headers and
+filter bars (matches input height). Props: `href` (Inertia link), `native`
+(plain `<a>` for file downloads and CSV exports), `type="submit"`, `loading`
+(spinner, disabled), `disabled`, `pressed` (view toggles).
+
+Icon vocabulary — reuse, do not invent per page:
+
+| Action | Icon | Action | Icon |
+|---|---|---|---|
+| New / add (primary) | `Plus` | Edit | `Pencil` |
+| Delete / remove | `Trash2` | View / open record | `Eye` |
+| Manage (open a management page) | `Settings2` | Back | `ArrowLeft` |
+| Go to (card "view all") | `ArrowRight` | Archive / restore | `Archive` / `ArchiveRestore` |
+| Activate / start · complete | `CirclePlay` / `Play` · `CircleCheckBig` | Close (semester) | `CircleStop` |
+| Approve · reject | `Check` · `X` | Submit / send · publish | `Send` |
+| Publish / release (visibility) · hide | `Eye` · `EyeOff` | Return to draft · withdraw · reverse | `Undo2` |
+| Finalize · reopen | `Lock` · `LockOpen` | Revoke · cancel record | `Ban` |
+| Apply filters / search | `Search` | Clear filters | `FunnelX` |
+| Download / export CSV | `Download` | Make current | `Star` |
+| Enroll / assign person · drop | `UserPlus` · `UserMinus` | Deactivate · reactivate person | `UserX` · `UserCheck` |
+| Module links | the sidebar icon of that module (Attendance `UserCheck`, Assignments `ClipboardList`, Exams `FileCheck`, Grades `Award`, Grading scale `Scale`, Faculties `School`, Internships `Briefcase`, Announcements `Megaphone`) | | |
+
+**Words stay** only where the words are the content: the submit button that
+commits a form or dialog (Save, Create, Record payment, Change status…),
+dialog Cancel / confirm buttons, the shared `EmptyState` / `ErrorState`
+calls to action, choice controls (attendance marks, segmented filters, filter
+chips), navigation (sidebar, breadcrumbs, menus, pagination), links whose
+text is data (file names, codes, URLs), and the public landing and sign-in
+pages.
 
 ```mermaid
 flowchart LR
@@ -123,7 +168,7 @@ Tables are the backbone of this administration platform.
 | Empty state | `EmptyState` component with message + CTA |
 | Loading | skeleton rows or spinner overlay |
 
-- **Actions column:** rightmost, icon buttons, `gap-2`. Use `components/IconButton.vue` for Edit (`Pencil`) and Delete / Remove (`Trash2`, `variant="danger"`): 32px target, muted at rest, primary (or error) on hover, a required `label` that is both the accessible name and the tooltip. Other row actions (Archive, Activate…) stay as text links. Page-header actions keep text labels.
+- **Actions column:** rightmost, icon buttons only (`components/IconButton.vue`, §2 "Icon-first actions"), `gap-1`: Edit (`Pencil`), Delete / Remove (`Trash2`, `danger`), Archive / Reactivate, Activate, View, Manage… — 32px target, muted at rest, coloured on hover, a required `label` that is both the accessible name and the tooltip. Page-header and filter-bar actions are icon buttons too (`size="md"`).
 - **Sorting:** header toggles `sort_by`/`sort_dir` (see `skills/api/SKILL.md`).
 - **Filtering/search:** toolbar above the table; consistent across all tables.
 - **Pagination:** `Pagination` footer; shared `useDataTable` composable.

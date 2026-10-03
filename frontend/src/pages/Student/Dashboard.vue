@@ -1,7 +1,8 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3'
+import IconButton from '../../components/IconButton.vue'
+import { Head } from '@inertiajs/vue3'
 import { computed } from 'vue'
-import { Award, CalendarClock, GraduationCap, UserCheck } from '@lucide/vue'
+import { ArrowRight, Award, CalendarClock, GraduationCap, UserCheck } from '@lucide/vue'
 import BaseBadge from '../../components/BaseBadge.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import EmptyState from '../../components/EmptyState.vue'
@@ -18,7 +19,6 @@ const props = defineProps({
 const d = computed(() => props.dashboard)
 const dueLabel = (iso) => new Date(iso).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
 const rateTone = (rate) => (rate === null ? 'text-muted dark:text-dark-muted' : rate < 75 ? 'text-error' : 'text-ink dark:text-dark-ink')
-const linkClass = 'text-small font-medium text-primary hover:underline underline-offset-2 focus-visible:outline-2 focus-visible:outline-primary dark:text-dark-primary'
 </script>
 
 <template>
@@ -40,6 +40,7 @@ const linkClass = 'text-small font-medium text-primary hover:underline underline
     <div class="grid gap-6 lg:grid-cols-2">
       <!-- Today's classes -->
       <BaseCard title="Today's classes">
+        <template #actions><IconButton :icon="ArrowRight" href="/timetable" label="Open my timetable" /></template>
         <EmptyState v-if="!d.today.length" title="No classes today" description="Enjoy the break — your full week is in My timetable." />
         <ul v-else class="divide-y divide-border-default dark:divide-dark-border">
           <li v-for="entry in d.today" :key="entry.id" class="flex items-start justify-between gap-3 py-3">
@@ -50,11 +51,11 @@ const linkClass = 'text-small font-medium text-primary hover:underline underline
             <span class="shrink-0 text-small font-semibold tabular-nums text-ink dark:text-dark-ink">{{ entry.start_time }}–{{ entry.end_time }}</span>
           </li>
         </ul>
-        <Link href="/timetable" :class="['mt-3 inline-block', linkClass]">My timetable</Link>
       </BaseCard>
 
       <!-- Upcoming assignments -->
       <BaseCard title="Assignments due">
+        <template #actions><IconButton :icon="ArrowRight" href="/my-assignments" label="Open my assignments" /></template>
         <EmptyState v-if="!d.assignments.length" title="Nothing due" description="Published assignments you still need to submit appear here." />
         <ul v-else class="divide-y divide-border-default dark:divide-dark-border">
           <li v-for="assignment in d.assignments" :key="assignment.id" class="flex items-start justify-between gap-3 py-3">
@@ -65,11 +66,11 @@ const linkClass = 'text-small font-medium text-primary hover:underline underline
             <BaseBadge variant="warning" size="sm">Due {{ dueLabel(assignment.due_at) }}</BaseBadge>
           </li>
         </ul>
-        <Link href="/my-assignments" :class="['mt-3 inline-block', linkClass]">My assignments</Link>
       </BaseCard>
 
       <!-- Upcoming exams -->
       <BaseCard title="Upcoming exams">
+        <template #actions><IconButton :icon="ArrowRight" href="/my-exams" label="Open my exams" /></template>
         <EmptyState v-if="!d.exams.length" title="No upcoming exams" description="Scheduled exams appear here." />
         <ul v-else class="divide-y divide-border-default dark:divide-dark-border">
           <li v-for="exam in d.exams" :key="exam.id" class="flex items-start justify-between gap-3 py-3">
@@ -80,11 +81,11 @@ const linkClass = 'text-small font-medium text-primary hover:underline underline
             <BaseBadge variant="muted" size="sm">{{ typeLabel(exam.exam_type) }}</BaseBadge>
           </li>
         </ul>
-        <Link href="/my-exams" :class="['mt-3 inline-block', linkClass]">My exams</Link>
       </BaseCard>
 
       <!-- Recent grades -->
       <BaseCard title="Recent grades">
+        <template #actions><IconButton :icon="ArrowRight" href="/my-grades" label="Open grades and GPA" /></template>
         <EmptyState v-if="!d.grades.length" title="No grades yet" description="Approved course grades appear here." />
         <ul v-else class="divide-y divide-border-default dark:divide-dark-border">
           <li v-for="grade in d.grades" :key="grade.id" class="flex items-start justify-between gap-3 py-3">
@@ -95,12 +96,12 @@ const linkClass = 'text-small font-medium text-primary hover:underline underline
             <span class="shrink-0 text-small font-semibold" :class="grade.grade_point > 0 ? 'text-ink dark:text-dark-ink' : 'text-error'">{{ grade.letter_grade }} <span class="font-normal text-muted dark:text-dark-muted">({{ formatGpa(grade.grade_point) }})</span></span>
           </li>
         </ul>
-        <Link href="/my-grades" :class="['mt-3 inline-block', linkClass]">Grades &amp; GPA</Link>
       </BaseCard>
     </div>
 
     <!-- Latest announcements (module 9.19) -->
     <BaseCard title="Announcements">
+      <template #actions><IconButton :icon="ArrowRight" href="/announcements" label="All announcements" /></template>
       <EmptyState v-if="!d.announcements.length" title="No announcements" description="News for your program, classes and courses appears here." />
       <ul v-else class="divide-y divide-border-default dark:divide-dark-border">
         <li v-for="item in d.announcements" :key="item.id" class="py-3">
@@ -108,7 +109,6 @@ const linkClass = 'text-small font-medium text-primary hover:underline underline
           <p class="text-caption text-muted dark:text-dark-muted">{{ item.audience }} · {{ dueLabel(item.published_at) }}</p>
         </li>
       </ul>
-      <Link href="/announcements" :class="['mt-3 inline-block', linkClass]">All announcements</Link>
     </BaseCard>
 
     <!-- Attendance by course -->

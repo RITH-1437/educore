@@ -1,5 +1,7 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3'
+import IconButton from '../../components/IconButton.vue'
+import { ArrowLeft } from '@lucide/vue'
+import { Head, useForm } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
@@ -46,7 +48,7 @@ const submit = () => form.put(`/programs/${props.program.id}`, { preserveScroll:
   <div class="mx-auto max-w-3xl space-y-6">
     <PageHeader eyebrow="Academic structure" :title="program.name" description="Changing the department moves the program; students and curriculum keep pointing at the same program.">
       <template #actions>
-        <Link href="/programs" class="text-small font-semibold text-primary hover:underline dark:text-dark-primary">Back to programs</Link>
+        <IconButton :icon="ArrowLeft" href="/programs" size="md" label="Back to programs" />
       </template>
     </PageHeader>
 

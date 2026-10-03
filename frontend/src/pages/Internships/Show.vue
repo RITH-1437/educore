@@ -1,4 +1,6 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { ArrowLeft, Ban, Check, CircleCheckBig, Pencil, Play, SearchCheck, Send, Undo2, X } from '@lucide/vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -62,21 +64,21 @@ const decide = () => {
   <div class="mx-auto max-w-5xl space-y-6">
     <PageHeader eyebrow="Internship" :title="internship.position_title" :description="`${internship.company.name} · ${internship.student.full_name} (${internship.student.student_number})`">
       <template #actions>
-        <BaseButton :href="isOwner ? '/my-internships' : '/internships'" variant="secondary">Back</BaseButton>
-        <BaseButton v-if="editable" variant="secondary" @click="showEdit = true">Edit</BaseButton>
+        <IconButton :icon="ArrowLeft" :href="isOwner ? '/my-internships' : '/internships'" size="md" label="Back to internships" />
+        <IconButton v-if="editable" :icon="Pencil" size="md" label="Edit application" @click="showEdit = true" />
         <!-- Student -->
         <template v-if="isOwner">
-          <BaseButton v-if="status === 'draft'" @click="ask('submit', 'Submit application?', 'The university office will review it. You can no longer edit it after submitting.', 'Submit')">Submit for review</BaseButton>
-          <BaseButton v-if="['draft', 'submitted', 'under_review'].includes(status)" variant="ghost" @click="ask('cancel', 'Withdraw application?', 'You can start a new application afterwards.', 'Withdraw', true)">Withdraw</BaseButton>
+          <IconButton v-if="status === 'draft'" :icon="Send" size="md" variant="primary" label="Submit for review" @click="ask('submit', 'Submit application?', 'The university office will review it. You can no longer edit it after submitting.', 'Submit')" />
+          <IconButton v-if="['draft', 'submitted', 'under_review'].includes(status)" :icon="Undo2" size="md" variant="danger" label="Withdraw application" @click="ask('cancel', 'Withdraw application?', 'You can start a new application afterwards.', 'Withdraw', true)" />
         </template>
         <!-- Staff -->
         <template v-if="canProcess">
-          <BaseButton v-if="status === 'submitted'" variant="secondary" @click="go('review')">Start review</BaseButton>
-          <BaseButton v-if="['submitted', 'under_review'].includes(status)" @click="openDecision('approve')">Approve</BaseButton>
-          <BaseButton v-if="['submitted', 'under_review'].includes(status)" variant="ghost" @click="openDecision('reject')">Reject</BaseButton>
-          <BaseButton v-if="status === 'approved'" @click="ask('start', 'Mark as started?', 'The student can then submit the final report.', 'Mark started')">Mark started</BaseButton>
-          <BaseButton v-if="status === 'in_progress'" @click="openDecision('complete')">Mark completed</BaseButton>
-          <BaseButton v-if="['approved', 'in_progress'].includes(status)" variant="ghost" @click="openDecision('cancel')">Cancel</BaseButton>
+          <IconButton v-if="status === 'submitted'" :icon="SearchCheck" size="md" label="Start review" @click="go('review')" />
+          <IconButton v-if="['submitted', 'under_review'].includes(status)" :icon="Check" size="md" variant="success" label="Approve internship" @click="openDecision('approve')" />
+          <IconButton v-if="['submitted', 'under_review'].includes(status)" :icon="X" size="md" variant="danger" label="Reject internship" @click="openDecision('reject')" />
+          <IconButton v-if="status === 'approved'" :icon="Play" size="md" variant="success" label="Mark started" @click="ask('start', 'Mark as started?', 'The student can then submit the final report.', 'Mark started')" />
+          <IconButton v-if="status === 'in_progress'" :icon="CircleCheckBig" size="md" variant="success" label="Mark completed" @click="openDecision('complete')" />
+          <IconButton v-if="['approved', 'in_progress'].includes(status)" :icon="Ban" size="md" variant="danger" label="Cancel internship" @click="openDecision('cancel')" />
         </template>
       </template>
     </PageHeader>

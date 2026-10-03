@@ -1,5 +1,5 @@
 <script setup>
-import { Pencil, Trash2 } from '@lucide/vue'
+import { ClipboardCheck, Eye, EyeOff, Pencil, Plus, Trash2 } from '@lucide/vue'
 import IconButton from '../../components/IconButton.vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
@@ -96,7 +96,7 @@ const badge = (status) => ({ submitted: 'active', late: 'pending', graded: 'comp
   <div class="space-y-6">
     <PageHeader eyebrow="Coursework" :title="`${section.course.code} · Section ${section.code}`" :description="`${section.course.name} · ${section.semester}`">
       <template v-if="canManage" #actions>
-        <BaseButton @click="openCreate">New assignment</BaseButton>
+        <IconButton :icon="Plus" size="md" variant="primary" label="New assignment" @click="openCreate" />
       </template>
     </PageHeader>
 
@@ -116,10 +116,10 @@ const badge = (status) => ({ submitted: 'active', late: 'pending', graded: 'comp
             Due {{ formatDue(assignment.due_at) }} · {{ assignment.max_score }} points
           </p>
         </div>
-        <div v-if="canManage" class="flex flex-wrap gap-2">
+        <div v-if="canManage" class="flex flex-wrap gap-1">
           <IconButton :icon="Pencil" :label="`Edit ${assignment.title}`" @click="openEdit(assignment)" />
-          <BaseButton v-if="!assignment.is_published" size="sm" @click="publish(assignment, true)">Publish</BaseButton>
-          <BaseButton v-else-if="!rows(assignment).length" size="sm" variant="ghost" @click="publish(assignment, false)">Unpublish</BaseButton>
+          <IconButton v-if="!assignment.is_published" :icon="Eye" variant="success" :label="`Publish ${assignment.title}`" @click="publish(assignment, true)" />
+          <IconButton v-else-if="!rows(assignment).length" :icon="EyeOff" :label="`Unpublish ${assignment.title}`" @click="publish(assignment, false)" />
           <IconButton v-if="!rows(assignment).length" :icon="Trash2" variant="danger" :label="`Delete ${assignment.title}`" @click="remove(assignment)" />
         </div>
       </div>
@@ -156,7 +156,7 @@ const badge = (status) => ({ submitted: 'active', late: 'pending', graded: 'comp
             <div class="flex items-center gap-2">
               <StatusBadge :status="badge(row.status)" :label="label(row.status)" />
               <span v-if="row.score !== null" class="text-small font-semibold tabular-nums text-ink dark:text-dark-ink">{{ row.score }} / {{ assignment.max_score }}</span>
-              <BaseButton v-if="canManage" size="sm" variant="secondary" @click="startGrade({ ...row, max: assignment.max_score })">{{ row.score === null ? 'Grade' : 'Regrade' }}</BaseButton>
+              <IconButton v-if="canManage" :icon="row.score === null ? ClipboardCheck : Pencil" :label="`${row.score === null ? 'Grade' : 'Regrade'} ${row.student?.full_name ?? 'submission'}`" @click="startGrade({ ...row, max: assignment.max_score })" />
             </div>
           </li>
         </ul>

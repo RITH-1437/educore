@@ -1,4 +1,6 @@
 <script setup>
+import IconButton from '../../components/IconButton.vue'
+import { ArrowLeft, Ban, Pencil, Undo2 } from '@lucide/vue'
 import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -53,9 +55,9 @@ const cancelInvoice = async () => {
   <div class="mx-auto max-w-5xl space-y-6">
     <PageHeader eyebrow="Invoice" :title="invoice.invoice_number" :description="`${invoice.title} · ${invoice.student.full_name} (${invoice.student.student_number})`">
       <template #actions>
-        <BaseButton :href="canManage ? '/invoices' : '/my-invoices'" variant="secondary">Back</BaseButton>
-        <BaseButton v-if="editable" :href="`/invoices/${invoice.id}/edit`" variant="secondary">Edit</BaseButton>
-        <BaseButton v-if="canManage && !cancelled && invoice.amount_paid === 0" variant="ghost" @click="cancelInvoice">Cancel invoice</BaseButton>
+        <IconButton :icon="ArrowLeft" :href="canManage ? '/invoices' : '/my-invoices'" size="md" label="Back to invoices" />
+        <IconButton v-if="editable" :icon="Pencil" :href="`/invoices/${invoice.id}/edit`" size="md" label="Edit invoice" />
+        <IconButton v-if="canManage && !cancelled && invoice.amount_paid === 0" :icon="Ban" size="md" variant="danger" label="Cancel invoice" @click="cancelInvoice" />
       </template>
     </PageHeader>
 
@@ -114,7 +116,7 @@ const cancelInvoice = async () => {
                 <span v-if="row.reference">Ref {{ row.reference }}</span><span v-if="row.notes"> · {{ row.notes }}</span><span v-if="row.received_by"> · by {{ row.received_by }}</span>
               </p>
             </div>
-            <BaseButton v-if="canManage && !row.is_reversal && !row.reversed" size="sm" variant="ghost" @click="openReverse(row)">Reverse</BaseButton>
+            <IconButton v-if="canManage && !row.is_reversal && !row.reversed" :icon="Undo2" variant="danger" label="Reverse payment" @click="openReverse(row)" />
           </li>
         </ul>
       </BaseCard>

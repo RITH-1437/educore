@@ -1,5 +1,5 @@
 <script setup>
-import { Trash2 } from '@lucide/vue'
+import { ArrowLeft, Plus, Trash2 } from '@lucide/vue'
 import IconButton from '../../components/IconButton.vue'
 import { Head, useForm } from '@inertiajs/vue3'
 import { computed } from 'vue'
@@ -61,7 +61,7 @@ const itemError = (i, field) => form.errors[`items.${i}.${field}`]
   <div class="mx-auto max-w-5xl space-y-6">
     <PageHeader eyebrow="Operations" :title="editing ? `Edit ${invoice.invoice_number}` : 'New invoice'" description="Totals are computed from the items. Invoices can be edited until a payment is recorded.">
       <template #actions>
-        <BaseButton :href="editing ? `/invoices/${invoice.id}` : '/invoices'" variant="secondary">Cancel</BaseButton>
+        <IconButton :icon="ArrowLeft" :href="editing ? `/invoices/${invoice.id}` : '/invoices'" size="md" :label="editing ? 'Back to the invoice' : 'Back to invoices'" />
       </template>
     </PageHeader>
 
@@ -91,7 +91,7 @@ const itemError = (i, field) => form.errors[`items.${i}.${field}`]
         </div>
         <ErrorAlert v-if="form.errors.items" class="mt-4" title="Items" :message="form.errors.items" />
         <div class="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-border-default pt-4 dark:border-dark-border">
-          <BaseButton variant="secondary" :disabled="form.items.length >= 50" @click="form.items.push(blankItem())">Add item</BaseButton>
+          <IconButton :icon="Plus" size="md" label="Add item" :disabled="form.items.length >= 50" @click="form.items.push(blankItem())" />
           <p class="text-small text-muted dark:text-dark-muted">
             Subtotal <span class="tabular-nums text-ink dark:text-dark-ink">{{ money(preview.subtotal, form.currency) }}</span> ·
             Total <span class="font-semibold tabular-nums text-ink dark:text-dark-ink">{{ money(preview.total, form.currency) }}</span>

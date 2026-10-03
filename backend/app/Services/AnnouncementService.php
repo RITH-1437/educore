@@ -12,11 +12,16 @@ use App\Models\Enrollment;
 use App\Models\Faculty;
 use App\Models\Program;
 use App\Models\Section;
+use App\Models\StoredFile;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Announcements (module 9.19, `skills/announcements`).
@@ -66,7 +71,7 @@ class AnnouncementService
                     }
                 }
             })
-            ->with('author:id,name')
+            ->with(['author:id,name', 'attachments'])
             ->latest('published_at')
             ->latest('id');
     }
@@ -119,7 +124,7 @@ class AnnouncementService
         return Announcement::query()
             ->when(! $this->manages($user), fn ($q) => $q->where('author_id', $user->getKey()))
             ->when($state, fn ($q) => $q->where('publish_state', $state))
-            ->with('author:id,name')
+            ->with(['author:id,name', 'attachments'])
             ->orderByRaw("case publish_state when 'draft' then 0 when 'published' then 1 else 2 end")
             ->latest('updated_at')
             ->latest('id');
@@ -202,7 +207,73 @@ class AnnouncementService
     public function delete(Announcement $announcement): void
     {
         $this->assertDraft($announcement, 'deleted');
+
+        foreach ($announcement->attachments as $attachment) {
+            $this->deleteAttachment($announcement, $attachment);
+        }
+
         $announcement->delete();
+    }
+
+    public function disk(): string
+    {
+        return (string) config('academics.uploads_disk', 's3');
+    }
+
+    /**
+     * Attach an uploaded file to an announcement.
+     */
+    public function attachFile(Announcement $announcement, UploadedFile $file, User $uploader): StoredFile
+    {
+        $this->assertDraft($announcement, 'modified');
+
+        $disk = $this->disk();
+        $uuid = (string) Str::uuid();
+        $ext = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'bin');
+        $storageKey = "announcements/{$announcement->id}/{$uuid}.{$ext}";
+
+        Storage::disk($disk)->put($storageKey, (string) file_get_contents($file->getRealPath()));
+
+        return StoredFile::query()->create([
+            'fileable_type' => Announcement::class,
+            'fileable_id' => $announcement->id,
+            'uploader_id' => $uploader->id,
+            'file_name' => "{$uuid}.{$ext}",
+            'original_name' => $file->getClientOriginalName(),
+            'storage_key' => $storageKey,
+            'bucket' => (string) config("filesystems.disks.{$disk}.bucket", 'educore'),
+            'mime_type' => $file->getClientMimeType() ?: $file->getMimeType(),
+            'size' => $file->getSize(),
+            'visibility' => 'public',
+            'checksum' => hash_file('sha256', $file->getRealPath()),
+        ]);
+    }
+
+    /**
+     * Delete an attachment.
+     */
+    public function deleteAttachment(Announcement $announcement, StoredFile $attachment): void
+    {
+        $this->assertDraft($announcement, 'modified');
+
+        if ($attachment->fileable_type !== Announcement::class || (int) $attachment->fileable_id !== (int) $announcement->id) {
+            throw new BusinessRuleException('Attachment does not belong to this announcement.');
+        }
+
+        Storage::disk($this->disk())->delete($attachment->storage_key);
+        $attachment->delete();
+    }
+
+    /**
+     * Download an attachment.
+     */
+    public function downloadAttachment(Announcement $announcement, StoredFile $attachment): StreamedResponse
+    {
+        if ($attachment->fileable_type !== Announcement::class || (int) $attachment->fileable_id !== (int) $announcement->id) {
+            abort(404, 'Attachment not found.');
+        }
+
+        return Storage::disk($this->disk())->download($attachment->storage_key, $attachment->original_name);
     }
 
     /**

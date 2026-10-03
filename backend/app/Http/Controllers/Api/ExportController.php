@@ -7,12 +7,15 @@ use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\Enrollment;
 use App\Models\Invoice;
+use App\Models\University;
 use App\Services\AnalyticsService;
 use App\Services\AuditLogger;
 use App\Services\EnrollmentService;
 use App\Services\InvoiceService;
 use App\Support\CsvExport;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use OpenApi\Attributes as OA;
@@ -206,6 +209,61 @@ class ExportController extends Controller
         $suffix = $semester ? '-'.str($semester->academicYear?->code.' '.$semester->name)->slug() : '';
 
         return CsvExport::download(CsvExport::filename('analytics-'.str_replace('_', '-', $table).$suffix), $header, $rows);
+    }
+
+    #[OA\Get(
+        path: '/analytics/export/pdf',
+        summary: 'Export executive analytics report as PDF',
+        description: 'Comprehensive institutional analytics report for a semester as a PDF document. Audited as `export.analytics_pdf`.',
+        operationId: 'exportAnalyticsPdf',
+        tags: ['Analytics'],
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\QueryParameter(name: 'semester_id', required: false, schema: new OA\Schema(type: 'integer')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'PDF file.', content: new OA\MediaType(mediaType: 'application/pdf')),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 409, description: 'No semester to report on.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 422, description: 'Unknown semester.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
+        ]
+    )]
+    public function analyticsPdf(Request $request): Response
+    {
+        Gate::authorize('view-analytics');
+        $semester = $this->analyticsApi->semester($request);
+
+        if ($semester === null) {
+            throw new BusinessRuleException('There is no semester to report on.');
+        }
+
+        $semester->loadMissing('academicYear');
+        $university = University::query()->where('is_current', true)->first();
+
+        $overview = $this->analytics->overview($semester);
+        $enrollment = $this->analytics->enrollment($semester);
+        $academic = $this->analytics->academic($semester);
+        $administrative = $this->analytics->administrative();
+
+        $this->audited('analytics_pdf', ['semester_id' => $semester->id], 1);
+
+        $filename = 'analytics-report-'.str($semester->academicYear?->code.' '.$semester->name)->slug().'.pdf';
+
+        $pdf = Pdf::loadView('analytics.pdf', [
+            'semester' => $semester,
+            'university' => $university,
+            'generatedAt' => now()->format('Y-m-d H:i'),
+            'overview' => $overview,
+            'enrollment' => $enrollment,
+            'academic' => $academic,
+            'administrative' => $administrative,
+        ])->setPaper('a4')->setOption('isFontSubsettingEnabled', true);
+
+        return response($pdf->output(), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
     }
 
     /**

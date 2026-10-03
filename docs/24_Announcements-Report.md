@@ -14,15 +14,18 @@ feed of the published announcements addressed to them, and the student
 dashboard (9.15) now shows the latest three.
 
 Not built: notification delivery on publish (9.20 email, 9.21 Telegram — the
-skill's "queued notifications on publish" arrives with them), attachments,
+skill's "queued notifications on publish" arrives with them),
 read receipts, scheduled publishing, and Faculty Admin authoring (needs unit
 scoping on the user record).
+
+File attachments are implemented (`AnnouncementService::attachFile()`) using the private file storage (`skills/file-storage`) via polymorphic relation (`MorphMany StoredFile`).
 
 ## 2. Data model
 
 ```mermaid
 erDiagram
     USERS ||--o{ ANNOUNCEMENTS : authors
+    ANNOUNCEMENTS ||--o{ STORED_FILES : "attachments (morph)"
     ANNOUNCEMENTS {
         varchar title
         text body
@@ -34,7 +37,7 @@ erDiagram
     }
 ```
 
-**No schema change.** `audience_id` is a polymorphic-style id whose table is
+**No schema change.** Relies on existing `stored_files` polymorphic table (`fileable_type = App\Models\Announcement`). `audience_id` is a polymorphic-style id whose table is
 given by `audience_type` (the existing design; no FK). The service checks the
 target exists. New model `Announcement`.
 
@@ -90,22 +93,25 @@ earlier announcements; someone who leaves stops seeing them.
 | Method | Path | Purpose |
 |---|---|---|
 | GET | `/api/announcements/feed` | The caller's feed (paginated) |
-| GET / POST | `/api/announcements` | Managed list (`filters[publish_state]`) / create (`publish` to publish at once) |
+| GET / POST | `/api/announcements` | Managed list (`filters[publish_state]`) / create (`publish` to publish at once; multipart with `attachments[]`) |
 | GET | `/api/announcements/{announcement}` | One announcement |
-| PUT, PATCH | `/api/announcements/{announcement}` | Edit a draft |
-| DELETE | `/api/announcements/{announcement}` | Delete a draft |
+| PUT, PATCH | `/api/announcements/{announcement}` | Edit a draft (supports new `attachments[]` and `remove_attachment_ids[]`) |
+| DELETE | `/api/announcements/{announcement}` | Delete a draft (deletes physical files) |
 | POST | `/api/announcements/{announcement}/publish` · `/archive` | Lifecycle |
+| GET | `/api/announcements/{announcement}/attachments/{file}/download` | Download attachment file |
 
 Web: `GET /announcements` (feed, every role), `GET /announcements/manage`,
 `POST /announcements`, `PUT|DELETE /announcements/{id}`,
-`POST /announcements/{id}/publish|archive`.
+`POST /announcements/{id}/publish|archive`, `GET /announcements/{id}/attachments/{file}/download`.
 
 ## 7. UI
 
-- `Announcements/Feed` — category badge, audience, date, title, body, author.
+- `Announcements/Feed` — category badge, audience, date, title, body, author,
+  and attachment pills with paperclip icons, file sizes, and direct download links.
 - `Announcements/Manage` — filter by state; drafts with Publish / Edit / Delete,
-  published with Archive (confirmations); compose modal with category, audience
-  and target (lecturers only see their sections and courses).
+  published with Archive (confirmations); compose modal with category, audience,
+  target (lecturers only see their sections and courses), multiple file attachment
+  picker, and existing attachment removal controls.
 - `Student/Dashboard` — new *Announcements* card (latest three).
 - Sidebar: *Announcements* for every role (staff under *Operations*).
 
@@ -114,13 +120,14 @@ audience type (`AnnouncementService::preloadTargets`), not one per row.
 
 ## 8. Tests
 
-`backend/tests/Feature/Announcements/AnnouncementTest.php` — 6 tests: audience
+`backend/tests/Feature/Announcements/AnnouncementTest.php` — 7 tests: audience
 resolution for all nine audience types against a student in the program /
 section, an unrelated student, the section's lecturer and an administrator
 (drafts never shown); lifecycle (edit draft, archive refused before publish,
 publish, no edit / delete / re-publish, archived leaves the feed and becomes
 invisible); validation; lecturer targeting limits and own-only management;
 students, Faculty Admin and inactive lecturers cannot write; web pages and the
-dashboard card. `StudentDashboardTest` still passes with the new card. Full
-suite: **355 passed**. `AnnouncementSeeder` adds four published notices and a
+dashboard card; file attachments workflow (upload, list with URLs and sizes,
+authorized streaming download, remove attachment, and deletion cleanup). Full
+suite: **356 passed**. `AnnouncementSeeder` adds four published notices and a
 draft.

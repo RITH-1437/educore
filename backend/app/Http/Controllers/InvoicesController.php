@@ -67,6 +67,18 @@ class InvoicesController extends Controller
         ]);
     }
 
+    public function download(Invoice $invoice): \Illuminate\Http\Response
+    {
+        $this->authorize('view', $invoice);
+        $content = $this->invoices->renderPdf($invoice);
+        $filename = "{$invoice->invoice_number}.pdf";
+
+        return response($content, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
+
     public function edit(Invoice $invoice): Response
     {
         $this->authorize('manage', Invoice::class);

@@ -17,6 +17,8 @@ use App\Models\Student;
 use App\Models\User;
 use App\Services\EnrollmentService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -166,6 +168,39 @@ class AnnouncementTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page->component('Announcements/Feed')->has('announcements.data', 1)->where('canManage', false));
         $this->actingAs($this->student->user)->get('/dashboard')->assertOk()
             ->assertInertia(fn (Assert $page) => $page->component('Student/Dashboard')->has('dashboard.announcements', 1)->where('dashboard.announcements.0.audience', "Program: {$this->program->name}"));
+    }
+
+    public function test_announcement_attachments(): void
+    {
+        Storage::fake(config('academics.uploads_disk', 's3'));
+
+        $file = UploadedFile::fake()->create('handout.pdf', 300, 'application/pdf');
+
+        $res = $this->actingAs($this->admin)->post('/announcements', [
+            ...$this->payload(['audience_type' => 'program', 'audience_id' => $this->program->id, 'publish' => true]),
+            'attachments' => [$file],
+        ]);
+        $res->assertSessionHas('success');
+
+        $announcement = Announcement::query()->where('title', 'Library hours')->firstOrFail();
+        $this->assertCount(1, $announcement->attachments);
+
+        $attachment = $announcement->attachments->first();
+        $this->assertSame('handout.pdf', $attachment->original_name);
+        Storage::disk(config('academics.uploads_disk', 's3'))->assertExists($attachment->storage_key);
+
+        // Student in program can download via web and API
+        $downloadRes = $this->actingAs($this->student->user)->get("/announcements/{$announcement->id}/attachments/{$attachment->id}/download");
+        $downloadRes->assertOk();
+
+        $apiDownloadRes = $this->actingAs($this->student->user)->get("/api/announcements/{$announcement->id}/attachments/{$attachment->id}/download");
+        $apiDownloadRes->assertOk();
+
+        // Outsider student cannot download
+        $this->actingAs($this->outsider->user)->get("/announcements/{$announcement->id}/attachments/{$attachment->id}/download")
+            ->assertForbidden();
+        $this->actingAs($this->outsider->user)->get("/api/announcements/{$announcement->id}/attachments/{$attachment->id}/download")
+            ->assertForbidden();
     }
 
     /**

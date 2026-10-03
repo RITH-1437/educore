@@ -15,7 +15,7 @@ invoices, payments and balances. **No online payment gateway** (business
 overview §23) and **no Finance Officer role** — administrators record funds
 received.
 
-Not built: invoice PDFs / receipts, fee schedules or automatic tuition
+Invoice & receipt PDF generation is implemented (`GET /invoices/{invoice}/download`, `GET /api/invoices/{invoice}/download`), rendering official itemized billings and receipt history with university branding and status badge via DomPDF. Not built: fee schedules or automatic tuition
 invoices from enrollments, billing of document fees (`document_types.requires_fee`),
 refunds of overpayments (overpayment is refused), an audit trail (9.24 —
 added since, see `docs/28_Audit-Logs-and-Security-Report.md`), currency conversion.
@@ -115,6 +115,7 @@ currency.
 |---|---|---|
 | GET / POST | `/api/invoices` | List (`search`, `filters[status]`, `filters[student_id]`) / create |
 | GET | `/api/invoices/{invoice}` | Invoice with items, payments, balance |
+| GET | `/api/invoices/{invoice}/download` | Download invoice and receipt as PDF |
 | PUT, PATCH | `/api/invoices/{invoice}` | Edit (before any payment) |
 | POST | `/api/invoices/{invoice}/cancel` | Cancel (optional reason) |
 | POST | `/api/invoices/{invoice}/payments` | Record a payment |
@@ -122,7 +123,7 @@ currency.
 | GET | `/api/students/{student}/invoices` | A student's invoices + per-currency summary |
 
 Web: `GET /invoices`, `GET /invoices/create`, `POST /invoices`,
-`GET /invoices/{id}` (managers and the invoiced student), `GET /invoices/{id}/edit`,
+`GET /invoices/{id}` (managers and the invoiced student), `GET /invoices/{id}/download` (download PDF), `GET /invoices/{id}/edit`,
 `PUT /invoices/{id}`, `POST /invoices/{id}/cancel`, `POST /invoices/{id}/payments`,
 `POST /payments/{id}/reverse`, `GET /my-invoices` (student).
 
@@ -136,7 +137,7 @@ Web: `GET /invoices`, `GET /invoices/create`, `POST /invoices`,
   subtotal / discount / total, payment history (reversed payments struck
   through, reversal rows marked), *Record payment* form (prefilled with the
   balance), *Reverse* with a reason modal, *Edit* and *Cancel invoice* when
-  allowed. Students see the same page read-only.
+  allowed. Features a *Download PDF* button in the header actions. Students see the same page read-only.
 - `Invoices/Mine` — balance due, paid and overdue cards per currency and the
   student's invoices.
 - Sidebar: *Invoices* in *Operations* (Super Admin, University Admin); *My
@@ -144,15 +145,16 @@ Web: `GET /invoices`, `GET /invoices/create`, `POST /invoices`,
 
 ## 7. Tests
 
-`backend/tests/Feature/Finance/InvoiceTest.php` — 8 tests (time frozen): totals
+`backend/tests/Feature/Finance/InvoiceTest.php` — 9 tests (time frozen): totals
 and sequential numbering; validation (no items, discount > subtotal, due before
 issue, currency, fractional cent, zero quantity); payments → partial → paid,
 overpayment / future date / bad method refused, paid invoice not editable or
 cancellable; append-only reversal (reason required, history kept, double and
 reversal-of-reversal refused, then cancel, no payments on cancelled); overdue
 derivation on read, settling an overdue invoice, the scheduled command; editing
-before payments and the student lock; access matrix; web pages. Full suite:
-**348 passed**. `InvoiceSeeder` creates demo invoices through the service with
+before payments and the student lock; access matrix; web pages; invoice PDF
+download rendering valid `%PDF-` document. Full suite:
+**349 passed**. `InvoiceSeeder` creates demo invoices through the service with
 full, partial and no payments.
 
 ## 8. Decisions

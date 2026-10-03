@@ -174,6 +174,7 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::get('/invoices/export', [ExportController::class, 'invoices'])->name('api.invoices.export');
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('api.invoices.store');
     Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('api.invoices.show');
+    Route::get('/invoices/{invoice}/download', [InvoiceController::class, 'download'])->name('api.invoices.download');
     Route::match(['put', 'patch'], '/invoices/{invoice}', [InvoiceController::class, 'update'])->name('api.invoices.update');
     Route::post('/invoices/{invoice}/cancel', [InvoiceController::class, 'cancel'])->name('api.invoices.cancel');
     Route::post('/invoices/{invoice}/payments', [InvoiceController::class, 'pay'])->name('api.invoices.payments.store');
@@ -190,6 +191,7 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('api.announcements.destroy');
     Route::post('/announcements/{announcement}/publish', [AnnouncementController::class, 'publish'])->name('api.announcements.publish');
     Route::post('/announcements/{announcement}/archive', [AnnouncementController::class, 'archive'])->name('api.announcements.archive');
+    Route::get('/announcements/{announcement}/attachments/{file}/download', [AnnouncementController::class, 'downloadAttachment'])->name('api.announcements.attachments.download');
 
     // Internships: `InternshipPolicy` — a student runs their own application
     // and reports; managers review, approve, evaluate and keep companies.
@@ -362,6 +364,7 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->prefix
     Route::get('/academic', [AnalyticsController::class, 'academic'])->name('academic');
     Route::get('/administrative', [AnalyticsController::class, 'administrative'])->name('administrative');
     Route::get('/export', [ExportController::class, 'analytics'])->name('export');
+    Route::get('/export/pdf', [ExportController::class, 'analyticsPdf'])->name('export.pdf');
 });
 
 // Notification preferences (modules 9.20 / 9.21): always the caller's own.

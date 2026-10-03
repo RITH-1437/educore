@@ -418,6 +418,7 @@ documented operations.
 | GET | `/api/invoices/export` | Sanctum + super-admin or university-admin (CSV, audited) | Documented |
 | POST | `/api/invoices` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/invoices/{invoice}` | Sanctum + managers, or the invoiced student | Documented |
+| GET | `/api/invoices/{invoice}/download` | Sanctum + managers, or the invoiced student (PDF stream) | Documented |
 | PUT, PATCH | `/api/invoices/{invoice}` | Sanctum + super-admin or university-admin | Both documented |
 | POST | `/api/invoices/{invoice}/cancel` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/invoices/{invoice}/payments` | Sanctum + super-admin or university-admin | Documented |
@@ -425,12 +426,13 @@ documented operations.
 | GET | `/api/students/{student}/invoices` | Sanctum + managers, or the student themself | Documented |
 | GET | `/api/announcements/feed` | Sanctum, any role (own audience only) | Documented |
 | GET | `/api/announcements` | Sanctum + managers (all) or an active lecturer (own) | Documented |
-| POST | `/api/announcements` | Sanctum + managers or an active lecturer (own sections / courses) | Documented |
+| POST | `/api/announcements` | Sanctum + managers or an active lecturer (own sections / courses; multipart attachments) | Documented |
 | GET | `/api/announcements/{announcement}` | Sanctum + author, managers, or a member of the audience | Documented |
 | PUT, PATCH | `/api/announcements/{announcement}` | Sanctum + author or managers (drafts only) | Both documented |
 | DELETE | `/api/announcements/{announcement}` | Sanctum + author or managers (drafts only) | Documented |
 | POST | `/api/announcements/{announcement}/publish` | Sanctum + author or managers | Documented |
 | POST | `/api/announcements/{announcement}/archive` | Sanctum + author or managers | Documented |
+| GET | `/api/announcements/{announcement}/attachments/{file}/download` | Sanctum, user with announcement access (download attachment) | Documented |
 | GET | `/api/notification-preferences` | Sanctum, any role (own only) | Documented |
 | PUT | `/api/notification-preferences` | Sanctum, any role (own only) | Documented |
 | POST | `/api/notification-preferences/test` | Sanctum, any role; `throttle:notification-test` (3/min) | Documented |
@@ -451,6 +453,7 @@ documented operations.
 | GET | `/api/analytics/academic` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
 | GET | `/api/analytics/administrative` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
 | GET | `/api/analytics/export` | Sanctum + super-admin or university-admin (`view-analytics`; CSV, audited) | Documented |
+| GET | `/api/analytics/export/pdf` | Sanctum + super-admin or university-admin (`view-analytics`; PDF, audited) | Documented |
 | GET | `/api/grading-scale` | Sanctum, any role | Documented |
 | PUT | `/api/grading-scale` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/courses/{course}/grading-config` | Sanctum + super-admin, university-admin or faculty-admin | Documented |

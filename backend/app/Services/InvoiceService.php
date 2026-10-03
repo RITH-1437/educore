@@ -6,9 +6,11 @@ use App\Exceptions\BusinessRuleException;
 use App\Models\Invoice;
 use App\Models\Payment;
 use App\Models\Student;
+use App\Models\University;
 use App\Models\User;
 use App\Notifications\InvoiceIssued;
 use App\Notifications\PaymentRecorded;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Carbon;
@@ -362,5 +364,27 @@ class InvoiceService
         $last = Invoice::withTrashed()->where('invoice_number', 'like', $prefix.'%')->max('invoice_number');
 
         return $prefix.str_pad((string) ((int) substr((string) $last, strlen($prefix)) + 1), 5, '0', STR_PAD_LEFT);
+    }
+
+    /**
+     * Render the invoice PDF document.
+     */
+    public function renderPdf(Invoice $invoice): string
+    {
+        $this->refreshOverdue();
+        $invoice->loadMissing([
+            'student.user',
+            'student.currentProgram.program.department.faculty',
+            'items',
+            'payments.receiver:id,name',
+        ]);
+        $university = University::query()->where('is_current', true)->first();
+
+        return Pdf::loadView('invoices.pdf', [
+            'invoice' => $invoice,
+            'student' => $invoice->student,
+            'university' => $university,
+            'issuedOn' => now()->toDateString(),
+        ])->setPaper('a4')->setOption('isFontSubsettingEnabled', true)->output();
     }
 }

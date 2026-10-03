@@ -1,6 +1,6 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { SquarePen } from '@lucide/vue'
+import { Paperclip, SquarePen } from '@lucide/vue'
 import { Head } from '@inertiajs/vue3'
 import BaseBadge from '../../components/BaseBadge.vue'
 import BaseCard from '../../components/BaseCard.vue'
@@ -36,6 +36,18 @@ defineProps({
         </div>
         <h2 class="mt-3 text-h4 font-semibold text-ink dark:text-dark-ink">{{ item.title }}</h2>
         <p class="mt-2 whitespace-pre-line text-body text-ink dark:text-dark-ink">{{ item.body }}</p>
+        <div v-if="item.attachments?.length" class="mt-3 flex flex-wrap gap-2 pt-2 border-t border-border-default dark:border-dark-border">
+          <a
+            v-for="att in item.attachments"
+            :key="att.id"
+            :href="`/announcements/${item.id}/attachments/${att.id}/download`"
+            class="inline-flex items-center gap-1.5 rounded-md bg-muted-light/60 px-2.5 py-1 text-caption font-medium text-ink hover:bg-muted-light hover:text-primary dark:bg-dark-muted/20 dark:text-dark-ink dark:hover:bg-dark-muted/30"
+          >
+            <Paperclip class="size-3.5 text-muted dark:text-dark-muted" />
+            <span>{{ att.original_name }}</span>
+            <span class="text-caption text-muted dark:text-dark-muted">({{ Math.round(att.size / 1024) }} KB)</span>
+          </a>
+        </div>
         <p class="mt-4 text-caption text-muted dark:text-dark-muted">{{ item.author?.name }}</p>
       </BaseCard>
     </article>

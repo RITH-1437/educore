@@ -88,6 +88,12 @@ class Invoice extends Model
         return self::cents($this->total) - self::cents($this->amount_paid);
     }
 
+    /** Remaining balance formatted as standard 2-decimal string. */
+    public function balance(): string
+    {
+        return number_format($this->balanceCents() / 100, 2, '.', '');
+    }
+
     public static function cents(string|int|float|null $amount): int
     {
         return (int) round(((float) $amount) * 100);

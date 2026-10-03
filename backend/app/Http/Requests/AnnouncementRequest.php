@@ -29,6 +29,10 @@ class AnnouncementRequest extends FormRequest
             'audience_type' => ['required', Rule::in([...Announcement::GROUP_AUDIENCES, ...array_keys(Announcement::UNIT_AUDIENCES)])],
             'audience_id' => ['nullable', 'integer'],
             'publish' => ['sometimes', 'boolean'],
+            'attachments' => ['sometimes', 'array', 'max:5'],
+            'attachments.*' => ['file', 'max:10240', 'mimes:pdf,jpg,jpeg,png,docx,xlsx,txt,zip'],
+            'remove_attachment_ids' => ['sometimes', 'array'],
+            'remove_attachment_ids.*' => ['integer'],
         ];
     }
 }

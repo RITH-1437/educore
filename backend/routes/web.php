@@ -246,7 +246,11 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function
     Route::post('/invoices/{invoice}/payments', [InvoicesController::class, 'pay'])->name('invoices.payments.store');
     Route::post('/payments/{payment}/reverse', [InvoicesController::class, 'reverse'])->name('payments.reverse');
 });
-Route::middleware(['auth', 'role:super-admin,university-admin,student'])->get('/invoices/{invoice}', [InvoicesController::class, 'show'])->name('invoices.show');
+
+Route::middleware(['auth', 'role:super-admin,university-admin,student'])->group(function () {
+    Route::get('/invoices/{invoice}', [InvoicesController::class, 'show'])->name('invoices.show');
+    Route::get('/invoices/{invoice}/download', [InvoicesController::class, 'download'])->name('invoices.download');
+});
 
 // Announcements: every signed-in role reads its feed; managers and lecturers
 // compose (`AnnouncementPolicy` + audience rules in `AnnouncementService`).
@@ -259,6 +263,7 @@ Route::middleware(['auth', 'role:super-admin,university-admin,lecturer'])->group
     Route::post('/announcements/{announcement}/publish', [AnnouncementsController::class, 'publish'])->name('announcements.publish');
     Route::post('/announcements/{announcement}/archive', [AnnouncementsController::class, 'archive'])->name('announcements.archive');
 });
+Route::middleware('auth')->get('/announcements/{announcement}/attachments/{file}/download', [AnnouncementsController::class, 'downloadAttachment'])->name('announcements.attachments.download');
 
 // Internships (`InternshipPolicy`): students apply and report; managers and
 // (for their faculty's students) Faculty Admins review, approve and evaluate;
@@ -290,6 +295,7 @@ Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,stud
 // Analytics (module 9.23): managers only.
 Route::middleware(['auth', 'role:super-admin,university-admin'])->get('/analytics', AnalyticsPageController::class)->name('analytics');
 Route::middleware(['auth', 'role:super-admin,university-admin'])->get('/analytics/export', [ExportController::class, 'analytics'])->name('analytics.export');
+Route::middleware(['auth', 'role:super-admin,university-admin'])->get('/analytics/export/pdf', [ExportController::class, 'analyticsPdf'])->name('analytics.export.pdf');
 
 // Notification settings (modules 9.20 / 9.21): every signed-in user, own only.
 Route::middleware('auth')->group(function () {

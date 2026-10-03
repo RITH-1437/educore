@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\AnnouncementController as ApiAnnouncementController
 use App\Http\Requests\AnnouncementRequest;
 use App\Http\Resources\AnnouncementResource;
 use App\Models\Announcement;
+use App\Models\StoredFile;
 use App\Services\AnnouncementService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,6 +14,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Announcement screens (module 9.19): every user's feed, and the compose /
@@ -51,7 +53,17 @@ class AnnouncementsController extends Controller
         $this->authorize('create', Announcement::class);
 
         $publish = $request->boolean('publish');
-        $this->announcements->create($request->user(), $request->validated(), $publish);
+        $announcement = $this->announcements->create($request->user(), $request->validated(), false);
+
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $this->announcements->attachFile($announcement, $file, $request->user());
+            }
+        }
+
+        if ($publish) {
+            $this->announcements->publish($announcement, $request->user());
+        }
 
         return back()->with('success', $publish ? 'Announcement published.' : 'Draft saved.');
     }
@@ -62,7 +74,29 @@ class AnnouncementsController extends Controller
 
         $this->announcements->update($announcement, $request->user(), $request->validated());
 
+        if ($request->has('remove_attachment_ids')) {
+            foreach ((array) $request->input('remove_attachment_ids') as $id) {
+                $attachment = $announcement->attachments()->find($id);
+                if ($attachment) {
+                    $this->announcements->deleteAttachment($announcement, $attachment);
+                }
+            }
+        }
+
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $this->announcements->attachFile($announcement, $file, $request->user());
+            }
+        }
+
         return back()->with('success', 'Draft updated.');
+    }
+
+    public function downloadAttachment(Announcement $announcement, StoredFile $file): StreamedResponse
+    {
+        $this->authorize('view', $announcement);
+
+        return $this->announcements->downloadAttachment($announcement, $file);
     }
 
     public function publish(Request $request, Announcement $announcement): RedirectResponse

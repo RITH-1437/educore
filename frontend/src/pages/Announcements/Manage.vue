@@ -1,5 +1,5 @@
 <script setup>
-import { Archive, Megaphone, Pencil, Plus, Send, Trash2 } from '@lucide/vue'
+import { Archive, Megaphone, Paperclip, Pencil, Plus, Send, Trash2 } from '@lucide/vue'
 import IconButton from '../../components/IconButton.vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
@@ -36,7 +36,10 @@ const typeOptions = computed(() => props.types.map((t) => ({ value: t, label: ty
 
 const editing = ref(null)
 const showForm = ref(false)
-const blank = () => ({ title: '', body: '', announcement_type: 'general', audience_type: audienceOptions.value[0]?.value ?? 'section', audience_id: '', publish: false })
+const fileInput = ref(null)
+const existingAttachments = ref([])
+const removeAttachmentIds = ref([])
+const blank = () => ({ title: '', body: '', announcement_type: 'general', audience_type: audienceOptions.value[0]?.value ?? 'section', audience_id: '', publish: false, attachments: [] })
 const form = useForm(blank())
 const targetOptions = computed(() => (props.targets[form.audience_type] ?? []).map((t) => ({ value: t.id, label: t.label })))
 const needsTarget = computed(() => !AUDIENCES.find((a) => a.value === form.audience_type)?.group)
@@ -44,21 +47,46 @@ watch(() => form.audience_type, () => { if (!editing.value) form.audience_id = '
 
 const openCreate = () => {
   editing.value = null
+  existingAttachments.value = []
+  removeAttachmentIds.value = []
+  if (fileInput.value) fileInput.value.value = ''
   form.defaults(blank()).reset()
   form.clearErrors()
   showForm.value = true
 }
 const openEdit = (item) => {
   editing.value = item
-  form.defaults({ title: item.title, body: item.body, announcement_type: item.announcement_type ?? 'general', audience_type: item.audience_type, audience_id: item.audience_id ?? '', publish: false }).reset()
+  existingAttachments.value = [...(item.attachments ?? [])]
+  removeAttachmentIds.value = []
+  if (fileInput.value) fileInput.value.value = ''
+  form.defaults({ title: item.title, body: item.body, announcement_type: item.announcement_type ?? 'general', audience_type: item.audience_type, audience_id: item.audience_id ?? '', publish: false, attachments: [] }).reset()
   form.clearErrors()
   showForm.value = true
 }
+const removeExistingAttachment = (id) => {
+  removeAttachmentIds.value.push(id)
+  existingAttachments.value = existingAttachments.value.filter((a) => a.id !== id)
+}
 const save = (publish) => {
   form.publish = publish
-  const request = form.transform((data) => ({ ...data, audience_id: needsTarget.value ? data.audience_id || null : null }))
-  const options = { preserveScroll: true, onSuccess: () => (showForm.value = false) }
-  editing.value ? request.put(`/announcements/${editing.value.id}`, options) : request.post('/announcements', options)
+  const options = {
+    forceFormData: true,
+    preserveScroll: true,
+    onSuccess: () => (showForm.value = false),
+  }
+  if (editing.value) {
+    form.transform((data) => ({
+      ...data,
+      _method: 'PUT',
+      audience_id: needsTarget.value ? data.audience_id || null : null,
+      remove_attachment_ids: removeAttachmentIds.value,
+    })).post(`/announcements/${editing.value.id}`, options)
+  } else {
+    form.transform((data) => ({
+      ...data,
+      audience_id: needsTarget.value ? data.audience_id || null : null,
+    })).post('/announcements', options)
+  }
 }
 
 const publish = async (item) => {
@@ -110,6 +138,17 @@ const remove = async (item) => {
                 {{ item.audience }} · {{ item.author?.name }} · {{ item.publish_state === 'draft' ? `edited ${when(item.updated_at)}` : `published ${when(item.published_at)}` }}
               </p>
               <p class="mt-2 line-clamp-2 text-small text-muted dark:text-dark-muted">{{ item.body }}</p>
+              <div v-if="item.attachments?.length" class="mt-2 flex flex-wrap gap-1.5">
+                <a
+                  v-for="att in item.attachments"
+                  :key="att.id"
+                  :href="`/announcements/${item.id}/attachments/${att.id}/download`"
+                  class="inline-flex items-center gap-1 rounded bg-muted-light/70 px-2 py-0.5 text-caption font-medium text-muted hover:text-primary dark:bg-dark-muted/20 dark:text-dark-muted"
+                >
+                  <Paperclip class="size-3" />
+                  {{ att.original_name }}
+                </a>
+              </div>
             </div>
             <div class="flex flex-wrap gap-1">
               <template v-if="item.publish_state === 'draft'">
@@ -134,6 +173,26 @@ const remove = async (item) => {
           <BaseSelect v-model="form.announcement_type" :options="typeOptions" label="Category" :error="form.errors.announcement_type" />
           <BaseSelect v-model="form.audience_type" :options="audienceOptions.map(({ value, label }) => ({ value, label }))" label="Audience" :error="form.errors.audience_type" />
           <BaseSelect v-if="needsTarget" v-model="form.audience_id" :options="targetOptions" label="Which one" placeholder="Choose…" :error="form.errors.audience_id" />
+        </div>
+        <div class="space-y-2 border-t border-border-default pt-3 dark:border-dark-border">
+          <label class="block text-small font-medium text-ink dark:text-dark-ink">Attachments</label>
+          <div v-if="existingAttachments.length" class="space-y-1">
+            <p class="text-caption text-muted dark:text-dark-muted">Attached files:</p>
+            <div v-for="att in existingAttachments" :key="att.id" class="flex items-center justify-between rounded-md bg-muted-light/60 px-3 py-1.5 text-small dark:bg-dark-muted/20">
+              <span class="truncate">{{ att.original_name }} ({{ Math.round(att.size / 1024) }} KB)</span>
+              <button type="button" class="text-error hover:underline text-caption ml-2 cursor-pointer" @click="removeExistingAttachment(att.id)">Remove</button>
+            </div>
+          </div>
+          <input
+            ref="fileInput"
+            type="file"
+            multiple
+            accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx,.txt,.zip"
+            class="block w-full text-small text-muted file:mr-3 file:min-h-9 file:rounded-md file:border-0 file:bg-primary/10 file:px-3 file:text-small file:font-semibold file:text-primary dark:text-dark-muted dark:file:bg-dark-primary/15 dark:file:text-dark-primary"
+            @change="(e) => (form.attachments = Array.from(e.target.files ?? []))"
+          />
+          <p class="text-caption text-muted dark:text-dark-muted">PDF, PNG, JPG, DOCX, XLSX, ZIP · max 10 MB per file</p>
+          <p v-if="form.errors.attachments" class="text-small text-error" role="alert">{{ form.errors.attachments }}</p>
         </div>
       </form>
       <template #footer>

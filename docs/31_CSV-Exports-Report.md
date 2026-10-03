@@ -1,8 +1,8 @@
 # 31 — CSV Exports Report
 
-- **Date:** 2026-10-02
+- **Date:** 2026-10-02 (updated 2026-10-03)
 - **Modules extended:** 9.9 Enrollment, 9.18 Invoices & Payments, 9.23 Analytics & Reporting, 9.24 Audit Logs & Security
-- **Status:** `[Implemented]` (PDF exports `[Future]`)
+- **Status:** `[Implemented]` (Analytics and Invoice PDF exports implemented; scheduled / emailed reports `[Future]`)
 - **Depends on:** `docs/15_Enrollment-Report.md`, `docs/23_Invoices-and-Payments-Report.md`,
   `docs/27_Analytics-and-Reporting-Report.md`, `docs/28_Audit-Logs-and-Security-Report.md`
 
@@ -17,7 +17,9 @@ Staff can download what they see as a CSV file:
 | Audit trail | every entry matching the viewer's search / area / action / actor / date filters, with before / after values as JSON | Super Admin |
 | Analytics tables | one table per file: enrollment by program, attendance by course, grade distribution, semester-GPA distribution, results by course (per semester); finance per currency and workload by status (point in time) | Super Admin, University Admin |
 
-Not built: PDF exports, scheduled / emailed reports, exports for other lists
+PDF exports are also provided for executive institutional analytics (`GET /analytics/export/pdf`, `GET /api/analytics/export/pdf`) and student invoices / payment receipts (`GET /invoices/{id}/download`).
+
+Not built: scheduled / emailed reports, exports for other lists
 (students, courses…), a Faculty Admin analytics export (analytics is not
 unit-scoped yet). Enrollment exports by a Faculty Admin are limited to their
 faculty (`docs/32_Faculty-Admin-Scoping-Report.md`).
@@ -74,6 +76,7 @@ sequenceDiagram
 | GET | `/api/enrollments/export` | `/enrollments/export` | `search`, `filters[student_id|section_id|semester_id|status]` |
 | GET | `/api/audit-logs/export` | `/audit-logs/export` | `search`, `filters[area|action|actor_id]`, `from`, `to` |
 | GET | `/api/analytics/export` | `/analytics/export` | `table` (required), `semester_id`; 409 when a semester table has no semester; 422 on an unknown table |
+| GET | `/api/analytics/export/pdf` | `/analytics/export/pdf` | `semester_id`; 409 when no semester; outputs executive PDF report; audited as `export.analytics_pdf` |
 
 ### Authorization
 
@@ -83,6 +86,7 @@ sequenceDiagram
 | Enrollments | ✓ | ✓ | ✓ | 403 | 403 |
 | Audit trail | ✓ | 403 | 403 | 403 | 403 |
 | Analytics | ✓ | ✓ | 403 | 403 | 403 |
+| Analytics PDF | ✓ | ✓ | 403 | 403 | 403 |
 
 ## 4. UI
 
@@ -95,7 +99,7 @@ sequenceDiagram
 - Invoices, Enrollments and Audit logs: an **Export CSV** icon in the page
   header, using the *applied* filters (what the list shows, not unsubmitted
   input).
-- Analytics: a download icon on each chart / table card for the selected
+- Analytics: an **Export PDF** action button in the page header, a download icon on each chart / table card for the selected
   semester, plus finance and workload downloads beside "Current workload".
 
 ## 5. Tests
@@ -111,7 +115,8 @@ sequenceDiagram
 - audit trail: Super Admin only (API and web), area filter, JSON values, the
   export audits itself;
 - analytics: 409 without a semester, every table downloads, unknown table
-  422, Faculty Admin 403, one audit entry per export.
+  422, Faculty Admin 403, one audit entry per export;
+- `test_analytics_pdf_export`: 409 without semester, valid `%PDF-` document on API and web routes, audited (`export.analytics_pdf`), 403 on non-managers.
 
 Full suite: 394 passed. Swagger regenerated; route list and Swagger match
 (215 operations).

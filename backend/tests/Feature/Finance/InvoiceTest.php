@@ -180,6 +180,34 @@ class InvoiceTest extends TestCase
         $this->actingAs($this->student->user)->get('/invoices')->assertForbidden();
     }
 
+    public function test_download_invoice_pdf(): void
+    {
+        $id = $this->createInvoice();
+        $invoice = Invoice::query()->findOrFail($id);
+        $this->actingAs($this->admin)->post("/invoices/{$invoice->id}/payments", $this->payment(['amount' => 100]));
+        $otherStudent = Student::factory()->create();
+
+        // Admin can download via web and API
+        $response = $this->actingAs($this->admin)->get("/invoices/{$invoice->id}/download");
+        $response->assertOk();
+        $response->assertHeader('content-type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF', $response->getContent());
+
+        $apiResponse = $this->actingAs($this->admin)->get("/api/invoices/{$invoice->id}/download");
+        $apiResponse->assertOk();
+        $apiResponse->assertHeader('content-type', 'application/pdf');
+        $this->assertStringStartsWith('%PDF', $apiResponse->getContent());
+
+        // Invoiced student can download own invoice PDF
+        $studentResponse = $this->actingAs($this->student->user)->get("/invoices/{$invoice->id}/download");
+        $studentResponse->assertOk();
+        $studentResponse->assertHeader('content-type', 'application/pdf');
+
+        // Another student cannot download
+        $this->actingAs($otherStudent->user)->get("/invoices/{$invoice->id}/download")->assertForbidden();
+        $this->actingAs($otherStudent->user)->get("/api/invoices/{$invoice->id}/download")->assertForbidden();
+    }
+
     /**
      * @param  array<string, mixed>  $overrides
      * @return array<string, mixed>

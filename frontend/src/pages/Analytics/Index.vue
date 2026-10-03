@@ -1,6 +1,6 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { Download, FileSpreadsheet } from '@lucide/vue'
+import { ChartColumn, Download, FileSpreadsheet, FileText, PieChart as PieIcon } from '@lucide/vue'
 import { exportUrl } from '../../utils/exports'
 import { Head, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
@@ -11,6 +11,7 @@ import PageHeader from '../../components/PageHeader.vue'
 import StatCard from '../../components/StatCard.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
 import BarChart from '../../components/charts/BarChart.vue'
+import PieChart from '../../components/charts/PieChart.vue'
 import { money } from '../../utils/finance'
 
 const props = defineProps({
@@ -27,6 +28,11 @@ const semester = ref(props.semesterId ?? '')
 const semesterOptions = computed(() => props.semesters.map((s) => ({ value: s.id, label: `${s.name}${s.status === 'open' ? ' (open)' : ''}` })))
 const pick = (value) => router.get('/analytics', { semester_id: value || undefined }, { preserveState: true, preserveScroll: true, replace: true })
 
+const enrollmentChartType = ref('bar')
+const gradeChartType = ref('pie')
+const gpaChartType = ref('pie')
+
+const pdfUrl = computed(() => exportUrl('/analytics/export/pdf', { semester_id: props.semesterId }))
 const csv = (table) => exportUrl('/analytics/export', { table, semester_id: props.semesterId })
 const pct = (v) => (v === null || v === undefined ? '—' : `${v}%`)
 const o = computed(() => props.overview)
@@ -53,7 +59,17 @@ const label = (s) => s.replaceAll('_', ' ').replace(/^./, (c) => c.toUpperCase()
 <template>
   <Head title="Analytics - EduCore" />
   <div class="space-y-8">
-    <PageHeader eyebrow="Reports" title="Analytics" description="Enrollment, academic performance and administrative workload. Academic figures use approved grades only." />
+    <PageHeader eyebrow="Reports" title="Analytics" description="Enrollment, academic performance and administrative workload. Academic figures use approved grades only.">
+      <template v-if="overview" #actions>
+        <a
+          :href="pdfUrl"
+          class="inline-flex min-h-10 items-center justify-center gap-2 rounded-md border border-border-default bg-surface px-4 py-2 text-button font-medium text-ink transition duration-150 ease-out hover:bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:border-dark-border dark:bg-dark-surface dark:text-dark-ink dark:hover:bg-dark-surface-2"
+        >
+          <FileText class="size-4 text-primary" />
+          <span>Export PDF</span>
+        </a>
+      </template>
+    </PageHeader>
 
     <div class="max-w-sm">
       <BaseSelect v-model="semester" :options="semesterOptions" label="Semester" placeholder="No semesters yet" @update:model-value="pick" />
@@ -71,29 +87,101 @@ const label = (s) => s.replaceAll('_', ' ').replace(/^./, (c) => c.toUpperCase()
 
       <div class="grid gap-6 xl:grid-cols-2">
         <BaseCard title="Enrollment by program" padding="lg">
-          <template #actions><IconButton :icon="Download" :href="csv('enrollment_by_program')" native label="Download enrollment by program as CSV" /></template>
+          <template #actions>
+            <div class="flex items-center gap-1">
+              <IconButton
+                :icon="enrollmentChartType === 'pie' ? ChartColumn : PieIcon"
+                size="sm"
+                :label="enrollmentChartType === 'pie' ? 'Switch to bar chart' : 'Switch to donut chart'"
+                @click="enrollmentChartType = enrollmentChartType === 'pie' ? 'bar' : 'pie'"
+              />
+              <IconButton :icon="Download" :href="csv('enrollment_by_program')" native size="sm" label="Download enrollment by program as CSV" />
+            </div>
+          </template>
           <EmptyState v-if="!enrollment.by_program.length" title="No enrollments" description="Students' registrations in this semester appear here." />
-          <BarChart v-else horizontal label="Enrollments by program" value-label="Enrollments" :labels="enrollment.by_program.map((p) => p.code)" :details="enrollment.by_program.map((p) => `${p.name} (${p.students} students)`)" :values="enrollment.by_program.map((p) => p.enrollments)" />
+          <PieChart
+            v-else-if="enrollmentChartType === 'pie'"
+            label="Enrollments by program"
+            value-label="Enrollments"
+            :labels="enrollment.by_program.map((p) => p.code)"
+            :details="enrollment.by_program.map((p) => `${p.name} (${p.students} students)`)"
+            :values="enrollment.by_program.map((p) => p.enrollments)"
+          />
+          <BarChart
+            v-else
+            horizontal
+            label="Enrollments by program"
+            value-label="Enrollments"
+            :labels="enrollment.by_program.map((p) => p.code)"
+            :details="enrollment.by_program.map((p) => `${p.name} (${p.students} students)`)"
+            :values="enrollment.by_program.map((p) => p.enrollments)"
+          />
         </BaseCard>
 
         <BaseCard title="Attendance by course" padding="lg">
-          <template #actions><IconButton :icon="Download" :href="csv('attendance_by_course')" native label="Download attendance by course as CSV" /></template>
+          <template #actions><IconButton :icon="Download" :href="csv('attendance_by_course')" native size="sm" label="Download attendance by course as CSV" /></template>
           <template #description>Lowest first — courses under 75% need attention.</template>
           <EmptyState v-if="!academic.attendance_by_course.length" title="No attendance yet" description="Rates appear once sessions are recorded." />
           <BarChart v-else horizontal label="Attendance rate by course" value-label="Attendance" suffix="%" :max="100" :labels="academic.attendance_by_course.map((c) => c.code)" :details="academic.attendance_by_course.map((c) => c.name)" :values="academic.attendance_by_course.map((c) => c.rate)" />
         </BaseCard>
 
         <BaseCard title="Grade distribution" padding="lg">
-          <template #actions><IconButton :icon="Download" :href="csv('grade_distribution')" native label="Download grade distribution as CSV" /></template>
+          <template #actions>
+            <div class="flex items-center gap-1">
+              <IconButton
+                :icon="gradeChartType === 'pie' ? ChartColumn : PieIcon"
+                size="sm"
+                :label="gradeChartType === 'pie' ? 'Switch to bar chart' : 'Switch to donut chart'"
+                @click="gradeChartType = gradeChartType === 'pie' ? 'bar' : 'pie'"
+              />
+              <IconButton :icon="Download" :href="csv('grade_distribution')" native size="sm" label="Download grade distribution as CSV" />
+            </div>
+          </template>
           <template #description>Approved course grades on the active scale.</template>
           <EmptyState v-if="!hasGrades" title="No approved grades" description="The distribution appears once section grades are approved." />
-          <BarChart v-else label="Grades by letter" value-label="Students" :labels="academic.grade_distribution.map((g) => g.grade)" :values="academic.grade_distribution.map((g) => g.total)" />
+          <PieChart
+            v-else-if="gradeChartType === 'pie'"
+            label="Grades by letter"
+            value-label="Students"
+            :labels="academic.grade_distribution.map((g) => g.grade)"
+            :values="academic.grade_distribution.map((g) => g.total)"
+          />
+          <BarChart
+            v-else
+            label="Grades by letter"
+            value-label="Students"
+            :labels="academic.grade_distribution.map((g) => g.grade)"
+            :values="academic.grade_distribution.map((g) => g.total)"
+          />
         </BaseCard>
 
         <BaseCard title="Semester GPA distribution" padding="lg">
-          <template #actions><IconButton :icon="Download" :href="csv('gpa_distribution')" native label="Download semester GPA distribution as CSV" /></template>
+          <template #actions>
+            <div class="flex items-center gap-1">
+              <IconButton
+                :icon="gpaChartType === 'pie' ? ChartColumn : PieIcon"
+                size="sm"
+                :label="gpaChartType === 'pie' ? 'Switch to bar chart' : 'Switch to donut chart'"
+                @click="gpaChartType = gpaChartType === 'pie' ? 'bar' : 'pie'"
+              />
+              <IconButton :icon="Download" :href="csv('gpa_distribution')" native size="sm" label="Download semester GPA distribution as CSV" />
+            </div>
+          </template>
           <EmptyState v-if="!hasGpa" title="No GPAs yet" description="Semester GPAs are computed when grades are approved." />
-          <BarChart v-else label="Students by semester GPA band" value-label="Students" :labels="academic.gpa_distribution.map((g) => g.band)" :values="academic.gpa_distribution.map((g) => g.total)" />
+          <PieChart
+            v-else-if="gpaChartType === 'pie'"
+            label="Students by semester GPA band"
+            value-label="Students"
+            :labels="academic.gpa_distribution.map((g) => g.band)"
+            :values="academic.gpa_distribution.map((g) => g.total)"
+          />
+          <BarChart
+            v-else
+            label="Students by semester GPA band"
+            value-label="Students"
+            :labels="academic.gpa_distribution.map((g) => g.band)"
+            :values="academic.gpa_distribution.map((g) => g.total)"
+          />
         </BaseCard>
       </div>
 

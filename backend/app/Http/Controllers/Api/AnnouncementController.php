@@ -6,12 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\AnnouncementRequest;
 use App\Http\Resources\AnnouncementResource;
 use App\Models\Announcement;
+use App\Models\StoredFile;
 use App\Services\AnnouncementService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Validation\Rule;
 use OpenApi\Attributes as OA;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Announcements (module 9.19).
@@ -90,9 +92,20 @@ class AnnouncementController extends Controller
     {
         $this->authorize('create', Announcement::class);
 
-        $announcement = $this->announcements->create($request->user(), $request->validated(), $request->boolean('publish'));
+        $publish = $request->boolean('publish');
+        $announcement = $this->announcements->create($request->user(), $request->validated(), false);
 
-        return (new AnnouncementResource($announcement->load('author:id,name')))->response()->setStatusCode(201);
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $this->announcements->attachFile($announcement, $file, $request->user());
+            }
+        }
+
+        if ($publish) {
+            $this->announcements->publish($announcement, $request->user());
+        }
+
+        return (new AnnouncementResource($announcement->load(['author:id,name', 'attachments'])))->response()->setStatusCode(201);
     }
 
     #[OA\Get(
@@ -114,7 +127,7 @@ class AnnouncementController extends Controller
     {
         $this->authorize('view', $announcement);
 
-        return new AnnouncementResource($announcement->load('author:id,name'));
+        return new AnnouncementResource($announcement->load(['author:id,name', 'attachments']));
     }
 
     #[OA\Put(
@@ -155,7 +168,24 @@ class AnnouncementController extends Controller
     {
         $this->authorize('update', $announcement);
 
-        return new AnnouncementResource($this->announcements->update($announcement, $request->user(), $request->validated())->load('author:id,name'));
+        $announcement = $this->announcements->update($announcement, $request->user(), $request->validated());
+
+        if ($request->has('remove_attachment_ids')) {
+            foreach ((array) $request->input('remove_attachment_ids') as $id) {
+                $attachment = $announcement->attachments()->find($id);
+                if ($attachment) {
+                    $this->announcements->deleteAttachment($announcement, $attachment);
+                }
+            }
+        }
+
+        if ($request->hasFile('attachments')) {
+            foreach ($request->file('attachments') as $file) {
+                $this->announcements->attachFile($announcement, $file, $request->user());
+            }
+        }
+
+        return new AnnouncementResource($announcement->load(['author:id,name', 'attachments']));
     }
 
     #[OA\Post(
@@ -177,7 +207,7 @@ class AnnouncementController extends Controller
     {
         $this->authorize('update', $announcement);
 
-        return new AnnouncementResource($this->announcements->publish($announcement, $request->user())->load('author:id,name'));
+        return new AnnouncementResource($this->announcements->publish($announcement, $request->user())->load(['author:id,name', 'attachments']));
     }
 
     #[OA\Post(
@@ -199,7 +229,32 @@ class AnnouncementController extends Controller
     {
         $this->authorize('update', $announcement);
 
-        return new AnnouncementResource($this->announcements->archive($announcement)->load('author:id,name'));
+        return new AnnouncementResource($this->announcements->archive($announcement)->load(['author:id,name', 'attachments']));
+    }
+
+    #[OA\Get(
+        path: '/announcements/{announcement}/attachments/{file}/download',
+        summary: 'Download an announcement attachment',
+        description: 'Available to any user within the audience of the announcement, its author, or managers.',
+        operationId: 'downloadAnnouncementAttachment',
+        tags: ['Announcements'],
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\PathParameter(name: 'announcement', required: true, schema: new OA\Schema(type: 'integer', format: 'int64')),
+            new OA\PathParameter(name: 'file', required: true, schema: new OA\Schema(type: 'integer', format: 'int64')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'File stream.', content: new OA\MediaType(mediaType: 'application/octet-stream')),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not allowed to view announcement.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 404, description: 'Attachment not found.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+        ]
+    )]
+    public function downloadAttachment(Announcement $announcement, StoredFile $file): StreamedResponse
+    {
+        $this->authorize('view', $announcement);
+
+        return $this->announcements->downloadAttachment($announcement, $file);
     }
 
     #[OA\Delete(

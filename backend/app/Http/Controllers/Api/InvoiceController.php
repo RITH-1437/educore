@@ -13,6 +13,7 @@ use App\Services\InvoiceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Http\Response;
 use Illuminate\Validation\Rule;
 use OpenApi\Attributes as OA;
 
@@ -97,6 +98,33 @@ class InvoiceController extends Controller
         $this->invoices->refreshOverdue();
 
         return new InvoiceResource($invoice->refresh()->load(self::DETAIL));
+    }
+
+    #[OA\Get(
+        path: '/invoices/{invoice}/download',
+        summary: 'Download invoice PDF',
+        description: 'Returns an official PDF invoice and payment receipt. Accessible by managers and the invoiced student.',
+        operationId: 'downloadInvoicePdf',
+        tags: ['Finance'],
+        security: [['sanctum' => []]],
+        parameters: [new OA\PathParameter(name: 'invoice', required: true, schema: new OA\Schema(type: 'integer', format: 'int64'))],
+        responses: [
+            new OA\Response(response: 200, description: 'The invoice PDF.', content: new OA\MediaType(mediaType: 'application/pdf')),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a manager or the invoiced student.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 404, description: 'Not found.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+        ]
+    )]
+    public function download(Invoice $invoice): Response
+    {
+        $this->authorize('view', $invoice);
+        $content = $this->invoices->renderPdf($invoice);
+        $filename = "{$invoice->invoice_number}.pdf";
+
+        return response($content, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
     }
 
     #[OA\Put(

@@ -155,6 +155,35 @@ class CsvExportTest extends TestCase
         $this->assertSame(8, AuditLog::query()->where('action', 'export.analytics')->count());
     }
 
+    public function test_analytics_pdf_export(): void
+    {
+        // No semester yet -> 409
+        $this->actingAs($this->admin)->getJson('/api/analytics/export/pdf')->assertStatus(409);
+
+        $semester = Semester::factory()->create();
+        Enrollment::factory()->create(['student_id' => $this->student->id]);
+
+        $response = $this->actingAs($this->uniAdmin)->get("/api/analytics/export/pdf?semester_id={$semester->id}")
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+
+        $this->assertStringStartsWith('%PDF-', $response->getContent());
+
+        // Web route test
+        $webResponse = $this->actingAs($this->admin)->get("/analytics/export/pdf?semester_id={$semester->id}")
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
+
+        $this->assertStringStartsWith('%PDF-', $webResponse->getContent());
+
+        // Audited
+        $this->assertTrue(AuditLog::query()->where('action', 'export.analytics_pdf')->exists());
+
+        // Non-managers forbidden
+        $this->actingAs($this->facultyAdmin)->get('/api/analytics/export/pdf')->assertForbidden();
+        $this->actingAs($this->student->user)->get('/api/analytics/export/pdf')->assertForbidden();
+    }
+
     /**
      * @return list<list<string>>
      */

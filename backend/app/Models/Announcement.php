@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Carbon;
 
 /**
@@ -64,6 +65,12 @@ class Announcement extends Model
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
+    }
+
+    /** Attachments linked to this announcement. */
+    public function attachments(): MorphMany
+    {
+        return $this->morphMany(StoredFile::class, 'fileable');
     }
 
     /** The targeted record (faculty, department, program, section or course), if any. */

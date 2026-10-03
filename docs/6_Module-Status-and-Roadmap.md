@@ -33,12 +33,12 @@
 | 9.15 | Student Academic Dashboard | `[Implemented]` |
 | 9.16 | Document Management | `[Implemented]` (student certificate and internship letter in report 30) |
 | 9.17 | Digital Document Verification | `[Implemented]` |
-| 9.18 | Invoices & Payment Records | `[Implemented]` |
-| 9.19 | Announcements | `[Implemented]` |
+| 9.18 | Invoices & Payment Records | `[Implemented]` (invoice & receipt PDF download in report 23) |
+| 9.19 | Announcements | `[Implemented]` (file attachments in report 24) |
 | 9.20 | Email Notifications | `[Implemented]` (password emails `[Future]`) |
 | 9.21 | Telegram Notifications | `[Implemented]` (class reminders `[Future]`) |
 | 9.22 | Internship Management | `[Implemented]` (opportunity postings, letter document `[Future]`) |
-| 9.23 | Analytics & Reporting | `[Implemented]` (CSV exports in report 31; PDF exports, faculty-scoped views `[Future]`) |
+| 9.23 | Analytics & Reporting | `[Implemented]` (CSV & PDF exports, modern Pie/Donut charts in report 27 & 31; faculty-scoped views `[Future]`) |
 | 9.24 | Audit Logs & Security | `[Implemented]` (CSV export in report 31; retention `[Future]`) |
 
 > No module is documented as implemented unless it is genuinely tested and running

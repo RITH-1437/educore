@@ -1,6 +1,6 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { ArrowLeft, Ban, Pencil, Undo2 } from '@lucide/vue'
+import { ArrowLeft, Ban, Download, Pencil, Undo2 } from '@lucide/vue'
 import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -56,6 +56,7 @@ const cancelInvoice = async () => {
     <PageHeader eyebrow="Invoice" :title="invoice.invoice_number" :description="`${invoice.title} · ${invoice.student.full_name} (${invoice.student.student_number})`">
       <template #actions>
         <IconButton :icon="ArrowLeft" :href="canManage ? '/invoices' : '/my-invoices'" size="md" label="Back to invoices" />
+        <IconButton :icon="Download" native :href="`/invoices/${invoice.id}/download`" size="md" label="Download PDF" />
         <IconButton v-if="editable" :icon="Pencil" :href="`/invoices/${invoice.id}/edit`" size="md" label="Edit invoice" />
         <IconButton v-if="canManage && !cancelled && invoice.amount_paid === 0" :icon="Ban" size="md" variant="danger" label="Cancel invoice" @click="cancelInvoice" />
       </template>

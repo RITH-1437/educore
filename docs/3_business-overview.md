@@ -615,8 +615,8 @@ users, main business activities, and expected outputs.
 - **Delivered:** itemised invoices (USD / KHR, discount, sequential numbers),
   payment records within the balance, append-only reversals, cancellation
   instead of deletion, derived statuses kept current (overdue refreshed on read
-  and by a daily command), a per-currency student summary and "My invoices".
-  Invoice PDFs and automatic tuition billing are [Future].
+  and by a daily command), invoice and receipt PDF download, a per-currency student summary and "My invoices".
+  Automatic tuition billing is [Future].
   See [23_Invoices-and-Payments-Report.md](23_Invoices-and-Payments-Report.md).
 
 ### 9.19 Announcements [Implemented]
@@ -627,10 +627,10 @@ users, main business activities, and expected outputs.
 - **Expected outputs:** a structured announcement feed per audience.
 - **Delivered:** drafts → published → archived announcements to everyone, a
   role group, or one faculty / department / program / section / course;
-  lecturers write to the sections and courses they teach; every user has a
-  live feed resolved from their memberships, and the student dashboard shows
-  the latest three. Email / Telegram delivery ships with 9.20 / 9.21;
-  attachments and read receipts are [Future].
+  lecturers write to the sections and courses they teach; file attachments via private
+  storage; every user has a live feed resolved from their memberships, and the
+  student dashboard shows the latest three. Email / Telegram delivery ships with 9.20 / 9.21;
+  read receipts are [Future].
   See [24_Announcements-Report.md](24_Announcements-Report.md).
 
 ### 9.20 Email Notifications [Implemented]
@@ -682,8 +682,9 @@ users, main business activities, and expected outputs.
   headline numbers, enrollment by program, attendance and results per course,
   grade and GPA distributions — plus the current workload (documents,
   internships, invoices, finance per currency), all computed live in SQL from
-  the domain tables, each table downloadable as CSV. A Faculty Admin sees
-  their faculty's headline numbers on their dashboard; PDF exports, a
+  the domain tables, each table downloadable as CSV, executive PDF report export,
+  and modern interactive Chart.js Pie/Donut charts with view-mode toggles. A Faculty Admin sees
+  their faculty's headline numbers on their dashboard; a
   faculty-scoped analytics page and trends are [Future].
   See [27_Analytics-and-Reporting-Report.md](27_Analytics-and-Reporting-Report.md),
   [31_CSV-Exports-Report.md](31_CSV-Exports-Report.md) and

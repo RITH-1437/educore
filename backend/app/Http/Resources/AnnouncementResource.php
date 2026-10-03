@@ -29,6 +29,15 @@ class AnnouncementResource extends JsonResource
             'published_at' => $this->published_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
             'author' => $this->whenLoaded('author', fn () => ['id' => $this->author->id, 'name' => $this->author->name]),
+            'attachments' => $this->relationLoaded('attachments')
+                ? $this->attachments->map(fn ($f) => [
+                    'id' => $f->id,
+                    'original_name' => $f->original_name,
+                    'mime_type' => $f->mime_type,
+                    'size' => $f->size,
+                    'download_url' => url("/api/announcements/{$this->id}/attachments/{$f->id}/download"),
+                ])->values()
+                : [],
         ];
     }
 }

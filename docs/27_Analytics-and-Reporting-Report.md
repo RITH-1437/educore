@@ -1,8 +1,8 @@
 # 27 — Analytics & Reporting Report (Module 9.23)
 
-- **Date:** 2026-10-02
+- **Date:** 2026-10-02 (updated 2026-10-03)
 - **Module:** 9.23 Analytics & Reporting (business-overview §9.23)
-- **Status:** `[Implemented]` (CSV exports in `docs/31_CSV-Exports-Report.md`; PDF exports, faculty-scoped views and trends over time `[Future]`)
+- **Status:** `[Implemented]` (CSV and PDF exports implemented; faculty-scoped views and trends over time `[Future]`)
 - **Depends on:** every academic and administrative module (read-only)
 
 ## 1. Scope
@@ -13,7 +13,10 @@ academic performance (grade and semester-GPA distributions, attendance and
 results per course) for a chosen semester, and the current administrative
 workload (documents, internships, invoices, finance per currency).
 
-Not built: PDF exports (CSV exports were added later — `docs/31_CSV-Exports-Report.md`), a Faculty Admin view scoped to their unit (needs
+Comprehensive executive PDF report export (`GET /analytics/export/pdf`, `GET /api/analytics/export/pdf`)
+and modern interactive Chart.js Pie/Donut charts (`components/charts/PieChart.vue`) with view-mode toggling are implemented.
+
+Not built: a Faculty Admin view scoped to their unit (needs
 unit scoping on the user record — `skills/analytics-reporting` §12 forbids
 returning institution-wide data to them), multi-semester trend charts,
 predictive analytics (out of scope by the business overview).
@@ -66,10 +69,11 @@ Chosen with the `dataviz` skill and `docs/branding/UI-COMPONENTS.md` §10:
   sections, active lecturers / attendance rate, approved grades, pass rate,
   average semester GPA. Counts with a list link to it (enrollments and
   offerings filtered to the semester, active students, active lecturers).
-- Magnitude comparisons (enrollment by program, attendance by course, grade
-  and GPA distributions) are **single-series bar charts in one hue** — no
-  categorical palette, so no rainbow and nothing that depends on telling
-  colors apart; long category lists are horizontal bars sorted by value.
+- Magnitude comparisons and distributions support **both single-series bar charts and modern donut/pie charts** (`components/charts/PieChart.vue`):
+  - Thin cutout donut (68%) with centered headline count and metric label.
+  - Interactive legend with color dots and share percentages.
+  - Accessible table toggle for full tabular data review.
+  - One-click instant view-mode toggling between Bar chart and Donut chart on Enrollment, Grade, and GPA cards.
 - Status breakdowns are **labelled lists with status badges** (text + color),
   not multi-color charts.
 - `components/charts/BarChart.vue`: thin bars, 4px rounded data end with a
@@ -77,6 +81,9 @@ Chosen with the `dataviz` skill and `docs/branding/UI-COMPONENTS.md` §10:
   the card title names it), hover tooltip over the whole band, an accessible
   name listing every value, and a **Show as table** toggle; follows dark mode
   by observing the `<html>` class; respects `prefers-reduced-motion`.
+- `components/charts/PieChart.vue`: Chart.js doughnut/pie chart with 68% cutout,
+  EduCore theme palettes (light & dark), accessible data table alternative, percentage
+  tooltips, and responsive legend list.
 - The series color was validated with the skill's palette validator:
   `#2563EB` passes on the light surface; in dark mode `#60A5FA`
   (`dark-primary`) fails the lightness band, so the chart uses `#3B82F6`
@@ -97,21 +104,21 @@ under *Overview* to Super Admin and University Admin only.
 | GET | `/api/analytics/enrollment?semester_id=` | By program and by status |
 | GET | `/api/analytics/academic?semester_id=` | Grade / GPA distributions, attendance and results per course |
 | GET | `/api/analytics/administrative` | Workload by status, finance per currency |
+| GET | `/api/analytics/export?table=&semester_id=` | CSV export per table (audited) |
+| GET | `/api/analytics/export/pdf?semester_id=` | Executive institutional PDF report (audited) |
 
 Semester-bound responses are `{ semester, data }` (both null when no semester
-exists). Web: `GET /analytics` (`Analytics/Index`, all sections in one page).
+exists). Web: `GET /analytics` (`Analytics/Index`, all sections in one page),
+`GET /analytics/export` (CSV), and `GET /analytics/export/pdf` (PDF).
 
 ## 6. Tests
 
-`backend/tests/Feature/Analytics/AnalyticsTest.php` — 4 tests: every figure
-against a hand-counted fixture (5 counted enrollments of which a dropped one
-and another semester's are excluded, attendance 75 % with excused ignored,
-2 approved grades of 3 with 50 % pass, letter counts on the scale, GPA bands,
-per-course attendance lowest first, per-course results, another semester's
-own numbers, unknown semester 422); finance per currency with cancelled
-invoices excluded and overdue refreshed; an empty system (no semesters) is
-safe on API and page; manager-only access on all four endpoints and the page.
-Full suite: **373 passed**.
+`backend/tests/Feature/Analytics/AnalyticsTest.php` and `backend/tests/Feature/Exports/CsvExportTest.php`:
+- Hand-counted aggregates fixture tests across all endpoints;
+- Zero-data / empty system safety;
+- Finance per currency separation;
+- Manager-only RBAC enforcement;
+- `test_analytics_pdf_export`: Validates 409 when no semester exists, valid `%PDF-` document output for managers on both API and web routes, audit logging (`export.analytics_pdf`), and 403 rejection of non-managers.
 
 Not verified: the rendered charts were not inspected in a browser in this
 session (no browser tool available); the build is clean and the data contract

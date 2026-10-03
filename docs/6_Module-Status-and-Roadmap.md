@@ -32,7 +32,7 @@
 | 9.14 | Grades & GPA | `[Implemented]` (transcript by 9.16; finalize lock in report 30) |
 | 9.15 | Student Academic Dashboard | `[Implemented]` |
 | 9.16 | Document Management | `[Implemented]` (student certificate and internship letter in report 30) |
-| 9.17 | Digital Document Verification | `[Implemented]` (QR image `[Planned]`) |
+| 9.17 | Digital Document Verification | `[Implemented]` |
 | 9.18 | Invoices & Payment Records | `[Implemented]` |
 | 9.19 | Announcements | `[Implemented]` |
 | 9.20 | Email Notifications | `[Implemented]` (password emails `[Future]`) |
@@ -405,9 +405,10 @@ A module is not done until its report exists and its tests pass — never label
   (report 36). All role dashboards are fully operational.
 - `[Done]` 9.16 / 9.17 Document Management & Verification. Report:
   `docs/22_Documents-and-Verification-Report.md`. `[Done]` Transition audit
-  trail (9.24, `docs/28_Audit-Logs-and-Security-Report.md`). `[Open]` QR image
-  on the PDF, document fees (`requires_fee`) not billed, document-type
-  management screen.
+  trail (9.24, `docs/28_Audit-Logs-and-Security-Report.md`). `[Done]` Embedded
+  SVG QR code image on all generated document PDFs (`bacon/bacon-qr-code`).
+  `[Open]` Document fees (`requires_fee`) not billed, document-type management
+  screen.
 - `[Done]` 9.18 Invoices & Payment Records. Report:
   `docs/23_Invoices-and-Payments-Report.md`. `[Done]` The `scheduler`
   container (9.20) now runs `invoices:refresh-statuses` daily. `[Done]` Finance

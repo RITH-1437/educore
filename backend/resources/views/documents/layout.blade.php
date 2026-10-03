@@ -35,8 +35,19 @@
 </header>
 
 <footer>
-    Issued {{ $issuedOn }} by EduCore. Verify this document at {{ $verifyUrl }}<br>
-    Verification code: <span class="code">{{ $token }}</span>
+    <table style="width: 100%; border-collapse: collapse; border: none; margin: 0; padding: 0;">
+        <tr>
+            <td style="vertical-align: middle; border: none; padding: 0;">
+                Issued {{ $issuedOn }} by EduCore. Scan QR or verify at {{ $verifyUrl }}<br>
+                Verification code: <span class="code">{{ $token }}</span>
+            </td>
+            @if(!empty($qrCode))
+            <td style="text-align: right; vertical-align: middle; border: none; padding: 0; width: 44px;">
+                <img src="{{ $qrCode }}" alt="Verify QR" width="40" height="40" style="display: inline-block;">
+            </td>
+            @endif
+        </tr>
+    </table>
 </footer>
 
 <main>

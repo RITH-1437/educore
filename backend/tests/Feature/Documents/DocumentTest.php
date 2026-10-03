@@ -18,6 +18,7 @@ use App\Models\Section;
 use App\Models\Semester;
 use App\Models\Student;
 use App\Models\User;
+use App\Services\DocumentService;
 use App\Services\GpaService;
 use Database\Seeders\DocumentTypeSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -81,6 +82,13 @@ class DocumentTest extends TestCase
         $this->assertStringStartsWith('%PDF', Storage::disk('s3')->get($document->file_key));
         $this->assertSame(hash('sha256', Storage::disk('s3')->get($document->file_key)), $response->json('data.document.checksum'));
         $this->assertSame(64, strlen($document->verification_token));
+
+        $service = app(DocumentService::class);
+        $verifyUrl = $service->verificationUrl($document->verification_token);
+        $qrSvg = $service->qrCodeSvg($verifyUrl);
+        $this->assertStringStartsWith('<?xml', $qrSvg);
+        $this->assertStringContainsString('<svg', $qrSvg);
+        $this->assertStringStartsWith('data:image/svg+xml;base64,', $service->qrCodeDataUri($verifyUrl));
 
         // Owner and staff download; another student cannot.
         $this->actingAs($this->student->user)->get("/api/documents/{$document->id}/download")->assertOk()->assertHeader('content-type', 'application/pdf');

@@ -14,6 +14,10 @@ use App\Models\Student;
 use App\Models\University;
 use App\Models\User;
 use App\Notifications\DocumentRequestUpdated;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -212,11 +216,34 @@ class DocumentService
         return rtrim((string) config('app.url'), '/')."/verify/{$token}";
     }
 
+    /**
+     * Generate an SVG string of the QR code pointing to the verification URL.
+     */
+    public function qrCodeSvg(string $url): string
+    {
+        $renderer = new ImageRenderer(
+            new RendererStyle(120, 1),
+            new SvgImageBackEnd
+        );
+        $writer = new Writer($renderer);
+
+        return $writer->writeString($url);
+    }
+
+    /**
+     * Generate a data URI for the SVG QR code suitable for DomPDF <img> embedding.
+     */
+    public function qrCodeDataUri(string $url): string
+    {
+        return 'data:image/svg+xml;base64,'.base64_encode($this->qrCodeSvg($url));
+    }
+
     // ---------------------------------------------------------------- render
 
     private function render(DocumentRequest $request, string $token): string
     {
         $student = $request->student->loadMissing('currentProgram.program.department.faculty');
+        $verifyUrl = $this->verificationUrl($token);
         $data = [
             'request' => $request,
             'student' => $student,
@@ -224,7 +251,8 @@ class DocumentService
             'university' => University::query()->where('is_current', true)->first(),
             'issuedOn' => now()->toDateString(),
             'token' => $token,
-            'verifyUrl' => $this->verificationUrl($token),
+            'verifyUrl' => $verifyUrl,
+            'qrCode' => $this->qrCodeDataUri($verifyUrl),
         ];
 
         $view = match ($request->type->code) {

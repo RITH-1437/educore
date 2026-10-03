@@ -600,10 +600,11 @@ users, main business activities, and expected outputs.
 - **Primary users:** anyone with a document and internet access (employers, institutions, graduates).
 - **Main business activities:** scan/enter a QR code to verify validity.
 - **Expected outputs:** a clear valid/invalid verification result per document.
-- **Delivered:** every PDF prints a verification URL and code; the public
-  `/verify/{code}` page (and API) reports valid / revoked / not found with
-  minimal facts and the file's SHA-256, logs each lookup and is rate limited.
-  A scannable QR image is [Planned]. See [22_Documents-and-Verification-Report.md](22_Documents-and-Verification-Report.md).
+- **Delivered:** every PDF embeds an inline scannable QR code alongside the
+  printed verification URL and code; the public `/verify/{code}` page (and API)
+  reports valid / revoked / not found with minimal facts and the file's SHA-256,
+  logs each lookup and is rate limited.
+  See [22_Documents-and-Verification-Report.md](22_Documents-and-Verification-Report.md).
 
 ### 9.18 Invoices & Payment Records [Implemented]
 

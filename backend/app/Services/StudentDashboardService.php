@@ -116,9 +116,7 @@ class StudentDashboardService
     {
         $today = Carbon::today();
 
-        if ($semester === null
-            || ($semester->start_date && $today->lt($semester->start_date))
-            || ($semester->end_date && $today->gt($semester->end_date))) {
+        if ($semester === null || ! $semester->covers($today)) {
             return collect();
         }
 

@@ -400,8 +400,9 @@ A module is not done until its report exists and its tests pass — never label
   `[Done]` The `finalized` grade lock step (finalize; Super Admin reopen with reason). `[Done]` The transcript document ships with 9.16.
 - `[Done]` 9.15 Student Academic Dashboard. Report:
   `docs/21_Student-Academic-Dashboard-Report.md`. Its announcements card
-  shipped with 9.19. `[Done]` Faculty Admin dashboard (report 34). `[Open]`
-  Lecturer and University Admin dashboards are still previews.
+  shipped with 9.19. `[Done]` Faculty Admin dashboard (report 34). `[Done]`
+  Lecturer dashboard (report 35). `[Done]` University Admin dashboard
+  (report 36). All role dashboards are fully operational.
 - `[Done]` 9.16 / 9.17 Document Management & Verification. Report:
   `docs/22_Documents-and-Verification-Report.md`. `[Done]` Transition audit
   trail (9.24, `docs/28_Audit-Logs-and-Security-Report.md`). `[Open]` QR image
@@ -503,8 +504,8 @@ A module is not done until its report exists and its tests pass — never label
   queue filtered to that status) and their faculty's headline numbers for the
   current semester on the analytics definitions; `GET
   /api/faculties/{faculty}/dashboard` serves managers and the faculty's admin.
-  Report: `docs/34_Faculty-Admin-Dashboard-Report.md`. `[Open]` Lecturer and
-  University Admin dashboards (still previews).
+  Report: `docs/34_Faculty-Admin-Dashboard-Report.md`. `[Done]` Lecturer
+  dashboard (report 35). `[Done]` University Admin dashboard (report 36).
 - `[Done]` Sidebar scrolling and collapse (2026-10-03): the collapsed sidebar
   could not scroll (its nav was `overflow-visible` so tooltips could show), so
   on 1366×768 and even 1920×1080 screens the lower items were unreachable and
@@ -515,3 +516,18 @@ A module is not done until its report exists and its tests pass — never label
   scrollbar is thin, and the current page's item is kept in view. Checked in
   headless Chrome at 1366×768, 1920×1080 and the 390×844 drawer, light and
   dark, mouse and keyboard (`docs/branding/UI-COMPONENTS.md` §8).
+- `[Done]` Lecturer dashboard (2026-10-03): `/dashboard` shows the lecturer's
+  teaching workload for the current semester (today's scheduled classes,
+  registers waiting to be taken, pending submissions to grade, upcoming exams,
+  and section grade-sheet progress with direct action shortcuts); `GET
+  /api/lecturers/{lecturer}/dashboard` serves the lecturer and authorized staff
+  (`LecturerPolicy::view`). Report: `docs/35_Lecturer-Dashboard-Report.md`.
+  `[Done]` University Admin dashboard (report 36).
+- `[Done]` University Admin dashboard (2026-10-03): `/dashboard` shows
+  institution-wide action queues (pending document requests, PDFs to generate,
+  internship applications to review/decide, overdue invoices) and
+  university-wide academic headline numbers for the active semester; `GET
+  /api/university/dashboard` serves Super Admin and University Admin. Report:
+  `docs/36_University-Admin-Dashboard-Report.md`.
+
+

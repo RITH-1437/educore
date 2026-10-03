@@ -79,4 +79,11 @@ class Semester extends Model
     {
         return $query->where('status', $status->value);
     }
+
+    /** Whether the day falls inside the semester's dates (a missing date leaves that side open). */
+    public function covers(Carbon $day): bool
+    {
+        return ($this->start_date === null || $day->gte($this->start_date))
+            && ($this->end_date === null || $day->lte($this->end_date));
+    }
 }

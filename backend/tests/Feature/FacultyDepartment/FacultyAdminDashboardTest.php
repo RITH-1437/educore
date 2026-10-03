@@ -124,7 +124,7 @@ class FacultyAdminDashboardTest extends TestCase
         $universityAdmin = $this->userWithRole('university-admin');
         $this->actingAs($universityAdmin)->getJson("/api/faculties/{$this->mine->id}/dashboard")->assertOk()
             ->assertJsonPath('data.faculty.name', 'Faculty of Engineering');
-        $this->actingAs($universityAdmin)->get('/dashboard')->assertOk()->assertInertia(fn (Assert $page) => $page->component('RoleDashboard'));
+        $this->actingAs($universityAdmin)->get('/dashboard')->assertOk()->assertInertia(fn (Assert $page) => $page->component('UniversityAdmin/Dashboard'));
     }
 
     private function section(Faculty $faculty, Semester $semester, string $status): Section

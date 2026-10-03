@@ -52,7 +52,7 @@ class LoginTest extends TestCase
 
     public function test_other_role_can_view_a_sample_role_dashboard(): void
     {
-        $role = Role::factory()->withSlug('lecturer')->create();
+        $role = Role::factory()->withSlug('student')->create();
         $user = User::factory()->create(['role_id' => $role->id]);
 
         $this->actingAs($user)
@@ -60,8 +60,8 @@ class LoginTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('RoleDashboard')
-                ->where('role', 'lecturer')
-                ->where('title', 'Lecturer Dashboard'));
+                ->where('role', 'student')
+                ->where('title', 'Student Dashboard'));
     }
 
     public function test_non_super_admin_cannot_view_admin_dashboard(): void

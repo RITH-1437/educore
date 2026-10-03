@@ -7,7 +7,9 @@ use App\Models\Role;
 use App\Models\Semester;
 use App\Models\User;
 use App\Services\FacultyDashboardService;
+use App\Services\LecturerDashboardService;
 use App\Services\StudentDashboardService;
+use App\Services\UniversityDashboardService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -94,8 +96,13 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function roleDashboard(Request $request, StudentDashboardService $students, FacultyDashboardService $faculties): Response
-    {
+    public function roleDashboard(
+        Request $request,
+        StudentDashboardService $students,
+        FacultyDashboardService $faculties,
+        LecturerDashboardService $lecturers,
+        UniversityDashboardService $university,
+    ): Response {
         $user = $request->user();
 
         // Students with a profile get their academic dashboard (module 9.15).
@@ -114,24 +121,28 @@ class DashboardController extends Controller
             ]);
         }
 
+        // Lecturers get their teaching dashboard (report 35); no linked profile = no teaching data.
+        if ($user->isRole('lecturer')) {
+            return Inertia::render('Lecturer/Dashboard', [
+                'dashboard' => $user->lecturer ? $lecturers->build($user->lecturer) : null,
+                'userName' => $user->name,
+            ]);
+        }
+
+        // University Admins get their institution-wide dashboard (report 36).
+        if ($user->isRole('university-admin')) {
+            return Inertia::render('UniversityAdmin/Dashboard', [
+                'dashboard' => $university->build(),
+                'userName' => $user->name,
+            ]);
+        }
+
         $role = $user->role?->slug;
-        $dashboard = match ($role) {
-            'university-admin' => [
-                'title' => 'University Admin Dashboard',
-                'description' => 'A preview of university-wide academic operations and administration.',
-                'areas' => ['Academic calendar', 'Faculties and departments', 'Programs and courses', 'Students and lecturers', 'Announcements and reports'],
-            ],
-            'lecturer' => [
-                'title' => 'Lecturer Dashboard',
-                'description' => 'A preview of teaching, assessment, and course tools.',
-                'areas' => ['My courses', 'Class schedule', 'Attendance', 'Assignments and exams', 'Grades and materials'],
-            ],
-            default => [
-                'title' => 'Student Dashboard',
-                'description' => 'A preview of personal academic information and student services.',
-                'areas' => ['My courses', 'Timetable', 'Attendance', 'Grades and GPA', 'Documents and announcements'],
-            ],
-        };
+        $dashboard = [
+            'title' => 'Student Dashboard',
+            'description' => 'A preview of personal academic information and student services.',
+            'areas' => ['My courses', 'Timetable', 'Attendance', 'Grades and GPA', 'Documents and announcements'],
+        ];
 
         return Inertia::render('RoleDashboard', [
             ...$dashboard,

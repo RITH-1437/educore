@@ -307,6 +307,8 @@ academic years, semesters, announcements, document requests, and payment records
 
 **Information accessible:** institution-wide academic and administrative records.
 
+- **Delivered:** `[Implemented]` institutional management across all units, academic calendar, courses, offerings, sections, enrollments, documents, invoices, announcements, and a dedicated University Admin dashboard (`/dashboard` and `GET /api/university/dashboard`) aggregating waiting action queues (pending requests, PDFs to generate, internship applications to review/decide, overdue invoices) and university academic headline metrics for the active semester. See [36_University-Admin-Dashboard-Report.md](36_University-Admin-Dashboard-Report.md).
+
 ### 8.3 Faculty/Department Admin
 
 **Responsibilities:** academic operations within an assigned faculty or department.
@@ -411,10 +413,14 @@ users, main business activities, and expected outputs.
 - **Delivered:** lecturer profiles linked to Lecturer-role login accounts
   (create a new account or link an existing one), home department, position,
   specialization, employment type, deactivate/reactivate mirrored onto the
-  account, guarded delete, `/api/lecturers`, seeded staff. A lecturer can read
-  their own profile. See [12_Lecturer-Management-Report.md](12_Lecturer-Management-Report.md).
-- **Not yet delivered `[Planned]`:** section assignment (9.8) and lecturer
-  self-service editing.
+  account, guarded delete, `/api/lecturers`, section assignments, faculty
+  scoping, and the teaching dashboard (`/dashboard` and
+  `GET /api/lecturers/{lecturer}/dashboard`). A lecturer can read their own
+  profile and teaching dashboard. See [12_Lecturer-Management-Report.md](12_Lecturer-Management-Report.md),
+  [14_Class-and-Section-Report.md](14_Class-and-Section-Report.md),
+  [32_Faculty-Admin-Scoping-Report.md](32_Faculty-Admin-Scoping-Report.md), and
+  [35_Lecturer-Dashboard-Report.md](35_Lecturer-Dashboard-Report.md).
+- **Not yet delivered `[Planned]`:** lecturer self-service profile editing.
 
 ### 9.4 Faculty & Department Management [Implemented]
 
@@ -563,7 +569,13 @@ users, main business activities, and expected outputs.
   per course), today's classes, assignments due, upcoming exams and recent
   approved grades, all read from the owning modules, plus
   `GET /api/students/{student}/dashboard`, and (since 9.19) the latest
-  announcements. See [21_Student-Academic-Dashboard-Report.md](21_Student-Academic-Dashboard-Report.md).
+  announcements. All five roles now have dedicated operational dashboards:
+  Super Admin ([8_System-Error-Logs-Report.md](8_System-Error-Logs-Report.md)),
+  University Admin ([36_University-Admin-Dashboard-Report.md](36_University-Admin-Dashboard-Report.md)),
+  Faculty Admin ([34_Faculty-Admin-Dashboard-Report.md](34_Faculty-Admin-Dashboard-Report.md)),
+  Lecturer ([35_Lecturer-Dashboard-Report.md](35_Lecturer-Dashboard-Report.md)),
+  and Student ([21_Student-Academic-Dashboard-Report.md](21_Student-Academic-Dashboard-Report.md)).
+  See [21_Student-Academic-Dashboard-Report.md](21_Student-Academic-Dashboard-Report.md).
 
 ### 9.16 Document Management [Implemented]
 

@@ -210,6 +210,30 @@ class ExamService
             });
     }
 
+    /**
+     * Exams of the given sections scheduled from today on, soonest first, in
+     * the row shape of forStudent() without results (lecturer dashboard).
+     *
+     * @param  list<int>  $sectionIds
+     * @return Collection<int, array<string, mixed>>
+     */
+    public function upcoming(array $sectionIds): Collection
+    {
+        return Exam::query()
+            ->whereIn('section_id', $sectionIds)
+            ->where('scheduled_date', '>=', Carbon::today()->toDateString())
+            ->with('section.offering.course:id,code,name', 'section.offering.semester:id,name')
+            ->orderBy('scheduled_date')
+            ->orderBy('start_time')
+            ->get()
+            ->map(fn (Exam $exam) => [
+                ...(new ExamResource($exam))->resolve(),
+                'course' => ['code' => $exam->section->offering->course->code, 'name' => $exam->section->offering->course->name],
+                'section_code' => $exam->section->code,
+                'semester' => $exam->section->offering->semester->name,
+            ]);
+    }
+
     private function assertOpenSemester(Section $section): void
     {
         if ($section->offering->semester->status === SemesterStatus::Completed) {

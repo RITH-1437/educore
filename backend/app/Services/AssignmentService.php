@@ -12,6 +12,7 @@ use App\Models\Student;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -170,6 +171,25 @@ class AssignmentService
 
             return $submission->refresh();
         });
+    }
+
+    /**
+     * Submissions waiting for a grade (submitted or late; graded and returned
+     * ones are done), counted per section.
+     *
+     * @param  list<int>  $sectionIds
+     * @return Collection<int, int> section id => count
+     */
+    public function toGradeCounts(array $sectionIds): Collection
+    {
+        return AssignmentSubmission::query()
+            ->join('assignments', 'assignments.id', '=', 'assignment_submissions.assignment_id')
+            ->whereIn('assignments.section_id', $sectionIds)
+            ->whereIn('assignment_submissions.status', ['submitted', 'late'])
+            ->groupBy('assignments.section_id')
+            ->selectRaw('assignments.section_id, count(*) as total')
+            ->pluck('total', 'section_id')
+            ->map(fn ($total) => (int) $total);
     }
 
     public function download(AssignmentSubmission $submission): StreamedResponse

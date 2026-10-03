@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\GradeController;
 use App\Http\Controllers\Api\InternshipController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\LecturerController;
+use App\Http\Controllers\Api\LecturerDashboardController;
 use App\Http\Controllers\Api\NotificationPreferenceController;
 use App\Http\Controllers\Api\PasswordController;
 use App\Http\Controllers\Api\ProgramController;
@@ -31,6 +32,7 @@ use App\Http\Controllers\Api\SemesterController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\StudentDashboardController;
 use App\Http\Controllers\Api\UniversityController;
+use App\Http\Controllers\Api\UniversityDashboardController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -215,10 +217,12 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
 Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-admin,lecturer'])->group(function () {
     Route::get('/lecturers/{lecturer}', [LecturerController::class, 'show'])->name('api.lecturers.show');
     Route::get('/lecturers/{lecturer}/sections', [LecturerController::class, 'sections'])->name('api.lecturers.sections');
+    Route::get('/lecturers/{lecturer}/dashboard', LecturerDashboardController::class)->name('api.lecturers.dashboard');
     Route::get('/timetable/lecturer/{lecturer}', [ScheduleController::class, 'lecturer'])->name('api.timetable.lecturer');
 });
 
 Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->group(function () {
+    Route::get('/university/dashboard', UniversityDashboardController::class)->name('api.university.dashboard');
     Route::post('/universities', [UniversityController::class, 'store'])->name('api.universities.store');
     Route::match(['put', 'patch'], '/universities/{university}', [UniversityController::class, 'update'])
         ->name('api.universities.update');

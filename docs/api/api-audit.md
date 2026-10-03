@@ -289,6 +289,7 @@ documented operations.
 | PUT, PATCH | `/api/universities/{university}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/universities/{university}` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/universities/{university}/current` | Sanctum + super-admin or university-admin | Documented |
+| GET | `/api/university/dashboard` | Sanctum + super-admin or university-admin (report 36) | Documented |
 | GET | `/api/faculties` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
 | POST | `/api/faculties` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/faculties/{faculty}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
@@ -350,6 +351,7 @@ documented operations.
 | POST | `/api/sections/{section}/lecturers` | Sanctum + super-admin or university-admin | Documented |
 | DELETE | `/api/sections/{section}/lecturers/{lecturer}` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/lecturers/{lecturer}/sections` | Sanctum + staff, or the lecturer themself | Documented |
+| GET | `/api/lecturers/{lecturer}/dashboard` | Sanctum + staff, or the lecturer themself (report 35) | Documented |
 | GET | `/api/enrollments` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
 | GET | `/api/enrollments/export` | Sanctum + super-admin, university-admin or faculty-admin (CSV, audited) | Documented |
 | POST | `/api/enrollments` | Sanctum + managers (any student) or a student (self) | Documented |
@@ -566,3 +568,22 @@ waiting to be processed and its headline numbers for the current semester.
 `FacultyPolicy::view` decides: managers read any faculty, a Faculty Admin only
 their own (`403` for another faculty or when none is assigned). See
 `docs/34_Faculty-Admin-Dashboard-Report.md`.
+
+## Lecturer dashboard (2026-10-03)
+
+One endpoint added: `GET /api/lecturers/{lecturer}/dashboard` (`LecturerDashboard`
+schema), today's scheduled classes, registers waiting to be taken, submissions
+waiting to be graded, upcoming exams, and section grade-sheet progress for the
+lecturer's sections in the current semester. `LecturerPolicy::view` decides:
+the lecturer themself, or staff who may view the lecturer (managers or a Faculty
+Admin within their faculty). See `docs/35_Lecturer-Dashboard-Report.md`.
+
+## University dashboard (2026-10-03)
+
+One endpoint added: `GET /api/university/dashboard` (`UniversityDashboard`
+schema), institution-wide document requests and internships waiting to be
+processed, overdue invoices, and headline academic numbers for the active
+semester. Access is limited to Super Admin and University Admin. See
+`docs/36_University-Admin-Dashboard-Report.md`.
+
+

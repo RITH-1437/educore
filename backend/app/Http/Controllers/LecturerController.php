@@ -46,8 +46,9 @@ class LecturerController extends Controller
             'lecturers' => LecturerResource::collection($lecturers),
             ...$this->lookups(),
             // Lecturer accounts created in Users management that have no
-            // profile yet — offered as "link existing account" when creating.
-            'unlinkedAccounts' => User::query()
+            // profile yet — offered as "link existing account" when creating,
+            // so only users who may create a lecturer receive them.
+            'unlinkedAccounts' => $request->user()->cannot('create', Lecturer::class) ? [] : User::query()
                 ->whereHas('role', fn ($query) => $query->where('slug', RoleSlug::Lecturer->value))
                 ->whereDoesntHave('lecturer')
                 ->orderBy('name')

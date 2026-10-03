@@ -103,6 +103,21 @@ flowchart TD
 - Endpoints that authorize through these policies inherit the scope, e.g.
   student timetable / dashboard / grades / GPA, lecturer timetable and
   sections, submission and internship-report downloads, document downloads.
+- **Form options (fixed 2026-10-03)** — pages a Faculty Admin may open also
+  carry option lists for forms only managers use. Those lists are
+  university-wide, so they are now sent only when the policy allows the
+  action, and are empty for a Faculty Admin:
+
+  | Page | Prop | Sent when |
+  |---|---|---|
+  | `/enrollments` | `students`, `openSections` (enroll form) | `can('create', Enrollment::class)` |
+  | `/offerings/{offering}` | `lecturers` (assign to section) | `can('update', $offering)` |
+  | `/lecturers` | `unlinkedAccounts` (link existing account) | `can('create', Lecturer::class)` |
+  | `/students` | `unlinkedAccounts` (link existing account) | `can('create', Student::class)` |
+
+  The audit after the first release found the first two; reviewing the fix
+  found the other two. Rule for new pages: any prop that lists records for a
+  form must be gated by the same ability as the form's action.
 
 ## 5. API and UI
 
@@ -139,7 +154,9 @@ faculty, or says none is assigned.
   activity scoped by course faculty (offerings, sections, schedules, grade
   sheets, enrollments, approvals queue), unassigned admin sees nothing while
   shared reference data stays readable, dashboard text, faculty deletion
-  unassigns.
+  unassigns, and (`test_manager_only_form_options_are_not_sent_to_faculty_admins`)
+  the four form-option props above are empty for a Faculty Admin but still
+  sent to managers.
 - Existing role tests (assignments, attendance, courses, documents,
   enrollments, exams, CSV export, grades, internships, lecturers, offerings,
   programs, student dashboard, students) now assign the fixture's faculty
@@ -147,8 +164,8 @@ faculty, or says none is assigned.
 - `Tests\TestCase` helpers: `facultyAdminFor()`, `facultyOfSection()`,
   `placeInFaculty()`.
 
-Full suite: 399 passed. Swagger regenerated; route list and Swagger match
-(215 operations).
+Full suite: 399 passed at release; 400 with the form-options fix. Swagger
+regenerated; route list and Swagger match (215 operations).
 
 ## 8. Decisions
 

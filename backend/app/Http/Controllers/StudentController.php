@@ -47,8 +47,9 @@ class StudentController extends Controller
             'students' => StudentResource::collection($students),
             ...$this->lookups(),
             // Student accounts created in Users management that have no
-            // profile yet — offered as "link existing account" when creating.
-            'unlinkedAccounts' => User::query()
+            // profile yet — offered as "link existing account" when creating,
+            // so only users who may create a student receive them.
+            'unlinkedAccounts' => $request->user()->cannot('create', Student::class) ? [] : User::query()
                 ->whereHas('role', fn ($query) => $query->where('slug', RoleSlug::Student->value))
                 ->whereDoesntHave('student')
                 ->orderBy('name')

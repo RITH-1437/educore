@@ -64,9 +64,12 @@ class CourseOfferingController extends Controller
         return redirect()->route('offerings.show', $offering)->with('success', 'Offering created. Add its sections.');
     }
 
-    public function show(CourseOffering $offering): Response
+    public function show(Request $request, CourseOffering $offering): Response
     {
         $this->authorize('view', $offering);
+        // Every active lecturer, for assigning to sections: only users who may
+        // change the offering receive the list (not a read-only Faculty Admin).
+        $canManage = $request->user()->can('update', $offering);
 
         $offering->load([
             'course:id,code,name,credits',
@@ -82,7 +85,7 @@ class CourseOfferingController extends Controller
 
         return Inertia::render('Offerings/Show', [
             'offering' => (new CourseOfferingResource($offering))->resolve(),
-            'lecturers' => Lecturer::query()->where('is_active', true)->with('department:id,code')->orderBy('last_name')->get()
+            'lecturers' => ! $canManage ? [] : Lecturer::query()->where('is_active', true)->with('department:id,code')->orderBy('last_name')->get()
                 ->map(fn (Lecturer $lecturer) => [
                     'id' => $lecturer->id,
                     'label' => $lecturer->fullName().' ('.$lecturer->staff_number.', '.$lecturer->department?->code.')',

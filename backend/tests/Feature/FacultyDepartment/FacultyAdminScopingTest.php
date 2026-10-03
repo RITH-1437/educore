@@ -14,6 +14,7 @@ use App\Models\Lecturer;
 use App\Models\Program;
 use App\Models\Role as RoleModel;
 use App\Models\Section;
+use App\Models\Semester;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -126,6 +127,33 @@ class FacultyAdminScopingTest extends TestCase
         // The approvals queue shows only their faculty's sections.
         $as->get('/grades')->assertOk()->assertInertia(fn (Assert $page) => $page->has('sections.data', 0));
         $this->actingAs($this->admin)->get('/grades')->assertInertia(fn (Assert $page) => $page->has('sections.data', 1));
+    }
+
+    public function test_manager_only_form_options_are_not_sent_to_faculty_admins(): void
+    {
+        $semester = Semester::factory()->create(['status' => 'open']);
+        $offering = CourseOffering::factory()->create(['course_id' => $this->course($this->mine)->id, 'semester_id' => $semester->id, 'status' => 'open']);
+        Section::factory()->create(['course_offering_id' => $offering->id, 'status' => 'open']);
+        Student::factory()->create();
+        Lecturer::factory()->create();
+        // Accounts without a profile, offered as "link existing account" when creating one.
+        foreach ([Role::Lecturer, Role::Student] as $role) {
+            User::factory()->create(['role_id' => RoleModel::query()->firstOrCreate(['slug' => $role->value], ['name' => $role->name, 'is_system' => true])->id]);
+        }
+
+        // The pages still open for a Faculty Admin, without the university-wide option lists…
+        $this->actingAs($this->facultyAdmin)->get('/enrollments')->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->has('students', 0)->has('openSections', 0));
+        $this->actingAs($this->facultyAdmin)->get("/offerings/{$offering->id}")->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->has('lecturers', 0));
+        $this->actingAs($this->facultyAdmin)->get('/lecturers')->assertOk()->assertInertia(fn (Assert $page) => $page->has('unlinkedAccounts', 0));
+        $this->actingAs($this->facultyAdmin)->get('/students')->assertOk()->assertInertia(fn (Assert $page) => $page->has('unlinkedAccounts', 0));
+
+        // …which managers still receive for their forms.
+        $this->actingAs($this->admin)->get('/enrollments')->assertInertia(fn (Assert $page) => $page->has('students', 1)->has('openSections', 1));
+        $this->actingAs($this->admin)->get("/offerings/{$offering->id}")->assertInertia(fn (Assert $page) => $page->has('lecturers', 1));
+        $this->actingAs($this->admin)->get('/lecturers')->assertInertia(fn (Assert $page) => $page->has('unlinkedAccounts', 1));
+        $this->actingAs($this->admin)->get('/students')->assertInertia(fn (Assert $page) => $page->has('unlinkedAccounts', 1));
     }
 
     public function test_unassigned_faculty_admin_sees_nothing(): void

@@ -34,13 +34,17 @@ class EnrollmentController extends Controller
             'section_id' => $request->integer('section_id') ?: null,
             'status' => in_array($request->query('status'), Enrollment::STATUSES, true) ? $request->query('status') : null,
         ];
+        // The enroll form's options list every active student and open section
+        // university-wide, so only users who may enroll receive them (a
+        // Faculty Admin reads this page but must not see other faculties).
+        $canEnroll = $request->user()->can('create', Enrollment::class);
 
         return Inertia::render('Enrollments/Index', [
             'enrollments' => EnrollmentResource::collection($this->enrollments->paginate($filters, $request->user())->withQueryString()),
             'semesters' => Semester::query()->with('academicYear:id,code')->orderByDesc('academic_year_id')->orderBy('sequence')->get()
                 ->map(fn (Semester $semester) => ['id' => $semester->id, 'label' => $semester->academicYear?->code.' · '.$semester->name])->values(),
             // Sections currently open for registration, with seats left.
-            'openSections' => Section::query()
+            'openSections' => ! $canEnroll ? [] : Section::query()
                 ->with('offering.course:id,code,name,credits', 'offering.semester')
                 ->whereIn('status', ['open', 'active'])
                 ->whereHas('offering', fn ($q) => $q->where('status', 'open')->whereHas('semester', fn ($s) => $s->where('status', 'open')))
@@ -51,7 +55,7 @@ class EnrollmentController extends Controller
                     'seats' => $this->enrollments->openSeats($section),
                 ])
                 ->sortBy('label')->values(),
-            'students' => Student::query()->where('status', Student::STATUS_ACTIVE)->orderBy('student_number')->get(['id', 'student_number', 'first_name', 'last_name'])
+            'students' => ! $canEnroll ? [] : Student::query()->where('status', Student::STATUS_ACTIVE)->orderBy('student_number')->get(['id', 'student_number', 'first_name', 'last_name'])
                 ->map(fn (Student $student) => ['id' => $student->id, 'label' => $student->student_number.' — '.$student->fullName()])->values(),
             'statuses' => Enrollment::STATUSES,
             'filters' => $filters,

@@ -465,3 +465,8 @@ A module is not done until its report exists and its tests pass — never label
   enrollments, documents and internships; unassigned = no unit data.
   Report: `docs/32_Faculty-Admin-Scoping-Report.md`. `[Open]` Unit-level writes for Faculty Admin,
   department-level admins, Faculty Admin analytics.
+- `[Done]` Audit fix (2026-10-03): `/enrollments`, `/offerings/{offering}`,
+  `/lecturers` and `/students` sent university-wide form options (students,
+  open sections, lecturers, unlinked accounts) to a Faculty Admin; they are
+  now sent only to users allowed to act. Report:
+  `docs/32_Faculty-Admin-Scoping-Report.md` §4.

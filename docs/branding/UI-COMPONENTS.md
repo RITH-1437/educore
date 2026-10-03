@@ -247,6 +247,12 @@ Rules:
 - One "recent activity" table per dashboard, not many.
 - Quick actions: obvious primary action first.
 - Do not overload — 6–8 widgets max; whitespace matters.
+- **Overview KPI rows** (admin dashboard, analytics): `StatCard` without an
+  icon — label, value, one short detail line — in a
+  `grid-cols-1 sm:grid-cols-2 xl:grid-cols-4` grid with the staggered
+  `animate-section-in` entrance; a card links to its list when one exists.
+  Put a secondary figure on its own card rather than packing it into the
+  detail line.
 
 ---
 

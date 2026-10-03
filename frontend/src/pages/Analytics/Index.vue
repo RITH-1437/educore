@@ -3,7 +3,6 @@ import ExportLink from '../../components/ExportLink.vue'
 import { exportUrl } from '../../utils/exports'
 import { Head, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { Award, BookOpenCheck, CircleCheck, GraduationCap, UserCheck, Users } from '@lucide/vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseSelect from '../../components/BaseSelect.vue'
 import EmptyState from '../../components/EmptyState.vue'
@@ -30,6 +29,20 @@ const pick = (value) => router.get('/analytics', { semester_id: value || undefin
 const csv = (table) => exportUrl('/analytics/export', { table, semester_id: props.semesterId })
 const pct = (v) => (v === null || v === undefined ? '—' : `${v}%`)
 const o = computed(() => props.overview)
+// Headline numbers, laid out like the dashboard overview: four per row, no
+// icons, a short detail line on every card; counts that have a list link to
+// it, filtered to the semester where the list supports it.
+const metrics = computed(() => (!o.value ? [] : [
+  { label: 'Students enrolled', value: o.value.students_enrolled, detail: `${o.value.enrollments} enrollments this semester`, href: `/enrollments?semester_id=${props.semesterId}` },
+  { label: 'Active students', value: o.value.students_active, detail: 'All programs', href: '/students?filters[status]=active' },
+  { label: 'Sections', value: o.value.sections, detail: 'Running this semester', href: `/offerings?semester_id=${props.semesterId}` },
+  { label: 'Active lecturers', value: o.value.lecturers_active, detail: 'Teaching staff', href: '/lecturers?filters[is_active]=1' },
+  { label: 'Attendance rate', value: pct(o.value.attendance_rate), detail: 'Present + late of counted sessions' },
+  { label: 'Approved grades', value: o.value.grades_approved, detail: 'Approved or finalized this semester' },
+  { label: 'Pass rate', value: pct(o.value.pass_rate), detail: 'Grades with points above 0' },
+  { label: 'Average semester GPA', value: o.value.average_gpa === null ? '—' : o.value.average_gpa.toFixed(2), detail: 'Students with a semester GPA' },
+]))
+const delay = (step) => ({ animationDelay: `${step * 60}ms` })
 const a = computed(() => props.academic)
 const hasGrades = computed(() => (a.value?.grade_distribution ?? []).some((g) => g.total > 0))
 const hasGpa = computed(() => (a.value?.gpa_distribution ?? []).some((g) => g.total > 0))
@@ -38,7 +51,7 @@ const label = (s) => s.replaceAll('_', ' ').replace(/^./, (c) => c.toUpperCase()
 
 <template>
   <Head title="Analytics - EduCore" />
-  <div class="space-y-6">
+  <div class="space-y-8">
     <PageHeader eyebrow="Reports" title="Analytics" description="Enrollment, academic performance and administrative workload. Academic figures use approved grades only." />
 
     <div class="max-w-sm">
@@ -50,14 +63,9 @@ const label = (s) => s.replaceAll('_', ' ').replace(/^./, (c) => c.toUpperCase()
     </BaseCard>
 
     <template v-else>
-      <!-- KPI row: headline numbers are tiles, not charts. -->
-      <section class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3" aria-label="Headline numbers">
-        <StatCard label="Students enrolled" :value="o.students_enrolled" :icon="GraduationCap" :detail="`${o.enrollments} enrollments · ${o.students_active} active students`" />
-        <StatCard label="Sections" :value="o.sections" :icon="BookOpenCheck" tone="secondary" :detail="`${o.lecturers_active} active lecturers`" />
-        <StatCard label="Attendance rate" :value="pct(o.attendance_rate)" :icon="UserCheck" :tone="o.attendance_rate !== null && o.attendance_rate < 75 ? 'warning' : 'success'" detail="Present + late of counted sessions" />
-        <StatCard label="Approved grades" :value="o.grades_approved" :icon="CircleCheck" tone="muted" />
-        <StatCard label="Pass rate" :value="pct(o.pass_rate)" :icon="Award" :tone="o.pass_rate !== null && o.pass_rate < 75 ? 'warning' : 'success'" detail="Grades with points above 0" />
-        <StatCard label="Average semester GPA" :value="o.average_gpa === null ? '—' : o.average_gpa.toFixed(2)" :icon="Users" tone="secondary" />
+      <!-- KPI rows: headline numbers are tiles, not charts (same layout as the dashboard overview). -->
+      <section class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4" aria-label="Headline numbers">
+        <StatCard v-for="(metric, index) in metrics" :key="metric.label" v-bind="metric" class="motion-safe:animate-section-in" :style="delay(index)" />
       </section>
 
       <div class="grid gap-6 xl:grid-cols-2">
@@ -129,7 +137,7 @@ const label = (s) => s.replaceAll('_', ' ').replace(/^./, (c) => c.toUpperCase()
       <div v-for="row in administrative.finance" :key="row.currency" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard :label="`Invoiced (${row.currency})`" :value="money(row.invoiced, row.currency)" tone="muted" detail="Excluding cancelled invoices" />
         <StatCard :label="`Collected (${row.currency})`" :value="money(row.collected, row.currency)" tone="success" :detail="`${pct(row.collection_rate)} of invoiced`" />
-        <StatCard :label="`Outstanding (${row.currency})`" :value="money(row.outstanding, row.currency)" tone="warning" />
+        <StatCard :label="`Outstanding (${row.currency})`" :value="money(row.outstanding, row.currency)" tone="warning" detail="Invoiced minus collected" />
         <StatCard :label="`Overdue (${row.currency})`" :value="money(row.overdue, row.currency)" :tone="row.overdue > 0 ? 'warning' : 'muted'" :detail="`${row.overdue_count} invoice${row.overdue_count === 1 ? '' : 's'}`" />
       </div>
 

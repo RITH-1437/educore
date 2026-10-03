@@ -475,3 +475,6 @@ A module is not done until its report exists and its tests pass — never label
   entries removed from `laravel.log`, development entries kept), and
   `docker/postgres/init/01-create-test-database.sh` creates `educore_test` on a
   fresh volume (previously created by hand; README §13 covers older volumes).
+- `[Done]` Analytics KPI cards follow the dashboard overview (2026-10-03): no
+  icons, rows of four, one detail line each, linked to their lists
+  (`docs/27_Analytics-and-Reporting-Report.md` §3, UI-COMPONENTS §9).

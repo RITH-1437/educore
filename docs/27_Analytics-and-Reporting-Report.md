@@ -54,7 +54,12 @@ flowchart LR
 
 Chosen with the `dataviz` skill and `docs/branding/UI-COMPONENTS.md` §10:
 
-- Headline numbers are **KPI stat tiles**, not charts.
+- Headline numbers are **KPI stat tiles**, not charts, laid out like the admin
+  dashboard overview (2026-10-03): eight `StatCard`s in rows of four, no icons,
+  each with one short detail line — students enrolled, active students,
+  sections, active lecturers / attendance rate, approved grades, pass rate,
+  average semester GPA. Counts with a list link to it (enrollments and
+  offerings filtered to the semester, active students, active lecturers).
 - Magnitude comparisons (enrollment by program, attendance by course, grade
   and GPA distributions) are **single-series bar charts in one hue** — no
   categorical palette, so no rainbow and nothing that depends on telling

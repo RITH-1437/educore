@@ -402,13 +402,16 @@ A module is not done until its report exists and its tests pass — never label
   `docs/21_Student-Academic-Dashboard-Report.md`. `[Open]` Its announcements
   card shipped with 9.19; lecturer / faculty-admin dashboards are still previews.
 - `[Done]` 9.16 / 9.17 Document Management & Verification. Report:
-  `docs/22_Documents-and-Verification-Report.md`. `[Open]` QR image on the PDF,
-  document fees (`requires_fee`) not billed, document-type management screen,
-  transition audit trail (9.24).
+  `docs/22_Documents-and-Verification-Report.md`. `[Done]` Transition audit
+  trail (9.24, `docs/28_Audit-Logs-and-Security-Report.md`). `[Open]` QR image
+  on the PDF, document fees (`requires_fee`) not billed, document-type
+  management screen.
 - `[Done]` 9.18 Invoices & Payment Records. Report:
   `docs/23_Invoices-and-Payments-Report.md`. `[Done]` The `scheduler`
-  container (9.20) now runs `invoices:refresh-statuses` daily. `[Open]` Invoice PDFs / receipts, automatic tuition invoices and document-fee billing
-  are not built; finance changes are not audited (9.24).
+  container (9.20) now runs `invoices:refresh-statuses` daily. `[Done]` Finance
+  changes are audited (9.24, `docs/28_Audit-Logs-and-Security-Report.md`).
+  `[Open]` Invoice PDFs / receipts, automatic tuition invoices and document-fee
+  billing are not built.
 - `[Done]` Pagination never rendered on 12 list pages (Users, Students,
   Lecturers, Courses, Programs, Faculties, Universities, Academic years,
   Offerings, Rooms, Enrollments, Error logs): they passed a Resource

@@ -17,8 +17,8 @@ received.
 
 Not built: invoice PDFs / receipts, fee schedules or automatic tuition
 invoices from enrollments, billing of document fees (`document_types.requires_fee`),
-refunds of overpayments (overpayment is refused), an audit trail (9.24),
-currency conversion.
+refunds of overpayments (overpayment is refused), an audit trail (9.24 —
+added since, see `docs/28_Audit-Logs-and-Security-Report.md`), currency conversion.
 
 ## 2. Data model
 

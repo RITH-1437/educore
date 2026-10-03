@@ -20,7 +20,8 @@ see `docs/30_Grade-Finalization-and-Document-Templates-Report.md`.
 Not built: a QR image on the PDF (verification uses the printed URL and code;
 a QR needs another library), document fees (`requires_fee` is stored but not
 billed — 9.18 invoices are not linked to requests),
-an audit trail of transitions (9.24), document-type management screens (types
+an audit trail of transitions (9.24 — added since, see
+`docs/28_Audit-Logs-and-Security-Report.md`), document-type management screens (types
 are seeded).
 
 ## 2. Data model

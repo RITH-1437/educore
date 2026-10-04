@@ -588,12 +588,14 @@ users, main business activities, and expected outputs.
   approved grades and GPA, stored privately in MinIO and downloaded through an
   authorized route. Document types carry a fee: approving a request for a
   fee-bearing type issues an unpaid invoice (9.18), and the PDF is generated
-  only once that invoice is paid; Super Admin / University Admin manage types
+  only once that invoice is paid; administrators can grant fee waivers to
+  cancel pending invoices and unlock PDF generation (report 41); Super Admin / University Admin manage types
   and fees on `/document-types`. See
-  [22_Documents-and-Verification-Report.md](22_Documents-and-Verification-Report.md) and
+  [22_Documents-and-Verification-Report.md](22_Documents-and-Verification-Report.md),
   [30_Grade-Finalization-and-Document-Templates-Report.md](30_Grade-Finalization-and-Document-Templates-Report.md),
   [33_Faculty-Admin-Request-Handling-Report.md](33_Faculty-Admin-Request-Handling-Report.md),
-  [40_Document-Fee-Billing-and-Type-Management-Report.md](40_Document-Fee-Billing-and-Type-Management-Report.md).
+  [40_Document-Fee-Billing-and-Type-Management-Report.md](40_Document-Fee-Billing-and-Type-Management-Report.md),
+  and [41_Document-Fee-Waiver-and-Tuition-Invoicing-Report.md](41_Document-Fee-Waiver-and-Tuition-Invoicing-Report.md).
 
 ### 9.17 Digital Document Verification [Implemented]
 
@@ -618,8 +620,11 @@ users, main business activities, and expected outputs.
   instead of deletion, derived statuses kept current (overdue refreshed on read
   and by a daily command), invoice and receipt PDF download, a per-currency student summary and "My invoices".
   Document-fee invoices are issued automatically on approval of a fee-bearing
-  document request (report 40). Automatic tuition billing is [Future].
-  See [23_Invoices-and-Payments-Report.md](23_Invoices-and-Payments-Report.md).
+  document request (report 40) with fee waiver support (report 41).
+  Automatic tuition billing from semester enrollments is `[Implemented]`
+  with itemized course billings, program/override credit rates, CLI
+  `tuition:generate`, REST API, and web UI modal (report 41).
+  See [23_Invoices-and-Payments-Report.md](23_Invoices-and-Payments-Report.md) and [41_Document-Fee-Waiver-and-Tuition-Invoicing-Report.md](41_Document-Fee-Waiver-and-Tuition-Invoicing-Report.md).
 
 ### 9.19 Announcements [Implemented]
 

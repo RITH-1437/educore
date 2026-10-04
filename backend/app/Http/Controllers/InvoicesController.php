@@ -3,14 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Api\InvoiceController as ApiInvoiceController;
+use App\Http\Requests\GenerateTuitionRequest;
 use App\Http\Requests\InvoiceRequest;
 use App\Http\Requests\RecordPaymentRequest;
 use App\Http\Resources\InvoiceResource;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\Payment;
+use App\Models\Semester;
 use App\Models\Student;
 use App\Services\InvoiceService;
+use App\Services\TuitionInvoiceService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -36,7 +39,23 @@ class InvoicesController extends Controller
             'invoices' => InvoiceResource::collection($this->invoices->paginate($filters)),
             'filters' => $filters,
             'statuses' => Invoice::STATUSES,
+            'canManage' => $request->user()->can('manage', Invoice::class),
+            'semesters' => Semester::query()->with('academicYear:id,code')->orderByDesc('start_date')->get(['id', 'name', 'code', 'academic_year_id', 'status']),
         ]);
+    }
+
+    public function generateTuition(GenerateTuitionRequest $request, TuitionInvoiceService $service): RedirectResponse
+    {
+        $this->authorize('manage', Invoice::class);
+        $semester = Semester::query()->findOrFail($request->validated('semester_id'));
+
+        $result = $service->generate($semester, $request->validated(), $request->user());
+
+        $msg = $result['dry_run']
+            ? "Tuition preview: {$result['generated_count']} invoice(s) projected (\${$result['total_amount']})."
+            : "Tuition generation completed: {$result['generated_count']} invoice(s) generated (\${$result['total_amount']}).";
+
+        return redirect()->route('invoices.index')->with('success', $msg);
     }
 
     public function create(): Response

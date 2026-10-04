@@ -63,6 +63,7 @@ class InvoiceService
             ->with('student:id,student_number,first_name,last_name')
             ->when($filters['status'] ?? null, fn ($q, $status) => $q->where('status', $status))
             ->when($filters['student_id'] ?? null, fn ($q, $id) => $q->where('student_id', $id))
+            ->when($filters['semester_id'] ?? null, fn ($q, $id) => $q->where('semester_id', $id))
             ->when($filters['search'] ?? null, fn ($q, $search) => $q->where(fn ($w) => $w
                 ->where('invoice_number', 'ilike', "%{$search}%")
                 ->orWhere('title', 'ilike', "%{$search}%")
@@ -84,6 +85,7 @@ class InvoiceService
 
             $invoice = Invoice::query()->create([
                 'student_id' => $student->getKey(),
+                'semester_id' => $data['semester_id'] ?? null,
                 'invoice_number' => $this->nextNumber($issued),
                 'title' => $data['title'],
                 'description' => $data['description'] ?? null,

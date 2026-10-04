@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\GenerateTuitionRequest;
 use App\Http\Requests\InvoiceRequest;
 use App\Http\Requests\RecordPaymentRequest;
 use App\Http\Resources\InvoiceResource;
 use App\Models\Invoice;
 use App\Models\Payment;
+use App\Models\Semester;
 use App\Models\Student;
 use App\Services\InvoiceService;
+use App\Services\TuitionInvoiceService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
@@ -278,6 +281,49 @@ class InvoiceController extends Controller
             'data' => InvoiceResource::collection(Invoice::query()->where('student_id', $student->getKey())->with(['items', 'payments'])->latest('issued_date')->latest('id')->get())->resolve(),
             'summary' => $summary,
         ];
+    }
+
+    #[OA\Post(
+        path: '/invoices/generate-tuition',
+        summary: 'Generate automatic tuition invoices',
+        description: 'Generates tuition invoices for students enrolled in a semester based on course credits.',
+        operationId: 'generateTuitionInvoices',
+        tags: ['Finance'],
+        security: [['sanctum' => []]],
+        requestBody: new OA\RequestBody(
+            required: true,
+            content: new OA\JsonContent(
+                required: ['semester_id'],
+                properties: [
+                    new OA\Property(property: 'semester_id', type: 'integer', example: 1),
+                    new OA\Property(property: 'due_date', type: 'string', format: 'date', nullable: true, example: '2026-11-15'),
+                    new OA\Property(property: 'rate_per_credit', type: 'number', format: 'float', nullable: true, example: 50.0),
+                    new OA\Property(property: 'department_id', type: 'integer', nullable: true, example: 1),
+                    new OA\Property(property: 'program_id', type: 'integer', nullable: true, example: 1),
+                    new OA\Property(property: 'dry_run', type: 'boolean', example: false),
+                ]
+            )
+        ),
+        responses: [
+            new OA\Response(response: 200, description: 'Tuition generation result summary.'),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 422, description: 'Validation error.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
+        ]
+    )]
+    public function generateTuition(GenerateTuitionRequest $request, TuitionInvoiceService $service): JsonResponse
+    {
+        $this->authorize('manage', Invoice::class);
+        $semester = Semester::query()->findOrFail($request->validated('semester_id'));
+
+        $result = $service->generate($semester, $request->validated(), $request->user());
+
+        return response()->json([
+            'message' => $result['dry_run']
+                ? "Preview completed: {$result['generated_count']} invoice(s) projected."
+                : "Successfully generated {$result['generated_count']} tuition invoice(s).",
+            'data' => $result,
+        ]);
     }
 
     /**

@@ -1,6 +1,6 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { Ban, Check, Download, FileCheck2, X } from '@lucide/vue'
+import { BadgePercent, Ban, Check, Download, FileCheck2, X } from '@lucide/vue'
 import { Head, Link, router, useForm } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
@@ -20,6 +20,7 @@ const props = defineProps({
   statuses: { type: Array, default: () => [] },
   canProcess: { type: Boolean, default: false },
   canRevoke: { type: Boolean, default: false },
+  canWaive: { type: Boolean, default: false },
 })
 
 const { confirm } = useConfirm()
@@ -36,7 +37,7 @@ const revoke = async (row) => {
   }
 }
 
-const isInvoiceUnpaid = (row) => Boolean(row.invoice && row.invoice.status !== 'paid')
+const isInvoiceUnpaid = (row) => !row.is_fee_waived && Boolean(row.invoice && row.invoice.status !== 'paid')
 
 const rejecting = ref(null)
 const rejectForm = useForm({ rejection_reason: '' })
@@ -47,6 +48,16 @@ const openReject = (row) => {
 }
 const reject = () => rejectForm.post(`/document-requests/${rejecting.value.id}/reject`, { preserveScroll: true, onSuccess: () => (rejecting.value = null) })
 const showReject = computed({ get: () => rejecting.value !== null, set: (open) => { if (!open) rejecting.value = null } })
+
+const waiving = ref(null)
+const waiveForm = useForm({ reason: '' })
+const openWaive = (row) => {
+  waiving.value = row
+  waiveForm.reset()
+  waiveForm.clearErrors()
+}
+const waive = () => waiveForm.post(`/document-requests/${waiving.value.id}/waive-fee`, { preserveScroll: true, onSuccess: () => (waiving.value = null) })
+const showWaive = computed({ get: () => waiving.value !== null, set: (open) => { if (!open) waiving.value = null } })
 
 const columns = [
   { key: 'student', label: 'Student' },
@@ -77,7 +88,13 @@ const columns = [
             {{ row.type.name }}<span v-if="row.semester" class="text-muted dark:text-dark-muted"> · {{ row.semester.name }}</span>
           </p>
           <span
-            v-if="row.requires_fee && row.fee_amount > 0"
+            v-if="row.is_fee_waived"
+            class="inline-flex items-center rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+          >
+            Fee waived
+          </span>
+          <span
+            v-else-if="row.requires_fee && row.fee_amount > 0"
             class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
           >
             ${{ Number(row.fee_amount).toFixed(2) }}
@@ -91,6 +108,7 @@ const columns = [
         </div>
         <p v-if="row.reason" class="text-caption text-muted dark:text-dark-muted">{{ row.reason }}</p>
         <p v-if="row.rejection_reason" class="text-caption text-error">Rejected: {{ row.rejection_reason }}</p>
+        <p v-if="row.waiver_reason" class="text-caption text-emerald-700 dark:text-emerald-300">Waiver reason: {{ row.waiver_reason }}</p>
         <div v-if="row.invoice" class="mt-1 flex items-center gap-1.5 text-caption">
           <span class="text-muted dark:text-dark-muted">Invoice:</span>
           <Link :href="`/invoices/${row.invoice.id}`" class="font-mono text-primary hover:underline">
@@ -122,6 +140,13 @@ const columns = [
             <IconButton v-if="row.status === 'pending'" :icon="Check" variant="success" label="Approve request" @click="approve(row)" />
             <IconButton v-if="row.status === 'pending'" :icon="X" variant="danger" label="Reject request" @click="openReject(row)" />
             <IconButton
+              v-if="canWaive && row.status === 'approved' && row.requires_fee && !row.is_fee_waived"
+              :icon="BadgePercent"
+              variant="default"
+              label="Waive document fee"
+              @click="openWaive(row)"
+            />
+            <IconButton
               v-if="row.status === 'approved'"
               :icon="FileCheck2"
               variant="primary"
@@ -145,6 +170,21 @@ const columns = [
         <div class="flex justify-end gap-2">
           <BaseButton variant="ghost" @click="showReject = false">Cancel</BaseButton>
           <BaseButton type="submit" form="reject-form" variant="danger" :loading="rejectForm.processing">Reject</BaseButton>
+        </div>
+      </template>
+    </BaseModal>
+
+    <BaseModal v-model="showWaive" title="Waive document fee">
+      <form id="waive-form" @submit.prevent="waive">
+        <p class="mb-4 text-sm text-muted dark:text-dark-muted">
+          Waiving this document fee will cancel any pending invoice and unlock PDF generation for this approved request.
+        </p>
+        <BaseTextarea v-model="waiveForm.reason" name="reason" label="Reason for waiver (optional)" :rows="3" :error="waiveForm.errors.reason" />
+      </form>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <BaseButton variant="ghost" @click="showWaive = false">Cancel</BaseButton>
+          <BaseButton type="submit" form="waive-form" variant="primary" :loading="waiveForm.processing">Waive fee</BaseButton>
         </div>
       </template>
     </BaseModal>

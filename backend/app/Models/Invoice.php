@@ -52,13 +52,14 @@ class Invoice extends Model
     public const CURRENCIES = ['USD', 'KHR'];
 
     protected $fillable = [
-        'student_id', 'invoice_number', 'title', 'description', 'currency', 'subtotal', 'discount',
+        'student_id', 'semester_id', 'invoice_number', 'title', 'description', 'currency', 'subtotal', 'discount',
         'total', 'amount_paid', 'status', 'issued_date', 'due_date', 'notes',
     ];
 
     protected function casts(): array
     {
         return [
+            'semester_id' => 'integer',
             'subtotal' => 'decimal:2',
             'discount' => 'decimal:2',
             'total' => 'decimal:2',
@@ -71,6 +72,11 @@ class Invoice extends Model
     public function student(): BelongsTo
     {
         return $this->belongsTo(Student::class);
+    }
+
+    public function semester(): BelongsTo
+    {
+        return $this->belongsTo(Semester::class);
     }
 
     public function items(): HasMany

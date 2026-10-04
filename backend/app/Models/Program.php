@@ -43,6 +43,7 @@ class Program extends Model
         'degree_level',
         'duration_years',
         'credits_required',
+        'tuition_per_credit',
         'is_active',
     ];
 
@@ -58,6 +59,7 @@ class Program extends Model
         return [
             'duration_years' => 'integer',
             'credits_required' => 'decimal:1',
+            'tuition_per_credit' => 'decimal:2',
             'is_active' => 'boolean',
         ];
     }

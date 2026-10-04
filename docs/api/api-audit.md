@@ -405,22 +405,24 @@ documented operations.
 | GET | `/api/students/{student}/gpa` | Sanctum + staff, or the student themself | Documented |
 | GET | `/api/students/{student}/dashboard` | Sanctum + staff, or the student themself | Documented |
 | GET | `/api/document-types` | Sanctum, any role (active types incl. `requires_fee`, `fee_amount`) | Documented |
-| POST | `/api/document-types` | Sanctum + super-admin or university-admin (`DocumentTypePolicy`; report 40) | Not annotated (OpenAPI pending) |
-| GET | `/api/document-types/{documentType}` | Sanctum + any role (`DocumentTypePolicy::view`; report 40) | Not annotated (OpenAPI pending) |
-| PUT/PATCH | `/api/document-types/{documentType}` | Sanctum + super-admin or university-admin (report 40) | Not annotated (OpenAPI pending) |
-| DELETE | `/api/document-types/{documentType}` | Sanctum + super-admin or university-admin; 409 if requests exist; 204 on success (report 40) | Not annotated (OpenAPI pending) |
+| POST | `/api/document-types` | Sanctum + super-admin or university-admin (`DocumentTypePolicy`; report 40) | Documented |
+| GET | `/api/document-types/{documentType}` | Sanctum + any role (`DocumentTypePolicy::view`; report 40) | Documented |
+| PUT/PATCH | `/api/document-types/{documentType}` | Sanctum + super-admin or university-admin (report 40) | Documented |
+| DELETE | `/api/document-types/{documentType}` | Sanctum + super-admin or university-admin; 409 if requests exist; 204 on success (report 40) | Documented |
 | GET | `/api/document-requests` | Sanctum + staff (all) or a student (own); rows include `type.fee_amount` and `invoice` summary (report 40) | Documented |
 | POST | `/api/document-requests` | Sanctum + student with a profile (self only) | Documented |
 | GET | `/api/document-requests/{documentRequest}` | Sanctum + staff, or the requesting student | Documented |
 | POST | `/api/document-requests/{documentRequest}/approve` | Sanctum + super-admin or university-admin, or the student's Department Admin; issues an unpaid invoice for fee-bearing types (report 40) | Documented |
 | POST | `/api/document-requests/{documentRequest}/reject` | Sanctum + super-admin or university-admin, or the student's Department Admin | Documented |
-| POST | `/api/document-requests/{documentRequest}/generate` | Sanctum + super-admin or university-admin, or the student's Department Admin; 409 while the linked invoice is not `paid` (report 40) | Documented |
+| POST | `/api/document-requests/{documentRequest}/generate` | Sanctum + super-admin or university-admin, or the student's Department Admin; 409 while the linked invoice is not `paid` unless fee is waived (reports 40 & 41) | Documented |
+| POST | `/api/document-requests/{documentRequest}/waive-fee` | Sanctum + super-admin or university-admin; cancels pending invoice and unlocks generation (report 41) | Documented |
 | POST | `/api/documents/{document}/revoke` | Sanctum + super-admin or university-admin (`revoke`, not delegated) | Documented |
 | GET | `/api/documents/{document}/download` | Sanctum + staff, or the requesting student (PDF stream) | Documented |
 | GET | `/api/verifications/{token}` | Public; `throttle:verification` (30/min/IP) | Documented |
 | GET | `/api/invoices` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/invoices/export` | Sanctum + super-admin or university-admin (CSV, audited) | Documented |
 | POST | `/api/invoices` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/invoices/generate-tuition` | Sanctum + super-admin or university-admin; generates itemized semester tuition invoices from course enrollments (report 41) | Documented |
 | GET | `/api/invoices/{invoice}` | Sanctum + managers, or the invoiced student | Documented |
 | GET | `/api/invoices/{invoice}/download` | Sanctum + managers, or the invoiced student (PDF stream) | Documented |
 | PUT, PATCH | `/api/invoices/{invoice}` | Sanctum + super-admin or university-admin | Both documented |

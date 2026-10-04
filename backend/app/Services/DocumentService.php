@@ -140,6 +140,45 @@ class DocumentService
         return $this->afterTransition($this->transition($request, DocumentRequest::STATUS_PENDING, ['status' => DocumentRequest::STATUS_REJECTED, 'rejection_reason' => $reason, 'processed_by' => $by->getKey(), 'processed_at' => now()]));
     }
 
+    public function waiveFee(DocumentRequest $request, User $by, ?string $reason = null): DocumentRequest
+    {
+        return DB::transaction(function () use ($request, $by, $reason) {
+            $locked = DocumentRequest::query()->lockForUpdate()->findOrFail($request->getKey());
+
+            if (! in_array($locked->status, [DocumentRequest::STATUS_PENDING, DocumentRequest::STATUS_APPROVED], true)) {
+                throw new BusinessRuleException("Cannot waive fee for a {$locked->status} request.");
+            }
+
+            if ($locked->is_fee_waived) {
+                return $locked;
+            }
+
+            $locked->loadMissing('invoice');
+            if ($locked->invoice && $locked->invoice->status === Invoice::STATUS_PAID) {
+                throw new BusinessRuleException('Cannot waive fee: the invoice is already paid.');
+            }
+
+            if ($locked->invoice && $locked->invoice->status !== Invoice::STATUS_CANCELLED) {
+                $this->invoices->cancel($locked->invoice, "Fee waived by {$by->name}".($reason ? ": {$reason}" : ''));
+            }
+
+            $locked->update([
+                'is_fee_waived' => true,
+                'waived_by' => $by->getKey(),
+                'waived_at' => now(),
+                'waiver_reason' => $reason,
+            ]);
+
+            $this->audit->record('document_request.fee_waived', $locked, after: [
+                'is_fee_waived' => true,
+                'waiver_reason' => $reason,
+                'waived_by' => $by->getKey(),
+            ]);
+
+            return $locked->refresh();
+        });
+    }
+
     /**
      * Render, store and register the PDF. If storing fails the request stays
      * `approved` so generation can be retried, and no orphan file is left.
@@ -152,7 +191,7 @@ class DocumentService
 
         $request->loadMissing('type', 'semester.academicYear', 'student', 'invoice');
 
-        if ($request->invoice_id && $request->invoice && $request->invoice->status !== Invoice::STATUS_PAID) {
+        if (! $request->is_fee_waived && $request->invoice_id && $request->invoice && $request->invoice->status !== Invoice::STATUS_PAID) {
             throw new BusinessRuleException("Document generation requires fee payment: invoice {$request->invoice->invoice_number} is {$request->invoice->status}.");
         }
 

@@ -56,6 +56,17 @@ class DocumentRequestPolicy
         return $this->manages($user);
     }
 
+    /** Waive a document fee: managers only (`InvoicePolicy`). */
+    public function waiveFee(User $user, DocumentRequest $request): bool
+    {
+        return $this->manages($user);
+    }
+
+    public function waiveFeeAny(User $user): bool
+    {
+        return $this->manages($user);
+    }
+
     private function manages(User $user): bool
     {
         return $user->isRole(Role::SuperAdmin->value) || $user->isRole(Role::UniversityAdmin->value);

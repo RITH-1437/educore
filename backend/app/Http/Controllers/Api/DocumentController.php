@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RejectDocumentRequestRequest;
 use App\Http\Requests\StoreDocumentRequestRequest;
+use App\Http\Requests\WaiveDocumentFeeRequest;
 use App\Http\Resources\DocumentRequestResource;
 use App\Models\Document;
 use App\Models\DocumentRequest;
@@ -180,6 +181,31 @@ class DocumentController extends Controller
         $this->documents->generate($documentRequest, $request->user());
 
         return (new DocumentRequestResource($documentRequest->refresh()->load(self::RELATIONS)))->response()->setStatusCode(201);
+    }
+
+    #[OA\Post(
+        path: '/document-requests/{documentRequest}/waive-fee',
+        summary: 'Waive the fee for a document request',
+        description: 'Super Admin and University Admin only. Cancels the linked unpaid fee invoice (if any) and lifts the fee lock on document generation.',
+        operationId: 'waiveDocumentFee',
+        tags: ['Documents'],
+        security: [['sanctum' => []]],
+        parameters: [new OA\PathParameter(name: 'documentRequest', required: true, schema: new OA\Schema(type: 'integer', format: 'int64'))],
+        requestBody: new OA\RequestBody(required: false, content: new OA\JsonContent(properties: [new OA\Property(property: 'reason', type: 'string', maxLength: 500, nullable: true)])),
+        responses: [
+            new OA\Response(response: 200, description: 'Fee waived.', content: new OA\JsonContent(ref: '#/components/schemas/DocumentRequestResourceResponse')),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not authorized.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 409, description: 'Cannot waive (e.g. invoice already paid or invalid request status).', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+        ]
+    )]
+    public function waiveFee(WaiveDocumentFeeRequest $request, DocumentRequest $documentRequest): DocumentRequestResource
+    {
+        $this->authorize('waiveFee', $documentRequest);
+
+        return new DocumentRequestResource(
+            $this->documents->waiveFee($documentRequest, $request->user(), $request->validated('reason'))->load(self::RELATIONS)
+        );
     }
 
     #[OA\Post(

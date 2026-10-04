@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Api\DocumentController as ApiDocumentController;
 use App\Http\Requests\RejectDocumentRequestRequest;
 use App\Http\Requests\StoreDocumentRequestRequest;
+use App\Http\Requests\WaiveDocumentFeeRequest;
 use App\Http\Resources\DocumentRequestResource;
 use App\Models\Document;
 use App\Models\DocumentRequest;
@@ -39,6 +40,7 @@ class DocumentsController extends Controller
             // Rows are limited to the viewer's scope, so every visible request can be processed.
             'canProcess' => $request->user()->can('processAny', DocumentRequest::class),
             'canRevoke' => $request->user()->can('revoke', DocumentRequest::class),
+            'canWaive' => $request->user()->can('waiveFeeAny', DocumentRequest::class),
         ]);
     }
 
@@ -98,6 +100,15 @@ class DocumentsController extends Controller
         $this->documents->generate($documentRequest, $request->user());
 
         return back()->with('success', 'Document generated.');
+    }
+
+    public function waiveFee(WaiveDocumentFeeRequest $request, DocumentRequest $documentRequest): RedirectResponse
+    {
+        $this->authorize('waiveFee', $documentRequest);
+
+        $this->documents->waiveFee($documentRequest, $request->user(), $request->validated('reason'));
+
+        return back()->with('success', 'Document fee waived.');
     }
 
     public function revoke(Document $document): RedirectResponse

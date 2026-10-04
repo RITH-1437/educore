@@ -69,7 +69,13 @@ const submit = () =>
               <StatusBadge v-bind="requestBadge(request.status)" />
             </div>
             <p v-if="request.status === 'rejected'" class="mt-2 text-small text-error">Rejected: {{ request.rejection_reason }}</p>
-            <div v-if="request.invoice" class="mt-2 flex flex-wrap items-center gap-2 text-caption">
+            <div v-if="request.is_fee_waived" class="mt-2 flex flex-wrap items-center gap-2 text-caption">
+              <span class="inline-flex items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-950/40 dark:text-blue-300">
+                Fee waived
+              </span>
+              <span v-if="request.waiver_reason" class="text-muted dark:text-dark-muted">({{ request.waiver_reason }})</span>
+            </div>
+            <div v-else-if="request.invoice" class="mt-2 flex flex-wrap items-center gap-2 text-caption">
               <span class="font-medium text-ink dark:text-dark-ink">Invoice:</span>
               <span class="font-mono text-primary">{{ request.invoice.invoice_number }}</span>
               <span>(${{ Number(request.invoice.total).toFixed(2) }})</span>

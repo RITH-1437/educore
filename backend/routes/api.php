@@ -163,6 +163,7 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,department
     Route::post('/document-requests/{documentRequest}/approve', [DocumentController::class, 'approve'])->name('api.document-requests.approve');
     Route::post('/document-requests/{documentRequest}/reject', [DocumentController::class, 'reject'])->name('api.document-requests.reject');
     Route::post('/document-requests/{documentRequest}/generate', [DocumentController::class, 'generate'])->name('api.document-requests.generate');
+    Route::post('/document-requests/{documentRequest}/waive-fee', [DocumentController::class, 'waiveFee'])->name('api.document-requests.waive-fee');
     Route::post('/documents/{document}/revoke', [DocumentController::class, 'revoke'])->name('api.documents.revoke');
     Route::get('/documents/{document}/download', [DocumentController::class, 'download'])->name('api.documents.download');
 
@@ -171,6 +172,7 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,department
     Route::get('/invoices', [InvoiceController::class, 'index'])->name('api.invoices.index');
     Route::get('/invoices/export', [ExportController::class, 'invoices'])->name('api.invoices.export');
     Route::post('/invoices', [InvoiceController::class, 'store'])->name('api.invoices.store');
+    Route::post('/invoices/generate-tuition', [InvoiceController::class, 'generateTuition'])->name('api.invoices.generate-tuition');
     Route::get('/invoices/{invoice}', [InvoiceController::class, 'show'])->name('api.invoices.show');
     Route::get('/invoices/{invoice}/download', [InvoiceController::class, 'download'])->name('api.invoices.download');
     Route::match(['put', 'patch'], '/invoices/{invoice}', [InvoiceController::class, 'update'])->name('api.invoices.update');

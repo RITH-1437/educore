@@ -297,6 +297,120 @@ class DocumentFeeAndTypeTest extends TestCase
         $this->assertNull($item['invoice']);
     }
 
+    public function test_fee_waiver_cancels_pending_invoice_and_unlocks_generation(): void
+    {
+        $transcriptType = DocumentType::query()->where('code', DocumentType::TRANSCRIPT)->firstOrFail();
+        $this->assertTrue($transcriptType->requires_fee);
+
+        $requestId = $this->actingAs($this->student->user)
+            ->postJson('/api/document-requests', [
+                'document_type_id' => $transcriptType->id,
+            ])
+            ->assertCreated()
+            ->json('data.id');
+
+        $this->actingAs($this->deptAdmin)
+            ->postJson("/api/document-requests/{$requestId}/approve")
+            ->assertOk();
+
+        $req = DocumentRequest::query()->find($requestId);
+        $this->assertNotNull($req->invoice_id);
+        $invoice = Invoice::query()->find($req->invoice_id);
+        $this->assertSame(Invoice::STATUS_PENDING, $invoice->status);
+
+        // Generation is blocked before waiver or payment
+        $this->actingAs($this->deptAdmin)
+            ->postJson("/api/document-requests/{$requestId}/generate")
+            ->assertStatus(409);
+
+        // Dept admin and student cannot waive fees (403)
+        $this->actingAs($this->deptAdmin)
+            ->postJson("/api/document-requests/{$requestId}/waive-fee", ['reason' => 'Dean waiver'])
+            ->assertForbidden();
+
+        $this->actingAs($this->student->user)
+            ->postJson("/api/document-requests/{$requestId}/waive-fee", ['reason' => 'Self waiver'])
+            ->assertForbidden();
+
+        // Univ admin can waive fee
+        $this->actingAs($this->univAdmin)
+            ->postJson("/api/document-requests/{$requestId}/waive-fee", ['reason' => 'Scholarship recipient waiver'])
+            ->assertOk()
+            ->assertJsonPath('data.is_fee_waived', true)
+            ->assertJsonPath('data.waiver_reason', 'Scholarship recipient waiver');
+
+        $req->refresh();
+        $invoice->refresh();
+        $this->assertTrue($req->is_fee_waived);
+        $this->assertSame('Scholarship recipient waiver', $req->waiver_reason);
+        $this->assertSame($this->univAdmin->id, $req->waived_by);
+        $this->assertNotNull($req->waived_at);
+        $this->assertSame(Invoice::STATUS_CANCELLED, $invoice->status);
+
+        // Dept admin can now generate PDF since fee is waived
+        $this->actingAs($this->deptAdmin)
+            ->postJson("/api/document-requests/{$requestId}/generate")
+            ->assertCreated()
+            ->assertJsonPath('data.status', 'generated')
+            ->assertJsonPath('data.document.status', 'valid');
+    }
+
+    public function test_fee_waiver_fails_if_invoice_already_paid(): void
+    {
+        $transcriptType = DocumentType::query()->where('code', DocumentType::TRANSCRIPT)->firstOrFail();
+
+        $requestId = $this->actingAs($this->student->user)
+            ->postJson('/api/document-requests', [
+                'document_type_id' => $transcriptType->id,
+            ])
+            ->assertCreated()
+            ->json('data.id');
+
+        $this->actingAs($this->deptAdmin)
+            ->postJson("/api/document-requests/{$requestId}/approve")
+            ->assertOk();
+
+        $req = DocumentRequest::query()->find($requestId);
+        $invoice = Invoice::query()->find($req->invoice_id);
+        $invoice->update([
+            'status' => Invoice::STATUS_PAID,
+            'amount_paid' => 10.00,
+        ]);
+
+        $this->actingAs($this->superAdmin)
+            ->postJson("/api/document-requests/{$requestId}/waive-fee", ['reason' => 'Too late'])
+            ->assertStatus(409)
+            ->assertJsonPath('message', 'Cannot waive fee: the invoice is already paid.');
+    }
+
+    public function test_web_routes_for_document_fee_waiver(): void
+    {
+        $transcriptType = DocumentType::query()->where('code', DocumentType::TRANSCRIPT)->firstOrFail();
+
+        $requestId = $this->actingAs($this->student->user)
+            ->postJson('/api/document-requests', [
+                'document_type_id' => $transcriptType->id,
+            ])
+            ->assertCreated()
+            ->json('data.id');
+
+        $this->actingAs($this->deptAdmin)
+            ->postJson("/api/document-requests/{$requestId}/approve")
+            ->assertOk();
+
+        $this->actingAs($this->superAdmin)
+            ->from('/documents')
+            ->post("/document-requests/{$requestId}/waive-fee", [
+                'reason' => 'Admin discretionary waiver',
+            ])
+            ->assertRedirect('/documents')
+            ->assertSessionHas('success');
+
+        $req = DocumentRequest::query()->find($requestId);
+        $this->assertTrue($req->is_fee_waived);
+        $this->assertSame('Admin discretionary waiver', $req->waiver_reason);
+    }
+
     public function test_web_routes_for_document_types(): void
     {
         // Web create

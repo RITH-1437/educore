@@ -22,6 +22,10 @@ use Illuminate\Support\Carbon;
  * @property int|null $academic_year_id
  * @property int|null $semester_id
  * @property int|null $invoice_id
+ * @property bool $is_fee_waived
+ * @property int|null $waived_by
+ * @property Carbon|null $waived_at
+ * @property string|null $waiver_reason
  * @property string|null $reason
  * @property string $status
  * @property Carbon $submitted_at
@@ -34,6 +38,7 @@ use Illuminate\Support\Carbon;
  * @property-read Semester|null $semester
  * @property-read Document|null $document
  * @property-read Invoice|null $invoice
+ * @property-read User|null $waiverAdmin
  */
 class DocumentRequest extends Model
 {
@@ -50,18 +55,27 @@ class DocumentRequest extends Model
     public const STATUSES = [self::STATUS_PENDING, self::STATUS_APPROVED, self::STATUS_REJECTED, self::STATUS_GENERATED];
 
     protected $fillable = [
-        'student_id', 'document_type_id', 'academic_year_id', 'semester_id', 'invoice_id', 'reason', 'status',
-        'submitted_at', 'processed_by', 'processed_at', 'rejection_reason', 'notes',
+        'student_id', 'document_type_id', 'academic_year_id', 'semester_id', 'invoice_id',
+        'is_fee_waived', 'waived_by', 'waived_at', 'waiver_reason',
+        'reason', 'status', 'submitted_at', 'processed_by', 'processed_at', 'rejection_reason', 'notes',
     ];
 
     /**
      * @var array<string, mixed>
      */
-    protected $attributes = ['status' => self::STATUS_PENDING];
+    protected $attributes = [
+        'status' => self::STATUS_PENDING,
+        'is_fee_waived' => false,
+    ];
 
     protected function casts(): array
     {
-        return ['submitted_at' => 'datetime', 'processed_at' => 'datetime'];
+        return [
+            'is_fee_waived' => 'boolean',
+            'submitted_at' => 'datetime',
+            'processed_at' => 'datetime',
+            'waived_at' => 'datetime',
+        ];
     }
 
     public function student(): BelongsTo
@@ -92,6 +106,11 @@ class DocumentRequest extends Model
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    public function waiverAdmin(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'waived_by');
     }
 
     /**

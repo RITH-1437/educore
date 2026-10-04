@@ -33,6 +33,9 @@ class DocumentRequestResource extends JsonResource
             'student' => $this->whenLoaded('student', fn () => ['id' => $this->student->id, 'student_number' => $this->student->student_number, 'full_name' => $this->student->fullName()]),
             'reason' => $this->reason,
             'rejection_reason' => $this->rejection_reason,
+            'is_fee_waived' => (bool) $this->is_fee_waived,
+            'waived_at' => $this->waived_at?->toIso8601String(),
+            'waiver_reason' => $this->waiver_reason,
             'submitted_at' => $this->submitted_at?->toIso8601String(),
             'processed_at' => $this->processed_at?->toIso8601String(),
             'document' => $this->whenLoaded('document', fn () => $this->document ? [

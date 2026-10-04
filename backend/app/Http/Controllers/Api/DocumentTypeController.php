@@ -12,6 +12,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use OpenApi\Attributes as OA;
 
 class DocumentTypeController extends Controller
 {
@@ -29,6 +30,22 @@ class DocumentTypeController extends Controller
         return DocumentTypeResource::collection($types);
     }
 
+    #[OA\Get(
+        path: '/document-types/{documentType}',
+        summary: 'Get document type details',
+        operationId: 'getDocumentType',
+        tags: ['Documents'],
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\PathParameter(name: 'documentType', required: true, schema: new OA\Schema(type: 'integer', format: 'int64')),
+        ],
+        responses: [
+            new OA\Response(response: 200, description: 'Document type details with requests count.', content: new OA\JsonContent(ref: '#/components/schemas/DocumentTypeResourceResponse')),
+            new OA\Response(response: 401, ref: '#/components/schemas/ErrorResponse'),
+            new OA\Response(response: 403, ref: '#/components/schemas/ErrorResponse'),
+            new OA\Response(response: 404, ref: '#/components/schemas/ErrorResponse'),
+        ]
+    )]
     public function show(DocumentType $documentType): DocumentTypeResource
     {
         $this->authorize('view', $documentType);
@@ -36,6 +53,21 @@ class DocumentTypeController extends Controller
         return new DocumentTypeResource($documentType->loadCount('requests'));
     }
 
+    #[OA\Post(
+        path: '/document-types',
+        summary: 'Create document type',
+        description: 'Super Admin and University Admin only.',
+        operationId: 'storeDocumentType',
+        tags: ['Documents'],
+        security: [['sanctum' => []]],
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/StoreDocumentTypeRequest')),
+        responses: [
+            new OA\Response(response: 201, description: 'Document type created.', content: new OA\JsonContent(ref: '#/components/schemas/DocumentTypeResourceResponse')),
+            new OA\Response(response: 401, ref: '#/components/schemas/ErrorResponse'),
+            new OA\Response(response: 403, ref: '#/components/schemas/ErrorResponse'),
+            new OA\Response(response: 422, ref: '#/components/schemas/ValidationErrorResponse'),
+        ]
+    )]
     public function store(StoreDocumentTypeRequest $request): JsonResponse
     {
         $this->authorize('create', DocumentType::class);
@@ -45,6 +77,25 @@ class DocumentTypeController extends Controller
         return (new DocumentTypeResource($created))->response()->setStatusCode(201);
     }
 
+    #[OA\Put(
+        path: '/document-types/{documentType}',
+        summary: 'Update document type',
+        description: 'Super Admin and University Admin only.',
+        operationId: 'updateDocumentType',
+        tags: ['Documents'],
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\PathParameter(name: 'documentType', required: true, schema: new OA\Schema(type: 'integer', format: 'int64')),
+        ],
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/UpdateDocumentTypeRequest')),
+        responses: [
+            new OA\Response(response: 200, description: 'Document type updated.', content: new OA\JsonContent(ref: '#/components/schemas/DocumentTypeResourceResponse')),
+            new OA\Response(response: 401, ref: '#/components/schemas/ErrorResponse'),
+            new OA\Response(response: 403, ref: '#/components/schemas/ErrorResponse'),
+            new OA\Response(response: 404, ref: '#/components/schemas/ErrorResponse'),
+            new OA\Response(response: 422, ref: '#/components/schemas/ValidationErrorResponse'),
+        ]
+    )]
     public function update(UpdateDocumentTypeRequest $request, DocumentType $documentType): DocumentTypeResource
     {
         $this->authorize('update', $documentType);
@@ -54,6 +105,24 @@ class DocumentTypeController extends Controller
         return new DocumentTypeResource($updated);
     }
 
+    #[OA\Delete(
+        path: '/document-types/{documentType}',
+        summary: 'Delete document type',
+        description: 'Super Admin and University Admin only. Refused with 409 if document requests reference this type.',
+        operationId: 'deleteDocumentType',
+        tags: ['Documents'],
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\PathParameter(name: 'documentType', required: true, schema: new OA\Schema(type: 'integer', format: 'int64')),
+        ],
+        responses: [
+            new OA\Response(response: 204, description: 'Document type deleted.'),
+            new OA\Response(response: 401, ref: '#/components/schemas/ErrorResponse'),
+            new OA\Response(response: 403, ref: '#/components/schemas/ErrorResponse'),
+            new OA\Response(response: 404, ref: '#/components/schemas/ErrorResponse'),
+            new OA\Response(response: 409, description: 'Type referenced by existing requests.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+        ]
+    )]
     public function destroy(DocumentType $documentType): Response
     {
         $this->authorize('delete', $documentType);

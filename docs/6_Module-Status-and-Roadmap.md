@@ -253,14 +253,16 @@ operations incl. the public `/api/verifications/{token}`, `DocumentTypeSeeder`,
 `docs/22_Documents-and-Verification-Report.md`.
 
 **9.18 Invoices & Payments** `[Implemented]` — tables `invoices`,
-`invoice_items`, `payments` (no schema change). Delivered: `InvoiceService`
+`invoice_items`, `payments`. Delivered: `InvoiceService`
 (cent-exact totals from items, `INV-{year}-{seq}` numbering under an advisory
 lock, edit before payment only, payments ≤ balance, append-only reversals,
 cancel instead of delete, one status derivation + overdue refresh on read and
-`invoices:refresh-statuses` daily), `InvoicePolicy` (managers; students read
-own), pages `Invoices/Index|Form|Show|Mine`, 9 API operations,
-`InvoiceSeeder`, 8 feature tests. Report:
-`docs/23_Invoices-and-Payments-Report.md`.
+`invoices:refresh-statuses` daily), `TuitionInvoiceService` (automatic semester
+tuition invoices itemized per enrolled course with program-level/override rates,
+idempotent deduplication, dry-run simulation, CLI `tuition:generate` and UI modal),
+`InvoicePolicy` (managers; students read own), pages `Invoices/Index|Form|Show|Mine`,
+10 API operations, `InvoiceSeeder`, 16 feature tests. Reports:
+`docs/23_Invoices-and-Payments-Report.md` and `docs/41_Document-Fee-Waiver-and-Tuition-Invoicing-Report.md`.
 
 **9.19 Announcements** `[Implemented]` — table `announcements` (no schema
 change). Delivered: `AnnouncementService` (nine audience types resolved live
@@ -409,14 +411,15 @@ A module is not done until its report exists and its tests pass — never label
   `docs/22_Documents-and-Verification-Report.md`. `[Done]` Transition audit
   trail (9.24, `docs/28_Audit-Logs-and-Security-Report.md`). `[Done]` Embedded
   SVG QR code image on all generated document PDFs (`bacon/bacon-qr-code`).
-  `[Done]` Document fees (`requires_fee` + `fee_amount`) billed on approval and
-  the document-type management screen (report 40).
+  `[Done]` Document fees (`requires_fee` + `fee_amount`) billed on approval,
+  fee waivers, and the document-type management screen (reports 40 & 41).
 - `[Done]` 9.18 Invoices & Payment Records. Report:
   `docs/23_Invoices-and-Payments-Report.md`. `[Done]` The `scheduler`
   container (9.20) now runs `invoices:refresh-statuses` daily. `[Done]` Finance
   changes are audited (9.24, `docs/28_Audit-Logs-and-Security-Report.md`).
-  `[Done]` Document-fee billing (report 40). `[Open]` Invoice PDFs / receipts
-  and automatic tuition invoices are not built.
+  `[Done]` Document-fee billing and fee waivers (reports 40 & 41). `[Done]` Invoice
+  PDFs / receipts (report 23) and automatic tuition invoices from semester
+  enrollments (report 41).
 - `[Done]` Pagination never rendered on 12 list pages (Users, Students,
   Lecturers, Courses, Programs, Faculties, Universities, Academic years,
   Offerings, Rooms, Enrollments, Error logs): they passed a Resource

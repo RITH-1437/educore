@@ -219,7 +219,10 @@ Route::middleware(['auth', 'role:super-admin,university-admin,department-admin']
     Route::post('/document-requests/{documentRequest}/reject', [DocumentsController::class, 'reject'])->name('documents.reject');
     Route::post('/document-requests/{documentRequest}/generate', [DocumentsController::class, 'generate'])->name('documents.generate');
 });
-Route::middleware(['auth', 'role:super-admin,university-admin'])->post('/documents/{document}/revoke', [DocumentsController::class, 'revoke'])->name('documents.revoke');
+Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function () {
+    Route::post('/documents/{document}/revoke', [DocumentsController::class, 'revoke'])->name('documents.revoke');
+    Route::post('/document-requests/{documentRequest}/waive-fee', [DocumentsController::class, 'waiveFee'])->name('documents.waive-fee');
+});
 Route::middleware(['auth', 'role:super-admin,university-admin,department-admin,student'])->get('/documents/{document}/download', [DocumentsController::class, 'download'])->name('documents.download');
 
 // Document Types management (`DocumentTypePolicy`): Super Admin and University Admin
@@ -238,6 +241,7 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function
     Route::get('/invoices/export', [ExportController::class, 'invoices'])->name('invoices.export');
     Route::get('/invoices/create', [InvoicesController::class, 'create'])->name('invoices.create');
     Route::post('/invoices', [InvoicesController::class, 'store'])->name('invoices.store');
+    Route::post('/invoices/generate-tuition', [InvoicesController::class, 'generateTuition'])->name('invoices.generate-tuition');
     Route::get('/invoices/{invoice}/edit', [InvoicesController::class, 'edit'])->name('invoices.edit');
     Route::put('/invoices/{invoice}', [InvoicesController::class, 'update'])->name('invoices.update');
     Route::post('/invoices/{invoice}/cancel', [InvoicesController::class, 'cancel'])->name('invoices.cancel');

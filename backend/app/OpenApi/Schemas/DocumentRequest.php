@@ -15,6 +15,8 @@ use OpenApi\Attributes as OA;
             new OA\Property(property: 'id', type: 'integer', format: 'int64'),
             new OA\Property(property: 'code', type: 'string'),
             new OA\Property(property: 'name', type: 'string'),
+            new OA\Property(property: 'requires_fee', type: 'boolean'),
+            new OA\Property(property: 'fee_amount', type: 'number', format: 'float'),
         ]),
         new OA\Property(property: 'semester', type: 'object', nullable: true, properties: [
             new OA\Property(property: 'id', type: 'integer', format: 'int64'),
@@ -37,6 +39,14 @@ use OpenApi\Attributes as OA;
             new OA\Property(property: 'generated_at', type: 'string', format: 'date-time'),
             new OA\Property(property: 'verification_token', type: 'string'),
             new OA\Property(property: 'checksum', type: 'string', description: 'SHA-256 of the PDF.'),
+        ]),
+        new OA\Property(property: 'invoice', type: 'object', nullable: true, properties: [
+            new OA\Property(property: 'id', type: 'integer', format: 'int64'),
+            new OA\Property(property: 'invoice_number', type: 'string'),
+            new OA\Property(property: 'total', type: 'number', format: 'float'),
+            new OA\Property(property: 'amount_paid', type: 'number', format: 'float'),
+            new OA\Property(property: 'status', type: 'string'),
+            new OA\Property(property: 'due_date', type: 'string', format: 'date', nullable: true),
         ]),
     ]
 )]
@@ -69,10 +79,15 @@ use OpenApi\Attributes as OA;
     type: 'object',
     properties: [
         new OA\Property(property: 'id', type: 'integer', format: 'int64'),
-        new OA\Property(property: 'code', type: 'string', enum: ['enrollment_certificate', 'transcript', 'academic_result']),
+        new OA\Property(property: 'code', type: 'string'),
         new OA\Property(property: 'name', type: 'string'),
         new OA\Property(property: 'description', type: 'string', nullable: true),
-        new OA\Property(property: 'needs_semester', type: 'boolean'),
+        new OA\Property(property: 'requires_fee', type: 'boolean'),
+        new OA\Property(property: 'fee_amount', type: 'number', format: 'float'),
+        new OA\Property(property: 'is_active', type: 'boolean'),
+        new OA\Property(property: 'sort_order', type: 'integer'),
+        new OA\Property(property: 'needs_semester', type: 'boolean', nullable: true),
+        new OA\Property(property: 'requests_count', type: 'integer', nullable: true),
     ]
 )]
 #[OA\Schema(

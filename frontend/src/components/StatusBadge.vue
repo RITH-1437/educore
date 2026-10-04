@@ -27,9 +27,10 @@ const statusMap = {
   failed: { variant: 'error', label: 'Failed' },
 }
 
-const mappedStatus = computed(() => statusMap[props.status.toLowerCase()] ?? {
-  variant: 'muted',
-  label: props.status.replaceAll('-', ' '),
+// Tolerates a missing status (renders a muted dash) instead of crashing the page.
+const mappedStatus = computed(() => {
+  const status = String(props.status ?? '')
+  return statusMap[status.toLowerCase()] ?? { variant: 'muted', label: status.replaceAll('-', ' ') || '—' }
 })
 </script>
 

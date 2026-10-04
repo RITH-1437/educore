@@ -1,6 +1,6 @@
 # EduCore — Module Status & Build Roadmap Report
 
-- **Date:** 2026-09-26 (updated 2026-10-02)
+- **Date:** 2026-09-26 (updated 2026-10-05)
 - **Source of truth:** `docs/3_business-overview.md` §9 (module list), `docs/5_Build-Steps-Report.md` (build workflow)
 - **Status labels:** `[Implemented]` = shipped and tested · `[Planned]` = next, follows this playbook · `[Future]` = later
 - **Database:** the full 49-table schema already exists as migrations — **every** module below builds on top of already-migrated tables (see `docs/4_Database-Migration-Report.md`).
@@ -15,6 +15,8 @@
 | — | Users management (extra, part of 9.1 scope) | `[Implemented]` |
 | — | Database schema (49 domain tables) | `[Implemented]` |
 | — | Branding / design system + admin dashboard | `[Implemented]` |
+| — | Public landing page redesign + clickable table rows (report 37) | `[Implemented]` |
+| — | Bottom-right toast notifications, accounts-by-role pie, academic year page fix (report 38) | `[Implemented]` |
 | — | API contract & OpenAPI audit | `[Implemented]` |
 | — | System Error Logs (9.25, extra operational diagnostics) | `[Implemented]` |
 | 9.2 | Student Management | `[Implemented]` |
@@ -407,14 +409,14 @@ A module is not done until its report exists and its tests pass — never label
   `docs/22_Documents-and-Verification-Report.md`. `[Done]` Transition audit
   trail (9.24, `docs/28_Audit-Logs-and-Security-Report.md`). `[Done]` Embedded
   SVG QR code image on all generated document PDFs (`bacon/bacon-qr-code`).
-  `[Open]` Document fees (`requires_fee`) not billed, document-type management
-  screen.
+  `[Done]` Document fees (`requires_fee` + `fee_amount`) billed on approval and
+  the document-type management screen (report 40).
 - `[Done]` 9.18 Invoices & Payment Records. Report:
   `docs/23_Invoices-and-Payments-Report.md`. `[Done]` The `scheduler`
   container (9.20) now runs `invoices:refresh-statuses` daily. `[Done]` Finance
   changes are audited (9.24, `docs/28_Audit-Logs-and-Security-Report.md`).
-  `[Open]` Invoice PDFs / receipts, automatic tuition invoices and document-fee
-  billing are not built.
+  `[Done]` Document-fee billing (report 40). `[Open]` Invoice PDFs / receipts
+  and automatic tuition invoices are not built.
 - `[Done]` Pagination never rendered on 12 list pages (Users, Students,
   Lecturers, Courses, Programs, Faculties, Universities, Academic years,
   Offerings, Rooms, Enrollments, Error logs): they passed a Resource
@@ -530,5 +532,19 @@ A module is not done until its report exists and its tests pass — never label
   university-wide academic headline numbers for the active semester; `GET
   /api/university/dashboard` serves Super Admin and University Admin. Report:
   `docs/36_University-Admin-Dashboard-Report.md`.
+- `[Done]` Department-Only Academic Structure (2026-10-05): Removed the faculty
+  tier in the academic hierarchy (University → Department → Program); departments
+  attach directly to universities (`departments.university_id`); unit admins
+  are scoped to departments (`department-admin` role via `users.department_id`);
+  operational dashboard at `/dashboard` and `GET /api/departments/{department}/dashboard`.
+  Report: `docs/39_Department-Only-Structure-Report.md`.
+- `[Done]` Document Fee Billing & Type Management (2026-10-05):
+  `document_types.fee_amount`, `document_requests.invoice_id`; approving a
+  request for a fee-bearing type issues an unpaid invoice, and PDF generation
+  is refused (409) until that invoice is `paid`; Super Admin / University
+  Admin manage types at `/document-types` (`/api/document-types` CRUD; types
+  with requests cannot be deleted — deactivate instead). Report:
+  `docs/40_Document-Fee-Billing-and-Type-Management-Report.md`.
+
 
 

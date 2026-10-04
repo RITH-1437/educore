@@ -5,8 +5,8 @@ namespace App\Dto\UniversityStructure;
 /**
  * Whitelisted filter, sort and pagination input for department listings.
  *
- * `facultyId` is the scoping filter: a department always belongs to exactly one
- * faculty, so the list view always has a parent in context.
+ * `universityId` scopes the list: a department belongs to exactly one
+ * university (the faculty level was removed in report 39).
  */
 final readonly class DepartmentListFilters
 {
@@ -21,7 +21,7 @@ final readonly class DepartmentListFilters
 
     public function __construct(
         public ?string $search = null,
-        public ?int $facultyId = null,
+        public ?int $universityId = null,
         public ?bool $isActive = null,
         public string $sortBy = 'name',
         public string $sortDir = 'asc',
@@ -29,7 +29,7 @@ final readonly class DepartmentListFilters
     ) {}
 
     /**
-     * Build filters from a plain input array (`search`, `filters[faculty_id]`,
+     * Build filters from a plain input array (`search`, `filters[university_id]`,
      * `filters[is_active]`, `sort_by`, `sort_dir`, `per_page`).
      *
      * @param  array<string, mixed>  $input
@@ -37,7 +37,7 @@ final readonly class DepartmentListFilters
     public static function fromInput(array $input): self
     {
         $search = trim((string) ($input['search'] ?? ''));
-        $facultyId = $input['filters']['faculty_id'] ?? null;
+        $universityId = $input['filters']['university_id'] ?? null;
         $isActive = $input['filters']['is_active'] ?? null;
         $sortBy = (string) ($input['sort_by'] ?? 'name');
         $sortDir = strtolower((string) ($input['sort_dir'] ?? 'asc'));
@@ -45,7 +45,7 @@ final readonly class DepartmentListFilters
 
         return new self(
             search: $search === '' ? null : $search,
-            facultyId: ($facultyId === null || $facultyId === '') ? null : (int) $facultyId,
+            universityId: ($universityId === null || $universityId === '') ? null : (int) $universityId,
             isActive: self::toNullableBool($isActive),
             sortBy: in_array($sortBy, self::SORTABLE, true) ? $sortBy : 'name',
             sortDir: in_array($sortDir, ['asc', 'desc'], true) ? $sortDir : 'asc',
@@ -67,8 +67,8 @@ final readonly class DepartmentListFilters
 
         $filters = [];
 
-        if ($this->facultyId !== null) {
-            $filters['faculty_id'] = $this->facultyId;
+        if ($this->universityId !== null) {
+            $filters['university_id'] = $this->universityId;
         }
 
         if ($this->isActive !== null) {

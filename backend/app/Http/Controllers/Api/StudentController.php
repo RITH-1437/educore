@@ -19,12 +19,12 @@ use OpenApi\Attributes as OA;
 /**
  * Student endpoints (module 9.2).
  *
- * List: Super Admin, University Admin, Faculty Admin. Show: the same, plus a
+ * List: Super Admin, University Admin, Department Admin. Show: the same, plus a
  * student reading their own profile. Writes: Super Admin and University Admin.
  */
 class StudentController extends Controller
 {
-    private const DETAIL = ['user', 'currentProgram.program.department.faculty:id,code,name', 'programHistory.program.department'];
+    private const DETAIL = ['user', 'currentProgram.program.department:id,code,name', 'programHistory.program.department'];
 
     public function __construct(
         private readonly StudentService $students,
@@ -33,13 +33,12 @@ class StudentController extends Controller
     #[OA\Get(
         path: '/students',
         summary: 'List students',
-        description: 'Paginated student profiles with account and current program. Search covers student ID, names, national ID and email; faculty/department/program filters use the current program.',
+        description: 'Paginated student profiles with account and current program. Search covers student ID, names, national ID and email; department/program filters use the current program.',
         operationId: 'listStudents',
         tags: ['People'],
         security: [['sanctum' => []]],
         parameters: [
             new OA\QueryParameter(name: 'search', description: 'Partial match on student ID, first/last name, national ID or email.', schema: new OA\Schema(type: 'string'), example: 'Sok'),
-            new OA\QueryParameter(name: 'filters[faculty_id]', description: 'Current program belongs to this faculty.', schema: new OA\Schema(type: 'integer', format: 'int64')),
             new OA\QueryParameter(name: 'filters[department_id]', description: 'Current program belongs to this department.', schema: new OA\Schema(type: 'integer', format: 'int64')),
             new OA\QueryParameter(name: 'filters[program_id]', description: 'Currently in this program.', schema: new OA\Schema(type: 'integer', format: 'int64')),
             new OA\QueryParameter(name: 'filters[status]', description: 'Student status.', schema: new OA\Schema(type: 'string', enum: Student::STATUSES)),

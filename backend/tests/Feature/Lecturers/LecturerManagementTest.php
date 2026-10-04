@@ -4,7 +4,6 @@ namespace Tests\Feature\Lecturers;
 
 use App\Enums\Role;
 use App\Models\Department;
-use App\Models\Faculty;
 use App\Models\Lecturer;
 use App\Models\Role as RoleModel;
 use App\Models\Semester;
@@ -35,7 +34,7 @@ class LecturerManagementTest extends TestCase
 
     private User $universityAdmin;
 
-    private User $facultyAdmin;
+    private User $departmentAdmin;
 
     private User $lecturerUser;
 
@@ -51,14 +50,13 @@ class LecturerManagementTest extends TestCase
 
         $this->superAdmin = User::factory()->superAdmin()->create(['email' => 'root@test.test']);
         $this->universityAdmin = $this->userWithRole(Role::UniversityAdmin->value, 'dean@test.test');
-        $this->facultyAdmin = $this->userWithRole(Role::FacultyAdmin->value, 'unit@test.test');
+        $this->departmentAdmin = $this->userWithRole(Role::DepartmentAdmin->value, 'unit@test.test');
         $this->lecturerRole = RoleModel::factory()->withSlug(Role::Lecturer->value)->create();
         $this->lecturerUser = User::factory()->create(['email' => 'teacher@test.test', 'role_id' => $this->lecturerRole->id]);
         $this->student = $this->userWithRole(Role::Student->value, 'pupil@test.test');
 
         $university = University::factory()->current()->create();
-        $faculty = Faculty::factory()->create(['university_id' => $university->id]);
-        $this->department = Department::factory()->create(['faculty_id' => $faculty->id]);
+        $this->department = Department::factory()->create(['university_id' => $university->id]);
     }
 
     // ---------------------------------------------------------------- auth ---
@@ -93,22 +91,22 @@ class LecturerManagementTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_faculty_admin_may_read_but_not_write(): void
+    public function test_department_admin_may_read_but_not_write(): void
     {
         $lecturer = $this->makeLecturer();
-        $this->facultyAdmin->update(['faculty_id' => $this->department->faculty_id]);
+        $this->departmentAdmin->update(['department_id' => $this->department->id]);
         $elsewhere = Lecturer::factory()->create();
 
-        $this->actingAs($this->facultyAdmin)->getJson("/api/lecturers/{$elsewhere->id}")->assertForbidden();
-        $this->actingAs($this->facultyAdmin)->getJson('/api/lecturers')->assertOk()->assertJsonCount(1, 'data');
-        $this->actingAs($this->facultyAdmin)->get('/lecturers')->assertOk();
-        $this->actingAs($this->facultyAdmin)->getJson('/api/lecturers')->assertOk();
-        $this->actingAs($this->facultyAdmin)->getJson("/api/lecturers/{$lecturer->id}")->assertOk();
+        $this->actingAs($this->departmentAdmin)->getJson("/api/lecturers/{$elsewhere->id}")->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->getJson('/api/lecturers')->assertOk()->assertJsonCount(1, 'data');
+        $this->actingAs($this->departmentAdmin)->get('/lecturers')->assertOk();
+        $this->actingAs($this->departmentAdmin)->getJson('/api/lecturers')->assertOk();
+        $this->actingAs($this->departmentAdmin)->getJson("/api/lecturers/{$lecturer->id}")->assertOk();
 
-        $this->actingAs($this->facultyAdmin)->postJson('/api/lecturers', $this->createPayload())->assertForbidden();
-        $this->actingAs($this->facultyAdmin)->get("/lecturers/{$lecturer->id}/edit")->assertForbidden();
-        $this->actingAs($this->facultyAdmin)->postJson("/api/lecturers/{$lecturer->id}/deactivate")->assertForbidden();
-        $this->actingAs($this->facultyAdmin)->deleteJson("/api/lecturers/{$lecturer->id}")->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->postJson('/api/lecturers', $this->createPayload())->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->get("/lecturers/{$lecturer->id}/edit")->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->postJson("/api/lecturers/{$lecturer->id}/deactivate")->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->deleteJson("/api/lecturers/{$lecturer->id}")->assertForbidden();
 
         $this->assertDatabaseCount('lecturers', 2);
     }
@@ -126,7 +124,6 @@ class LecturerManagementTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Lecturers/Index')
                 ->has('lecturers.data', 1)
-                ->has('faculties.data', 1)
                 ->has('departments.data', 1)
                 ->has('employmentTypes', 4)
                 ->has('unlinkedAccounts', 1)
@@ -225,7 +222,7 @@ class LecturerManagementTest extends TestCase
 
     public function test_create_rejects_an_archived_department(): void
     {
-        $archived = Department::factory()->create(['faculty_id' => $this->department->faculty_id]);
+        $archived = Department::factory()->create(['university_id' => $this->department->university_id]);
         $archived->delete();
 
         $this->actingAs($this->superAdmin)
@@ -332,7 +329,7 @@ class LecturerManagementTest extends TestCase
         $this->actingAs($this->superAdmin)->getJson("/api/lecturers?filters[department_id]={$this->department->id}")
             ->assertOk()->assertJsonCount(2, 'data');
 
-        $this->actingAs($this->superAdmin)->getJson("/api/lecturers?filters[faculty_id]={$other->faculty_id}")
+        $this->actingAs($this->superAdmin)->getJson("/api/lecturers?filters[department_id]={$other->id}")
             ->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.staff_number', 'C-1');
 
         $this->actingAs($this->superAdmin)->getJson('/api/lecturers?filters[employment_type]=contract')

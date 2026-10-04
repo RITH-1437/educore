@@ -1,217 +1,68 @@
 <script setup>
-import { Link } from '@inertiajs/vue3'
-import {
-  ArrowRight,
-  Bell,
-  BookOpen,
-  CalendarDays,
-  ClipboardList,
-  FolderOpen,
-  GraduationCap,
-  Landmark,
-  LayoutDashboard,
-  Search,
-  ShieldCheck,
-  TrendingUp,
-  Users,
-} from '@lucide/vue'
+import { ArrowRight, CircleCheck } from '@lucide/vue'
+import BaseButton from '../BaseButton.vue'
+import HeroTerminal from './HeroTerminal.vue'
 import { scrollToId } from './scrollTo'
 
 const symbolMark = '/assets/logo/educore-symbol-mark.jpg'
 
-const bars = [62, 78, 46, 88, 71, 55, 92, 66]
-const courses = [
-  { name: 'Compiler Design', done: 74, color: 'bg-blue-600' },
-  { name: 'Database Systems', done: 62, color: 'bg-sky-500' },
-  { name: 'Operating Systems', done: 48, color: 'bg-teal-500' },
-]
+const facts = ['25 connected modules', '5 user roles', 'Built for Cambodian universities']
+
+// Entrance order: badge → headline → copy → each CTA → facts → terminal.
+const delay = (seconds) => ({ animationDelay: `${seconds}s` })
 </script>
 
 <template>
-  <section id="top" class="relative overflow-hidden">
-    <div class="bg-grid-slate absolute inset-0" aria-hidden="true" />
-    <div
-      class="absolute -top-32 left-1/2 h-[520px] w-[900px] -translate-x-1/2 rounded-full bg-blue-600/10 blur-3xl"
-      aria-hidden="true"
-    />
-    <div class="absolute top-40 -right-24 h-64 w-64 rounded-full bg-sky-500/15 blur-3xl" aria-hidden="true" />
-    <div class="absolute -left-24 bottom-10 h-64 w-64 rounded-full bg-teal-500/10 blur-3xl" aria-hidden="true" />
+  <section id="top" class="relative overflow-hidden bg-background dark:bg-dark-bg" aria-labelledby="hero-title">
+    <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+      <div class="app-ambient edu-drift absolute -inset-16" />
+      <div class="bg-grid-slate absolute inset-0" />
+    </div>
 
-    <div class="relative mx-auto grid max-w-7xl items-center gap-14 px-4 pt-32 pb-20 sm:px-6 lg:grid-cols-2 lg:gap-10 lg:pt-40 lg:pb-28">
+    <div class="relative mx-auto grid max-w-7xl items-center gap-12 px-4 pt-32 pb-20 sm:px-6 lg:grid-cols-2 lg:px-8 lg:pt-40 lg:pb-24">
       <div class="max-w-xl">
-        <div
-          class="edu-fade-up inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/90 px-3.5 py-1.5 text-sm font-medium text-slate-700 shadow-sm backdrop-blur-sm"
-          style="animation-delay: 0.05s"
-        >
-          <Landmark class="h-4 w-4 text-blue-600" />
-          University Digital Administration Platform
-        </div>
-
-        <h1
-          class="font-display edu-fade-up mt-6 text-5xl leading-[1.05] font-bold tracking-tight text-slate-950 sm:text-6xl"
-          style="animation-delay: 0.15s"
-        >
-          One Platform.
-          <span class="bg-gradient-to-r from-blue-600 via-blue-600 to-sky-500 bg-clip-text text-transparent">Smarter Education.</span>
-        </h1>
-
         <p
-          class="edu-fade-up mt-6 text-lg leading-relaxed text-slate-600"
-          style="animation-delay: 0.25s"
+          class="edu-fade-up inline-flex items-center gap-2 rounded-pill border border-border-default bg-surface py-1 pr-3 pl-1 text-small font-medium text-ink shadow-sm dark:border-dark-border dark:bg-dark-surface dark:text-dark-ink"
+          :style="delay(0.05)"
         >
-          EduCore brings academic management, student services, administration, documents,
-          communication, and institutional workflows together in one secure digital platform.
+          <img :src="symbolMark" alt="" width="24" height="24" class="h-6 w-6 rounded-pill object-cover" />
+          <span><span class="font-semibold text-primary-dark dark:text-dark-ink">EduCore</span> · University Digital Administration</span>
         </p>
 
-        <div class="edu-fade-up mt-8 flex flex-wrap items-center gap-3" style="animation-delay: 0.35s">
-          <button
-            type="button"
-            class="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-md shadow-blue-600/25 transition hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/35 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 active:scale-[0.98]"
-            @click="scrollToId('platform')"
-          >
-            Explore EduCore
-            <ArrowRight class="h-4 w-4" />
-          </button>
-          <Link
-            href="/login"
-            class="inline-flex items-center rounded-lg border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-800 transition hover:border-slate-400 hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 active:scale-[0.98]"
-          >
+        <h1 id="hero-title" class="font-display edu-fade-up mt-6 text-h1 text-primary-dark sm:text-display dark:text-dark-ink" :style="delay(0.15)">
+          One Platform.
+          <span class="block text-primary dark:text-dark-primary">Smarter Education.</span>
+        </h1>
+
+        <p class="edu-fade-up mt-6 text-body text-muted sm:text-h4 sm:font-normal dark:text-dark-muted" :style="delay(0.25)">
+          EduCore runs a university on one secure platform: academic structure, student services,
+          administration, documents and communication, connected for every role.
+        </p>
+
+        <div class="mt-8 flex flex-wrap items-center gap-3">
+          <BaseButton size="lg" class="edu-fade-up" :style="delay(0.35)" @click="scrollToId('platform')">
+            Explore Platform
+            <ArrowRight class="h-4 w-4" aria-hidden="true" />
+          </BaseButton>
+          <BaseButton href="/login" variant="secondary" size="lg" class="edu-fade-up" :style="delay(0.45)">
             Sign In
-          </Link>
+          </BaseButton>
         </div>
 
-        <dl class="edu-fade-up mt-10 grid grid-cols-3 gap-6 border-t border-slate-200 pt-8" style="animation-delay: 0.45s">
-          <div>
-            <dt class="text-sm font-medium text-slate-500">Core modules</dt>
-            <dd class="font-display mt-1 text-3xl font-bold tracking-tight text-slate-950">16</dd>
-          </div>
-          <div>
-            <dt class="text-sm font-medium text-slate-500">User roles</dt>
-            <dd class="font-display mt-1 text-3xl font-bold tracking-tight text-slate-950">5</dd>
-          </div>
-          <div>
-            <dt class="text-sm font-medium text-slate-500">Domain tables</dt>
-            <dd class="font-display mt-1 text-3xl font-bold tracking-tight text-slate-950">49</dd>
-          </div>
-        </dl>
+        <ul class="edu-fade-up mt-10 flex flex-wrap gap-x-6 gap-y-2 border-t border-border-default pt-6 text-small text-muted dark:border-dark-border dark:text-dark-muted" :style="delay(0.55)">
+          <li v-for="fact in facts" :key="fact" class="flex items-center gap-2">
+            <CircleCheck class="h-4 w-4 text-primary dark:text-dark-primary" aria-hidden="true" />
+            {{ fact }}
+          </li>
+        </ul>
       </div>
 
-      <div class="edu-fade-up relative mx-auto w-full max-w-xl" style="animation-delay: 0.55s">
-        <div class="relative" aria-hidden="true">
-          <div class="glass-frosted rounded-2xl border border-white/80 shadow-2xl shadow-slate-900/10">
-            <div class="flex items-center gap-1.5 border-b border-slate-200 px-4 py-3">
-              <span class="h-2.5 w-2.5 rounded-full bg-slate-200" />
-              <span class="h-2.5 w-2.5 rounded-full bg-slate-200" />
-              <span class="h-2.5 w-2.5 rounded-full bg-slate-200" />
-              <div class="ml-4 flex items-center gap-1.5 text-xs font-semibold text-slate-600">
-                <img :src="symbolMark" alt="" class="h-3.5 w-3.5 rounded" />
-                EduCore
-              </div>
-              <div class="ml-auto flex items-center gap-1">
-                <Search class="h-3.5 w-3.5 text-slate-400" />
-                <Bell class="h-3.5 w-3.5 text-slate-400" />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-[40px_1fr]">
-              <div class="flex flex-col items-center gap-4 border-r border-slate-100 py-4">
-                <LayoutDashboard class="h-4 w-4 text-blue-600" />
-                <BookOpen class="h-4 w-4 text-slate-300" />
-                <Users class="h-4 w-4 text-slate-300" />
-                <CalendarDays class="h-4 w-4 text-slate-300" />
-                <ClipboardList class="h-4 w-4 text-slate-300" />
-                <FolderOpen class="h-4 w-4 text-slate-300" />
-              </div>
-
-              <div class="space-y-4 p-4 sm:p-5">
-                <div class="flex items-center justify-between">
-                  <div>
-                    <p class="text-xs font-medium text-slate-400">Academic Overview</p>
-                    <p class="font-display text-sm font-bold text-slate-900">Second Semester — 2025</p>
-                  </div>
-                  <span class="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-700">
-                    Spring Session
-                  </span>
-                </div>
-
-                <div class="grid grid-cols-3 gap-2.5">
-                  <div class="rounded-lg border border-slate-100 bg-slate-50/60 p-3">
-                    <p class="text-[11px] text-slate-500">Students</p>
-                    <p class="font-display mt-0.5 text-lg font-bold text-slate-900">4,825</p>
-                    <p class="text-[11px] font-medium text-teal-600">+8.2%</p>
-                  </div>
-                  <div class="rounded-lg border border-slate-100 bg-slate-50/60 p-3">
-                    <p class="text-[11px] text-slate-500">Average GPA</p>
-                    <p class="font-display mt-0.5 text-lg font-bold text-slate-900">3.42</p>
-                    <p class="text-[11px] font-medium text-teal-600">+0.06</p>
-                  </div>
-                  <div class="rounded-lg border border-slate-100 bg-slate-50/60 p-3">
-                    <p class="text-[11px] text-slate-500">Attendance</p>
-                    <p class="font-display mt-0.5 text-lg font-bold text-slate-900">94%</p>
-                    <p class="text-[11px] font-medium text-teal-600">+1.4%</p>
-                  </div>
-                </div>
-
-                <div class="rounded-lg border border-slate-100 p-3.5">
-                  <div class="flex items-center justify-between">
-                    <p class="text-xs font-semibold text-slate-700">Enrollment by Faculty</p>
-                    <TrendingUp class="h-3.5 w-3.5 text-sky-500" />
-                  </div>
-                  <div class="mt-3 flex items-end gap-1.5">
-                    <div
-                      v-for="(h, i) in bars"
-                      :key="i"
-                      class="flex-1 rounded-t-sm"
-                      :class="i % 3 === 2 ? 'bg-teal-400/80' : i % 3 === 1 ? 'bg-sky-500/80' : 'bg-blue-600'"
-                      :style="{ height: `${h * 0.42}px` }"
-                    />
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-3 gap-2.5">
-                  <div v-for="c in courses" :key="c.name" class="rounded-lg border border-slate-100 p-3">
-                    <p class="truncate text-[11px] font-semibold text-slate-700">{{ c.name }}</p>
-                    <p class="mt-1 text-[11px] text-slate-400">{{ c.done }} students</p>
-                    <div class="mt-2 h-1 overflow-hidden rounded-full bg-slate-100">
-                      <div class="h-full rounded-full" :class="c.color" :style="{ width: `${c.done}%` }" />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div
-            class="edu-float glass-frosted absolute -top-5 -right-3 hidden items-center gap-2.5 rounded-xl border border-white/80 px-3.5 py-2.5 shadow-lg sm:flex"
-          >
-            <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50">
-              <Bell class="h-4 w-4 text-blue-600" />
-            </span>
-            <div>
-              <p class="text-xs font-semibold text-slate-900">Spring session started</p>
-              <p class="text-[11px] text-slate-500">Timetable published — just now</p>
-            </div>
-          </div>
-
-          <div
-            class="edu-float-slow glass-frosted absolute -bottom-6 -left-4 hidden rounded-xl border border-white/80 px-4 py-3 shadow-lg sm:block"
-          >
-            <div class="flex items-center gap-2">
-              <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-50">
-                <ShieldCheck class="h-4 w-4 text-teal-600" />
-              </span>
-              <div>
-                <p class="text-xs font-semibold text-slate-900">Document verified</p>
-                <div class="flex items-center gap-1 text-[11px] font-medium text-teal-600">
-                  <GraduationCap class="h-3 w-3" />
-                  Academic transcript — QR validated
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <p class="mt-10 text-center text-xs text-slate-500">Illustrative interface preview — sample data, not real statistics.</p>
-      </div>
+      <figure class="edu-slide-in mx-auto w-full max-w-2xl" :style="delay(0.5)">
+        <HeroTerminal />
+        <figcaption class="mt-4 text-center text-caption text-muted dark:text-dark-muted">
+          Real commands from the EduCore repository · test count as of October 2026
+        </figcaption>
+      </figure>
     </div>
   </section>
 </template>

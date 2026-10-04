@@ -44,14 +44,14 @@ class LecturerPolicy
     }
 
     /**
-     * Faculty Admin reads but does not manage: the user row has no
-     * faculty/department scope yet, so "manage in scope" cannot be enforced.
+     * Department Admin reads but does not manage: the user row has no
+     * department scope yet, so "manage in scope" cannot be enforced.
      */
     private function staff(User $user): bool
     {
         return $user->isRole(Role::SuperAdmin->value)
             || $user->isRole(Role::UniversityAdmin->value)
-            || $user->isRole(Role::FacultyAdmin->value);
+            || $user->isRole(Role::DepartmentAdmin->value);
     }
 
     private function manage(User $user): bool

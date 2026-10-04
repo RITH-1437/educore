@@ -17,16 +17,14 @@ class UpdateDepartmentRequest extends FormRequest
     {
         $departmentId = $this->route('department')?->getKey();
 
-        // The uniqueness scope must be the faculty the department will END UP
-        // in. When no faculty is submitted, that is the one it already belongs
-        // to — using the request input alone would scope to `NULL` and let a
+        // The uniqueness scope must be the university the department will END
+        // UP in. When none is submitted, that is the one it already belongs to —
+        // using the request input alone would scope to `NULL` and let a
         // duplicate slip past validation until the database rejects it.
-        $facultyId = $this->route('faculty')?->getKey()
-            ?? $this->input('faculty_id')
-            ?? $this->route('department')?->faculty_id;
+        $universityId = $this->input('university_id') ?? $this->route('department')?->university_id;
 
         return [
-            'faculty_id' => ['sometimes', 'integer', Rule::exists('faculties', 'id')],
+            'university_id' => ['sometimes', 'integer', Rule::exists('universities', 'id')],
             'code' => [
                 'required', 'string', 'max:50',
                 Rule::unique('departments', 'code')->ignore($departmentId),
@@ -34,7 +32,7 @@ class UpdateDepartmentRequest extends FormRequest
             'name' => [
                 'required', 'string', 'max:255',
                 Rule::unique('departments', 'name')
-                    ->where(fn ($query) => $query->where('faculty_id', $facultyId))
+                    ->where(fn ($query) => $query->where('university_id', $universityId))
                     ->ignore($departmentId),
             ],
             'head_name' => ['nullable', 'string', 'max:255'],

@@ -14,7 +14,7 @@ use OpenApi\Attributes as OA;
 
 /**
  * Attendance endpoints (module 9.11). The section's lecturers record; managers
- * may correct; Faculty Admin reads; a student reads only their own summary.
+ * may correct; Department Admin reads; a student reads only their own summary.
  */
 class AttendanceController extends Controller
 {

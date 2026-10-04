@@ -1,7 +1,7 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { ArrowLeft, Eye, UserCheck, UserX } from '@lucide/vue'
-import { Head, router, useForm } from '@inertiajs/vue3'
+import { ArrowLeft, UserCheck, UserX } from '@lucide/vue'
+import { Head, Link, router, useForm } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
@@ -78,14 +78,15 @@ const toggleActive = () =>
     <BaseCard title="Teaching assignments" padding="lg">
       <template #description>Sections this lecturer is assigned to. Assign lecturers from the offering page.</template>
       <ul v-if="sections.length" class="divide-y divide-border-default dark:divide-dark-border">
-        <li v-for="section in sections" :key="section.id" class="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
-          <div>
-            <p class="text-small font-medium text-ink dark:text-dark-ink">
-              <span class="font-semibold">{{ section.offering?.course?.code }}</span> · Section {{ section.code }}
-            </p>
-            <p class="text-caption text-muted dark:text-dark-muted">{{ section.offering?.semester?.academic_year }} · {{ section.offering?.semester?.name }} · {{ section.capacity }} seats</p>
-          </div>
-          <IconButton :icon="Eye" :href="`/offerings/${section.offering?.id}`" label="Open offering" />
+        <li v-for="section in sections" :key="section.id" class="py-1">
+          <Link :href="`/offerings/${section.offering?.id}`" class="-mx-3 flex flex-wrap items-center justify-between gap-3 rounded-md px-3 py-3 transition-colors duration-150 hover:bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:hover:bg-dark-surface-2">
+            <div>
+              <p class="text-small font-medium text-ink dark:text-dark-ink">
+                <span class="font-semibold">{{ section.offering?.course?.code }}</span> · Section {{ section.code }}
+              </p>
+              <p class="text-caption text-muted dark:text-dark-muted">{{ section.offering?.semester?.academic_year }} · {{ section.offering?.semester?.name }} · {{ section.capacity }} seats</p>
+            </div>
+          </Link>
         </li>
       </ul>
       <p v-else class="text-small text-muted dark:text-dark-muted">Not assigned to any section yet.</p>

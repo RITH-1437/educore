@@ -57,12 +57,12 @@ class StudentService
     /**
      * @return LengthAwarePaginator<int, Student>
      */
-    /** `$viewer` limits a Faculty Admin to their faculty (`BelongsToFaculty`). */
+    /** `$viewer` limits a Department Admin to their department (`BelongsToDepartment`). */
     public function paginate(StudentListFilters $filters, ?User $viewer = null): LengthAwarePaginator
     {
         return Student::query()
             ->when($viewer, fn ($query) => $query->visibleTo($viewer))
-            ->with(['user:id,name,email,phone,is_active', 'currentProgram.program.department.faculty:id,code,name'])
+            ->with(['user:id,name,email,phone,is_active', 'currentProgram.program.department:id,code,name'])
             ->search($filters->search)
             ->when($filters->status, fn ($query, $status) => $query->where('status', $status))
             ->when($filters->programId, fn ($query, $id) => $query->whereHas(
@@ -72,10 +72,6 @@ class StudentService
             ->when($filters->departmentId, fn ($query, $id) => $query->whereHas(
                 'currentProgram.program',
                 fn ($q) => $q->where('department_id', $id),
-            ))
-            ->when($filters->facultyId, fn ($query, $id) => $query->whereHas(
-                'currentProgram.program.department',
-                fn ($q) => $q->where('faculty_id', $id),
             ))
             ->orderBy($filters->sortBy, $filters->sortDir)
             ->orderBy('id')

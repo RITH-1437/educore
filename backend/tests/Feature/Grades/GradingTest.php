@@ -11,10 +11,10 @@ use App\Models\AttendanceSession;
 use App\Models\AuditLog;
 use App\Models\Course;
 use App\Models\CourseOffering;
+use App\Models\Department;
 use App\Models\Enrollment;
 use App\Models\Exam;
 use App\Models\ExamResult;
-use App\Models\Faculty;
 use App\Models\GpaRecord;
 use App\Models\Grade;
 use App\Models\Lecturer;
@@ -321,15 +321,15 @@ class GradingTest extends TestCase
     public function test_role_matrix(): void
     {
         $base = "/api/sections/{$this->section->id}/grades";
-        $faculty = $this->facultyAdminFor($this->facultyOfSection($this->section));
-        $this->placeInFaculty($this->bob, $faculty->faculty_id);
-        $otherFaculty = $this->facultyAdminFor(Faculty::factory()->create());
+        $departmentAdmin = $this->departmentAdminFor($this->departmentOfSection($this->section));
+        $this->placeInDepartment($this->bob, $departmentAdmin->department_id);
+        $otherDepartmentAdmin = $this->departmentAdminFor(Department::factory()->create());
         $outsider = Lecturer::factory()->create();
 
-        $this->actingAs($faculty)->getJson($base)->assertOk();
-        $this->actingAs($otherFaculty)->getJson($base)->assertForbidden();
-        $this->actingAs($otherFaculty)->getJson("/api/students/{$this->bob->id}/gpa")->assertForbidden();
-        $this->actingAs($faculty)->postJson($base)->assertForbidden();
+        $this->actingAs($departmentAdmin)->getJson($base)->assertOk();
+        $this->actingAs($otherDepartmentAdmin)->getJson($base)->assertForbidden();
+        $this->actingAs($otherDepartmentAdmin)->getJson("/api/students/{$this->bob->id}/gpa")->assertForbidden();
+        $this->actingAs($departmentAdmin)->postJson($base)->assertForbidden();
         $this->actingAs($outsider->user)->getJson($base)->assertForbidden();
         $this->actingAs($outsider->user)->postJson($base)->assertForbidden();
         $this->actingAs($this->alice->user)->getJson($base)->assertForbidden();
@@ -342,7 +342,7 @@ class GradingTest extends TestCase
         // Students read only their own grades.
         $this->actingAs($this->alice->user)->getJson("/api/students/{$this->alice->id}/grades")->assertOk();
         $this->actingAs($this->alice->user)->getJson("/api/students/{$this->bob->id}/grades")->assertForbidden();
-        $this->actingAs($faculty)->getJson("/api/students/{$this->bob->id}/gpa")->assertOk();
+        $this->actingAs($departmentAdmin)->getJson("/api/students/{$this->bob->id}/gpa")->assertOk();
     }
 
     public function test_students_see_only_approved_grades(): void

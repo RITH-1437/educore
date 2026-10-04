@@ -149,7 +149,7 @@ class InvoiceTest extends TestCase
     public function test_access(): void
     {
         $id = $this->createInvoice();
-        $faculty = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::FacultyAdmin->value)->create()->id]);
+        $departmentAdmin = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::DepartmentAdmin->value)->create()->id]);
         $other = Student::factory()->create();
 
         $this->actingAs($this->student->user)->getJson("/api/invoices/{$id}")->assertOk();
@@ -159,7 +159,7 @@ class InvoiceTest extends TestCase
         $this->actingAs($this->student->user)->postJson("/api/invoices/{$id}/payments", $this->payment())->assertForbidden();
         $this->actingAs($other->user)->getJson("/api/invoices/{$id}")->assertForbidden();
         $this->actingAs($other->user)->getJson("/api/students/{$this->student->id}/invoices")->assertForbidden();
-        $this->actingAs($faculty)->getJson('/api/invoices')->assertForbidden();
+        $this->actingAs($departmentAdmin)->getJson('/api/invoices')->assertForbidden();
         $this->actingAs(Lecturer::factory()->create()->user)->getJson("/api/invoices/{$id}")->assertForbidden();
     }
 

@@ -11,7 +11,7 @@ use App\Services\AnnouncementService;
  * Announcements (`skills/announcements` §8): Super Admin / University Admin
  * manage all; an active lecturer writes to sections / courses they teach
  * (audience checked by `AnnouncementService`); everyone reads their own feed.
- * Faculty Admin reads only until unit scoping exists on the user record.
+ * Department Admin reads only until unit scoping exists on the user record.
  * Students never publish.
  */
 class AnnouncementPolicy

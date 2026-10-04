@@ -1,8 +1,7 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
-import Chart from 'chart.js/auto'
-import { Head, Link, router } from '@inertiajs/vue3'
+import { computed } from 'vue'
+import { Head, Link } from '@inertiajs/vue3'
 import { ArrowRight, BookOpen, CalendarDays, CalendarPlus, GraduationCap, Landmark, Presentation, TriangleAlert, UserPlus, Users } from '@lucide/vue'
 import BaseBadge from '../../components/BaseBadge.vue'
 import BaseCard from '../../components/BaseCard.vue'
@@ -10,6 +9,7 @@ import EmptyState from '../../components/EmptyState.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import StatCard from '../../components/StatCard.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
+import PieChart from '../../components/charts/PieChart.vue'
 
 const props = defineProps({
   stats: { type: Object, required: true },
@@ -48,81 +48,12 @@ const areas = [
 const formatDate = (value) => (value ? new Date(value).toLocaleDateString() : '—')
 const delay = (step) => ({ animationDelay: `${step * 60}ms` })
 
-// -- Accounts by role bar chart --
-const roleChartRef = ref(null)
-let roleChart = null
-
-const barColors = ['#2563eb', '#7c3aed', '#059669', '#d97706', '#dc2626']
-
-function buildRoleChart() {
-  if (roleChart) roleChart.destroy()
-  if (!roleChartRef.value || !props.roleCounts.length) return
-
-  const labels = props.roleCounts.map((r) => r.name)
-  const data = props.roleCounts.map((r) => r.total)
-  const colors = labels.map((_, i) => barColors[i % barColors.length])
-
-  roleChart = new Chart(roleChartRef.value, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Accounts',
-          data,
-          backgroundColor: colors,
-          borderRadius: { topLeft: 6, topRight: 6 },
-          maxBarThickness: 42,
-        },
-      ],
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-      },
-      onClick: (_event, elements) => {
-        if (elements.length > 0) {
-          const index = elements[0].index
-          const role = props.roleCounts[index]
-          if (role?.slug) {
-            router.get('/users', { role: role.slug })
-          }
-        }
-      },
-      onHover: (event, elements) => {
-        if (event.native?.target) {
-          event.native.target.style.cursor = elements.length ? 'pointer' : 'default'
-        }
-      },
-      scales: {
-        x: {
-          grid: { display: false },
-          ticks: {
-            color: '#64748b',
-            font: { size: 11 },
-            maxRotation: 30,
-            autoSkip: false,
-          },
-        },
-        y: {
-          beginAtZero: true,
-          grid: { color: 'rgba(148,163,184,0.15)' },
-          ticks: {
-            color: '#334155',
-            font: { size: 11 },
-            precision: 0,
-          },
-        },
-      },
-    },
-  })
-}
-
-onMounted(buildRoleChart)
-watch(() => props.roleCounts, buildRoleChart)
-onBeforeUnmount(() => { if (roleChart) roleChart.destroy() })
+// Accounts by role: brand palette tokens (primary, secondary, accent, muted, dark-muted), one per role.
+const roleColors = ['#2563EB', '#38BDF8', '#14B8A6', '#64748B', '#94A3B8']
+const roleChart = computed(() => ({
+  labels: props.roleCounts.map((role) => role.name),
+  values: props.roleCounts.map((role) => role.total),
+}))
 </script>
 
 <template>
@@ -184,21 +115,17 @@ onBeforeUnmount(() => { if (roleChart) roleChart.destroy() })
       <BaseCard title="Accounts by role" class="motion-safe:animate-section-in" :style="delay(5)">
         <template #description>Share of all accounts, active and inactive.</template>
         <div v-if="roleCounts.length">
-          <div class="relative h-60">
-            <canvas ref="roleChartRef" />
-          </div>
-          <div class="mt-4 flex flex-wrap gap-2 border-t border-border-default pt-3 dark:border-dark-border">
+          <PieChart :labels="roleChart.labels" :values="roleChart.values" :colors="roleColors" label="Accounts by role" value-label="Accounts" />
+          <nav class="mt-4 flex flex-wrap items-center gap-2 border-t border-border-default pt-3 dark:border-dark-border" aria-label="Open the users of a role">
             <Link
-              v-for="(roleItem, i) in roleCounts"
+              v-for="roleItem in roleCounts"
               :key="roleItem.slug"
               :href="`/users?role=${roleItem.slug}`"
-              class="inline-flex items-center gap-1.5 rounded-full border border-border-default bg-surface px-2.5 py-1 text-caption font-medium text-ink transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary dark:border-dark-border dark:bg-dark-surface dark:text-dark-ink dark:hover:border-dark-primary dark:hover:bg-dark-primary/10"
+              class="inline-flex items-center rounded-full border border-border-default bg-surface px-3 py-1 text-caption font-medium text-ink transition-colors hover:border-primary hover:bg-primary/5 hover:text-primary focus-visible:outline-2 focus-visible:outline-primary dark:border-dark-border dark:bg-dark-surface dark:text-dark-ink dark:hover:border-dark-primary dark:hover:bg-dark-primary/10"
             >
-              <span class="h-2 w-2 rounded-full" :style="{ backgroundColor: barColors[i % barColors.length] }" aria-hidden="true" />
-              <span>{{ roleItem.name }}</span>
-              <span class="font-semibold text-muted dark:text-dark-muted">({{ roleItem.total }})</span>
+              {{ roleItem.name }}
             </Link>
-          </div>
+          </nav>
         </div>
         <EmptyState v-else title="No roles assigned" description="Accounts will appear here as roles are assigned." />
       </BaseCard>

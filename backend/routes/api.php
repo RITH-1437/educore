@@ -10,13 +10,13 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\CourseOfferingController;
 use App\Http\Controllers\Api\DepartmentController;
+use App\Http\Controllers\Api\DepartmentDashboardController;
 use App\Http\Controllers\Api\DocumentController;
+use App\Http\Controllers\Api\DocumentTypeController;
 use App\Http\Controllers\Api\EnrollmentController;
 use App\Http\Controllers\Api\ErrorLogController;
 use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\ExportController;
-use App\Http\Controllers\Api\FacultyController;
-use App\Http\Controllers\Api\FacultyDashboardController;
 use App\Http\Controllers\Api\GradeController;
 use App\Http\Controllers\Api\InternshipController;
 use App\Http\Controllers\Api\InvoiceController;
@@ -56,23 +56,17 @@ Route::middleware(['auth:sanctum', 'role:super-admin'])->group(function () {
     Route::apiResource('users', UserController::class, ['names' => 'api.users']);
 });
 
-// Read routes also allow Faculty Admin; write routes are university-wide data
-// and stay with Super Admin / University Admin. `UniversityPolicy`,
-// `FacultyPolicy` and `DepartmentPolicy` mirror this split.
-Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-admin'])->group(function () {
-    // Registered before `/faculties/{faculty}` so the literal path wins.
-    Route::get('/faculties-tree', [DepartmentController::class, 'tree'])->name('api.faculties.tree');
-
+// Read routes also allow Department Admin; write routes are university-wide data
+// and stay with Super Admin / University Admin. `UniversityPolicy` and
+// `DepartmentPolicy` mirror this split.
+Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,department-admin'])->group(function () {
     Route::get('/universities', [UniversityController::class, 'index'])->name('api.universities.index');
     Route::get('/universities/{university}', [UniversityController::class, 'show'])->name('api.universities.show');
 
-    Route::get('/faculties', [FacultyController::class, 'index'])->name('api.faculties.index');
-    Route::get('/faculties/{faculty}', [FacultyController::class, 'show'])->name('api.faculties.show');
-    // Waiting requests and headline numbers; `FacultyPolicy::view` keeps a Faculty Admin to their own.
-    Route::get('/faculties/{faculty}/dashboard', FacultyDashboardController::class)->name('api.faculties.dashboard');
-
     Route::get('/departments', [DepartmentController::class, 'index'])->name('api.departments.index');
     Route::get('/departments/{department}', [DepartmentController::class, 'show'])->name('api.departments.show');
+    // Waiting requests and headline numbers; `DepartmentPolicy::view` keeps a Department Admin to their own.
+    Route::get('/departments/{department}/dashboard', DepartmentDashboardController::class)->name('api.departments.dashboard');
 
     Route::get('/programs', [ProgramController::class, 'index'])->name('api.programs.index');
     Route::get('/programs/{program}', [ProgramController::class, 'show'])->name('api.programs.show');
@@ -93,7 +87,7 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
 
 // Enrollment: staff list everything; a student enrolls/drops/reads only their
 // own (`EnrollmentPolicy`). Admin-only actions are checked by the policy.
-Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-admin,student'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,department-admin,student'])->group(function () {
     Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('api.enrollments.index');
     Route::get('/enrollments/export', [ExportController::class, 'enrollments'])->name('api.enrollments.export');
     Route::post('/enrollments', [EnrollmentController::class, 'store'])->name('api.enrollments.store');
@@ -105,8 +99,8 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
 });
 
 // Attendance: `AttendancePolicy` decides per section / student (lecturer of the
-// section, managers, Faculty Admin read-only, a student their own summary).
-Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-admin,lecturer,student'])->group(function () {
+// section, managers, Department Admin read-only, a student their own summary).
+Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,department-admin,lecturer,student'])->group(function () {
     Route::get('/sections/{section}/attendance', [AttendanceController::class, 'show'])->name('api.sections.attendance');
     Route::post('/sections/{section}/attendance', [AttendanceController::class, 'record'])->name('api.sections.attendance.store');
     Route::get('/sections/{section}/attendance/summary', [AttendanceController::class, 'summary'])->name('api.sections.attendance.summary');
@@ -127,7 +121,7 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::get('/submissions/{submission}/file', [AssignmentController::class, 'download'])->name('api.submissions.file');
 
     // Examinations: `ExamPolicy` scopes every call to the section's lecturers /
-    // managers (write), Faculty Admin (read) and enrolled students (schedule +
+    // managers (write), Department Admin (read) and enrolled students (schedule +
     // released results).
     Route::get('/sections/{section}/exams', [ExamController::class, 'index'])->name('api.sections.exams');
     Route::post('/sections/{section}/exams', [ExamController::class, 'store'])->name('api.sections.exams.store');
@@ -140,7 +134,7 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::get('/students/{student}/exams', [ExamController::class, 'student'])->name('api.students.exams');
 
     // Grades & GPA: `GradePolicy` — lecturers of the section compute / submit,
-    // managers approve / return and configure, Faculty Admin reads, a student
+    // managers approve / return and configure, Department Admin reads, a student
     // reads their own grades and GPA.
     Route::get('/sections/{section}/grades', [GradeController::class, 'sheet'])->name('api.sections.grades');
     Route::post('/sections/{section}/grades', [GradeController::class, 'compute'])->name('api.sections.grades.compute');
@@ -157,8 +151,12 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
     Route::put('/courses/{course}/grading-config', [GradeController::class, 'updateConfig'])->name('api.courses.grading-config.update');
 
     // Documents: `DocumentRequestPolicy` — a student requests and downloads
-    // their own, managers process, Faculty Admin reads.
+    // their own, managers process, Department Admin reads.
     Route::get('/document-types', [DocumentController::class, 'types'])->name('api.document-types');
+    Route::post('/document-types', [DocumentTypeController::class, 'store'])->name('api.document-types.store');
+    Route::get('/document-types/{documentType}', [DocumentTypeController::class, 'show'])->name('api.document-types.show');
+    Route::match(['put', 'patch'], '/document-types/{documentType}', [DocumentTypeController::class, 'update'])->name('api.document-types.update');
+    Route::delete('/document-types/{documentType}', [DocumentTypeController::class, 'destroy'])->name('api.document-types.destroy');
     Route::get('/document-requests', [DocumentController::class, 'index'])->name('api.document-requests.index');
     Route::post('/document-requests', [DocumentController::class, 'store'])->name('api.document-requests.store');
     Route::get('/document-requests/{documentRequest}', [DocumentController::class, 'show'])->name('api.document-requests.show');
@@ -210,13 +208,13 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-ad
 });
 
 // A student may read their own profile; `StudentPolicy::view` limits them to it.
-Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-admin,student'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,department-admin,student'])->group(function () {
     Route::get('/students/{student}', [StudentController::class, 'show'])->name('api.students.show');
     Route::get('/students/{student}/dashboard', StudentDashboardController::class)->name('api.students.dashboard');
 });
 
 // A lecturer may read their own profile; `LecturerPolicy::view` limits them to it.
-Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,faculty-admin,lecturer'])->group(function () {
+Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,department-admin,lecturer'])->group(function () {
     Route::get('/lecturers/{lecturer}', [LecturerController::class, 'show'])->name('api.lecturers.show');
     Route::get('/lecturers/{lecturer}/sections', [LecturerController::class, 'sections'])->name('api.lecturers.sections');
     Route::get('/lecturers/{lecturer}/dashboard', LecturerDashboardController::class)->name('api.lecturers.dashboard');
@@ -232,16 +230,6 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->group(
         ->name('api.universities.current');
     Route::delete('/universities/{university}', [UniversityController::class, 'destroy'])
         ->name('api.universities.destroy');
-
-    Route::post('/faculties', [FacultyController::class, 'store'])->name('api.faculties.store');
-    Route::match(['put', 'patch'], '/faculties/{faculty}', [FacultyController::class, 'update'])
-        ->name('api.faculties.update');
-    Route::post('/faculties/{faculty}/archive', [FacultyController::class, 'archive'])
-        ->name('api.faculties.archive');
-    Route::post('/faculties/{faculty}/reactivate', [FacultyController::class, 'reactivate'])
-        ->name('api.faculties.reactivate');
-    Route::delete('/faculties/{faculty}', [FacultyController::class, 'destroy'])
-        ->name('api.faculties.destroy');
 
     Route::post('/departments', [DepartmentController::class, 'store'])->name('api.departments.store');
     Route::match(['put', 'patch'], '/departments/{department}', [DepartmentController::class, 'update'])

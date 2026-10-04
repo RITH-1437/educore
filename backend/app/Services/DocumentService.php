@@ -9,6 +9,7 @@ use App\Models\DocumentType;
 use App\Models\DocumentVerification;
 use App\Models\Enrollment;
 use App\Models\Internship;
+use App\Models\Invoice;
 use App\Models\Semester;
 use App\Models\Student;
 use App\Models\University;
@@ -44,6 +45,7 @@ class DocumentService
         private readonly AuditLogger $audit,
         private readonly GradingService $grading,
         private readonly GpaService $gpa,
+        private readonly InvoiceService $invoices,
     ) {}
 
     /**
@@ -94,7 +96,43 @@ class DocumentService
 
     public function approve(DocumentRequest $request, User $by): DocumentRequest
     {
-        return $this->afterTransition($this->transition($request, DocumentRequest::STATUS_PENDING, ['status' => DocumentRequest::STATUS_APPROVED, 'processed_by' => $by->getKey(), 'processed_at' => now()]));
+        return DB::transaction(function () use ($request, $by) {
+            $request->loadMissing('type', 'student');
+            $invoiceId = $request->invoice_id;
+
+            if ($request->type->requires_fee && (float) $request->type->fee_amount > 0 && ! $invoiceId) {
+                $invoice = $this->invoices->create([
+                    'student_id' => $request->student_id,
+                    'title' => "Document Fee: {$request->type->name}",
+                    'description' => "Official document fee for {$request->type->name} (Request #{$request->id})",
+                    'currency' => 'USD',
+                    'due_date' => now()->addDays(14)->toDateString(),
+                    'issued_date' => now()->toDateString(),
+                    'discount' => 0,
+                    'items' => [
+                        [
+                            'description' => "Fee for {$request->type->name}",
+                            'quantity' => 1,
+                            'unit_price' => (float) $request->type->fee_amount,
+                            'fee_category' => 'document',
+                        ],
+                    ],
+                ]);
+                $invoiceId = $invoice->id;
+            }
+
+            $changes = [
+                'status' => DocumentRequest::STATUS_APPROVED,
+                'processed_by' => $by->getKey(),
+                'processed_at' => now(),
+            ];
+
+            if ($invoiceId) {
+                $changes['invoice_id'] = $invoiceId;
+            }
+
+            return $this->afterTransition($this->transition($request, DocumentRequest::STATUS_PENDING, $changes));
+        });
     }
 
     public function reject(DocumentRequest $request, User $by, string $reason): DocumentRequest
@@ -112,7 +150,12 @@ class DocumentService
             throw new BusinessRuleException("A {$request->status} request cannot be generated; approve it first.");
         }
 
-        $request->loadMissing('type', 'semester.academicYear', 'student');
+        $request->loadMissing('type', 'semester.academicYear', 'student', 'invoice');
+
+        if ($request->invoice_id && $request->invoice && $request->invoice->status !== Invoice::STATUS_PAID) {
+            throw new BusinessRuleException("Document generation requires fee payment: invoice {$request->invoice->invoice_number} is {$request->invoice->status}.");
+        }
+
         $token = bin2hex(random_bytes(32));
         $pdf = $this->render($request, $token);
         $key = "documents/{$request->student_id}/".Str::uuid().'.pdf';
@@ -242,7 +285,7 @@ class DocumentService
 
     private function render(DocumentRequest $request, string $token): string
     {
-        $student = $request->student->loadMissing('currentProgram.program.department.faculty');
+        $student = $request->student->loadMissing('currentProgram.program.department');
         $verifyUrl = $this->verificationUrl($token);
         $data = [
             'request' => $request,
@@ -345,7 +388,7 @@ class DocumentService
         }
 
         // A graduate has no active program any more: fall back to the latest one.
-        $enrolment = $student->currentProgram ?? $student->programHistory()->with('program.department.faculty')->first();
+        $enrolment = $student->currentProgram ?? $student->programHistory()->with('program.department')->first();
 
         return ['documents.student-certificate', [...$data,
             'program' => $data['program'] ?? $enrolment?->program,

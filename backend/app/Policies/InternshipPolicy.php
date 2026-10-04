@@ -9,10 +9,10 @@ use App\Models\User;
 /**
  * Internships (`skills/internship` §8): a student manages their own
  * application and reports; Super Admin / University Admin process every
- * internship and keep the companies; a Faculty Admin processes the internships
- * of their faculty's students — review, approve, reject, start, complete,
+ * internship and keep the companies; a Department Admin processes the internships
+ * of their department's students — review, approve, reject, start, complete,
  * cancel, evaluate, review reports, edit
- * (`docs/33_Faculty-Admin-Request-Handling-Report.md`).
+ * (`docs/33_Faculty-Admin-Request-Handling-Report.md`, scoped to a department since report 39).
  */
 class InternshipPolicy
 {
@@ -40,12 +40,12 @@ class InternshipPolicy
 
     /**
      * Review, approve, reject, start, complete, cancel, evaluate, review reports,
-     * edit: managers, or a Faculty Admin when the student is in their faculty.
+     * edit: managers, or a Department Admin when the student is in their department.
      * The internship is required — a class-level check would be university-wide.
      */
     public function process(User $user, Internship $internship): bool
     {
-        return $this->manages($user) || ($user->isRole(Role::FacultyAdmin->value) && $internship->isVisibleTo($user));
+        return $this->manages($user) || ($user->isRole(Role::DepartmentAdmin->value) && $internship->isVisibleTo($user));
     }
 
     /** Host companies are shared reference data: managers only. */
@@ -67,7 +67,7 @@ class InternshipPolicy
 
     private function staff(User $user): bool
     {
-        return $this->manages($user) || $user->isRole(Role::FacultyAdmin->value);
+        return $this->manages($user) || $user->isRole(Role::DepartmentAdmin->value);
     }
 
     private function owns(User $user, Internship $internship): bool

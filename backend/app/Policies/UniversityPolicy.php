@@ -40,12 +40,12 @@ class UniversityPolicy
     {
         return $user->isRole(Role::SuperAdmin->value)
             || $user->isRole(Role::UniversityAdmin->value)
-            || $user->isRole(Role::FacultyAdmin->value);
+            || $user->isRole(Role::DepartmentAdmin->value);
     }
 
     /**
      * The university record itself is platform-wide data, so only Super Admin
-     * and University Admin manage it. A Faculty Admin manages their own unit,
+     * and University Admin manage it. A Department Admin manages their own unit,
      * never the university (see `skills/faculty-department/SKILL.md` §8).
      */
     private function manageStructure(User $user): bool

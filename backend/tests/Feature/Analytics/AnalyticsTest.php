@@ -151,17 +151,17 @@ class AnalyticsTest extends TestCase
 
     public function test_managers_only(): void
     {
-        $faculty = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::FacultyAdmin->value)->create()->id]);
+        $departmentAdmin = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::DepartmentAdmin->value)->create()->id]);
         $university = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::UniversityAdmin->value)->create()->id]);
 
         foreach (['overview', 'enrollment', 'academic', 'administrative'] as $endpoint) {
-            $this->actingAs($faculty)->getJson("/api/analytics/{$endpoint}")->assertForbidden();
+            $this->actingAs($departmentAdmin)->getJson("/api/analytics/{$endpoint}")->assertForbidden();
             $this->actingAs(Student::factory()->create()->user)->getJson("/api/analytics/{$endpoint}")->assertForbidden();
             $this->actingAs(Lecturer::factory()->create()->user)->getJson("/api/analytics/{$endpoint}")->assertForbidden();
             $this->actingAs($university)->getJson("/api/analytics/{$endpoint}")->assertOk();
         }
 
-        $this->actingAs($faculty)->get('/analytics')->assertForbidden();
+        $this->actingAs($departmentAdmin)->get('/analytics')->assertForbidden();
         $this->actingAs($university)->get("/analytics?semester_id={$this->other->id}")->assertOk()
             ->assertInertia(fn (Assert $page) => $page->where('semesterId', $this->other->id)->has('semesters', 2)->has('administrative.documents'));
     }

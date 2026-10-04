@@ -54,7 +54,7 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(Failed::class, fn (Failed $e) => app(AuditLogger::class)->record('auth.failed', $e->user, description: 'Sign-in failed for '.($e->credentials['email'] ?? 'an unknown email').'.'));
         Event::listen(Lockout::class, fn (Lockout $e) => app(AuditLogger::class)->record('auth.lockout', null, description: 'Too many sign-in attempts for '.($e->request->input('email') ?? 'an unknown email').'.'));
 
-        // Institution-wide analytics (module 9.23): managers only — Faculty Admin
+        // Institution-wide analytics (module 9.23): managers only — Department Admin
         // would need unit scoping first (`skills/analytics-reporting` §12).
         Gate::define('view-analytics', fn (User $user) => $user->isRole(Role::SuperAdmin->value) || $user->isRole(Role::UniversityAdmin->value));
 

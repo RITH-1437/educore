@@ -1,6 +1,6 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { Download, Eye, Search } from '@lucide/vue'
+import { Download, Search } from '@lucide/vue'
 import { exportUrl } from '../../utils/exports'
 import { Head, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
@@ -36,7 +36,6 @@ const columns = [
   { key: 'action', label: 'Action' },
   { key: 'actor', label: 'Who' },
   { key: 'target', label: 'Record' },
-  { key: 'actions', label: 'Details', align: 'right' },
 ]
 </script>
 
@@ -55,7 +54,7 @@ const columns = [
       <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
     </form>
 
-    <BaseTable :columns="columns" :rows="logs.data" caption="Audit log entries" empty-title="No entries" empty-description="Sensitive actions appear here as they happen.">
+    <BaseTable :columns="columns" :rows="logs.data" :row-href="(row) => `/audit-logs/${row.id}`" caption="Audit log entries" empty-title="No entries" empty-description="Sensitive actions appear here as they happen.">
       <template #cell-when="{ row }"><span class="whitespace-nowrap tabular-nums">{{ when(row.created_at) }}</span></template>
       <template #cell-action="{ row }">
         <p class="font-medium">{{ actionLabel(row.action) }}</p>
@@ -66,7 +65,6 @@ const columns = [
         <p v-if="row.ip_address" class="font-mono text-caption text-muted dark:text-dark-muted">{{ row.ip_address }}</p>
       </template>
       <template #cell-target="{ row }"><span class="text-muted dark:text-dark-muted">{{ row.target ? `${row.target.type} #${row.target.id}` : '—' }}</span></template>
-      <template #cell-actions="{ row }"><div class="flex justify-end"><IconButton :icon="Eye" :href="`/audit-logs/${row.id}`" label="View entry" /></div></template>
     </BaseTable>
 
     <Pagination :links="logs.meta?.links ?? []" />

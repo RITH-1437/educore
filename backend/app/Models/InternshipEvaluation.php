@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
 /**
- * The company supervisor's or the faculty's evaluation of an internship —
+ * The company supervisor's or the academic (university-side) evaluation of an internship —
  * at most one of each, entered by staff (supervisors have no login).
  *
  * @property int $id
@@ -22,7 +22,7 @@ use Illuminate\Support\Carbon;
  */
 class InternshipEvaluation extends Model
 {
-    public const TYPES = ['supervisor', 'faculty'];
+    public const TYPES = ['supervisor', 'academic'];
 
     public const RATINGS = ['excellent', 'good', 'satisfactory', 'needs_improvement', 'poor'];
 

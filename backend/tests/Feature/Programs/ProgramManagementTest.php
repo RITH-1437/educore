@@ -4,7 +4,6 @@ namespace Tests\Feature\Programs;
 
 use App\Enums\Role;
 use App\Models\Department;
-use App\Models\Faculty;
 use App\Models\Program;
 use App\Models\Role as RoleModel;
 use App\Models\University;
@@ -31,7 +30,7 @@ class ProgramManagementTest extends TestCase
 
     private User $universityAdmin;
 
-    private User $facultyAdmin;
+    private User $departmentAdmin;
 
     private User $lecturer;
 
@@ -45,13 +44,12 @@ class ProgramManagementTest extends TestCase
 
         $this->superAdmin = User::factory()->superAdmin()->create(['email' => 'root@test.test']);
         $this->universityAdmin = $this->userWithRole(Role::UniversityAdmin->value, 'dean@test.test');
-        $this->facultyAdmin = $this->userWithRole(Role::FacultyAdmin->value, 'unit@test.test');
+        $this->departmentAdmin = $this->userWithRole(Role::DepartmentAdmin->value, 'unit@test.test');
         $this->lecturer = $this->userWithRole(Role::Lecturer->value, 'teacher@test.test');
         $this->student = $this->userWithRole(Role::Student->value, 'pupil@test.test');
 
         $university = University::factory()->current()->create();
-        $faculty = Faculty::factory()->create(['university_id' => $university->id]);
-        $this->department = Department::factory()->create(['faculty_id' => $faculty->id]);
+        $this->department = Department::factory()->create(['university_id' => $university->id]);
     }
 
     // ---------------------------------------------------------------- auth ---
@@ -71,23 +69,23 @@ class ProgramManagementTest extends TestCase
         }
     }
 
-    public function test_faculty_admin_may_read_but_not_write(): void
+    public function test_department_admin_may_read_but_not_write(): void
     {
         $program = Program::factory()->create(['department_id' => $this->department->id]);
-        $this->facultyAdmin->update(['faculty_id' => $this->department->faculty_id]);
+        $this->departmentAdmin->update(['department_id' => $this->department->id]);
         $elsewhere = Program::factory()->create();
 
-        $this->actingAs($this->facultyAdmin)->getJson("/api/programs/{$elsewhere->id}")->assertForbidden();
-        $this->actingAs($this->facultyAdmin)->getJson('/api/programs')->assertOk()->assertJsonMissing(['code' => $elsewhere->code]);
-        $this->actingAs($this->facultyAdmin)->get('/programs')->assertOk();
-        $this->actingAs($this->facultyAdmin)->getJson('/api/programs')->assertOk();
-        $this->actingAs($this->facultyAdmin)->getJson("/api/programs/{$program->id}")->assertOk();
+        $this->actingAs($this->departmentAdmin)->getJson("/api/programs/{$elsewhere->id}")->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->getJson('/api/programs')->assertOk()->assertJsonMissing(['code' => $elsewhere->code]);
+        $this->actingAs($this->departmentAdmin)->get('/programs')->assertOk();
+        $this->actingAs($this->departmentAdmin)->getJson('/api/programs')->assertOk();
+        $this->actingAs($this->departmentAdmin)->getJson("/api/programs/{$program->id}")->assertOk();
 
-        $this->actingAs($this->facultyAdmin)->post('/programs', $this->payload())->assertForbidden();
-        $this->actingAs($this->facultyAdmin)->postJson('/api/programs', $this->payload())->assertForbidden();
-        $this->actingAs($this->facultyAdmin)->get("/programs/{$program->id}/edit")->assertForbidden();
-        $this->actingAs($this->facultyAdmin)->postJson("/api/programs/{$program->id}/archive")->assertForbidden();
-        $this->actingAs($this->facultyAdmin)->deleteJson("/api/programs/{$program->id}")->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->post('/programs', $this->payload())->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->postJson('/api/programs', $this->payload())->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->get("/programs/{$program->id}/edit")->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->postJson("/api/programs/{$program->id}/archive")->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->deleteJson("/api/programs/{$program->id}")->assertForbidden();
 
         $this->assertDatabaseCount('programs', 2);
     }
@@ -104,7 +102,6 @@ class ProgramManagementTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Programs/Index')
                 ->has('programs.data', 2)
-                ->has('faculties.data', 1)
                 ->has('departments.data', 1)
                 ->has('degreeLevels', 4)
                 ->has('filters.search'));
@@ -262,7 +259,7 @@ class ProgramManagementTest extends TestCase
 
     public function test_program_cannot_be_created_under_an_archived_department(): void
     {
-        $archived = Department::factory()->create(['faculty_id' => $this->department->faculty_id]);
+        $archived = Department::factory()->create(['university_id' => $this->department->university_id]);
         $archived->delete();
 
         $this->actingAs($this->superAdmin)
@@ -309,7 +306,7 @@ class ProgramManagementTest extends TestCase
         $this->actingAs($this->superAdmin)->getJson("/api/programs?filters[department_id]={$this->department->id}")
             ->assertOk()->assertJsonCount(2, 'data');
 
-        $this->actingAs($this->superAdmin)->getJson("/api/programs?filters[faculty_id]={$other->faculty_id}")
+        $this->actingAs($this->superAdmin)->getJson("/api/programs?filters[department_id]={$other->id}")
             ->assertOk()->assertJsonCount(1, 'data')->assertJsonPath('data.0.code', 'CCC');
 
         $this->actingAs($this->superAdmin)->getJson('/api/programs?filters[degree_level]=master')

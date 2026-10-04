@@ -17,7 +17,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'phone', type: 'string', nullable: true, maxLength: 50, example: '+855 12 345 678'),
         new OA\Property(property: 'role_id', type: 'integer', format: 'int64', example: 5),
         new OA\Property(property: 'is_active', type: 'boolean', example: true),
-        new OA\Property(property: 'faculty_id', type: 'integer', format: 'int64', nullable: true, description: 'Faculty a Faculty Admin administers (limits what they can see). Only allowed when `role_id` is the Faculty Admin role; omitted or null clears it.'),
+        new OA\Property(property: 'department_id', type: 'integer', format: 'int64', nullable: true, description: 'Department a Department Admin administers (limits what they can see). Only allowed when `role_id` is the Department Admin role; omitted or null clears it.'),
         new OA\Property(
             property: 'password',
             type: 'string',

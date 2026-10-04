@@ -7,9 +7,9 @@ use App\Models\AssignmentSubmission;
 use App\Models\AttendanceSession;
 use App\Models\Course;
 use App\Models\CourseOffering;
+use App\Models\Department;
 use App\Models\Enrollment;
 use App\Models\Exam;
-use App\Models\Faculty;
 use App\Models\Grade;
 use App\Models\Lecturer;
 use App\Models\Role as RoleModel;
@@ -109,10 +109,10 @@ class LecturerDashboardTest extends TestCase
     {
         $this->getJson("/api/lecturers/{$this->lecturer->id}/dashboard")->assertUnauthorized();
 
-        // Another lecturer, a student, and another faculty's Faculty Admin may not read it.
+        // Another lecturer, a student, and another department's Department Admin may not read it.
         $this->actingAs(Lecturer::factory()->create()->user)->getJson("/api/lecturers/{$this->lecturer->id}/dashboard")->assertForbidden();
         $this->actingAs($this->userWithRole('student'))->getJson("/api/lecturers/{$this->lecturer->id}/dashboard")->assertForbidden();
-        $this->actingAs($this->facultyAdminFor(Faculty::factory()->create()))->getJson("/api/lecturers/{$this->lecturer->id}/dashboard")->assertForbidden();
+        $this->actingAs($this->departmentAdminFor(Department::factory()->create()))->getJson("/api/lecturers/{$this->lecturer->id}/dashboard")->assertForbidden();
 
         // No semester yet: nothing to count.
         $this->actingAs($this->lecturer->user)->get('/dashboard')->assertOk()->assertInertia(fn (Assert $page) => $page

@@ -18,7 +18,6 @@ final readonly class CourseListFilters
 
     public function __construct(
         public ?string $search = null,
-        public ?int $facultyId = null,
         public ?int $departmentId = null,
         public ?int $programId = null,
         public ?string $status = null,
@@ -29,7 +28,7 @@ final readonly class CourseListFilters
     ) {}
 
     /**
-     * @param  array<string, mixed>  $input  `search`, `filters[faculty_id|department_id|program_id|status|course_level]`, `sort_by`, `sort_dir`, `per_page`
+     * @param  array<string, mixed>  $input  `search`, `filters[department_id|program_id|status|course_level]`, `sort_by`, `sort_dir`, `per_page`
      */
     public static function fromInput(array $input): self
     {
@@ -43,7 +42,6 @@ final readonly class CourseListFilters
 
         return new self(
             search: $search === '' ? null : $search,
-            facultyId: self::toNullableInt($filters['faculty_id'] ?? null),
             departmentId: self::toNullableInt($filters['department_id'] ?? null),
             programId: self::toNullableInt($filters['program_id'] ?? null),
             status: in_array($status, Course::STATUSES, true) ? $status : null,
@@ -67,7 +65,6 @@ final readonly class CourseListFilters
         ], fn ($value) => $value !== null);
 
         $filters = array_filter([
-            'faculty_id' => $this->facultyId,
             'department_id' => $this->departmentId,
             'program_id' => $this->programId,
             'status' => $this->status,

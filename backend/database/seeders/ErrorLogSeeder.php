@@ -33,7 +33,7 @@ class ErrorLogSeeder extends Seeder
             [
                 'status_code' => 404,
                 'method' => 'GET',
-                'url' => '/faculties/9999',
+                'url' => '/departments/9999',
                 'exception_class' => null,
                 'message' => null,
                 'user' => null,
@@ -112,7 +112,7 @@ class ErrorLogSeeder extends Seeder
             [
                 'status_code' => 500,
                 'method' => 'POST',
-                'url' => '/faculties/1/departments',
+                'url' => '/departments/1',
                 'exception_class' => 'Illuminate\\Validation\\ValidationException',
                 'message' => 'The given data was invalid.',
                 'user' => $universityAdmin,
@@ -145,7 +145,7 @@ class ErrorLogSeeder extends Seeder
             [
                 'status_code' => 502,
                 'method' => 'GET',
-                'url' => '/api/faculties',
+                'url' => '/api/departments',
                 'exception_class' => 'Symfony\\Component\\HttpClient\\Exception\\TransportException',
                 'message' => 'HTTP/2 502 received from upstream service.',
                 'user' => null,

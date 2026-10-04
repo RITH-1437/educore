@@ -8,9 +8,9 @@ use App\Http\Requests\ChangeStudentProgramRequest;
 use App\Http\Requests\ChangeStudentStatusRequest;
 use App\Http\Requests\StoreStudentRequest;
 use App\Http\Requests\UpdateStudentRequest;
-use App\Http\Resources\FacultyResource;
+use App\Http\Resources\DepartmentResource;
 use App\Http\Resources\StudentResource;
-use App\Models\Faculty;
+use App\Models\Department;
 use App\Models\Program;
 use App\Models\Student;
 use App\Models\User;
@@ -58,7 +58,6 @@ class StudentController extends Controller
                 ->values(),
             'filters' => [
                 'search' => $filters->search,
-                'faculty_id' => $filters->facultyId,
                 'program_id' => $filters->programId,
                 'status' => $filters->status,
             ],
@@ -80,7 +79,7 @@ class StudentController extends Controller
     {
         $this->authorize('update', $student);
 
-        $student->load(['user', 'currentProgram.program.department.faculty:id,code,name', 'programHistory.program.department']);
+        $student->load(['user', 'currentProgram.program.department:id,code,name', 'programHistory.program.department']);
 
         return Inertia::render('Students/Edit', [
             // `resolve()` so the page reads `props.student.student_number`, not `.data.…`.
@@ -132,24 +131,24 @@ class StudentController extends Controller
     /**
      * @return array<string, mixed>
      */
-    /** Filter / form options; a Faculty Admin only gets their own faculty's. */
+    /** Filter / form options; a Department Admin only gets their own department's. */
     private function lookups(): array
     {
         return [
-            'faculties' => FacultyResource::collection(
-                Faculty::query()->visibleTo(request()->user())->where('is_active', true)->orderBy('name')->get()
+            'departments' => DepartmentResource::collection(
+                Department::query()->visibleTo(request()->user())->where('is_active', true)->orderBy('name')->get()
             ),
-            // Active programs with their faculty, for the faculty → program cascade.
+            // Active programs with their department, for the department → program cascade.
             'programs' => Program::query()->visibleTo(request()->user())
                 ->where('is_active', true)
-                ->with('department:id,code,name,faculty_id')
+                ->with('department:id,code,name')
                 ->orderBy('code')
                 ->get()
                 ->map(fn (Program $program) => [
                     'id' => $program->id,
                     'code' => $program->code,
                     'name' => $program->name,
-                    'faculty_id' => $program->department?->faculty_id,
+                    'department_id' => $program->department_id,
                     'department' => $program->department?->code,
                 ])
                 ->values(),

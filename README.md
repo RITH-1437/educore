@@ -99,11 +99,15 @@ docker compose --project-directory . -f docker/docker-compose.yml exec backend p
 
 Or via Make: `make seed`. To drop and re-seed in one step: `make migrate-fresh`.
 
-The seed is idempotent and produces: 1 current university (`ITC`), 3 faculties
-(`ENG`, `SCI`, `HSS`), 6 departments, 7 degree programs and 10 courses with prerequisites and curricula, plus roles and a super-admin
-(`admin@educore.kh` / `admin@123`), and 6 lecturer accounts (e.g.
-`dara.lim@educore.kh` / `lecturer@123`) and 10 student accounts (e.g.
-`itc-2025-0001@student.educore.kh` / `student@123`), development only. See
+The seed is idempotent and produces only what a fresh installation needs: the
+five roles, **one account per role** — `admin@educore.kh` / `admin@123`
+(Super Admin), `university@educore.kh` / `university@123`, `faculty@educore.kh`
+/ `faculty@123`, `lecturer@educore.kh` / `lecturer@123` and
+`student@educore.kh` / `student@123` (development only — change them) — plus
+the default grading scale and the requestable document types. No demo people or records are seeded: universities, faculties,
+programs, courses, students, lecturers and everything else are entered through
+the application, and every screen (including the public landing page's figures)
+shows what is in the database. See
 [`docs/database/seed-strategy.md`](docs/database/seed-strategy.md).
 
 Optional: `MAX_SEMESTER_CREDITS` (default `24`) sets the per-semester credit

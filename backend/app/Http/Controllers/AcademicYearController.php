@@ -77,9 +77,10 @@ class AcademicYearController extends Controller
             // `JsonResource` as a `Responsable`, so it would nest the payload under
             // `data` and the page would read `props.academicYear.data.code`.
             'academicYear' => (new AcademicYearResource($academicYear))->resolve(),
+            // Resolved for the same reason: the page iterates a plain list.
             'semesters' => SemesterResource::collection(
                 $academicYear->semesters()->get()
-            ),
+            )->resolve(),
         ]);
     }
 

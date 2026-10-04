@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\UniversityAdmin;
 
+use App\Models\Department;
 use App\Models\DocumentRequest;
 use App\Models\DocumentType;
-use App\Models\Faculty;
 use App\Models\Internship;
 use App\Models\InternshipCompany;
 use App\Models\Invoice;
@@ -120,12 +120,12 @@ class UniversityAdminDashboardTest extends TestCase
     {
         $this->getJson('/api/university/dashboard')->assertUnauthorized();
 
-        // Students, lecturers, and faculty admins cannot access the endpoint
+        // Students, lecturers, and department admins cannot access the endpoint
         foreach (['student', 'lecturer'] as $role) {
             $this->actingAs($this->userWithRole($role))->getJson('/api/university/dashboard')->assertForbidden();
         }
-        $facultyAdmin = $this->facultyAdminFor(Faculty::factory()->create());
-        $this->actingAs($facultyAdmin)->getJson('/api/university/dashboard')->assertForbidden();
+        $departmentAdmin = $this->departmentAdminFor(Department::factory()->create());
+        $this->actingAs($departmentAdmin)->getJson('/api/university/dashboard')->assertForbidden();
 
         // Without any semester, overview figures are safe nulls
         $this->actingAs($this->universityAdmin)

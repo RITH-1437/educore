@@ -53,7 +53,7 @@ Keep in `frontend/src/components` and reuse everywhere:
 | Component | Purpose |
 | --- | --- |
 | `BaseButton` / `BaseInput` / `BaseSelect` / `BaseTextarea` | Form primitives with label + error slot |
-| `BaseTable` | Data tables with slots, sorting, pagination footer |
+| `BaseTable` | Data tables with slots, sorting, pagination footer; `row-href` makes rows open their record (no View/Eye action) |
 | `BaseModal` | Modal scaffold with `v-model` open state |
 | `BaseCard` | Content card container |
 | `BaseDropdown` / `BaseTooltip` / `BaseBadge` | Small interaction primitives |
@@ -61,6 +61,7 @@ Keep in `frontend/src/components` and reuse everywhere:
 | `StatusBadge` | Status → color mapping (e.g. Paid/Pending) |
 | `IconButton` | The default for **every action** (icon-first; vocabulary and exceptions in `docs/branding/UI-COMPONENTS.md` §2): required label → aria-label + tooltip; variants default / primary / success / danger, sizes sm / md, `href` / `native` / `type="submit"` / `loading` |
 | `Pagination` | Page navigation |
+| `ToastRegion` / `useToast` | Bottom-right toasts for save/update feedback (flash messages become toasts automatically) |
 
 - Add components when a pattern repeats; do not create a component for a single
   usage.
@@ -89,8 +90,9 @@ Keep in `frontend/src/components` and reuse everywhere:
 ## Alerts & feedback
 
 - Inline alerts for validation/errors near the relevant form.
-- Success feedback after mutations (toast or inline) — pick one pattern and
-  reuse it.
+- Success/error feedback after mutations is a bottom-right toast (`ToastRegion`;
+  flash `success`/`error` become toasts automatically, or call `toast.success()`);
+  validation errors stay inline under the field. Do not add page banners.
 - Distinguish info / success / warning / error consistently.
 
 ## Empty / loading / error states

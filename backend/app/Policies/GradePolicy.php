@@ -12,7 +12,7 @@ use App\Policies\Concerns\ChecksSectionTeaching;
 /**
  * Grades & GPA (`skills/grading-gpa/SKILL.md` §8): the section's lecturers
  * compute and submit, University Admin / Super Admin approve, return and
- * manage the scale and course weights, Faculty Admin reads, a student sees
+ * manage the scale and course weights, Department Admin reads, a student sees
  * only their own approved grades and GPA.
  */
 class GradePolicy

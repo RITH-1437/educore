@@ -17,7 +17,7 @@ final readonly class UpdateUserData
         public ?string $password = null,
         public ?string $phone = null,
         public ?bool $isActive = null,
-        public ?int $facultyId = null,
+        public ?int $departmentId = null,
     ) {}
 
     /**
@@ -32,7 +32,7 @@ final readonly class UpdateUserData
             password: $validated['password'] ?? null,
             phone: $validated['phone'] ?? null,
             isActive: isset($validated['is_active']) ? (bool) $validated['is_active'] : null,
-            facultyId: isset($validated['faculty_id']) ? (int) $validated['faculty_id'] : null,
+            departmentId: isset($validated['department_id']) ? (int) $validated['department_id'] : null,
         );
     }
 
@@ -48,9 +48,9 @@ final readonly class UpdateUserData
             'email' => $this->email,
             'role_id' => $this->roleId,
             'phone' => $this->phone,
-            // Always written: a full update without `faculty_id` (or a role
-            // change away from Faculty Admin) clears it.
-            'faculty_id' => $this->facultyId,
+            // Always written: a full update without `department_id` (or a role
+            // change away from Department Admin) clears it.
+            'department_id' => $this->departmentId,
         ];
 
         if ($this->isActive !== null) {

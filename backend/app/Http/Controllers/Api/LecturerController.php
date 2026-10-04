@@ -18,7 +18,7 @@ use OpenApi\Attributes as OA;
 /**
  * Lecturer endpoints (module 9.3).
  *
- * List: Super Admin, University Admin, Faculty Admin. Show: the same, plus a
+ * List: Super Admin, University Admin, Department Admin. Show: the same, plus a
  * lecturer reading their own profile. Writes: Super Admin and University Admin.
  */
 class LecturerController extends Controller
@@ -36,7 +36,6 @@ class LecturerController extends Controller
         security: [['sanctum' => []]],
         parameters: [
             new OA\QueryParameter(name: 'search', description: 'Partial match on staff number, first/last name, specialization or email.', schema: new OA\Schema(type: 'string'), example: 'Sok'),
-            new OA\QueryParameter(name: 'filters[faculty_id]', description: 'Lecturers whose department belongs to this faculty.', schema: new OA\Schema(type: 'integer', format: 'int64')),
             new OA\QueryParameter(name: 'filters[department_id]', description: 'Lecturers of this department.', schema: new OA\Schema(type: 'integer', format: 'int64')),
             new OA\QueryParameter(name: 'filters[employment_type]', description: 'Employment type.', schema: new OA\Schema(type: 'string', enum: Lecturer::EMPLOYMENT_TYPES)),
             new OA\QueryParameter(name: 'filters[is_active]', description: 'Active (1) or inactive (0) lecturers.', schema: new OA\Schema(type: 'boolean')),
@@ -82,7 +81,7 @@ class LecturerController extends Controller
 
         $lecturer = $this->lecturers->create($request->validated());
 
-        return (new LecturerResource($lecturer->load(['user', 'department.faculty:id,code,name'])))
+        return (new LecturerResource($lecturer->load(['user', 'department:id,code,name'])))
             ->response()
             ->setStatusCode(201);
     }
@@ -106,7 +105,7 @@ class LecturerController extends Controller
     {
         $this->authorize('view', $lecturer);
 
-        return new LecturerResource($lecturer->load(['user', 'department.faculty:id,code,name']));
+        return new LecturerResource($lecturer->load(['user', 'department:id,code,name']));
     }
 
     #[OA\Get(
@@ -176,7 +175,7 @@ class LecturerController extends Controller
 
         $this->lecturers->update($lecturer, $request->validated());
 
-        return new LecturerResource($lecturer->refresh()->load(['user', 'department.faculty:id,code,name']));
+        return new LecturerResource($lecturer->refresh()->load(['user', 'department:id,code,name']));
     }
 
     #[OA\Post(

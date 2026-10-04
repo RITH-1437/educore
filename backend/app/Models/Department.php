@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\BelongsToFaculty;
+use App\Models\Concerns\BelongsToDepartment;
 use Database\Factories\DepartmentFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,14 +12,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * A department inside a faculty — the deepest level the academic hierarchy
- * allows (`skills/faculty-department/SKILL.md` §12).
+ * A department of the university — the only unit between the university and
+ * its programs (`skills/faculty-department/SKILL.md`; the faculty level was
+ * removed in report 39).
  *
- * Soft deleted for the same reason as `Faculty`: programs, courses and
- * lecturers reference it, so units are archived instead of removed.
+ * Soft deleted: programs, courses and lecturers reference it, so units are
+ * archived instead of removed.
  *
  * @property int $id
- * @property int $faculty_id
+ * @property int $university_id
  * @property string $code
  * @property string $name
  * @property string|null $head_name
@@ -28,7 +29,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Department extends Model
 {
-    use BelongsToFaculty;
+    use BelongsToDepartment;
 
     /** @use HasFactory<DepartmentFactory> */
     use HasFactory;
@@ -36,7 +37,7 @@ class Department extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'faculty_id',
+        'university_id',
         'code',
         'name',
         'head_name',
@@ -61,9 +62,9 @@ class Department extends Model
         ];
     }
 
-    public function faculty(): BelongsTo
+    public function university(): BelongsTo
     {
-        return $this->belongsTo(Faculty::class);
+        return $this->belongsTo(University::class);
     }
 
     public function programs(): HasMany
@@ -100,12 +101,12 @@ class Department extends Model
     }
 
     /**
-     * Unit ownership (`App\Support\FacultyScope`).
+     * Unit ownership (`App\Support\DepartmentScope`): a department owns itself.
      *
      * @param  Builder<self>  $query
      */
-    public function scopeInFaculty(Builder $query, int $facultyId): void
+    public function scopeInDepartment(Builder $query, int $departmentId): void
     {
-        $query->where('faculty_id', $facultyId);
+        $query->whereKey($departmentId);
     }
 }

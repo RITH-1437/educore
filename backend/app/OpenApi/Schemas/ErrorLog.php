@@ -22,10 +22,10 @@ use OpenApi\Attributes as OA;
         new OA\Property(
             property: 'url',
             type: 'string',
-            example: '/faculties/999',
+            example: '/departments/999',
             description: 'Request path only. Query strings are dropped because they can carry secrets.'
         ),
-        new OA\Property(property: 'route_name', type: 'string', nullable: true, example: 'faculties.show'),
+        new OA\Property(property: 'route_name', type: 'string', nullable: true, example: 'departments.show'),
         new OA\Property(property: 'exception_class', type: 'string', nullable: true, example: 'Illuminate\\Database\\QueryException'),
         new OA\Property(property: 'message', type: 'string', nullable: true),
         new OA\Property(property: 'ip_address', type: 'string', nullable: true, example: '203.0.113.7'),

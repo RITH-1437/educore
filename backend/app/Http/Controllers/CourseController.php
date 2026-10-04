@@ -9,10 +9,8 @@ use App\Http\Requests\StoreCourseRequest;
 use App\Http\Requests\UpdateCourseRequest;
 use App\Http\Resources\CourseResource;
 use App\Http\Resources\DepartmentResource;
-use App\Http\Resources\FacultyResource;
 use App\Models\Course;
 use App\Models\Department;
-use App\Models\Faculty;
 use App\Models\Program;
 use App\Services\CourseService;
 use App\Services\GradingService;
@@ -49,7 +47,6 @@ class CourseController extends Controller
             ...$this->lookups(),
             'filters' => [
                 'search' => $filters->search,
-                'faculty_id' => $filters->facultyId,
                 'department_id' => $filters->departmentId,
                 'program_id' => $filters->programId,
                 'status' => $filters->status,
@@ -73,7 +70,7 @@ class CourseController extends Controller
     {
         $this->authorize('update', $course);
 
-        $course->load(['department.faculty:id,code,name', 'prerequisites', 'programs']);
+        $course->load(['department:id,code,name', 'prerequisites', 'programs']);
 
         return Inertia::render('Courses/Edit', [
             // `resolve()` so the page reads `props.course.code`, not `.data.code`.
@@ -160,18 +157,15 @@ class CourseController extends Controller
     }
 
     /**
-     * Faculty, department and program options for the filter bar and forms.
+     * Department and program options for the filter bar and forms.
      * Archived units are excluded: a course cannot be created under them.
      *
      * @return array<string, mixed>
      */
-    /** Filter / form options; a Faculty Admin only gets their own faculty's. */
+    /** Filter / form options; a Department Admin only gets their own department's. */
     private function lookups(): array
     {
         return [
-            'faculties' => FacultyResource::collection(
-                Faculty::query()->visibleTo(request()->user())->where('is_active', true)->orderBy('name')->get()
-            ),
             'departments' => DepartmentResource::collection(
                 Department::query()->visibleTo(request()->user())->where('is_active', true)->orderBy('name')->get()
             ),

@@ -11,7 +11,7 @@ use App\Models\User;
  * Invoices & payments (`skills/invoices-payments` §8): Super Admin and
  * University Admin manage everything (there is no Finance Officer role); a
  * student reads only their own invoices and payments and never records any.
- * Faculty Admin and lecturers have no finance access.
+ * Department Admin and lecturers have no finance access.
  */
 class InvoicePolicy
 {

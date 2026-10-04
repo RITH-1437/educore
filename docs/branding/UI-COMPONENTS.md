@@ -24,7 +24,7 @@ Reusable primitives live under `frontend/src/components` (see
 | `BaseButton` | Text buttons: form submits, dialog footers (see §2) |
 | `IconButton` | Icon-only actions — the default for every action (see §2 "Icon-first actions") |
 | `BaseInput` / `BaseSelect` / `BaseTextarea` | Form primitives with label + error slot |
-| `BaseTable` | Data tables: slots, sorting, pagination footer |
+| `BaseTable` | Data tables: slots, sorting, pagination footer, clickable rows (`row-href`, see §4) |
 | `BaseModal` | Modal scaffold (`v-model` open state) |
 | `BaseCard` | Content card container |
 | `BaseDropdown` / `BaseTooltip` / `BaseBadge` | Small interaction primitives |
@@ -36,6 +36,7 @@ Reusable primitives live under `frontend/src/components` (see
 | `SkeletonBlock` / `StatCardSkeleton` / `TableSkeleton` | Loading placeholders that match final dimensions |
 | `layout/AppSidebar` / `layout/AppTopbar` | Dashboard shell (see §8, §11) |
 | `Pagination` | Page navigation |
+| `ToastRegion` + `useToast` | Save / update feedback: small toasts at the bottom right (§12) |
 
 Do not rewrite these; extend/use them.
 
@@ -84,7 +85,7 @@ Icon vocabulary — reuse, do not invent per page:
 | Action | Icon | Action | Icon |
 |---|---|---|---|
 | New / add (primary) | `Plus` | Edit | `Pencil` |
-| Delete / remove | `Trash2` | View / open record | `Eye` |
+| Delete / remove | `Trash2` | Open a record | no icon: the row is clickable (§4) |
 | Manage (open a management page) | `Settings2` | Back | `ArrowLeft` |
 | Go to (card "view all") | `ArrowRight` | Archive / restore | `Archive` / `ArchiveRestore` |
 | Activate / start · complete | `CirclePlay` / `Play` · `CircleCheckBig` | Close (semester) | `CircleStop` |
@@ -168,7 +169,14 @@ Tables are the backbone of this administration platform.
 | Empty state | `EmptyState` component with message + CTA |
 | Loading | skeleton rows or spinner overlay |
 
-- **Actions column:** rightmost, icon buttons only (`components/IconButton.vue`, §2 "Icon-first actions"), `gap-1`: Edit (`Pencil`), Delete / Remove (`Trash2`, `danger`), Archive / Reactivate, Activate, View, Manage… — 32px target, muted at rest, coloured on hover, a required `label` that is both the accessible name and the tooltip. Page-header and filter-bar actions are icon buttons too (`size="md"`).
+- **Actions column:** rightmost, icon buttons only (`components/IconButton.vue`, §2 "Icon-first actions"), `gap-1`: Edit (`Pencil`), Delete / Remove (`Trash2`, `danger`), Archive / Reactivate, Activate, Manage… — 32px target, muted at rest, coloured on hover, a required `label` that is both the accessible name and the tooltip. Page-header and filter-bar actions are icon buttons too (`size="md"`).
+- **Opening a record (2026-10-05):** the whole row is the link — `BaseTable` `:row-href="(row) => url"`.
+  Rows get the pointer cursor, the hover tint, `tabindex="0"` and Enter to open; Ctrl/⌘-click and
+  middle-click open a new tab. Clicks on controls inside the row (buttons, links, inputs) and text
+  selection never navigate. There is **no** View/`Eye` action, and no Actions column when opening was
+  its only action. Lists outside tables (e.g. teaching assignments, "Used in programs") make each item
+  an Inertia `Link` with the same hover tint and a focus ring. `Eye` / `EyeOff` remain only for
+  publish / release (visibility) actions.
 - **Sorting:** header toggles `sort_by`/`sort_dir` (see `skills/api/SKILL.md`).
 - **Filtering/search:** toolbar above the table; consistent across all tables.
 - **Pagination:** `Pagination` footer; shared `useDataTable` composable.
@@ -368,6 +376,24 @@ Restrained, purposeful.
 
 ## 12. UX States (all components)
 
+### Feedback toasts (2026-10-05)
+
+Every save, update, delete or other mutation reports back with one pattern: a **small toast at the
+bottom right** (`components/ToastRegion.vue`, mounted once in `DefaultLayout`).
+
+| Rule | Value |
+|---|---|
+| Source | Server flash `success` / `error` (`->with('success', ...)`) becomes a toast once per server response (Inertia `success` event; Back/Forward never replays old messages). Code can call `toast.success()` / `toast.error()` from `composables/useToast` |
+| Placement | `fixed`, 24px from the bottom and right (`16px` gutters, full width on phones); `z-[80]` above modals |
+| Size | `w-80`, `px-4 py-3`, `text-small`, one icon (`CircleCheck` success · `CircleAlert` error · `Info`), a dismiss `X` |
+| Surface | `surface` / `dark-surface`, `border-default`, `shadow-lg`, `radius-lg`; the icon carries the semantic colour, the text stays `ink` |
+| Lifetime | success 4s, error 6s; hover or keyboard focus pauses; at most 3 stacked; an identical message within 1s is shown once |
+| Motion | 200ms rise + fade in, 150ms fade out (reduced-motion rule applies) |
+| Accessibility | Region `aria-live="polite"`; success/info `role="status"`, errors `role="alert"`; the dismiss button has a label |
+
+Validation errors are **not** toasts: they stay inline under their fields (§3). The previous
+full-width flash banner at the top of the content was removed.
+
 Every major component defines these states:
 
 | State | Meaning |
@@ -438,6 +464,41 @@ Rules:
   flat white landing sections (nothing behind them to blur).
 - The ambient fields are the **only** sanctioned decorative gradient in the app
   shell (alpha ≤ 18%); no other gradients.
+
+---
+
+## 15. Landing Page (2026-10-05)
+
+The public page at `/` (`pages/Landing.vue`, components in `components/landing/`). Light **and**
+dark: the navbar's Sun/Moon toggle uses `useTheme` (the dashboard's `educore_theme` preference, falling
+back to the system); report: `docs/37_Landing-Page-Redesign-Report.md`.
+
+| Rule | Value |
+|---|---|
+| Section order | Hero · What is EduCore? · Problem → Solution · Modules · Academic ecosystem · Student journey · See EduCore in action · Documents · Communication · Analytics · Security · Technology · Project story · Final CTA · Footer (the ASCII "EDUCORE" wordmark only) |
+| Surfaces | Alternate `surface` / `background` (dark: `dark-surface` / `dark-bg`); `primary-dark` (navy) for "See EduCore in action", the final CTA and the footer, with a `dark-border` edge in dark mode. The sample QR mark stays dark-on-light in both themes |
+| Type | Section titles `font-display` + `h2`; hero and final CTA `h1` → `display` from `sm` |
+| Navbar | Transparent over the hero, solid `surface` + `border-default` + `shadow-sm` once scrolled (glass greyed over navy sections); live-text wordmark (navy "Edu", primary "Core"); links Home · Platform · Modules · Technology · About; the active link is the last linked section above 30% of the viewport, so sections between links keep the previous link lit |
+| Buttons | `BaseButton` on light sections; on navy, the dark-mode button tokens (`dark-primary` fill, `dark-bg` text) so the hover never matches the background |
+| Tabs | `LandingTabs` — underline tabs (§8) with arrow / Home / End keys |
+| Live data | Figures come from the `stats` prop (`LandingStatsService`): aggregates only — no names or personal records; per-course results only from five approved grades. An empty database shows dashes and `EmptyState`s, never invented numbers. The Admin preview uses the live University Admin figures; Lecturer / Student previews show placeholders (personal dashboards). Illustrative content that is not data (sample transcript, example notifications) is captioned as such |
+
+Motion (all in `style.css`, deceleration easing, covered by the global reduced-motion rule):
+
+| Utility / component | Use |
+|---|---|
+| `Reveal` + `useInView` | Scroll reveal, once per element; content shows at once under reduced motion |
+| `.edu-fade-up` (staggered delays) · `.edu-slide-in` | Hero copy and CTAs · hero terminal |
+| `HeroTerminal` · `.edu-blink` | Types the repository's real Makefile commands once (`make up`, `make migrate && make seed`, `make test`, `open`), then the cursor blinks 6 times and rests; full transcript at once under reduced motion; `sr-only` summary |
+| `.edu-drift` | Hero `.app-ambient` backdrop, 18s × 2 cycles, then rests |
+| Scroll-linked line | Academic ecosystem: the line fills with scroll and each level lights when reached |
+| Problem → Solution morph | Chips move from scattered to aligned and swap problem → solution text; a Before / With EduCore toggle replays it |
+| `.edu-travel` · `.edu-scan` | Communication signal dot (3 runs) · QR scan line (3 runs), started when in view |
+| `.edu-marquee` | Technology rows. The **only infinite animation** in the product: it pauses on hover / keyboard focus and with a visible Pause button (WCAG 2.2.2), and becomes a static wrapped list under reduced motion |
+| `.landing-glow` | One low-alpha `primary` radial glow on navy sections; the only decorative gradient besides `.app-ambient` |
+| `.landing-banner` | Footer ASCII wordmark: monospace, `clamp(0.375rem, 2.4vw, 1.5rem)`, line-height 1, solid `primary` (no opacity — overlapping glyphs would show seams); `aria-hidden` with an `sr-only` text |
+
+Technology logos are the documented exception to Lucide-only icons (`BRAND-GUIDELINES.md` §10).
 
 ---
 

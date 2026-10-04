@@ -11,7 +11,7 @@ use App\Policies\Concerns\ChecksSectionTeaching;
 
 /**
  * Examinations (`skills/examinations/SKILL.md` §8): the section's lecturers
- * (and managers) run exams and enter results; Faculty Admin reads; enrolled
+ * (and managers) run exams and enter results; Department Admin reads; enrolled
  * students see the schedule and, once released, their own results.
  */
 class ExamPolicy

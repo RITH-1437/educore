@@ -14,11 +14,12 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseOfferingController;
 use App\Http\Controllers\CourseworkController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\DocumentsController;
+use App\Http\Controllers\DocumentTypesController;
 use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\ErrorLogController;
 use App\Http\Controllers\ExamsController;
-use App\Http\Controllers\FacultyController;
 use App\Http\Controllers\GradesController;
 use App\Http\Controllers\InternshipsController;
 use App\Http\Controllers\InvoicesController;
@@ -31,12 +32,14 @@ use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TimetableController;
 use App\Http\Controllers\UniversityController;
 use App\Http\Controllers\UserController;
+use App\Services\LandingStatsService;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
+Route::get('/', function (LandingStatsService $landing) {
     if (! auth()->check()) {
-        return Inertia::render('Landing');
+        // Live, aggregate-only figures (no personal data) — empty database, empty figures.
+        return Inertia::render('Landing', ['stats' => $landing->build()]);
     }
 
     return auth()->user()->isRole(Role::SuperAdmin->value)
@@ -75,14 +78,14 @@ Route::middleware(['auth', 'role:super-admin'])->group(function () {
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 });
 
-Route::middleware(['auth', 'role:university-admin,faculty-admin,lecturer,student'])
+Route::middleware(['auth', 'role:university-admin,department-admin,lecturer,student'])
     ->get('/dashboard', [DashboardController::class, 'roleDashboard'])
     ->name('role-dashboard');
 
-// Reading the university structure is open to Faculty Admin as well; changing
+// Reading the university structure is open to Department Admin as well; changing
 // it is university-wide data and stays with Super Admin / University Admin.
-// `UniversityPolicy` and `FacultyPolicy` mirror this split.
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])
+// `UniversityPolicy` and `DepartmentPolicy` mirror this split.
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])
     ->prefix('/universities')
     ->name('universities.')
     ->group(function () {
@@ -100,41 +103,28 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])
         Route::delete('/{university}', [UniversityController::class, 'destroy'])->name('destroy');
     });
 
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])
-    ->prefix('/faculties')
-    ->name('faculties.')
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])
+    ->prefix('/departments')
+    ->name('departments.')
     ->group(function () {
-        Route::get('/', [FacultyController::class, 'index'])->name('index');
+        Route::get('/', [DepartmentController::class, 'index'])->name('index');
     });
 
 Route::middleware(['auth', 'role:super-admin,university-admin'])
-    ->prefix('/faculties')
-    ->name('faculties.')
+    ->prefix('/departments')
+    ->name('departments.')
     ->group(function () {
-        Route::post('/', [FacultyController::class, 'store'])->name('store');
-        Route::get('/{faculty}/edit', [FacultyController::class, 'edit'])->name('edit');
-        Route::put('/{faculty}', [FacultyController::class, 'update'])->name('update');
-        Route::post('/{faculty}/archive', [FacultyController::class, 'archive'])->name('archive');
-        Route::post('/{faculty}/reactivate', [FacultyController::class, 'reactivate'])->name('reactivate');
-        Route::delete('/{faculty}', [FacultyController::class, 'destroy'])->name('destroy');
-
-        // Departments are a genuine child collection, so they nest under the
-        // faculty that owns them.
-        Route::post('/{faculty}/departments', [FacultyController::class, 'storeDepartment'])
-            ->name('departments.store');
-        Route::put('/{faculty}/departments/{department}', [FacultyController::class, 'updateDepartment'])
-            ->name('departments.update');
-        Route::post('/{faculty}/departments/{department}/archive', [FacultyController::class, 'archiveDepartment'])
-            ->name('departments.archive');
-        Route::post('/{faculty}/departments/{department}/reactivate', [FacultyController::class, 'reactivateDepartment'])
-            ->name('departments.reactivate');
-        Route::delete('/{faculty}/departments/{department}', [FacultyController::class, 'destroyDepartment'])
-            ->name('departments.destroy');
+        Route::post('/', [DepartmentController::class, 'store'])->name('store');
+        Route::get('/{department}/edit', [DepartmentController::class, 'edit'])->name('edit');
+        Route::put('/{department}', [DepartmentController::class, 'update'])->name('update');
+        Route::post('/{department}/archive', [DepartmentController::class, 'archive'])->name('archive');
+        Route::post('/{department}/reactivate', [DepartmentController::class, 'reactivate'])->name('reactivate');
+        Route::delete('/{department}', [DepartmentController::class, 'destroy'])->name('destroy');
     });
 
-// Programs follow the same split as the rest of the structure: Faculty Admin
+// Programs follow the same split as the rest of the structure: Department Admin
 // may read, only Super Admin / University Admin may change (`ProgramPolicy`).
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])
     ->prefix('/programs')
     ->name('programs.')
     ->group(function () {
@@ -162,7 +152,7 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])
 // from the offering page; students see their own (`AttendancePolicy`).
 Route::middleware(['auth', 'role:lecturer'])->get('/attendance', [AttendanceController::class, 'classes'])->name('attendance.classes');
 Route::middleware(['auth', 'role:student'])->get('/my-attendance', [AttendanceController::class, 'mine'])->name('attendance.mine');
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,lecturer'])->group(function () {
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin,lecturer'])->group(function () {
     Route::get('/attendance/sections/{section}', [AttendanceController::class, 'section'])->name('attendance.section');
     Route::post('/attendance/sections/{section}', [AttendanceController::class, 'record'])->name('attendance.record');
     Route::post('/attendance-sessions/{session}/cancel', [AttendanceController::class, 'cancel'])->name('attendance.cancel');
@@ -172,7 +162,7 @@ Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,lect
 // (lecturers of the section, staff, enrolled students); students also get an
 // overview of their own assignments.
 Route::middleware(['auth', 'role:student'])->get('/my-assignments', [CourseworkController::class, 'mine'])->name('coursework.mine');
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,lecturer,student'])->group(function () {
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin,lecturer,student'])->group(function () {
     Route::get('/coursework/sections/{section}', [CourseworkController::class, 'section'])->name('coursework.section');
     Route::post('/coursework/sections/{section}', [CourseworkController::class, 'store'])->name('coursework.store');
     Route::put('/assignments/{assignment}', [CourseworkController::class, 'update'])->name('assignments.update');
@@ -184,10 +174,10 @@ Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,lect
 });
 
 // Examinations: one page per section, scoped by `ExamPolicy` (lecturers of the
-// section and managers write, Faculty Admin reads, enrolled students see the
+// section and managers write, Department Admin reads, enrolled students see the
 // schedule and released results); students also get an overview.
 Route::middleware(['auth', 'role:student'])->get('/my-exams', [ExamsController::class, 'mine'])->name('exams.mine');
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,lecturer,student'])->group(function () {
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin,lecturer,student'])->group(function () {
     Route::get('/exams/sections/{section}', [ExamsController::class, 'section'])->name('exams.section');
     Route::post('/exams/sections/{section}', [ExamsController::class, 'store'])->name('exams.store');
     Route::put('/exams/{exam}', [ExamsController::class, 'update'])->name('exams.update');
@@ -197,11 +187,11 @@ Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,lect
 });
 
 // Grades & GPA (`GradePolicy`): lecturers of the section compute and submit,
-// managers approve / return and edit the scale and course weights, Faculty
+// managers approve / return and edit the scale and course weights, Department
 // Admin reads, students see their own approved grades and GPA.
 Route::middleware(['auth', 'role:student'])->get('/my-grades', [GradesController::class, 'mine'])->name('grades.mine');
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->get('/grades', [GradesController::class, 'index'])->name('grades.index');
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,lecturer'])->group(function () {
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])->get('/grades', [GradesController::class, 'index'])->name('grades.index');
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin,lecturer'])->group(function () {
     Route::get('/grades/sections/{section}', [GradesController::class, 'section'])->name('grades.section');
     Route::post('/grades/sections/{section}', [GradesController::class, 'compute'])->name('grades.compute');
     Route::post('/grades/sections/{section}/submit', [GradesController::class, 'submit'])->name('grades.submit');
@@ -217,20 +207,28 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function
 });
 
 // Documents (`DocumentRequestPolicy`): students request and download their
-// own; managers and (for their faculty's students) Faculty Admins approve /
+// own; managers and (for their department's students) Department Admins approve /
 // reject / generate; only managers revoke.
 Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/my-documents', [DocumentsController::class, 'mine'])->name('documents.mine');
     Route::post('/my-documents', [DocumentsController::class, 'store'])->name('documents.store');
 });
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->get('/documents', [DocumentsController::class, 'index'])->name('documents.index');
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->group(function () {
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])->get('/documents', [DocumentsController::class, 'index'])->name('documents.index');
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])->group(function () {
     Route::post('/document-requests/{documentRequest}/approve', [DocumentsController::class, 'approve'])->name('documents.approve');
     Route::post('/document-requests/{documentRequest}/reject', [DocumentsController::class, 'reject'])->name('documents.reject');
     Route::post('/document-requests/{documentRequest}/generate', [DocumentsController::class, 'generate'])->name('documents.generate');
 });
 Route::middleware(['auth', 'role:super-admin,university-admin'])->post('/documents/{document}/revoke', [DocumentsController::class, 'revoke'])->name('documents.revoke');
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,student'])->get('/documents/{document}/download', [DocumentsController::class, 'download'])->name('documents.download');
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin,student'])->get('/documents/{document}/download', [DocumentsController::class, 'download'])->name('documents.download');
+
+// Document Types management (`DocumentTypePolicy`): Super Admin and University Admin
+Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function () {
+    Route::get('/document-types', [DocumentTypesController::class, 'index'])->name('document-types.index');
+    Route::post('/document-types', [DocumentTypesController::class, 'store'])->name('document-types.store');
+    Route::put('/document-types/{documentType}', [DocumentTypesController::class, 'update'])->name('document-types.update');
+    Route::delete('/document-types/{documentType}', [DocumentTypesController::class, 'destroy'])->name('document-types.destroy');
+});
 
 // Finance (`InvoicePolicy`): managers manage invoices and payment records; a
 // student reads their own.
@@ -266,13 +264,13 @@ Route::middleware(['auth', 'role:super-admin,university-admin,lecturer'])->group
 Route::middleware('auth')->get('/announcements/{announcement}/attachments/{file}/download', [AnnouncementsController::class, 'downloadAttachment'])->name('announcements.attachments.download');
 
 // Internships (`InternshipPolicy`): students apply and report; managers and
-// (for their faculty's students) Faculty Admins review, approve and evaluate;
+// (for their department's students) Department Admins review, approve and evaluate;
 // only managers keep the companies.
 Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/my-internships', [InternshipsController::class, 'mine'])->name('internships.mine');
     Route::post('/my-internships', [InternshipsController::class, 'store'])->name('internships.store');
 });
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->group(function () {
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])->group(function () {
     Route::get('/internships', [InternshipsController::class, 'index'])->name('internships.index');
     Route::get('/internship-companies', [InternshipsController::class, 'companies'])->name('internship-companies.index');
 });
@@ -280,11 +278,11 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function
     Route::post('/internship-companies', [InternshipsController::class, 'storeCompany'])->name('internship-companies.store');
     Route::put('/internship-companies/{company}', [InternshipsController::class, 'updateCompany'])->name('internship-companies.update');
 });
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->group(function () {
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])->group(function () {
     Route::post('/internships/{internship}/evaluations', [InternshipsController::class, 'evaluate'])->name('internships.evaluate');
     Route::post('/internship-reports/{report}/review', [InternshipsController::class, 'reviewReport'])->name('internship-reports.review');
 });
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin,student'])->group(function () {
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin,student'])->group(function () {
     Route::get('/internships/{internship}', [InternshipsController::class, 'show'])->name('internships.show');
     Route::put('/internships/{internship}', [InternshipsController::class, 'update'])->name('internships.update');
     Route::post('/internships/{internship}/reports', [InternshipsController::class, 'report'])->name('internships.reports.store');
@@ -309,7 +307,7 @@ Route::get('/verify/{token}', [DocumentsController::class, 'verify'])->middlewar
 
 // Timetable: rooms (staff read, managers write), section schedules (managers),
 // and a personal weekly timetable for students and lecturers.
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->group(function () {
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])->group(function () {
     Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
 });
 
@@ -323,9 +321,9 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function
 
 Route::middleware(['auth', 'role:student,lecturer'])->get('/timetable', [TimetableController::class, 'mine'])->name('timetable.mine');
 
-// Enrollment management: Faculty Admin reads, managers enroll/drop/complete
+// Enrollment management: Department Admin reads, managers enroll/drop/complete
 // (`EnrollmentPolicy`). Student self-service lives under /registration.
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->group(function () {
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])->group(function () {
     Route::get('/enrollments', [EnrollmentController::class, 'index'])->name('enrollments.index');
     Route::get('/enrollments/export', [ExportController::class, 'enrollments'])->name('enrollments.export');
 });
@@ -342,9 +340,9 @@ Route::middleware(['auth', 'role:student'])->group(function () {
     Route::post('/registration/{enrollment}/drop', [RegistrationController::class, 'drop'])->name('registration.drop');
 });
 
-// Offerings & sections: Faculty Admin reads, Super Admin / University Admin
+// Offerings & sections: Department Admin reads, Super Admin / University Admin
 // manage (`CourseOfferingPolicy`).
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])->group(function () {
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])->group(function () {
     Route::get('/offerings', [CourseOfferingController::class, 'index'])->name('offerings.index');
     Route::get('/offerings/{offering}', [CourseOfferingController::class, 'show'])->name('offerings.show');
 });
@@ -360,9 +358,9 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function
     Route::delete('/sections/{section}/lecturers/{lecturer}', [CourseOfferingController::class, 'removeLecturer'])->name('sections.lecturers.destroy');
 });
 
-// Students: Faculty Admin reads, Super Admin / University Admin manage
+// Students: Department Admin reads, Super Admin / University Admin manage
 // (`StudentPolicy`).
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])
     ->prefix('/students')
     ->name('students.')
     ->group(function () {
@@ -381,9 +379,9 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])
         Route::delete('/{student}', [StudentController::class, 'destroy'])->name('destroy');
     });
 
-// Lecturers: Faculty Admin reads, Super Admin / University Admin manage
+// Lecturers: Department Admin reads, Super Admin / University Admin manage
 // (`LecturerPolicy`).
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])
     ->prefix('/lecturers')
     ->name('lecturers.')
     ->group(function () {
@@ -402,9 +400,9 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])
         Route::delete('/{lecturer}', [LecturerController::class, 'destroy'])->name('destroy');
     });
 
-// Courses follow the same split: Faculty Admin reads, Super Admin / University
+// Courses follow the same split: Department Admin reads, Super Admin / University
 // Admin change (`CoursePolicy`).
-Route::middleware(['auth', 'role:super-admin,university-admin,faculty-admin'])
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])
     ->prefix('/courses')
     ->name('courses.')
     ->group(function () {

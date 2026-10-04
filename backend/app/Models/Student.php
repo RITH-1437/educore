@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\BelongsToFaculty;
-use App\Support\FacultyScope;
+use App\Models\Concerns\BelongsToDepartment;
+use App\Support\DepartmentScope;
 use Database\Factories\StudentFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -37,7 +37,7 @@ use Illuminate\Support\Carbon;
  */
 class Student extends Model
 {
-    use BelongsToFaculty;
+    use BelongsToDepartment;
 
     /** @use HasFactory<StudentFactory> */
     use HasFactory;
@@ -164,12 +164,12 @@ class Student extends Model
     }
 
     /**
-     * Unit ownership (`App\Support\FacultyScope`).
+     * Unit ownership (`App\Support\DepartmentScope`).
      *
      * @param  Builder<self>  $query
      */
-    public function scopeInFaculty(Builder $query, int $facultyId): void
+    public function scopeInDepartment(Builder $query, int $departmentId): void
     {
-        $query->whereIn('id', FacultyScope::studentIds($facultyId));
+        $query->whereIn('id', DepartmentScope::studentIds($departmentId));
     }
 }

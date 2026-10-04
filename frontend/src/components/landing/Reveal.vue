@@ -1,5 +1,6 @@
 <script setup>
-import { onBeforeUnmount, onMounted, ref } from 'vue'
+import { ref } from 'vue'
+import { useInView } from './useInView'
 
 const props = defineProps({
   as: { type: String, default: 'div' },
@@ -9,30 +10,7 @@ const props = defineProps({
 })
 
 const el = ref(null)
-const visible = ref(false)
-let observer = null
-
-onMounted(() => {
-  // Show content immediately when motion is reduced or observers are unavailable.
-  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-  if (reduce || !('IntersectionObserver' in window)) {
-    visible.value = true
-    return
-  }
-
-  observer = new IntersectionObserver(
-    ([entry]) => {
-      if (entry.isIntersecting) {
-        visible.value = true
-        observer.disconnect()
-      }
-    },
-    { threshold: props.threshold, rootMargin: '0px 0px -48px 0px' }
-  )
-  if (el.value) observer.observe(el.value)
-})
-
-onBeforeUnmount(() => observer?.disconnect())
+const visible = useInView(el, { threshold: props.threshold })
 </script>
 
 <template>

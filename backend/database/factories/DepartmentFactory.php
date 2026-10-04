@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Department;
-use App\Models\Faculty;
+use App\Models\University;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -14,7 +14,7 @@ class DepartmentFactory extends Factory
     public function definition(): array
     {
         return [
-            'faculty_id' => Faculty::factory(),
+            'university_id' => University::factory(),
             'code' => strtoupper(fake()->unique()->lexify('DEP???')),
             'name' => 'Department of '.fake()->unique()->words(2, true),
             'head_name' => fake()->name(),

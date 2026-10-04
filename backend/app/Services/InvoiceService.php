@@ -374,7 +374,7 @@ class InvoiceService
         $this->refreshOverdue();
         $invoice->loadMissing([
             'student.user',
-            'student.currentProgram.program.department.faculty',
+            'student.currentProgram.program.department',
             'items',
             'payments.receiver:id,name',
         ]);

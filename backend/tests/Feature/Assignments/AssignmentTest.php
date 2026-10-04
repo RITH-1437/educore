@@ -6,8 +6,8 @@ use App\Models\Assignment;
 use App\Models\AssignmentSubmission;
 use App\Models\Course;
 use App\Models\CourseOffering;
+use App\Models\Department;
 use App\Models\Enrollment;
-use App\Models\Faculty;
 use App\Models\Lecturer;
 use App\Models\Section;
 use App\Models\Semester;
@@ -89,17 +89,17 @@ class AssignmentTest extends TestCase
     public function test_roles(): void
     {
         $other = Lecturer::factory()->create();
-        $faculty = $this->facultyAdminFor($this->facultyOfSection($this->section));
+        $departmentAdmin = $this->departmentAdminFor($this->departmentOfSection($this->section));
         $assignment = Assignment::factory()->create(['section_id' => $this->section->id]);
         $draft = Assignment::factory()->draft()->create(['section_id' => $this->section->id]);
         $outsider = Student::factory()->create();
 
         $this->actingAs($other->user)->postJson("/api/sections/{$this->section->id}/assignments", $this->payload())->assertForbidden();
-        $this->actingAs($faculty)->postJson("/api/sections/{$this->section->id}/assignments", $this->payload())->assertForbidden();
-        $this->actingAs($faculty)->getJson("/api/sections/{$this->section->id}/assignments")->assertOk()->assertJsonCount(2, 'data');
-        // A Faculty Admin of another faculty (or none) cannot read this section.
-        $this->actingAs($this->facultyAdminFor(Faculty::factory()->create()))->getJson("/api/sections/{$this->section->id}/assignments")->assertForbidden();
-        $this->actingAs($this->facultyAdminFor(null))->getJson("/api/assignments/{$assignment->id}")->assertForbidden();
+        $this->actingAs($departmentAdmin)->postJson("/api/sections/{$this->section->id}/assignments", $this->payload())->assertForbidden();
+        $this->actingAs($departmentAdmin)->getJson("/api/sections/{$this->section->id}/assignments")->assertOk()->assertJsonCount(2, 'data');
+        // A Department Admin of another department (or none) cannot read this section.
+        $this->actingAs($this->departmentAdminFor(Department::factory()->create()))->getJson("/api/sections/{$this->section->id}/assignments")->assertForbidden();
+        $this->actingAs($this->departmentAdminFor(null))->getJson("/api/assignments/{$assignment->id}")->assertForbidden();
         $this->actingAs($this->student->user)->postJson("/api/sections/{$this->section->id}/assignments", $this->payload())->assertForbidden();
 
         // Students see published work of their own section only.

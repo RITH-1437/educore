@@ -5,8 +5,8 @@ namespace Tests\Feature\Exports;
 use App\Enums\Role;
 use App\Models\AuditLog;
 use App\Models\Course;
+use App\Models\Department;
 use App\Models\Enrollment;
-use App\Models\Faculty;
 use App\Models\Role as RoleModel;
 use App\Models\Semester;
 use App\Models\Student;
@@ -31,7 +31,7 @@ class CsvExportTest extends TestCase
 
     private User $uniAdmin;
 
-    private User $facultyAdmin;
+    private User $departmentAdmin;
 
     private Student $student;
 
@@ -42,7 +42,7 @@ class CsvExportTest extends TestCase
 
         $this->admin = User::factory()->superAdmin()->create();
         $this->uniAdmin = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::UniversityAdmin->value)->create()->id]);
-        $this->facultyAdmin = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::FacultyAdmin->value)->create()->id]);
+        $this->departmentAdmin = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::DepartmentAdmin->value)->create()->id]);
         $this->student = Student::factory()->create(['first_name' => 'Sokha', 'last_name' => 'Chan']);
     }
 
@@ -82,24 +82,24 @@ class CsvExportTest extends TestCase
         $this->assertEquals(['filters' => ['status' => 'cancelled'], 'rows' => 1], $log->after_values);
         $this->assertSame($this->admin->id, $log->actor_id);
 
-        $this->actingAs($this->facultyAdmin)->get('/api/invoices/export')->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->get('/api/invoices/export')->assertForbidden();
         $this->actingAs($this->student->user)->get('/api/invoices/export')->assertForbidden();
         $this->actingAs($this->admin)->getJson('/api/invoices/export?filters[status]=bogus')->assertJsonValidationErrors('filters.status');
 
         // Web route: same file through the session.
         $this->assertCount(3, $this->rows($this->actingAs($this->uniAdmin)->get('/invoices/export')->assertOk()));
-        $this->actingAs($this->facultyAdmin)->get('/invoices/export')->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->get('/invoices/export')->assertForbidden();
     }
 
     public function test_enrollments_export_for_staff_with_filters(): void
     {
         $confirmed = Enrollment::factory()->create(['student_id' => $this->student->id]);
         $completed = Enrollment::factory()->completed()->create();
-        // The Faculty Admin's faculty owns both sections' courses.
+        // The Department Admin's department owns both sections' courses.
         Course::query()->whereKey($completed->section->offering->course_id)->update(['department_id' => $confirmed->section->offering->course->department_id]);
-        $this->facultyAdmin->update(['faculty_id' => $this->facultyOfSection($confirmed->section)]);
+        $this->departmentAdmin->update(['department_id' => $this->departmentOfSection($confirmed->section)]);
 
-        $rows = $this->rows($this->actingAs($this->facultyAdmin)->get('/api/enrollments/export')->assertOk());
+        $rows = $this->rows($this->actingAs($this->departmentAdmin)->get('/api/enrollments/export')->assertOk());
         $this->assertSame(['Student ID', 'Student', 'Course', 'Course name', 'Section', 'Semester', 'Credits', 'Status', 'Enrolled at', 'Dropped at'], $rows[0]);
         $this->assertCount(3, $rows);
 
@@ -110,8 +110,8 @@ class CsvExportTest extends TestCase
         $this->assertTrue(AuditLog::query()->where('action', 'export.enrollments')->exists());
 
         $this->actingAs($this->student->user)->get('/api/enrollments/export')->assertForbidden();
-        $this->assertCount(1, $this->rows($this->actingAs($this->facultyAdminFor(Faculty::factory()->create()))->get('/api/enrollments/export')->assertOk()));
-        $this->assertCount(3, $this->rows($this->actingAs($this->facultyAdmin)->get('/enrollments/export')->assertOk()));
+        $this->assertCount(1, $this->rows($this->actingAs($this->departmentAdminFor(Department::factory()->create()))->get('/api/enrollments/export')->assertOk()));
+        $this->assertCount(3, $this->rows($this->actingAs($this->departmentAdmin)->get('/enrollments/export')->assertOk()));
     }
 
     public function test_audit_log_export_is_super_admin_only_and_audits_itself(): void
@@ -151,7 +151,7 @@ class CsvExportTest extends TestCase
         $this->assertCount(5, $rows);
 
         $this->actingAs($this->admin)->getJson('/api/analytics/export?table=secrets')->assertJsonValidationErrors('table');
-        $this->actingAs($this->facultyAdmin)->get('/api/analytics/export?table=finance')->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->get('/api/analytics/export?table=finance')->assertForbidden();
         $this->assertSame(8, AuditLog::query()->where('action', 'export.analytics')->count());
     }
 
@@ -180,7 +180,7 @@ class CsvExportTest extends TestCase
         $this->assertTrue(AuditLog::query()->where('action', 'export.analytics_pdf')->exists());
 
         // Non-managers forbidden
-        $this->actingAs($this->facultyAdmin)->get('/api/analytics/export/pdf')->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->get('/api/analytics/export/pdf')->assertForbidden();
         $this->actingAs($this->student->user)->get('/api/analytics/export/pdf')->assertForbidden();
     }
 

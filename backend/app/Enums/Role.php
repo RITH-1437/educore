@@ -6,7 +6,7 @@ enum Role: string
 {
     case SuperAdmin = 'super-admin';
     case UniversityAdmin = 'university-admin';
-    case FacultyAdmin = 'faculty-admin';
+    case DepartmentAdmin = 'department-admin';
     case Lecturer = 'lecturer';
     case Student = 'student';
 
@@ -15,7 +15,7 @@ enum Role: string
         return match ($this) {
             self::SuperAdmin => 'Super Admin',
             self::UniversityAdmin => 'University Admin',
-            self::FacultyAdmin => 'Faculty / Department Admin',
+            self::DepartmentAdmin => 'Department Admin',
             self::Lecturer => 'Lecturer',
             self::Student => 'Student',
         };

@@ -35,18 +35,14 @@ class ProgramService
     /**
      * @return LengthAwarePaginator<int, Program>
      */
-    /** `$viewer` limits a Faculty Admin to their faculty (`BelongsToFaculty`). */
+    /** `$viewer` limits a Department Admin to their department (`BelongsToDepartment`). */
     public function paginate(ProgramListFilters $filters, ?User $viewer = null): LengthAwarePaginator
     {
         return Program::query()
             ->when($viewer, fn ($query) => $query->visibleTo($viewer))
-            ->with('department.faculty:id,code,name')
+            ->with('department:id,code,name')
             ->search($filters->search)
             ->when($filters->departmentId, fn ($query, $id) => $query->where('department_id', $id))
-            ->when(
-                $filters->facultyId,
-                fn ($query, $id) => $query->whereHas('department', fn ($q) => $q->where('faculty_id', $id)),
-            )
             ->when($filters->degreeLevel, fn ($query, $level) => $query->where('degree_level', $level))
             ->when(
                 $filters->isActive !== null,

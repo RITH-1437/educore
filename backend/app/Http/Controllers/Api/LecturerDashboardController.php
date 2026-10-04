@@ -20,7 +20,7 @@ class LecturerDashboardController extends Controller
     #[OA\Get(
         path: '/lecturers/{lecturer}/dashboard',
         summary: "A lecturer's teaching dashboard",
-        description: "Today's classes, registers not yet taken, submissions to grade, upcoming exams and the grade-sheet progress of the lecturer's sections in the current semester. The lecturer themself, or staff who may view the lecturer (a Faculty Admin within their faculty).",
+        description: "Today's classes, registers not yet taken, submissions to grade, upcoming exams and the grade-sheet progress of the lecturer's sections in the current semester. The lecturer themself, or staff who may view the lecturer (a Department Admin within their department).",
         operationId: 'getLecturerDashboard',
         tags: ['People'],
         security: [['sanctum' => []]],

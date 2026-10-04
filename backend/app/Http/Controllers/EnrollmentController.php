@@ -36,7 +36,7 @@ class EnrollmentController extends Controller
         ];
         // The enroll form's options list every active student and open section
         // university-wide, so only users who may enroll receive them (a
-        // Faculty Admin reads this page but must not see other faculties).
+        // Department Admin reads this page but must not see other departments).
         $canEnroll = $request->user()->can('create', Enrollment::class);
 
         return Inertia::render('Enrollments/Index', [

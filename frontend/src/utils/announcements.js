@@ -16,7 +16,6 @@ export const AUDIENCES = [
   { value: 'students', label: 'All students', group: true },
   { value: 'lecturers', label: 'All lecturers', group: true },
   { value: 'staff', label: 'Administrative staff', group: true },
-  { value: 'faculty', label: 'A faculty' },
   { value: 'department', label: 'A department' },
   { value: 'program', label: 'A program' },
   { value: 'section', label: 'A section' },

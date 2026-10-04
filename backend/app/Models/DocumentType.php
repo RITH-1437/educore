@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $name
  * @property string|null $description
  * @property bool $requires_fee
+ * @property string $fee_amount
  * @property bool $is_active
  * @property int $sort_order
  */
@@ -34,11 +35,16 @@ class DocumentType extends Model
     /** Codes with a template; `academic_result` is per semester. */
     public const GENERATABLE = [self::ENROLLMENT_CERTIFICATE, self::STUDENT_CERTIFICATE, self::TRANSCRIPT, self::ACADEMIC_RESULT, self::INTERNSHIP_LETTER];
 
-    protected $fillable = ['code', 'name', 'description', 'requires_fee', 'is_active', 'sort_order'];
+    protected $fillable = ['code', 'name', 'description', 'requires_fee', 'fee_amount', 'is_active', 'sort_order'];
 
     protected function casts(): array
     {
-        return ['requires_fee' => 'boolean', 'is_active' => 'boolean', 'sort_order' => 'integer'];
+        return [
+            'requires_fee' => 'boolean',
+            'fee_amount' => 'decimal:2',
+            'is_active' => 'boolean',
+            'sort_order' => 'integer',
+        ];
     }
 
     public function requests(): HasMany

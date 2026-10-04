@@ -8,11 +8,9 @@ use App\Http\Requests\StoreProgramRequest;
 use App\Http\Requests\UpdateProgramCourseRequest;
 use App\Http\Requests\UpdateProgramRequest;
 use App\Http\Resources\DepartmentResource;
-use App\Http\Resources\FacultyResource;
 use App\Http\Resources\ProgramResource;
 use App\Models\Course;
 use App\Models\Department;
-use App\Models\Faculty;
 use App\Models\Program;
 use App\Services\ProgramService;
 use Illuminate\Http\RedirectResponse;
@@ -24,7 +22,7 @@ use Inertia\Response;
  * Program screens (module 9.5).
  *
  * Programs are a top-level admin area of their own; each one belongs to exactly
- * one department, chosen through a faculty → department cascade in the UI.
+ * one department, chosen in the UI.
  */
 class ProgramController extends Controller
 {
@@ -48,7 +46,6 @@ class ProgramController extends Controller
             'degreeLevels' => Program::DEGREE_LEVELS,
             'filters' => [
                 'search' => $filters->search,
-                'faculty_id' => $filters->facultyId,
                 'department_id' => $filters->departmentId,
                 'degree_level' => $filters->degreeLevel,
                 'is_active' => $filters->isActive,
@@ -73,7 +70,7 @@ class ProgramController extends Controller
 
         return Inertia::render('Programs/Edit', [
             // `resolve()` so the page reads `props.program.code`, not `.data.code`.
-            'program' => (new ProgramResource($program->load(['department.faculty:id,code,name', 'courses'])))->resolve(),
+            'program' => (new ProgramResource($program->load(['department:id,code,name', 'courses'])))->resolve(),
             // Courses that can still join the curriculum: not archived, not already in it.
             'availableCourses' => Course::query()
                 ->where('status', '!=', Course::STATUS_ARCHIVED)
@@ -162,18 +159,15 @@ class ProgramController extends Controller
     }
 
     /**
-     * Faculty and department options for the filter bar and the form cascade.
+     * Department options for the filter bar and the form.
      * Archived units are excluded: a program cannot be created under them.
      *
      * @return array<string, mixed>
      */
-    /** Filter / form options; a Faculty Admin only gets their own faculty's. */
+    /** Filter / form options; a Department Admin only gets their own department's. */
     private function lookups(): array
     {
         return [
-            'faculties' => FacultyResource::collection(
-                Faculty::query()->visibleTo(request()->user())->where('is_active', true)->orderBy('name')->get()
-            ),
             'departments' => DepartmentResource::collection(
                 Department::query()->visibleTo(request()->user())->where('is_active', true)->orderBy('name')->get()
             ),

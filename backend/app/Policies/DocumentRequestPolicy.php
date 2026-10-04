@@ -9,8 +9,8 @@ use App\Models\User;
 /**
  * Documents (`skills/documents/SKILL.md` §8): a student requests and downloads
  * their own documents; University Admin / Super Admin process every request; a
- * Faculty Admin processes (approve, reject, generate) the requests of their
- * faculty's students (`docs/33_Faculty-Admin-Request-Handling-Report.md`).
+ * Department Admin processes (approve, reject, generate) the requests of their
+ * faculty's students (`docs/33_Faculty-Admin-Request-Handling-Report.md`, scoped to a department since report 39).
  * Revoking an issued document stays with managers. Verification is public and
  * needs no policy.
  */
@@ -35,19 +35,19 @@ class DocumentRequestPolicy
     }
 
     /**
-     * Approve, reject, generate this request: managers, or a Faculty Admin when
-     * the student is in their faculty. A student never processes a request.
+     * Approve, reject, generate this request: managers, or a Department Admin when
+     * the student is in their department. A student never processes a request.
      * The request is required — a class-level check would be university-wide.
      */
     public function process(User $user, DocumentRequest $request): bool
     {
-        return $this->manages($user) || ($user->isRole(Role::FacultyAdmin->value) && $request->isVisibleTo($user));
+        return $this->manages($user) || ($user->isRole(Role::DepartmentAdmin->value) && $request->isVisibleTo($user));
     }
 
     /** Whether the queue shows processing actions (each action still checks its request). */
     public function processAny(User $user): bool
     {
-        return $this->manages($user) || ($user->isRole(Role::FacultyAdmin->value) && $user->faculty_id !== null);
+        return $this->manages($user) || ($user->isRole(Role::DepartmentAdmin->value) && $user->department_id !== null);
     }
 
     /** Revoke an issued document: an institution-level correction, managers only. */
@@ -63,6 +63,6 @@ class DocumentRequestPolicy
 
     private function staff(User $user): bool
     {
-        return $this->manages($user) || $user->isRole(Role::FacultyAdmin->value);
+        return $this->manages($user) || $user->isRole(Role::DepartmentAdmin->value);
     }
 }

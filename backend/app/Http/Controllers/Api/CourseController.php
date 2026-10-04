@@ -18,7 +18,7 @@ use OpenApi\Attributes as OA;
 /**
  * Course endpoints (module 9.7).
  *
- * Reads: Super Admin, University Admin, Faculty Admin. Writes: Super Admin and
+ * Reads: Super Admin, University Admin, Department Admin. Writes: Super Admin and
  * University Admin — see `CoursePolicy`. Every operation documents 401 and 403.
  */
 class CourseController extends Controller
@@ -30,13 +30,12 @@ class CourseController extends Controller
     #[OA\Get(
         path: '/courses',
         summary: 'List courses',
-        description: 'Paginated courses with prerequisite and program counts. Supports search over code and name, filtering by faculty, department, program, status and level, whitelisted sorting and a capped page size.',
+        description: 'Paginated courses with prerequisite and program counts. Supports search over code and name, filtering by department, program, status and level, whitelisted sorting and a capped page size.',
         operationId: 'listCourses',
         tags: ['University Structure'],
         security: [['sanctum' => []]],
         parameters: [
             new OA\QueryParameter(name: 'search', description: 'Partial match against `code` or `name`.', schema: new OA\Schema(type: 'string'), example: 'Data'),
-            new OA\QueryParameter(name: 'filters[faculty_id]', description: 'Courses whose department belongs to this faculty.', schema: new OA\Schema(type: 'integer', format: 'int64')),
             new OA\QueryParameter(name: 'filters[department_id]', description: 'Courses of this department.', schema: new OA\Schema(type: 'integer', format: 'int64')),
             new OA\QueryParameter(name: 'filters[program_id]', description: 'Courses in this program curriculum.', schema: new OA\Schema(type: 'integer', format: 'int64')),
             new OA\QueryParameter(name: 'filters[status]', description: 'Lifecycle status.', schema: new OA\Schema(type: 'string', enum: Course::STATUSES)),
@@ -82,7 +81,7 @@ class CourseController extends Controller
 
         $course = $this->courses->create($request->validated());
 
-        return (new CourseResource($course->load('department.faculty:id,code,name')))
+        return (new CourseResource($course->load('department:id,code,name')))
             ->response()
             ->setStatusCode(201);
     }
@@ -106,7 +105,7 @@ class CourseController extends Controller
     {
         $this->authorize('view', $course);
 
-        return new CourseResource($course->load(['department.faculty:id,code,name', 'prerequisites', 'programs']));
+        return new CourseResource($course->load(['department:id,code,name', 'prerequisites', 'programs']));
     }
 
     #[OA\Put(
@@ -149,7 +148,7 @@ class CourseController extends Controller
 
         $this->courses->update($course, $request->validated());
 
-        return new CourseResource($course->refresh()->load('department.faculty:id,code,name'));
+        return new CourseResource($course->refresh()->load('department:id,code,name'));
     }
 
     #[OA\Post(
@@ -252,7 +251,7 @@ class CourseController extends Controller
             (bool) $request->validated('is_strict', true),
         );
 
-        return (new CourseResource($course->load(['department.faculty:id,code,name', 'prerequisites'])))
+        return (new CourseResource($course->load(['department:id,code,name', 'prerequisites'])))
             ->response()
             ->setStatusCode(201);
     }

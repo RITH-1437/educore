@@ -313,6 +313,125 @@
   animation: edu-scan 3.6s ease-in-out 3;
 }
 
+/* Hero product preview: slides in from the right after the copy. */
+@keyframes edu-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(32px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.edu-slide-in {
+  opacity: 0;
+  animation: edu-slide-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Hero backdrop: a very slow drift of the ambient fields, two cycles, then rests. */
+@keyframes edu-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(2%, -2%, 0) scale(1.04);
+  }
+}
+.edu-drift {
+  animation: edu-drift 18s ease-in-out 2;
+}
+
+/* Hero terminal cursor: a few blinks once typing ends, then it rests visible. */
+@keyframes edu-blink {
+  50% {
+    opacity: 0;
+  }
+}
+.edu-blink {
+  animation: edu-blink 1s steps(1) 6;
+}
+
+/* Communication flow: a signal travelling down the hierarchy line. */
+@keyframes edu-travel {
+  0% {
+    top: 0;
+    opacity: 0;
+  }
+  12%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+  }
+}
+.edu-travel {
+  animation: edu-travel 3.2s ease-in-out 3;
+}
+
+/* Technology marquee: two identical copies slide by exactly one copy (-50%).
+   Pauses on hover / keyboard focus or via the Pause button (WCAG 2.2.2); under
+   reduced motion it stops and the duplicate copy is hidden (static list). */
+@keyframes edu-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+.edu-marquee {
+  animation: edu-marquee var(--marquee-duration, 40s) linear infinite;
+}
+.edu-marquee-reverse {
+  animation-direction: reverse;
+}
+.edu-marquee-row:hover .edu-marquee,
+.edu-marquee-row:focus-within .edu-marquee,
+.edu-marquee-paused .edu-marquee {
+  animation-play-state: paused;
+}
+.edu-marquee-fade {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .edu-marquee {
+    animation: none;
+    flex-wrap: wrap;
+    width: auto;
+  }
+  .edu-marquee-copy {
+    display: none;
+  }
+  .edu-marquee-fade {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
+/* Landing footer: "EDUCORE" ASCII wordmark. Scales with the viewport (about
+   90% of a phone's width, capped on desktop); line-height 1 keeps rows joined. */
+.landing-banner {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: clamp(0.375rem, 2.4vw, 1.5rem);
+  line-height: 1;
+  letter-spacing: 0;
+  white-space: pre;
+}
+
+/* Navy landing sections (product showcase, final CTA): one low-alpha primary glow. */
+.landing-glow {
+  background: radial-gradient(
+    44rem 22rem at 50% 0%,
+    color-mix(in srgb, var(--color-primary) 24%, transparent),
+    transparent 70%
+  );
+}
+
 /* Sections receive programmatic focus from in-page navigation. */
 .landing [tabindex="-1"]:focus {
   outline: none;

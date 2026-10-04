@@ -4,12 +4,12 @@ namespace Tests\Feature\Documents;
 
 use App\Models\Course;
 use App\Models\CourseOffering;
+use App\Models\Department;
 use App\Models\Document;
 use App\Models\DocumentRequest;
 use App\Models\DocumentType;
 use App\Models\DocumentVerification;
 use App\Models\Enrollment;
-use App\Models\Faculty;
 use App\Models\Grade;
 use App\Models\Internship;
 use App\Models\InternshipCompany;
@@ -73,6 +73,9 @@ class DocumentTest extends TestCase
         $this->actingAs($this->admin)->postJson("/api/document-requests/{$id}/generate")->assertStatus(409);
 
         $this->actingAs($this->admin)->postJson("/api/document-requests/{$id}/approve")->assertOk()->assertJsonPath('data.status', 'approved');
+        // Generating before invoice is paid is refused.
+        $this->actingAs($this->admin)->postJson("/api/document-requests/{$id}/generate")->assertStatus(409);
+        DocumentRequest::query()->find($id)->invoice->update(['status' => 'paid']);
         $response = $this->actingAs($this->admin)->postJson("/api/document-requests/{$id}/generate")->assertCreated()
             ->assertJsonPath('data.status', 'generated')->assertJsonPath('data.document.status', 'valid');
 
@@ -141,6 +144,7 @@ class DocumentTest extends TestCase
 
         $ok = $this->actingAs($this->student->user)->postJson('/api/document-requests', ['document_type_id' => $result, 'semester_id' => $this->semester->id])->assertCreated()->json('data.id');
         $this->actingAs($this->admin)->postJson("/api/document-requests/{$ok}/approve");
+        DocumentRequest::query()->find($ok)->invoice->update(['status' => 'paid']);
         $this->actingAs($this->admin)->postJson("/api/document-requests/{$ok}/generate")->assertCreated();
 
         // Enrollment certificates only for active students.
@@ -186,10 +190,10 @@ class DocumentTest extends TestCase
         $id = $this->actingAs($this->student->user)->postJson('/api/document-requests', ['document_type_id' => $type])->json('data.id');
         $other = Student::factory()->create();
         $this->actingAs($other->user)->postJson('/api/document-requests', ['document_type_id' => $type])->assertCreated();
-        $faculty = $this->facultyAdminFor(Faculty::factory()->create());
-        $this->placeInFaculty($this->student, $faculty->faculty_id);
-        $this->placeInFaculty($other, $faculty->faculty_id);
-        $outsideFaculty = $this->facultyAdminFor(Faculty::factory()->create());
+        $departmentAdmin = $this->departmentAdminFor(Department::factory()->create());
+        $this->placeInDepartment($this->student, $departmentAdmin->department_id);
+        $this->placeInDepartment($other, $departmentAdmin->department_id);
+        $outsideDepartmentAdmin = $this->departmentAdminFor(Department::factory()->create());
         $lecturer = Lecturer::factory()->create()->user;
 
         // A student sees only their own requests and cannot process any.
@@ -197,13 +201,13 @@ class DocumentTest extends TestCase
         $this->actingAs($other->user)->getJson("/api/document-requests/{$id}")->assertForbidden();
         $this->actingAs($this->student->user)->postJson("/api/document-requests/{$id}/approve")->assertForbidden();
 
-        // Faculty Admin reads and processes their faculty's requests (docs/33); lecturers have no access.
-        $this->actingAs($faculty)->getJson('/api/document-requests?filters[status]=pending')->assertOk()->assertJsonCount(2, 'data');
-        $this->actingAs($outsideFaculty)->postJson("/api/document-requests/{$id}/approve")->assertForbidden();
-        $this->actingAs($faculty)->postJson("/api/document-requests/{$id}/approve")->assertOk()->assertJsonPath('data.status', 'approved');
-        // Another faculty's admin sees none of these students' requests.
-        $this->actingAs($outsideFaculty)->getJson('/api/document-requests')->assertOk()->assertJsonCount(0, 'data');
-        $this->actingAs($outsideFaculty)->getJson("/api/document-requests/{$id}")->assertForbidden();
+        // Department Admin reads and processes their department's requests (docs/33); lecturers have no access.
+        $this->actingAs($departmentAdmin)->getJson('/api/document-requests?filters[status]=pending')->assertOk()->assertJsonCount(2, 'data');
+        $this->actingAs($outsideDepartmentAdmin)->postJson("/api/document-requests/{$id}/approve")->assertForbidden();
+        $this->actingAs($departmentAdmin)->postJson("/api/document-requests/{$id}/approve")->assertOk()->assertJsonPath('data.status', 'approved');
+        // Another department's admin sees none of these students' requests.
+        $this->actingAs($outsideDepartmentAdmin)->getJson('/api/document-requests')->assertOk()->assertJsonCount(0, 'data');
+        $this->actingAs($outsideDepartmentAdmin)->getJson("/api/document-requests/{$id}")->assertForbidden();
         $this->actingAs($lecturer)->getJson('/api/document-requests')->assertForbidden();
         $this->actingAs($this->admin)->postJson('/api/document-requests', ['document_type_id' => $type])->assertForbidden();
         $this->actingAs($this->admin)->getJson('/api/document-requests?filters[status]=bogus')->assertJsonValidationErrors('filters.status');
@@ -221,6 +225,7 @@ class DocumentTest extends TestCase
         $this->actingAs($this->admin)->get('/documents')->assertOk()
             ->assertInertia(fn (Assert $page) => $page->component('Documents/Index')->has('requests.data', 1)->has('requests.meta.links')->where('canProcess', true));
         $this->actingAs($this->admin)->post("/document-requests/{$id}/approve")->assertSessionHas('success');
+        DocumentRequest::query()->find($id)->invoice->update(['status' => 'paid']);
         $this->actingAs($this->admin)->post("/document-requests/{$id}/generate")->assertSessionHas('success');
         $document = Document::query()->firstOrFail();
         $this->actingAs($this->student->user)->get("/documents/{$document->id}/download")->assertOk();

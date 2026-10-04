@@ -17,7 +17,7 @@ class CourseOfferingPolicy
         return $this->staff($user);
     }
 
-    /** A Faculty Admin only sees offerings of their faculty's courses. */
+    /** A Department Admin only sees offerings of their department's courses. */
     public function view(User $user, CourseOffering $offering): bool
     {
         return $this->staff($user) && $offering->isVisibleTo($user);
@@ -39,13 +39,13 @@ class CourseOfferingPolicy
     }
 
     /**
-     * Faculty Admin reads but does not manage (no unit scope on the user yet).
+     * Department Admin reads but does not manage (no unit scope on the user yet).
      */
     private function staff(User $user): bool
     {
         return $user->isRole(Role::SuperAdmin->value)
             || $user->isRole(Role::UniversityAdmin->value)
-            || $user->isRole(Role::FacultyAdmin->value);
+            || $user->isRole(Role::DepartmentAdmin->value);
     }
 
     private function manage(User $user): bool

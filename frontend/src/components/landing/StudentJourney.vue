@@ -1,67 +1,78 @@
 <script setup>
 import {
-  BookOpen,
-  Building2,
-  CalendarCheck,
-  CalendarDays,
-  ClipboardCheck,
+  Award,
+  Briefcase,
+  CalendarClock,
+  Calculator,
   ClipboardList,
+  FileCheck,
   FileText,
-  FolderOpen,
-  GraduationCap,
-  TrendingUp,
+  BookMarked,
+  ListChecks,
+  UserCheck,
   UserRound,
 } from '@lucide/vue'
-import Reveal from './Reveal.vue'
+import { ref } from 'vue'
+import SectionHeading from './SectionHeading.vue'
+import { useInView } from './useInView'
 
 const steps = [
-  { icon: UserRound, label: 'Admission & Profile' },
-  { icon: BookOpen, label: 'Program' },
-  { icon: ClipboardCheck, label: 'Course Registration' },
-  { icon: CalendarDays, label: 'Class Schedule' },
-  { icon: CalendarCheck, label: 'Attendance' },
-  { icon: ClipboardList, label: 'Assignments' },
-  { icon: FileText, label: 'Exams' },
-  { icon: GraduationCap, label: 'Grades' },
-  { icon: TrendingUp, label: 'GPA' },
-  { icon: FolderOpen, label: 'Documents' },
-  { icon: Building2, label: 'Internship' },
+  { icon: UserRound, label: 'Student Profile', text: 'Student number, program and status.' },
+  { icon: BookMarked, label: 'Program', text: 'Enrolled in a degree program.' },
+  { icon: ListChecks, label: 'Course Registration', text: 'Sections chosen each semester, with checks.' },
+  { icon: CalendarClock, label: 'Schedule', text: 'A weekly timetable of classes and rooms.' },
+  { icon: UserCheck, label: 'Attendance', text: 'Present, late, absent or excused per session.' },
+  { icon: ClipboardList, label: 'Assignments', text: 'Submitted online and graded by lecturers.' },
+  { icon: FileCheck, label: 'Exams', text: 'Scheduled exams and published results.' },
+  { icon: Award, label: 'Grades', text: 'Course grades once they are approved.' },
+  { icon: Calculator, label: 'GPA', text: 'Semester and cumulative GPA.' },
+  { icon: FileText, label: 'Documents', text: 'Transcripts and certificates on request.' },
+  { icon: Briefcase, label: 'Internship', text: 'Applications reviewed and approved.' },
 ]
+
+const timeline = ref(null)
+const visible = useInView(timeline, { threshold: 0.25 })
 </script>
 
 <template>
-  <section id="journey" class="scroll-mt-24 bg-white py-20 sm:py-28">
+  <section id="journey" class="scroll-mt-24 bg-surface py-20 sm:py-24 dark:bg-dark-surface" aria-labelledby="journey-title">
     <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="grid items-end gap-10 lg:grid-cols-[0.8fr_1.2fr]">
-        <Reveal class="lg:max-w-md">
-          <p class="text-xs font-semibold tracking-[0.2em] text-blue-600 uppercase">Student Experience</p>
-          <h2 class="font-display mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-            Designed Around the Student Journey
-          </h2>
-          <p class="mt-4 text-lg leading-relaxed text-slate-600">
-            EduCore connects the major stages of a student's academic journey, giving students and
-            university staff a clearer view of academic progress.
-          </p>
-        </Reveal>
+      <SectionHeading
+        id="journey-title"
+        eyebrow="Student journey"
+        title="One record, from first day to internship"
+        description="Every stage of a student's life at the university happens in EduCore and builds on the stage before it."
+      />
 
-        <ol class="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4">
-          <Reveal
-            as="li"
-            v-for="(s, i) in steps"
-            :key="s.label"
-            :delay="i * 60"
-            class="group rounded-xl border border-slate-200 bg-white p-4 transition duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-md"
+      <div ref="timeline" class="relative mt-14">
+        <!-- Track: vertical on mobile, horizontal from lg (between the first and last node centres). -->
+        <div
+          class="absolute top-5 bottom-5 left-5 w-0.5 -translate-x-1/2 rounded-pill bg-border-default lg:right-[calc(100%/22)] lg:bottom-auto lg:left-[calc(100%/22)] lg:h-0.5 lg:w-auto lg:translate-x-0 dark:bg-dark-border"
+          aria-hidden="true"
+        >
+          <div
+            class="h-full w-full origin-top rounded-pill bg-primary transition-[scale] duration-1000 ease-out lg:origin-left dark:bg-dark-primary"
+            :class="visible ? 'scale-100' : 'scale-y-0 lg:scale-x-0 lg:scale-y-100'"
+          />
+        </div>
+
+        <ol class="relative grid gap-6 lg:grid-cols-11 lg:gap-2">
+          <li
+            v-for="(step, i) in steps"
+            :key="step.label"
+            class="flex items-start gap-4 transition-[opacity,translate] duration-500 ease-out lg:flex-col lg:items-center lg:gap-3 lg:text-center"
+            :class="visible ? 'translate-y-0 opacity-100' : 'translate-y-2 opacity-0'"
+            :style="{ transitionDelay: `${i * 90}ms` }"
           >
-            <div class="flex items-center justify-between">
-              <span class="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 transition duration-300 group-hover:bg-blue-600">
-                <component :is="s.icon" class="h-5 w-5 text-slate-500 transition duration-300 group-hover:text-white" />
-              </span>
-              <span class="font-display text-xs font-bold text-slate-400" aria-hidden="true">
-                {{ String(i + 1).padStart(2, '0') }}
-              </span>
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-pill border-2 border-primary bg-surface text-primary shadow-sm dark:bg-dark-surface dark:text-dark-primary dark:border-dark-primary">
+              <component :is="step.icon" class="h-4 w-4" aria-hidden="true" />
+            </span>
+            <div class="pt-2 lg:pt-0">
+              <p class="text-caption font-semibold text-muted tabular-nums dark:text-dark-muted" aria-hidden="true">{{ String(i + 1).padStart(2, '0') }}</p>
+              <h3 class="text-small font-semibold text-primary-dark dark:text-dark-ink">{{ step.label }}</h3>
+              <p class="mt-1 text-small text-muted lg:sr-only dark:text-dark-muted">{{ step.text }}</p>
             </div>
-            <p class="mt-3 text-sm font-semibold text-slate-800">{{ s.label }}</p>
-          </Reveal>
+          </li>
         </ol>
       </div>
     </div>

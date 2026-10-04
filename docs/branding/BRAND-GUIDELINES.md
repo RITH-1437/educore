@@ -230,6 +230,11 @@ Full dark-mode token table: [`DESIGN-TOKENS.md`](./DESIGN-TOKENS.md#4-dark-mode)
 - Alignment: align to the text baseline; use inline-flex with fixed-size icons.
 - Color: inherit `currentColor` — never hardcode an icon fill color.
 - Do **not** mix unrelated icon libraries or styles.
+- **One documented exception (2026-10-05):** the public landing page's Technology section shows
+  the real logos of the stack (Vue, Laravel, PostgreSQL, ...), vendored as single-path SVGs from
+  Simple Icons (CC0) in `components/landing/techLogos.js`, in each brand's own colour on a
+  `primary-dark` tile (source and CC0 licence recorded in that file). Brand logos appear nowhere else in the product;
+  everything else stays Lucide.
 
 ---
 

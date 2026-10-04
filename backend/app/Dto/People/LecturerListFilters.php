@@ -18,7 +18,6 @@ final readonly class LecturerListFilters
 
     public function __construct(
         public ?string $search = null,
-        public ?int $facultyId = null,
         public ?int $departmentId = null,
         public ?string $employmentType = null,
         public ?bool $isActive = null,
@@ -28,7 +27,7 @@ final readonly class LecturerListFilters
     ) {}
 
     /**
-     * @param  array<string, mixed>  $input  `search`, `filters[faculty_id|department_id|employment_type|is_active]`, `sort_by`, `sort_dir`, `per_page`
+     * @param  array<string, mixed>  $input  `search`, `filters[department_id|employment_type|is_active]`, `sort_by`, `sort_dir`, `per_page`
      */
     public static function fromInput(array $input): self
     {
@@ -41,7 +40,6 @@ final readonly class LecturerListFilters
 
         return new self(
             search: $search === '' ? null : $search,
-            facultyId: self::toNullableInt($filters['faculty_id'] ?? null),
             departmentId: self::toNullableInt($filters['department_id'] ?? null),
             employmentType: in_array($type, Lecturer::EMPLOYMENT_TYPES, true) ? $type : null,
             isActive: self::toNullableBool($filters['is_active'] ?? null),
@@ -64,7 +62,6 @@ final readonly class LecturerListFilters
         ], fn ($value) => $value !== null);
 
         $filters = array_filter([
-            'faculty_id' => $this->facultyId,
             'department_id' => $this->departmentId,
             'employment_type' => $this->employmentType,
             'is_active' => $this->isActive === null ? null : ($this->isActive ? '1' : '0'),

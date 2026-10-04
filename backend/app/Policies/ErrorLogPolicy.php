@@ -14,7 +14,7 @@ use App\Models\User;
  * `skills/audit-logging/SKILL.md` §8 says to keep audit visibility to Super
  * Admin by default, and the same reasoning applies here with more force.
  *
- * University Admin and Faculty Admin are therefore refused even though they
+ * University Admin and Department Admin are therefore refused even though they
  * administer parts of the platform.
  */
 class ErrorLogPolicy

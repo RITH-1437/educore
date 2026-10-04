@@ -6,7 +6,7 @@ use App\Models\AcademicYear;
 use App\Models\Role;
 use App\Models\Semester;
 use App\Models\User;
-use App\Services\FacultyDashboardService;
+use App\Services\DepartmentDashboardService;
 use App\Services\LecturerDashboardService;
 use App\Services\StudentDashboardService;
 use App\Services\UniversityDashboardService;
@@ -60,7 +60,7 @@ class DashboardController extends Controller
             'total_academic_years' => AcademicYear::query()->count(),
             'active_academic_years' => AcademicYear::query()->where('status', 'active')->count(),
             'total_semesters' => Semester::query()->count(),
-            'total_faculties' => DB::table('faculties')->count(),
+            'total_departments' => DB::table('departments')->count(),
             'total_programs' => DB::table('programs')->count(),
             'total_courses' => DB::table('courses')->count(),
             'total_lecturers' => DB::table('lecturers')->count(),
@@ -99,7 +99,7 @@ class DashboardController extends Controller
     public function roleDashboard(
         Request $request,
         StudentDashboardService $students,
-        FacultyDashboardService $faculties,
+        DepartmentDashboardService $departments,
         LecturerDashboardService $lecturers,
         UniversityDashboardService $university,
     ): Response {
@@ -113,10 +113,10 @@ class DashboardController extends Controller
             ]);
         }
 
-        // Faculty Admins get their faculty's dashboard (report 34); none assigned = no unit data.
-        if ($user->isRole('faculty-admin')) {
-            return Inertia::render('FacultyAdmin/Dashboard', [
-                'dashboard' => $user->faculty ? $faculties->build($user->faculty) : null,
+        // Department Admins get their department's dashboard (report 39); none assigned = no unit data.
+        if ($user->isRole('department-admin')) {
+            return Inertia::render('DepartmentAdmin/Dashboard', [
+                'dashboard' => $user->department ? $departments->build($user->department) : null,
                 'userName' => $user->name,
             ]);
         }

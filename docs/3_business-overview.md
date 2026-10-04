@@ -422,18 +422,15 @@ users, main business activities, and expected outputs.
   [35_Lecturer-Dashboard-Report.md](35_Lecturer-Dashboard-Report.md).
 - **Not yet delivered `[Planned]`:** lecturer self-service profile editing.
 
-### 9.4 Faculty & Department Management [Implemented]
+### 9.4 Department Management [Implemented]
 
 - **Purpose:** model the university's organizational structure.
-- **Primary users:** University Admin (write), Super Admin (write), Faculty Admin (read-only, own faculty).
-- **Main business activities:** create/manage universities, faculties, departments, and their relationships.
+- **Primary users:** University Admin (write), Super Admin (write), Department Admin (read-only, own department).
+- **Main business activities:** create/manage universities, departments, and their relationships.
 - **Expected outputs:** a clear, reusable hierarchical structure.
-- **Delivered:** university record with a single `is_current` row, faculties and
-  departments with global/per-faculty name uniqueness, archive-vs-delete
-  semantics, delete guards that count soft-deleted children, nested department
-  management under the faculty screen, a `faculties-tree` read endpoint, and a
-  deterministic 1 university / 3 faculty / 6 department seed. See
-  [7_Faculty-and-Department-Report.md](7_Faculty-and-Department-Report.md).
+- **Delivered:** university record with a single `is_current` row, departments with per-university name uniqueness, archive-vs-delete semantics, delete guards that count soft-deleted children, standalone department management screen, and a deterministic 1 university / 6 department seed. Flattened from faculties to direct department hierarchy in report 39. See
+  [7_Faculty-and-Department-Report.md](7_Faculty-and-Department-Report.md) and
+  [39_Department-Only-Structure-Report.md](39_Department-Only-Structure-Report.md).
 
 ### 9.5 Program Management [Implemented]
 
@@ -589,10 +586,14 @@ users, main business activities, and expected outputs.
   generate by University Admin or, for their faculty's students, the Faculty
   Admin; revoke by University Admin; PDFs rendered only from enrollments,
   approved grades and GPA, stored privately in MinIO and downloaded through an
-  authorized route. Document fees are not billed yet. See
+  authorized route. Document types carry a fee: approving a request for a
+  fee-bearing type issues an unpaid invoice (9.18), and the PDF is generated
+  only once that invoice is paid; Super Admin / University Admin manage types
+  and fees on `/document-types`. See
   [22_Documents-and-Verification-Report.md](22_Documents-and-Verification-Report.md) and
   [30_Grade-Finalization-and-Document-Templates-Report.md](30_Grade-Finalization-and-Document-Templates-Report.md),
-  [33_Faculty-Admin-Request-Handling-Report.md](33_Faculty-Admin-Request-Handling-Report.md).
+  [33_Faculty-Admin-Request-Handling-Report.md](33_Faculty-Admin-Request-Handling-Report.md),
+  [40_Document-Fee-Billing-and-Type-Management-Report.md](40_Document-Fee-Billing-and-Type-Management-Report.md).
 
 ### 9.17 Digital Document Verification [Implemented]
 
@@ -616,7 +617,8 @@ users, main business activities, and expected outputs.
   payment records within the balance, append-only reversals, cancellation
   instead of deletion, derived statuses kept current (overdue refreshed on read
   and by a daily command), invoice and receipt PDF download, a per-currency student summary and "My invoices".
-  Automatic tuition billing is [Future].
+  Document-fee invoices are issued automatically on approval of a fee-bearing
+  document request (report 40). Automatic tuition billing is [Future].
   See [23_Invoices-and-Payments-Report.md](23_Invoices-and-Payments-Report.md).
 
 ### 9.19 Announcements [Implemented]

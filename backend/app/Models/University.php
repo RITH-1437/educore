@@ -60,9 +60,9 @@ class University extends Model
         ];
     }
 
-    public function faculties(): HasMany
+    public function departments(): HasMany
     {
-        return $this->hasMany(Faculty::class);
+        return $this->hasMany(Department::class);
     }
 
     public function scopeCurrent(Builder $query): Builder

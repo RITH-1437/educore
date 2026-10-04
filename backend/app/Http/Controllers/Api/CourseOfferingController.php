@@ -17,7 +17,7 @@ use OpenApi\Attributes as OA;
 
 /**
  * Course offering endpoints (module 9.8). Reads: Super Admin, University Admin,
- * Faculty Admin. Writes: Super Admin, University Admin.
+ * Department Admin. Writes: Super Admin, University Admin.
  */
 class CourseOfferingController extends Controller
 {

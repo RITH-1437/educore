@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Internships;
 
-use App\Models\Faculty;
+use App\Models\Department;
 use App\Models\Internship;
 use App\Models\InternshipCompany;
 use App\Models\InternshipReport;
@@ -135,9 +135,9 @@ class InternshipTest extends TestCase
     {
         $id = $this->apply();
         $other = Student::factory()->create();
-        $faculty = $this->facultyAdminFor(Faculty::factory()->create());
-        $this->placeInFaculty($this->student, $faculty->faculty_id);
-        $outsideFaculty = $this->facultyAdminFor(Faculty::factory()->create());
+        $departmentAdmin = $this->departmentAdminFor(Department::factory()->create());
+        $this->placeInDepartment($this->student, $departmentAdmin->department_id);
+        $outsideDepartmentAdmin = $this->departmentAdminFor(Department::factory()->create());
 
         $this->actingAs($other->user)->getJson("/api/internships/{$id}")->assertForbidden();
         $this->actingAs($other->user)->postJson("/api/internships/{$id}/submit")->assertForbidden();
@@ -145,14 +145,14 @@ class InternshipTest extends TestCase
         $this->actingAs($this->student->user)->postJson("/api/internships/{$id}/approve")->assertForbidden();
         $this->actingAs($this->admin)->postJson('/api/internships', $this->payload())->assertForbidden();
 
-        $this->actingAs($faculty)->getJson('/api/internships')->assertOk()->assertJsonCount(1, 'data');
-        $this->actingAs($faculty)->getJson("/api/internships/{$id}")->assertOk();
-        $this->actingAs($outsideFaculty)->getJson('/api/internships')->assertOk()->assertJsonCount(0, 'data');
-        $this->actingAs($outsideFaculty)->getJson("/api/internships/{$id}")->assertForbidden();
-        // Processing is scoped too (docs/33): another faculty's admin is refused; the student's
-        // own Faculty Admin passes authorization, but a draft cannot be reviewed yet (409).
-        $this->actingAs($outsideFaculty)->postJson("/api/internships/{$id}/review")->assertForbidden();
-        $this->actingAs($faculty)->postJson("/api/internships/{$id}/review")->assertStatus(409);
+        $this->actingAs($departmentAdmin)->getJson('/api/internships')->assertOk()->assertJsonCount(1, 'data');
+        $this->actingAs($departmentAdmin)->getJson("/api/internships/{$id}")->assertOk();
+        $this->actingAs($outsideDepartmentAdmin)->getJson('/api/internships')->assertOk()->assertJsonCount(0, 'data');
+        $this->actingAs($outsideDepartmentAdmin)->getJson("/api/internships/{$id}")->assertForbidden();
+        // Processing is scoped too (docs/33): another department's admin is refused; the student's
+        // own Department Admin passes authorization, but a draft cannot be reviewed yet (409).
+        $this->actingAs($outsideDepartmentAdmin)->postJson("/api/internships/{$id}/review")->assertForbidden();
+        $this->actingAs($departmentAdmin)->postJson("/api/internships/{$id}/review")->assertStatus(409);
 
         $this->actingAs($this->student->user)->postJson("/api/internships/{$id}/fly")->assertNotFound();
     }

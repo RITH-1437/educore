@@ -1,66 +1,19 @@
 <script setup>
-import { scrollToId } from './scrollTo'
-
-const symbolMark = '/assets/logo/educore-symbol-mark.jpg'
-
-const nav = [
-  { id: 'top', label: 'Home' },
-  { id: 'platform', label: 'Platform' },
-  { id: 'modules', label: 'Modules' },
-  { id: 'technology', label: 'Technology' },
-  { id: 'about', label: 'About' },
-]
-
-const team = ['Rin Nairith', 'Yong Lyhor']
+// "EDUCORE" in the ANSI Shadow figlet font. Rows are equal length, so the
+// monospace <pre> keeps every glyph aligned. Decorative: the text is in sr-only.
+const banner = [
+  "███████╗██████╗ ██╗   ██╗ ██████╗ ██████╗ ██████╗ ███████╗",
+  "██╔════╝██╔══██╗██║   ██║██╔════╝██╔═══██╗██╔══██╗██╔════╝",
+  "█████╗  ██║  ██║██║   ██║██║     ██║   ██║██████╔╝█████╗  ",
+  "██╔══╝  ██║  ██║██║   ██║██║     ██║   ██║██╔══██╗██╔══╝  ",
+  "███████╗██████╔╝╚██████╔╝╚██████╗╚██████╔╝██║  ██║███████╗",
+  "╚══════╝╚═════╝  ╚═════╝  ╚═════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝",
+].join('\n')
 </script>
 
 <template>
-  <footer class="border-t border-white/10 bg-slate-950 py-16">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="grid gap-10 lg:grid-cols-[1.2fr_1fr_1fr]">
-        <div>
-          <div class="flex items-center gap-2.5">
-            <span class="flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg bg-white shadow-sm">
-              <img :src="symbolMark" alt="" width="36" height="36" class="h-9 w-9 object-cover" />
-            </span>
-            <div>
-              <p class="font-display text-lg font-bold text-white">EduCore</p>
-              <p class="text-xs font-medium text-sky-400/90">One Platform. Smarter Education.</p>
-            </div>
-          </div>
-          <p class="mt-5 max-w-sm text-sm leading-relaxed text-slate-400">
-            A university digital administration platform connecting academic management, student
-            services, administration, communication, documents, and institutional workflows.
-          </p>
-        </div>
-
-        <nav aria-label="Landing navigation">
-          <h3 class="text-xs font-semibold tracking-[0.2em] text-slate-500 uppercase">Navigation</h3>
-          <ul class="mt-4 space-y-2.5">
-            <li v-for="n in nav" :key="n.id">
-              <a
-                :href="`#${n.id}`"
-                class="inline-flex min-h-8 items-center rounded-sm text-sm text-slate-400 transition hover:text-sky-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
-                @click.prevent="scrollToId(n.id, n.id === 'top' ? 0 : 88)"
-              >
-                {{ n.label }}
-              </a>
-            </li>
-          </ul>
-        </nav>
-
-        <div>
-          <h3 class="text-xs font-semibold tracking-[0.2em] text-slate-500 uppercase">Team</h3>
-          <ul class="mt-4 space-y-2.5">
-            <li v-for="m in team" :key="m" class="text-sm text-slate-400">{{ m }}</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="mt-14 flex flex-col items-start justify-between gap-4 border-t border-white/10 pt-8 sm:flex-row sm:items-center">
-        <p class="text-sm text-slate-500">© 2026 EduCore. All rights reserved.</p>
-        <p class="text-sm text-slate-500">University Digital Administration Platform</p>
-      </div>
-    </div>
+  <footer class="overflow-hidden border-t border-dark-border bg-primary-dark px-4 py-12 sm:py-16">
+    <pre class="landing-banner mx-auto w-fit text-primary" aria-hidden="true">{{ banner }}</pre>
+    <p class="sr-only">EduCore — One Platform. Smarter Education.</p>
   </footer>
 </template>

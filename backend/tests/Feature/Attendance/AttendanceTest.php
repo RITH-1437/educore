@@ -5,8 +5,8 @@ namespace Tests\Feature\Attendance;
 use App\Models\AttendanceSession;
 use App\Models\Course;
 use App\Models\CourseOffering;
+use App\Models\Department;
 use App\Models\Enrollment;
-use App\Models\Faculty;
 use App\Models\Lecturer;
 use App\Models\Room;
 use App\Models\ScheduleEntry;
@@ -163,16 +163,16 @@ class AttendanceTest extends TestCase
     public function test_who_may_record_and_read(): void
     {
         $otherLecturer = Lecturer::factory()->create();
-        $faculty = $this->facultyAdminFor($this->facultyOfSection($this->section));
+        $departmentAdmin = $this->departmentAdminFor($this->departmentOfSection($this->section));
         $student = $this->enrollments[0]->student;
 
         $this->actingAs($otherLecturer->user)->postJson("/api/sections/{$this->section->id}/attendance", $this->payload(self::MONDAY, ['present', 'present', 'present']))->assertForbidden();
-        $this->actingAs($faculty)->postJson("/api/sections/{$this->section->id}/attendance", $this->payload(self::MONDAY, ['present', 'present', 'present']))->assertForbidden();
+        $this->actingAs($departmentAdmin)->postJson("/api/sections/{$this->section->id}/attendance", $this->payload(self::MONDAY, ['present', 'present', 'present']))->assertForbidden();
         $this->actingAs($student->user)->postJson("/api/sections/{$this->section->id}/attendance", $this->payload(self::MONDAY, ['present', 'present', 'present']))->assertForbidden();
         $this->actingAs($this->admin)->postJson("/api/sections/{$this->section->id}/attendance", $this->payload(self::MONDAY, ['present', 'present', 'present']))->assertOk();
 
-        $this->actingAs($faculty)->getJson("/api/sections/{$this->section->id}/attendance?date=".self::MONDAY)->assertOk();
-        $this->actingAs($this->facultyAdminFor(Faculty::factory()->create()))->getJson("/api/sections/{$this->section->id}/attendance?date=".self::MONDAY)->assertForbidden();
+        $this->actingAs($departmentAdmin)->getJson("/api/sections/{$this->section->id}/attendance?date=".self::MONDAY)->assertOk();
+        $this->actingAs($this->departmentAdminFor(Department::factory()->create()))->getJson("/api/sections/{$this->section->id}/attendance?date=".self::MONDAY)->assertForbidden();
         $this->actingAs($otherLecturer->user)->getJson("/api/sections/{$this->section->id}/attendance/summary")->assertForbidden();
 
         $this->actingAs($student->user)->getJson("/api/students/{$student->id}/attendance")->assertOk()->assertJsonPath('data.0.present', 1);

@@ -11,11 +11,11 @@ use OpenApi\Attributes as OA;
     required: ['code', 'name'],
     properties: [
         new OA\Property(
-            property: 'faculty_id',
+            property: 'university_id',
             type: 'integer',
             format: 'int64',
             example: 1,
-            description: 'Moving a department to another faculty keeps its children valid because they reference the department id.'
+            description: 'Moving a department to another university keeps its children valid because they reference the department id.'
         ),
         new OA\Property(property: 'code', type: 'string', maxLength: 50, example: 'CSE'),
         new OA\Property(property: 'name', type: 'string', maxLength: 255, example: 'Department of Computer Science and Engineering'),

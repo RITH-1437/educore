@@ -74,10 +74,6 @@ const deleteSemester = async (semester) => {
       <IconButton :icon="ArrowLeft" href="/academic-years" size="md" label="Back to calendar" />
     </header>
 
-    <div v-if="flash?.error" class="rounded-lg border border-error/20 bg-error/5 px-4 py-3 text-small text-error" role="alert">
-      {{ flash.error }}
-    </div>
-
     <div class="grid gap-6 xl:grid-cols-2">
       <BaseCard title="Academic year details" padding="lg">
         <form class="space-y-5" @submit.prevent="submit">

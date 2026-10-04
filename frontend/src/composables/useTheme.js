@@ -19,9 +19,10 @@ const apply = (value) => {
 }
 
 /**
- * Dashboard theme (light/dark). The `dark` class is applied to <html> only
- * while a layout using this composable is mounted, so public pages (landing,
- * login) keep their own styling.
+ * Light/dark theme for the dashboard and the landing page (one shared
+ * preference). The `dark` class is applied to <html> only while a component
+ * using this composable is mounted, so other public pages (login) keep their
+ * own styling.
  */
 export function useTheme() {
   theme.value = readStored()

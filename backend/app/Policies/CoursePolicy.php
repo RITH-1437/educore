@@ -13,7 +13,7 @@ class CoursePolicy
         return $this->viewCatalog($user);
     }
 
-    /** A Faculty Admin only sees their own faculty's records. */
+    /** A Department Admin only sees their own department's records. */
     public function view(User $user, Course $course): bool
     {
         return $this->viewCatalog($user) && $course->isVisibleTo($user);
@@ -40,8 +40,8 @@ class CoursePolicy
     }
 
     /**
-     * Faculty Admin reads the catalog but cannot change it: the user row has no
-     * faculty/department scope yet, so "manage within scope"
+     * Department Admin reads the catalog but cannot change it: the user row has no
+     * department scope yet, so "manage within scope"
      * (`skills/course-management/SKILL.md` §8) cannot be enforced.
      * Lecturer and student catalog views arrive with their own dashboards.
      */
@@ -49,7 +49,7 @@ class CoursePolicy
     {
         return $user->isRole(Role::SuperAdmin->value)
             || $user->isRole(Role::UniversityAdmin->value)
-            || $user->isRole(Role::FacultyAdmin->value);
+            || $user->isRole(Role::DepartmentAdmin->value);
     }
 
     private function manageCatalog(User $user): bool

@@ -8,50 +8,26 @@ class DatabaseSeeder extends Seeder
 {
     /**
      * Seed the application's database.
+     *
+     * Only what a fresh installation needs: the roles, the single Super Admin
+     * account, and the system configuration that has no create screen in the
+     * UI. No demo people or records are seeded — everything else is entered
+     * through the application.
+     *
+     * The other seeder classes in this folder (UniversityStructureSeeder,
+     * ProgramSeeder, CourseSeeder, ...) are not run here; the feature tests use
+     * them as fixtures.
      */
     public function run(): void
     {
         $this->call([
             RoleSeeder::class,
+            // The one account: Super Admin (admin@educore.kh).
             UserSeeder::class,
-            // Faculties belong to a university, so the structure is seeded
-            // before the academic calendar that sits alongside it.
-            UniversityStructureSeeder::class,
-            // Programs hang off departments, so they follow the structure.
-            ProgramSeeder::class,
-            // Courses (and curricula) need both departments and programs.
-            CourseSeeder::class,
-            // Lecturer accounts + profiles need the Lecturer role and departments.
-            LecturerSeeder::class,
-            // Students need the Student role and active programs.
-            StudentSeeder::class,
-            AcademicYearSeeder::class,
-            // Offerings/sections need courses, lecturers and the semesters above.
-            CourseOfferingSeeder::class,
-            // Rooms and weekly meetings before enrollment, so student clashes apply.
-            RoomSeeder::class,
-            ScheduleSeeder::class,
-            // Enrollments go through EnrollmentService, so every rule applies.
-            EnrollmentSeeder::class,
-            // Attendance needs schedules and enrollments; recorded via AttendanceService.
-            AttendanceSeeder::class,
-            // Coursework (files stored on the uploads disk / MinIO).
-            AssignmentSeeder::class,
-            ExamSeeder::class,
-            // The grading scale grades are mapped against (module 9.14).
+            // The grading scale grades are mapped against (module 9.14); the UI edits it but cannot create it.
             GradingScaleSeeder::class,
-            // Requestable official documents (module 9.16).
+            // Requestable official documents (module 9.16); there is no screen to create types.
             DocumentTypeSeeder::class,
-            // Demo invoices and payments through InvoiceService (module 9.18).
-            InvoiceSeeder::class,
-            // Demo announcements through AnnouncementService (module 9.19).
-            AnnouncementSeeder::class,
-            // Host companies and a few internships through InternshipService (module 9.22).
-            InternshipSeeder::class,
-            // Operational diagnostics last: this table is filled by the recorder
-            // at runtime, so seeding it after the structure keeps the rows
-            // internally consistent.
-            ErrorLogSeeder::class,
         ]);
     }
 }

@@ -59,10 +59,10 @@ class TimetableTest extends TestCase
 
     public function test_room_crud_roles_and_delete_guard(): void
     {
-        $faculty = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::FacultyAdmin->value)->create()->id]);
+        $departmentAdmin = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::DepartmentAdmin->value)->create()->id]);
 
-        $this->actingAs($faculty)->getJson('/api/rooms')->assertOk();
-        $this->actingAs($faculty)->postJson('/api/rooms', $this->roomPayload())->assertForbidden();
+        $this->actingAs($departmentAdmin)->getJson('/api/rooms')->assertOk();
+        $this->actingAs($departmentAdmin)->postJson('/api/rooms', $this->roomPayload())->assertForbidden();
 
         $id = $this->actingAs($this->admin)->postJson('/api/rooms', $this->roomPayload(['code' => 'LAB-1', 'room_type' => 'lab']))
             ->assertCreated()->assertJsonPath('data.room_type', 'lab')->json('data.id');

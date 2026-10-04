@@ -27,19 +27,19 @@ trait ChecksSectionTeaching
         return $user->isRole(Role::SuperAdmin->value) || $user->isRole(Role::UniversityAdmin->value);
     }
 
-    /** Managers plus Faculty Admin (read access; lists are unit-scoped by the caller). */
+    /** Managers plus Department Admin (read access; lists are unit-scoped by the caller). */
     protected function staff(User $user): bool
     {
-        return $this->manages($user) || $user->isRole(Role::FacultyAdmin->value);
+        return $this->manages($user) || $user->isRole(Role::DepartmentAdmin->value);
     }
 
-    /** Managers, or a Faculty Admin when the section's course is in their faculty. */
+    /** Managers, or a Department Admin when the section's course is in their department. */
     protected function staffOver(User $user, Section $section): bool
     {
         return $this->staff($user) && $section->isVisibleTo($user);
     }
 
-    /** Managers, or a Faculty Admin when the student is in their faculty. */
+    /** Managers, or a Department Admin when the student is in their department. */
     protected function staffOverStudent(User $user, Student $student): bool
     {
         return $this->staff($user) && $student->isVisibleTo($user);

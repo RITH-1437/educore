@@ -9,9 +9,9 @@ use App\Models\AttendanceRecord;
 use App\Models\AttendanceSession;
 use App\Models\Course;
 use App\Models\CourseOffering;
+use App\Models\Department;
 use App\Models\Enrollment;
 use App\Models\Exam;
-use App\Models\Faculty;
 use App\Models\Grade;
 use App\Models\Lecturer;
 use App\Models\ScheduleEntry;
@@ -129,13 +129,13 @@ class StudentDashboardTest extends TestCase
     public function test_access_is_limited_to_staff_and_the_student(): void
     {
         $other = Student::factory()->create();
-        $faculty = $this->facultyAdminFor(Faculty::factory()->create());
-        $this->placeInFaculty($this->student, $faculty->faculty_id);
+        $departmentAdmin = $this->departmentAdminFor(Department::factory()->create());
+        $this->placeInDepartment($this->student, $departmentAdmin->department_id);
 
         $this->actingAs($other->user)->getJson("/api/students/{$this->student->id}/dashboard")->assertForbidden();
         $this->actingAs(Lecturer::factory()->create()->user)->getJson("/api/students/{$this->student->id}/dashboard")->assertForbidden();
-        $this->actingAs($faculty)->getJson("/api/students/{$this->student->id}/dashboard")->assertOk();
-        $this->actingAs($this->facultyAdminFor(Faculty::factory()->create()))->getJson("/api/students/{$this->student->id}/dashboard")->assertForbidden();
+        $this->actingAs($departmentAdmin)->getJson("/api/students/{$this->student->id}/dashboard")->assertOk();
+        $this->actingAs($this->departmentAdminFor(Department::factory()->create()))->getJson("/api/students/{$this->student->id}/dashboard")->assertForbidden();
         $this->actingAs(User::factory()->superAdmin()->create())->getJson("/api/students/{$this->student->id}/dashboard")->assertOk();
     }
 

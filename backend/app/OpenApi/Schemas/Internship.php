@@ -77,7 +77,7 @@ use OpenApi\Attributes as OA;
         ])),
         new OA\Property(property: 'evaluations', type: 'array', items: new OA\Items(properties: [
             new OA\Property(property: 'id', type: 'integer', format: 'int64'),
-            new OA\Property(property: 'evaluator_type', type: 'string', enum: ['supervisor', 'faculty']),
+            new OA\Property(property: 'evaluator_type', type: 'string', enum: ['supervisor', 'academic']),
             new OA\Property(property: 'evaluator_name', type: 'string', nullable: true),
             new OA\Property(property: 'score', type: 'number', nullable: true),
             new OA\Property(property: 'rating', type: 'string', nullable: true),
@@ -120,7 +120,7 @@ use OpenApi\Attributes as OA;
     type: 'object',
     required: ['evaluator_type', 'score'],
     properties: [
-        new OA\Property(property: 'evaluator_type', type: 'string', enum: ['supervisor', 'faculty']),
+        new OA\Property(property: 'evaluator_type', type: 'string', enum: ['supervisor', 'academic']),
         new OA\Property(property: 'evaluator_name', type: 'string', nullable: true, description: 'Defaults to the supervisor name / the signed-in staff member.'),
         new OA\Property(property: 'score', type: 'number', minimum: 0, maximum: 100),
         new OA\Property(property: 'rating', type: 'string', enum: ['excellent', 'good', 'satisfactory', 'needs_improvement', 'poor'], nullable: true),

@@ -17,7 +17,7 @@ use Illuminate\Support\Collection;
  * `TimetableService`, missing registers from `AttendanceService`, submissions
  * to grade from `AssignmentService`, exams from `ExamService`, grade-sheet
  * progress from `GradingService` — so nothing is re-derived here. The current
- * semester is the analytics default, as on the Faculty Admin dashboard; only
+ * semester is the analytics default, as on the Department Admin dashboard; only
  * the lecturer's sections in it are shown.
  */
 class LecturerDashboardService

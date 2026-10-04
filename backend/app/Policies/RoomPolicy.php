@@ -8,7 +8,7 @@ use App\Models\User;
 
 /**
  * Rooms: staff read, Super Admin / University Admin manage
- * (`skills/timetable/SKILL.md` §8; Faculty Admin has no unit scope yet).
+ * (`skills/timetable/SKILL.md` §8; Department Admin has no unit scope yet).
  */
 class RoomPolicy
 {
@@ -39,7 +39,7 @@ class RoomPolicy
 
     private function staff(User $user): bool
     {
-        return $this->manage($user) || $user->isRole(Role::FacultyAdmin->value);
+        return $this->manage($user) || $user->isRole(Role::DepartmentAdmin->value);
     }
 
     private function manage(User $user): bool

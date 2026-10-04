@@ -14,7 +14,7 @@ final readonly class CreateUserData
         public string $password,
         public ?string $phone = null,
         public bool $isActive = true,
-        public ?int $facultyId = null,
+        public ?int $departmentId = null,
     ) {}
 
     /**
@@ -29,7 +29,7 @@ final readonly class CreateUserData
             password: (string) $validated['password'],
             phone: $validated['phone'] ?? null,
             isActive: (bool) ($validated['is_active'] ?? true),
-            facultyId: isset($validated['faculty_id']) ? (int) $validated['faculty_id'] : null,
+            departmentId: isset($validated['department_id']) ? (int) $validated['department_id'] : null,
         );
     }
 
@@ -47,7 +47,7 @@ final readonly class CreateUserData
             'password' => $this->password,
             'phone' => $this->phone,
             'is_active' => $this->isActive,
-            'faculty_id' => $this->facultyId,
+            'department_id' => $this->departmentId,
         ];
     }
 }

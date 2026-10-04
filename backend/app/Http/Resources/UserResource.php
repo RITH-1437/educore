@@ -26,8 +26,8 @@ class UserResource extends JsonResource
             'is_active' => $user->isActive,
             'last_login_at' => $user->lastLoginAt,
             'created_at' => $user->createdAt,
-            'faculty_id' => $user->facultyId,
-            'faculty' => $user->facultyName,
+            'department_id' => $user->departmentId,
+            'department' => $user->departmentName,
             'role' => $this->when($user->hasRole(), fn () => [
                 'id' => $user->role->id,
                 'name' => $user->role->name,

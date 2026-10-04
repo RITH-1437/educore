@@ -5,8 +5,8 @@ namespace Tests\Feature\Enrollments;
 use App\Enums\Role;
 use App\Models\Course;
 use App\Models\CourseOffering;
+use App\Models\Department;
 use App\Models\Enrollment;
-use App\Models\Faculty;
 use App\Models\Role as RoleModel;
 use App\Models\Section;
 use App\Models\Semester;
@@ -35,7 +35,7 @@ class EnrollmentTest extends TestCase
 
     private User $admin;
 
-    private User $facultyAdmin;
+    private User $departmentAdmin;
 
     private Semester $semester;
 
@@ -48,7 +48,7 @@ class EnrollmentTest extends TestCase
         parent::setUp();
 
         $this->admin = User::factory()->superAdmin()->create();
-        $this->facultyAdmin = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::FacultyAdmin->value)->create()->id]);
+        $this->departmentAdmin = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::DepartmentAdmin->value)->create()->id]);
         $this->semester = Semester::factory()->create(['status' => 'open']);
         $this->section = $this->openSection(Course::factory()->create(['code' => 'CS101', 'credits' => 3]), 2);
         $this->student = Student::factory()->create();
@@ -89,12 +89,12 @@ class EnrollmentTest extends TestCase
         $this->actingAs($this->student->user)->getJson('/api/enrollments')->assertForbidden();
         $this->actingAs($this->student->user)->getJson("/api/students/{$this->student->id}/enrollments")->assertOk()->assertJsonCount(1, 'data');
         $this->actingAs($this->student->user)->getJson("/api/students/{$other->id}/enrollments")->assertForbidden();
-        $this->facultyAdmin->update(['faculty_id' => $this->facultyOfSection($this->section)]);
-        $this->actingAs($this->facultyAdmin)->getJson('/api/enrollments')->assertOk()->assertJsonCount(2, 'data');
-        $this->actingAs($this->facultyAdmin)->getJson("/api/enrollments/{$theirs->id}")->assertOk();
-        $this->actingAs($this->facultyAdminFor(Faculty::factory()->create()))->getJson('/api/enrollments')->assertOk()->assertJsonCount(0, 'data');
-        $this->actingAs($this->facultyAdminFor(null))->getJson("/api/enrollments/{$mine->id}")->assertForbidden();
-        $this->actingAs($this->facultyAdmin)->postJson('/api/enrollments', ['student_id' => $this->student->id, 'section_id' => $this->section->id])->assertForbidden();
+        $this->departmentAdmin->update(['department_id' => $this->departmentOfSection($this->section)]);
+        $this->actingAs($this->departmentAdmin)->getJson('/api/enrollments')->assertOk()->assertJsonCount(2, 'data');
+        $this->actingAs($this->departmentAdmin)->getJson("/api/enrollments/{$theirs->id}")->assertOk();
+        $this->actingAs($this->departmentAdminFor(Department::factory()->create()))->getJson('/api/enrollments')->assertOk()->assertJsonCount(0, 'data');
+        $this->actingAs($this->departmentAdminFor(null))->getJson("/api/enrollments/{$mine->id}")->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->postJson('/api/enrollments', ['student_id' => $this->student->id, 'section_id' => $this->section->id])->assertForbidden();
     }
 
     // ----------------------------------------------------------------- rules ---

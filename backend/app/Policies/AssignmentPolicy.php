@@ -10,7 +10,7 @@ use App\Policies\Concerns\ChecksSectionTeaching;
 
 /**
  * Assignments (`skills/assignments/SKILL.md` §8): the section's lecturers (and
- * managers) run coursework; Faculty Admin reads; students see published work
+ * managers) run coursework; Department Admin reads; students see published work
  * of their sections and touch only their own submission.
  */
 class AssignmentPolicy

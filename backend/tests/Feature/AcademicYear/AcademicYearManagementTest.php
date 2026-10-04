@@ -93,10 +93,12 @@ class AcademicYearManagementTest extends TestCase
     public function test_super_admin_can_view_the_academic_year_edit_screen(): void
     {
         $year = $this->makeYear(['code' => '2025-2026']);
+        Semester::factory()->forYear($year)->create(['sequence' => 1]);
 
-        // Guards against the single-resource nesting trap: a bare
-        // `JsonResource` prop is serialised under `data`, and the Vue page reads
-        // `props.academicYear.code`.
+        // Guards against the resource nesting trap: a bare `JsonResource` (or
+        // resource collection) prop is serialised under `data`, while the Vue
+        // page reads `props.academicYear.code` and iterates `props.semesters`.
+        // A nested `{data: [...]}` semesters prop crashed the page (2026-10-05).
         $this->actingAs($this->superAdmin)
             ->get("/academic-years/{$year->id}/edit")
             ->assertOk()
@@ -104,7 +106,8 @@ class AcademicYearManagementTest extends TestCase
                 ->component('AcademicYears/Edit')
                 ->where('academicYear.id', $year->id)
                 ->where('academicYear.code', '2025-2026')
-                ->has('semesters.data', 0));
+                ->has('semesters', 1)
+                ->has('semesters.0.status'));
     }
 
     public function test_university_admin_can_manage_the_academic_calendar(): void
@@ -671,7 +674,7 @@ class AcademicYearManagementTest extends TestCase
     }
 
     /**
-     * Minimal university -> faculty -> department -> course chain so a course
+     * Minimal university -> department -> course chain so a course
      * offering can reference a semester.
      */
     private function seedCourse(): int
@@ -681,14 +684,8 @@ class AcademicYearManagementTest extends TestCase
             'name' => 'ITC University',
         ]);
 
-        $facultyId = DB::table('faculties')->insertGetId([
-            'university_id' => $universityId,
-            'code' => 'ENG',
-            'name' => 'Faculty of Engineering',
-        ]);
-
         $departmentId = DB::table('departments')->insertGetId([
-            'faculty_id' => $facultyId,
+            'university_id' => $universityId,
             'code' => 'CS',
             'name' => 'Computer Science',
         ]);

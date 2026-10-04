@@ -27,7 +27,7 @@ class UniversityResource extends JsonResource
             'logo_key' => $this->logo_key,
             'website' => $this->website,
             'is_current' => $this->is_current,
-            'faculties_count' => $this->whenCounted('faculties'),
+            'departments_count' => $this->whenCounted('departments'),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];

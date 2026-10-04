@@ -8,7 +8,6 @@ use App\Http\Requests\StoreDepartmentRequest;
 use App\Http\Requests\UpdateDepartmentRequest;
 use App\Http\Resources\DepartmentResource;
 use App\Models\Department;
-use App\Models\Faculty;
 use App\Services\DepartmentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -18,8 +17,8 @@ use OpenApi\Attributes as OA;
 /**
  * Department endpoints.
  *
- * A department always belongs to exactly one faculty, so `faculty_id` is part of
- * the resource and `filters[faculty_id]` scopes the list
+ * A department belongs to the university (`university_id`; the faculty level
+ * was removed in report 39) and `filters[university_id]` scopes the list
  * (`skills/faculty-department/SKILL.md` §5).
  *
  * Protected by `auth:sanctum` and `role:super-admin,university-admin`, so every
@@ -34,7 +33,7 @@ class DepartmentController extends Controller
     #[OA\Get(
         path: '/departments',
         summary: 'List departments',
-        description: 'Returns a paginated list of departments. Supports case-insensitive search over code and name, scoping by faculty, filtering by active state, whitelisted sorting and a capped page size.',
+        description: 'Returns a paginated list of departments. Supports case-insensitive search over code and name, scoping by university, filtering by active state, whitelisted sorting and a capped page size.',
         operationId: 'listDepartments',
         tags: ['University Structure'],
         security: [['sanctum' => []]],
@@ -46,8 +45,8 @@ class DepartmentController extends Controller
                 example: 'Computer'
             ),
             new OA\QueryParameter(
-                name: 'filters[faculty_id]',
-                description: 'Only departments belonging to this faculty.',
+                name: 'filters[university_id]',
+                description: 'Only departments belonging to this university.',
                 schema: new OA\Schema(type: 'integer', format: 'int64'),
                 example: 1
             ),
@@ -107,7 +106,7 @@ class DepartmentController extends Controller
     #[OA\Post(
         path: '/departments',
         summary: 'Create a department',
-        description: '`faculty_id` is required here. Department names must be unique within their faculty.',
+        description: '`university_id` defaults to the current university. Department names must be unique within their university.',
         operationId: 'createDepartment',
         tags: ['University Structure'],
         security: [['sanctum' => []]],
@@ -142,16 +141,9 @@ class DepartmentController extends Controller
     {
         $this->authorize('create', Department::class);
 
-        $facultyId = $request->validated('faculty_id') ?? $request->facultyKey();
+        $department = $this->departments->create($request->validated());
 
-        abort_if($facultyId === null, 422, 'A faculty_id is required to create a department.');
-
-        $department = $this->departments->create([
-            ...$request->safe()->except('faculty_id'),
-            'faculty_id' => $facultyId,
-        ]);
-
-        return (new DepartmentResource($department->load('faculty:id,code,name,university_id')))
+        return (new DepartmentResource($department->load('university:id,code,name')))
             ->response()
             ->setStatusCode(201);
     }
@@ -198,13 +190,13 @@ class DepartmentController extends Controller
     {
         $this->authorize('view', $department);
 
-        return new DepartmentResource($department->load('faculty:id,code,name,university_id'));
+        return new DepartmentResource($department->load('university:id,code,name'));
     }
 
     #[OA\Put(
         path: '/departments/{department}',
         summary: 'Update a department',
-        description: 'Changing `faculty_id` moves the department to another faculty; its children keep pointing at the same department id, so their references stay valid.',
+        description: 'Changing `university_id` moves the department to another university; its children keep pointing at the same department id, so their references stay valid.',
         operationId: 'updateDepartment',
         tags: ['University Structure'],
         security: [['sanctum' => []]],
@@ -303,7 +295,7 @@ class DepartmentController extends Controller
 
         $this->departments->update($department, $request->validated());
 
-        return new DepartmentResource($department->refresh()->load('faculty:id,code,name,university_id'));
+        return new DepartmentResource($department->refresh()->load('university:id,code,name'));
     }
 
     #[OA\Post(
@@ -448,62 +440,5 @@ class DepartmentController extends Controller
         $this->departments->delete($department);
 
         return response()->json(null, 204);
-    }
-
-    /**
-     * Faculty → department tree for cascading selects
-     * (`skills/faculty-department/SKILL.md` §6).
-     */
-    #[OA\Get(
-        path: '/faculties-tree',
-        summary: 'Faculty → department tree',
-        description: 'Returns active faculties with their active departments, shaped for cascading dropdowns. Not paginated: the structure is small by nature.',
-        operationId: 'getFacultyTree',
-        tags: ['University Structure'],
-        security: [['sanctum' => []]],
-        responses: [
-            new OA\Response(
-                response: 200,
-                description: 'The faculty tree.',
-                content: new OA\JsonContent(ref: '#/components/schemas/FacultyTreeCollection')
-            ),
-            new OA\Response(
-                response: 401,
-                description: 'Unauthenticated.',
-                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
-            ),
-            new OA\Response(
-                response: 403,
-                description: 'Authenticated but not a Super Admin or University Admin.',
-                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
-            ),
-        ]
-    )]
-    public function tree(Request $request): JsonResponse
-    {
-        $this->authorize('viewAny', Faculty::class);
-
-        $tree = Faculty::query()
-            ->visibleTo($request->user())
-            ->active()
-            ->with(['departments' => fn ($query) => $query->active()])
-            ->orderBy('name')
-            ->get()
-            ->map(fn (Faculty $faculty) => [
-                'id' => $faculty->id,
-                'code' => $faculty->code,
-                'name' => $faculty->name,
-                'is_active' => $faculty->is_active,
-                'departments' => $faculty->departments->map(fn (Department $department) => [
-                    'id' => $department->id,
-                    'faculty_id' => $department->faculty_id,
-                    'code' => $department->code,
-                    'name' => $department->name,
-                    'is_active' => $department->is_active,
-                ])->all(),
-            ])
-            ->all();
-
-        return response()->json(['data' => $tree]);
     }
 }

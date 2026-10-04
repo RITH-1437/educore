@@ -43,18 +43,14 @@ class LecturerService
     /**
      * @return LengthAwarePaginator<int, Lecturer>
      */
-    /** `$viewer` limits a Faculty Admin to their faculty (`BelongsToFaculty`). */
+    /** `$viewer` limits a Department Admin to their department (`BelongsToDepartment`). */
     public function paginate(LecturerListFilters $filters, ?User $viewer = null): LengthAwarePaginator
     {
         return Lecturer::query()
             ->when($viewer, fn ($query) => $query->visibleTo($viewer))
-            ->with(['user:id,name,email,phone,is_active', 'department.faculty:id,code,name'])
+            ->with(['user:id,name,email,phone,is_active', 'department:id,code,name'])
             ->search($filters->search)
             ->when($filters->departmentId, fn ($query, $id) => $query->where('department_id', $id))
-            ->when(
-                $filters->facultyId,
-                fn ($query, $id) => $query->whereHas('department', fn ($q) => $q->where('faculty_id', $id)),
-            )
             ->when($filters->employmentType, fn ($query, $type) => $query->where('employment_type', $type))
             ->when(
                 $filters->isActive !== null,

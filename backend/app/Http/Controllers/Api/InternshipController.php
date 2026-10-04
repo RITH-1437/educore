@@ -193,7 +193,7 @@ class InternshipController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Updated.', content: new OA\JsonContent(ref: '#/components/schemas/InternshipResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not the student, a manager, or the student\'s Faculty Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not the student, a manager, or the student\'s Department Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Not editable in this status.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
@@ -210,7 +210,7 @@ class InternshipController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Updated.', content: new OA\JsonContent(ref: '#/components/schemas/InternshipResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not the student, a manager, or the student\'s Faculty Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not the student, a manager, or the student\'s Department Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Not editable in this status.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
@@ -226,7 +226,7 @@ class InternshipController extends Controller
     #[OA\Post(
         path: '/internships/{internship}/{action}',
         summary: 'Move an internship through its workflow',
-        description: '`submit` (student, from draft) · `review` (manager, submitted → under review) · `approve` (manager, optional `note`) · `reject` (manager, `reason` required) · `start` (manager, approved → in progress) · `complete` (manager, needs a final report, optional `note`) · `cancel` (student before approval, or manager with `reason` — early termination). Illegal transitions return 409. Manager actions: Super Admin, University Admin, or a Faculty Admin for a student of their faculty.',
+        description: '`submit` (student, from draft) · `review` (manager, submitted → under review) · `approve` (manager, optional `note`) · `reject` (manager, `reason` required) · `start` (manager, approved → in progress) · `complete` (manager, needs a final report, optional `note`) · `cancel` (student before approval, or manager with `reason` — early termination). Illegal transitions return 409. Manager actions: Super Admin, University Admin, or a Department Admin for a student of their department.',
         operationId: 'transitionInternship',
         tags: ['Internships'],
         security: [['sanctum' => []]],
@@ -298,7 +298,7 @@ class InternshipController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Reviewed; the updated internship.', content: new OA\JsonContent(ref: '#/components/schemas/InternshipResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a manager or the student\'s Faculty Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a manager or the student\'s Department Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
         ]
     )]
     public function reviewReport(Request $request, InternshipReport $report): InternshipResource
@@ -334,7 +334,7 @@ class InternshipController extends Controller
 
     #[OA\Post(
         path: '/internships/{internship}/evaluations',
-        summary: 'Record a supervisor or faculty evaluation',
+        summary: 'Record a supervisor or academic evaluation',
         description: 'One per evaluator type (saving again replaces it); once the internship has started (409 before).',
         operationId: 'evaluateInternship',
         tags: ['Internships'],
@@ -344,7 +344,7 @@ class InternshipController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Saved; the updated internship.', content: new OA\JsonContent(ref: '#/components/schemas/InternshipResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a manager or the student\'s Faculty Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a manager or the student\'s Department Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Not started yet.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]

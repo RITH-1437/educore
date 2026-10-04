@@ -39,6 +39,9 @@ const submit = () =>
         <form class="space-y-4" @submit.prevent="submit">
           <BaseSelect v-model="form.document_type_id" :options="typeOptions" label="Document" :error="form.errors.document_type_id" />
           <p v-if="selectedType?.description" class="text-caption text-muted dark:text-dark-muted">{{ selectedType.description }}</p>
+          <div v-if="selectedType?.requires_fee" class="rounded-lg bg-warning/10 p-3 text-caption text-warning-dark dark:text-warning">
+            This document incurs an official fee of <strong>${{ Number(selectedType.fee_amount).toFixed(2) }}</strong>. An invoice will be generated upon approval.
+          </div>
           <BaseSelect
             v-if="selectedType?.needs_semester"
             v-model="form.semester_id"
@@ -66,6 +69,21 @@ const submit = () =>
               <StatusBadge v-bind="requestBadge(request.status)" />
             </div>
             <p v-if="request.status === 'rejected'" class="mt-2 text-small text-error">Rejected: {{ request.rejection_reason }}</p>
+            <div v-if="request.invoice" class="mt-2 flex flex-wrap items-center gap-2 text-caption">
+              <span class="font-medium text-ink dark:text-dark-ink">Invoice:</span>
+              <span class="font-mono text-primary">{{ request.invoice.invoice_number }}</span>
+              <span>(${{ Number(request.invoice.total).toFixed(2) }})</span>
+              <span :class="request.invoice.status === 'paid' ? 'text-success font-semibold' : 'text-warning-dark font-semibold'">
+                {{ request.invoice.status }}
+              </span>
+              <a
+                v-if="request.invoice.status !== 'paid'"
+                href="/my-invoices"
+                class="ml-2 rounded bg-primary px-2 py-0.5 text-caption font-medium text-white hover:bg-primary-dark"
+              >
+                Pay in My Invoices
+              </a>
+            </div>
             <div v-if="request.document" class="mt-3 flex flex-wrap items-center gap-3">
               <IconButton :icon="Download" :href="`/documents/${request.document.id}/download`" native label="Download PDF" />
               <StatusBadge v-bind="documentBadge(request.document.status)" />

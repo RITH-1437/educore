@@ -43,7 +43,6 @@ class Announcement extends Model
 
     /** Audiences that point at one record of the given model. */
     public const UNIT_AUDIENCES = [
-        'faculty' => Faculty::class,
         'department' => Department::class,
         'program' => Program::class,
         'section' => Section::class,
@@ -73,7 +72,7 @@ class Announcement extends Model
         return $this->morphMany(StoredFile::class, 'fileable');
     }
 
-    /** The targeted record (faculty, department, program, section or course), if any. */
+    /** The targeted record (department, program, section or course), if any. */
     public function target(): ?Model
     {
         $class = self::UNIT_AUDIENCES[$this->audience_type] ?? null;

@@ -170,7 +170,7 @@ class UserController extends Controller
     {
         $this->authorize('view', $user);
 
-        return new UserResource($user->load('role', 'faculty:id,name'));
+        return new UserResource($user->load('role', 'department:id,name'));
     }
 
     #[OA\Put(

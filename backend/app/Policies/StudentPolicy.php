@@ -45,14 +45,14 @@ class StudentPolicy
     }
 
     /**
-     * Faculty Admin reads (within their faculty: `view` and the unit-scoped
+     * Department Admin reads (within their department: `view` and the unit-scoped
      * list) but does not manage.
      */
     private function staff(User $user): bool
     {
         return $user->isRole(Role::SuperAdmin->value)
             || $user->isRole(Role::UniversityAdmin->value)
-            || $user->isRole(Role::FacultyAdmin->value);
+            || $user->isRole(Role::DepartmentAdmin->value);
     }
 
     private function manage(User $user): bool

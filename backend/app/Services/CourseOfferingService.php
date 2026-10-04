@@ -48,7 +48,7 @@ class CourseOfferingService
      * @param  array{search?: ?string, semester_id?: ?int, academic_year_id?: ?int, course_id?: ?int, status?: ?string, per_page?: int}  $filters
      * @return LengthAwarePaginator<int, CourseOffering>
      */
-    /** `$viewer` limits a Faculty Admin to their faculty (`BelongsToFaculty`). */
+    /** `$viewer` limits a Department Admin to their department (`BelongsToDepartment`). */
     public function paginate(array $filters, ?User $viewer = null): LengthAwarePaginator
     {
         $search = trim((string) ($filters['search'] ?? ''));

@@ -27,7 +27,7 @@ class PaginationContractTest extends TestCase
             '/lecturers' => 'lecturers',
             '/courses' => 'courses',
             '/programs' => 'programs',
-            '/faculties' => 'faculties',
+            '/departments' => 'departments',
             '/universities' => 'universities',
             '/academic-years' => 'academicYears',
             '/offerings' => 'offerings',

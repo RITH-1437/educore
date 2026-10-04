@@ -13,7 +13,7 @@ class ProgramPolicy
         return $this->viewStructure($user);
     }
 
-    /** A Faculty Admin only sees their own faculty's records. */
+    /** A Department Admin only sees their own department's records. */
     public function view(User $user, Program $program): bool
     {
         return $this->viewStructure($user) && $program->isVisibleTo($user);
@@ -40,15 +40,15 @@ class ProgramPolicy
     }
 
     /**
-     * A Faculty Admin may read programs but not change them: the user row has
-     * no faculty/department scope yet, so "own unit only" cannot be enforced
-     * (same limitation documented for `FacultyPolicy`).
+     * A Department Admin may read programs but not change them: the user row has
+     * no department scope yet, so "own unit only" cannot be enforced
+     * (same limitation as the structure itself).
      */
     private function viewStructure(User $user): bool
     {
         return $user->isRole(Role::SuperAdmin->value)
             || $user->isRole(Role::UniversityAdmin->value)
-            || $user->isRole(Role::FacultyAdmin->value);
+            || $user->isRole(Role::DepartmentAdmin->value);
     }
 
     /**

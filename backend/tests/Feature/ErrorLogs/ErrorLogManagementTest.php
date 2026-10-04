@@ -31,7 +31,7 @@ class ErrorLogManagementTest extends TestCase
 
     private User $universityAdmin;
 
-    private User $facultyAdmin;
+    private User $departmentAdmin;
 
     private User $lecturer;
 
@@ -43,7 +43,7 @@ class ErrorLogManagementTest extends TestCase
 
         $this->superAdmin = User::factory()->superAdmin()->create(['email' => 'root@test.test']);
         $this->universityAdmin = $this->userWithRole(Role::UniversityAdmin->value, 'dean@test.test');
-        $this->facultyAdmin = $this->userWithRole(Role::FacultyAdmin->value, 'unit@test.test');
+        $this->departmentAdmin = $this->userWithRole(Role::DepartmentAdmin->value, 'unit@test.test');
         $this->lecturer = $this->userWithRole(Role::Lecturer->value, 'teacher@test.test');
         $this->student = $this->userWithRole(Role::Student->value, 'pupil@test.test');
 
@@ -188,7 +188,7 @@ class ErrorLogManagementTest extends TestCase
 
     public function test_non_super_admin_cannot_access_web_index(): void
     {
-        foreach ([$this->universityAdmin, $this->facultyAdmin, $this->lecturer, $this->student] as $user) {
+        foreach ([$this->universityAdmin, $this->departmentAdmin, $this->lecturer, $this->student] as $user) {
             $this->actingAs($user)
                 ->get('/error-logs')
                 ->assertForbidden();
@@ -205,7 +205,7 @@ class ErrorLogManagementTest extends TestCase
 
     public function test_non_super_admin_cannot_access_api_index(): void
     {
-        foreach ([$this->universityAdmin, $this->facultyAdmin, $this->lecturer, $this->student] as $user) {
+        foreach ([$this->universityAdmin, $this->departmentAdmin, $this->lecturer, $this->student] as $user) {
             $this->actingAs($user, 'sanctum')
                 ->getJson('/api/error-logs')
                 ->assertForbidden();

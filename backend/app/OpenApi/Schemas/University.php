@@ -19,7 +19,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'logo_key', type: 'string', nullable: true, description: 'Object storage key of the university logo.'),
         new OA\Property(property: 'website', type: 'string', nullable: true),
         new OA\Property(property: 'is_current', type: 'boolean', example: true, description: 'Exactly one university may be current.'),
-        new OA\Property(property: 'faculties_count', type: 'integer', nullable: true, example: 3),
+        new OA\Property(property: 'departments_count', type: 'integer', nullable: true, example: 6),
         new OA\Property(property: 'created_at', type: 'string', format: 'date-time'),
         new OA\Property(property: 'updated_at', type: 'string', format: 'date-time'),
     ]

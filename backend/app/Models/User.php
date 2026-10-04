@@ -27,7 +27,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
-        'faculty_id',
+        'department_id',
         'phone',
         'avatar_key',
         'is_active',
@@ -110,19 +110,19 @@ class User extends Authenticatable
         return $this->role?->slug === $slug;
     }
 
-    /** The faculty a Faculty Admin administers (null for every other role). */
-    public function faculty(): BelongsTo
+    /** The department a Department Admin administers (null for every other role). */
+    public function department(): BelongsTo
     {
-        return $this->belongsTo(Faculty::class);
+        return $this->belongsTo(Department::class);
     }
 
     /**
-     * The faculty this user's data access is limited to: null = no unit limit
-     * (every role except Faculty Admin); for a Faculty Admin their faculty id,
-     * or 0 when none is assigned, which matches nothing (fail closed).
+     * The department this user's data access is limited to: null = no unit
+     * limit (every role except Department Admin); for a Department Admin their
+     * department id, or 0 when none is assigned, which matches nothing (fail closed).
      */
-    public function facultyScope(): ?int
+    public function departmentScope(): ?int
     {
-        return $this->isRole(RoleSlug::FacultyAdmin->value) ? (int) ($this->faculty_id ?? 0) : null;
+        return $this->isRole(RoleSlug::DepartmentAdmin->value) ? (int) ($this->department_id ?? 0) : null;
     }
 }

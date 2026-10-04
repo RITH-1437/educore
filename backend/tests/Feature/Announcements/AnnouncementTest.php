@@ -7,7 +7,6 @@ use App\Models\Announcement;
 use App\Models\Course;
 use App\Models\CourseOffering;
 use App\Models\Department;
-use App\Models\Faculty;
 use App\Models\Lecturer;
 use App\Models\Program;
 use App\Models\Role as RoleModel;
@@ -32,8 +31,6 @@ class AnnouncementTest extends TestCase
 
     private User $admin;
 
-    private Faculty $faculty;
-
     private Department $department;
 
     private Program $program;
@@ -51,8 +48,7 @@ class AnnouncementTest extends TestCase
         parent::setUp();
 
         $this->admin = User::factory()->superAdmin()->create();
-        $this->faculty = Faculty::factory()->create();
-        $this->department = Department::factory()->create(['faculty_id' => $this->faculty->id]);
+        $this->department = Department::factory()->create();
         $this->program = Program::factory()->create(['department_id' => $this->department->id]);
 
         $semester = Semester::factory()->create(['status' => 'open']);
@@ -71,21 +67,23 @@ class AnnouncementTest extends TestCase
         $ids = [];
         foreach ([
             'all' => null, 'students' => null, 'lecturers' => null, 'staff' => null,
-            'faculty' => $this->faculty->id, 'department' => $this->department->id, 'program' => $this->program->id,
+            'department' => $this->department->id, 'program' => $this->program->id,
             'section' => $this->section->id, 'course' => $this->section->offering->course_id,
         ] as $type => $id) {
             $ids[$type] = $this->actingAs($this->admin)->postJson('/api/announcements', $this->payload(['audience_type' => $type, 'audience_id' => $id, 'publish' => true]))
                 ->assertCreated()->assertJsonPath('data.publish_state', 'published')->json('data.id');
         }
+        // The faculty level is gone: it is no longer a valid audience.
+        $this->actingAs($this->admin)->postJson('/api/announcements', $this->payload(['audience_type' => 'faculty', 'audience_id' => $this->department->id]))->assertStatus(422)->assertJsonValidationErrors('audience_type');
         // A draft never reaches a feed.
         $this->actingAs($this->admin)->postJson('/api/announcements', $this->payload())->assertCreated()->assertJsonPath('data.publish_state', 'draft');
 
         $feed = fn (User $user) => collect($this->actingAs($user)->getJson('/api/announcements/feed?per_page=50')->assertOk()->json('data'))->pluck('id')->sort()->values()->all();
         $expect = fn (array $types) => collect($types)->map(fn ($t) => $ids[$t])->sort()->values()->all();
 
-        $this->assertSame($expect(['all', 'students', 'faculty', 'department', 'program', 'section', 'course']), $feed($this->student->user));
+        $this->assertSame($expect(['all', 'students', 'department', 'program', 'section', 'course']), $feed($this->student->user));
         $this->assertSame($expect(['all', 'students']), $feed($this->outsider->user));
-        $this->assertSame($expect(['all', 'lecturers', 'faculty', 'department', 'section', 'course']), $feed($this->lecturer->user));
+        $this->assertSame($expect(['all', 'lecturers', 'department', 'section', 'course']), $feed($this->lecturer->user));
         $this->assertSame($expect(['all', 'staff']), $feed($this->admin));
     }
 
@@ -141,14 +139,14 @@ class AnnouncementTest extends TestCase
         $this->actingAs($this->admin)->getJson('/api/announcements')->assertJsonCount(3, 'data');
     }
 
-    public function test_students_and_faculty_admin_cannot_write(): void
+    public function test_students_and_department_admin_cannot_write(): void
     {
-        $faculty = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::FacultyAdmin->value)->create()->id]);
+        $departmentAdmin = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::DepartmentAdmin->value)->create()->id]);
 
         $this->actingAs($this->student->user)->postJson('/api/announcements', $this->payload())->assertForbidden();
         $this->actingAs($this->student->user)->getJson('/api/announcements')->assertForbidden();
-        $this->actingAs($faculty)->postJson('/api/announcements', $this->payload())->assertForbidden();
-        $this->actingAs($faculty)->getJson('/api/announcements/feed')->assertOk();
+        $this->actingAs($departmentAdmin)->postJson('/api/announcements', $this->payload())->assertForbidden();
+        $this->actingAs($departmentAdmin)->getJson('/api/announcements/feed')->assertOk();
 
         $this->lecturer->update(['is_active' => false]);
         $this->actingAs($this->lecturer->user)->postJson('/api/announcements', $this->payload(['audience_type' => 'section', 'audience_id' => $this->section->id]))->assertForbidden();

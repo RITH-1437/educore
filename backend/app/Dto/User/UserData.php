@@ -21,8 +21,8 @@ final readonly class UserData
         public ?string $lastLoginAt,
         public ?string $createdAt,
         public ?RoleData $role = null,
-        public ?int $facultyId = null,
-        public ?string $facultyName = null,
+        public ?int $departmentId = null,
+        public ?string $departmentName = null,
     ) {}
 
     public static function fromModel(User $user, bool $withRole = false): self
@@ -36,8 +36,8 @@ final readonly class UserData
             lastLoginAt: $user->last_login_at?->toISOString(),
             createdAt: $user->created_at?->toISOString(),
             role: $withRole && $user->role !== null ? RoleData::fromModel($user->role) : null,
-            facultyId: $user->faculty_id === null ? null : (int) $user->faculty_id,
-            facultyName: $user->faculty_id !== null && $user->relationLoaded('faculty') ? $user->faculty?->name : null,
+            departmentId: $user->department_id === null ? null : (int) $user->department_id,
+            departmentName: $user->department_id !== null && $user->relationLoaded('department') ? $user->department?->name : null,
         );
     }
 

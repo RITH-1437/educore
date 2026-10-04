@@ -23,7 +23,7 @@ class UserRepository
     public function paginate(UserListFilters $filters): LengthAwarePaginator
     {
         return User::query()
-            ->with('role', 'faculty:id,name')
+            ->with('role', 'department:id,name')
             ->when($filters->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('name', 'ilike', "%{$search}%")

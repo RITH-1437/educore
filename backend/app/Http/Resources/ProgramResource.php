@@ -23,14 +23,6 @@ class ProgramResource extends JsonResource
                 'id' => $this->department->id,
                 'code' => $this->department->code,
                 'name' => $this->department->name,
-                'faculty_id' => $this->department->faculty_id,
-                'faculty' => $this->department->relationLoaded('faculty') && $this->department->faculty
-                    ? [
-                        'id' => $this->department->faculty->id,
-                        'code' => $this->department->faculty->code,
-                        'name' => $this->department->faculty->name,
-                    ]
-                    : null,
             ]),
             'code' => $this->code,
             'name' => $this->name,

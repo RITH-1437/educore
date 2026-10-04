@@ -68,7 +68,7 @@ class CourseOfferingController extends Controller
     {
         $this->authorize('view', $offering);
         // Every active lecturer, for assigning to sections: only users who may
-        // change the offering receive the list (not a read-only Faculty Admin).
+        // change the offering receive the list (not a read-only Department Admin).
         $canManage = $request->user()->can('update', $offering);
 
         $offering->load([

@@ -3,41 +3,28 @@ import { Link } from '@inertiajs/vue3'
 import { ArrowRight } from '@lucide/vue'
 import Reveal from './Reveal.vue'
 import { scrollToId } from './scrollTo'
+
+// On navy the light-theme primary button would hover into the background, so
+// these follow the dark-mode button tokens (DESIGN-TOKENS §3).
+const base = 'inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md px-5 py-3 text-button transition duration-150 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-dark-primary active:scale-[0.98] sm:w-auto'
 </script>
 
 <template>
-  <section id="cta" class="scroll-mt-24 relative overflow-hidden bg-slate-950 py-24">
-    <div class="bg-grid-dark absolute inset-0" aria-hidden="true" />
-    <div class="absolute top-1/2 left-1/2 h-80 w-[860px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-blue-600/20 blur-3xl" aria-hidden="true" />
-    <div class="absolute -top-20 right-8 h-48 w-48 rounded-full bg-sky-500/10 blur-3xl" aria-hidden="true" />
-    <div class="absolute -bottom-16 -left-8 h-48 w-48 rounded-full bg-teal-500/10 blur-3xl" aria-hidden="true" />
+  <section id="cta" class="relative scroll-mt-24 overflow-hidden bg-primary-dark py-24 dark:border-t dark:border-dark-border" aria-labelledby="cta-title">
+    <div class="landing-glow pointer-events-none absolute inset-0" aria-hidden="true" />
 
-    <div class="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
-      <Reveal>
-        <h2 class="font-display text-3xl font-bold tracking-tight text-white text-balance sm:text-5xl lg:text-6xl">
-          Ready to Explore EduCore?
-        </h2>
-        <p class="mx-auto mt-5 max-w-2xl text-lg leading-relaxed text-slate-400">
-          Discover how academic management, student services, administration, communication, and digital
-          workflows can work together in one platform.
-        </p>
-        <div class="mt-9 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <button
-            type="button"
-            class="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 px-7 py-3 text-sm font-semibold text-white shadow-xl shadow-blue-600/30 ring-1 ring-blue-500/40 transition hover:bg-blue-700 hover:shadow-2xl hover:shadow-blue-600/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:scale-[0.98] sm:w-auto"
-            @click="scrollToId('platform')"
-          >
-            Explore Platform
-            <ArrowRight class="h-4 w-4" />
-          </button>
-          <Link
-            href="/login"
-            class="w-full rounded-lg border border-white/20 bg-white/5 px-7 py-3 text-sm font-semibold text-white transition hover:border-white/35 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 active:scale-[0.98] sm:w-auto"
-          >
-            Sign In
-          </Link>
-        </div>
-      </Reveal>
-    </div>
+    <Reveal class="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
+      <h2 id="cta-title" class="font-display text-h1 text-balance text-dark-ink sm:text-display">Ready to explore EduCore?</h2>
+      <p class="mx-auto mt-4 max-w-xl text-body text-dark-muted">
+        See how academic management, student services, administration and communication work together on one platform.
+      </p>
+      <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+        <button type="button" :class="[base, 'bg-dark-primary text-dark-bg hover:bg-dark-ink']" @click="scrollToId('platform')">
+          Explore Platform
+          <ArrowRight class="h-4 w-4" aria-hidden="true" />
+        </button>
+        <Link href="/login" :class="[base, 'border border-dark-border text-dark-ink hover:bg-dark-surface-2']">Sign In</Link>
+      </div>
+    </Reveal>
   </section>
 </template>

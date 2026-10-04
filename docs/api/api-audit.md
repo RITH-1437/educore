@@ -404,13 +404,17 @@ documented operations.
 | GET | `/api/students/{student}/grades` | Sanctum + staff, or the student themself (approved grades only) | Documented |
 | GET | `/api/students/{student}/gpa` | Sanctum + staff, or the student themself | Documented |
 | GET | `/api/students/{student}/dashboard` | Sanctum + staff, or the student themself | Documented |
-| GET | `/api/document-types` | Sanctum, any role | Documented |
-| GET | `/api/document-requests` | Sanctum + staff (all) or a student (own) | Documented |
+| GET | `/api/document-types` | Sanctum, any role (active types incl. `requires_fee`, `fee_amount`) | Documented |
+| POST | `/api/document-types` | Sanctum + super-admin or university-admin (`DocumentTypePolicy`; report 40) | Not annotated (OpenAPI pending) |
+| GET | `/api/document-types/{documentType}` | Sanctum + any role (`DocumentTypePolicy::view`; report 40) | Not annotated (OpenAPI pending) |
+| PUT/PATCH | `/api/document-types/{documentType}` | Sanctum + super-admin or university-admin (report 40) | Not annotated (OpenAPI pending) |
+| DELETE | `/api/document-types/{documentType}` | Sanctum + super-admin or university-admin; 409 if requests exist; 204 on success (report 40) | Not annotated (OpenAPI pending) |
+| GET | `/api/document-requests` | Sanctum + staff (all) or a student (own); rows include `type.fee_amount` and `invoice` summary (report 40) | Documented |
 | POST | `/api/document-requests` | Sanctum + student with a profile (self only) | Documented |
 | GET | `/api/document-requests/{documentRequest}` | Sanctum + staff, or the requesting student | Documented |
-| POST | `/api/document-requests/{documentRequest}/approve` | Sanctum + super-admin or university-admin, or the student's Faculty Admin (report 33) | Documented |
-| POST | `/api/document-requests/{documentRequest}/reject` | Sanctum + super-admin or university-admin, or the student's Faculty Admin (report 33) | Documented |
-| POST | `/api/document-requests/{documentRequest}/generate` | Sanctum + super-admin or university-admin, or the student's Faculty Admin (report 33) | Documented |
+| POST | `/api/document-requests/{documentRequest}/approve` | Sanctum + super-admin or university-admin, or the student's Department Admin; issues an unpaid invoice for fee-bearing types (report 40) | Documented |
+| POST | `/api/document-requests/{documentRequest}/reject` | Sanctum + super-admin or university-admin, or the student's Department Admin | Documented |
+| POST | `/api/document-requests/{documentRequest}/generate` | Sanctum + super-admin or university-admin, or the student's Department Admin; 409 while the linked invoice is not `paid` (report 40) | Documented |
 | POST | `/api/documents/{document}/revoke` | Sanctum + super-admin or university-admin (`revoke`, not delegated) | Documented |
 | GET | `/api/documents/{document}/download` | Sanctum + staff, or the requesting student (PDF stream) | Documented |
 | GET | `/api/verifications/{token}` | Public; `throttle:verification` (30/min/IP) | Documented |
@@ -589,4 +593,33 @@ processed, overdue invoices, and headline academic numbers for the active
 semester. Access is limited to Super Admin and University Admin. See
 `docs/36_University-Admin-Dashboard-Report.md`.
 
+
+
+## Landing page live figures (2026-10-05)
+
+No REST endpoint added or changed. The public web route `GET /` (guests only;
+signed-in users are still redirected to their dashboard) now passes an Inertia
+prop `stats` built by `LandingStatsService`: the University Admin dashboard's
+waiting counts and overview, enrollment by program, grade distribution,
+internships by status and per-course results. **Aggregates only** — no names,
+emails, student numbers or other personal records (asserted by
+`LandingStatsTest`), per-course results only from five approved grades, and no
+writes on the request. See `docs/37_Landing-Page-Redesign-Report.md`.
+
+## Department-Only Structure (2026-10-05)
+
+Removed the faculty level. Faculty REST endpoints (`/api/faculties`, `/api/faculties/{faculty}`,
+`/api/faculties-tree`, `/api/faculties/{faculty}/dashboard`) were replaced by direct department
+endpoints and the department dashboard endpoint:
+
+| Method | URI | Action | Auth | Notes |
+|---|---|---|---|---|
+| GET | `/api/departments` | `DepartmentController::index` | Sanctum | Managers + Department Admin (scoped) |
+| POST | `/api/departments` | `DepartmentController::store` | Sanctum | Super Admin, University Admin |
+| GET | `/api/departments/{department}` | `DepartmentController::show` | Sanctum | Managers + Department Admin (scoped) |
+| PUT/PATCH | `/api/departments/{department}` | `DepartmentController::update` | Sanctum | Super Admin, University Admin |
+| DELETE | `/api/departments/{department}` | `DepartmentController::destroy` | Sanctum | Super Admin, University Admin |
+| GET | `/api/departments/{department}/dashboard` | `DepartmentDashboardController` | Sanctum | Managers + assigned Department Admin |
+
+See `docs/39_Department-Only-Structure-Report.md`.
 

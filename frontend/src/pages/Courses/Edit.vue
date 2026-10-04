@@ -1,7 +1,7 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { ArchiveRestore, ArrowLeft, Eye } from '@lucide/vue'
-import { Head, router, useForm } from '@inertiajs/vue3'
+import { ArchiveRestore, ArrowLeft } from '@lucide/vue'
+import { Head, Link, router, useForm } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
@@ -89,14 +89,15 @@ const reactivate = () => router.post(`/courses/${props.course.id}/reactivate`, {
     <BaseCard title="Used in programs" padding="lg">
       <template #description>Programs whose curriculum includes this course. Manage membership from the program page.</template>
       <ul v-if="course.programs?.length" class="divide-y divide-border-default dark:divide-dark-border">
-        <li v-for="program in course.programs" :key="program.id" class="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
-          <div>
-            <p class="text-small font-medium text-ink dark:text-dark-ink"><span class="font-semibold">{{ program.code }}</span> — {{ program.name }}</p>
-            <p class="text-caption text-muted dark:text-dark-muted">
-              {{ program.is_required ? 'Required' : 'Elective' }}<template v-if="program.suggested_semester"> · suggested semester {{ program.suggested_semester }}</template>
-            </p>
-          </div>
-          <IconButton :icon="Eye" :href="`/programs/${program.id}/edit`" :label="`Open program ${program.code}`" />
+        <li v-for="program in course.programs" :key="program.id" class="py-1">
+          <Link :href="`/programs/${program.id}/edit`" class="-mx-3 flex flex-wrap items-center justify-between gap-3 rounded-md px-3 py-3 transition-colors duration-150 hover:bg-background focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:hover:bg-dark-surface-2">
+            <div>
+              <p class="text-small font-medium text-ink dark:text-dark-ink"><span class="font-semibold">{{ program.code }}</span> — {{ program.name }}</p>
+              <p class="text-caption text-muted dark:text-dark-muted">
+                {{ program.is_required ? 'Required' : 'Elective' }}<template v-if="program.suggested_semester"> · suggested semester {{ program.suggested_semester }}</template>
+              </p>
+            </div>
+          </Link>
         </li>
       </ul>
       <EmptyState v-else title="Not in any curriculum" description="Add it to a program from the program's curriculum section." />

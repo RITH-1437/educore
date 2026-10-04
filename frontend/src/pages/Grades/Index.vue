@@ -1,6 +1,6 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { Eye, Scale } from '@lucide/vue'
+import { Scale } from '@lucide/vue'
 import { Head, router } from '@inertiajs/vue3'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseTable from '../../components/BaseTable.vue'
@@ -20,7 +20,6 @@ const columns = [
   { key: 'course', label: 'Course / section' },
   { key: 'semester', label: 'Semester' },
   { key: 'counts', label: 'Grades' },
-  { key: 'actions', label: 'Actions', align: 'right' },
 ]
 </script>
 
@@ -41,6 +40,7 @@ const columns = [
     <BaseTable
       :columns="columns"
       :rows="sections.data"
+      :row-href="(row) => `/grades/sections/${row.id}`"
       caption="Sections with grades"
       :empty-title="status === 'submitted' ? 'Nothing awaiting approval' : 'No grades yet'"
       empty-description="Sections appear here once a lecturer computes grades."
@@ -57,9 +57,6 @@ const columns = [
           <StatusBadge v-if="row.counts.finalized" status="finalized" :label="`${row.counts.finalized} finalized`" />
           <StatusBadge v-if="row.counts.draft" status="draft" :label="`${row.counts.draft} draft`" />
         </div>
-      </template>
-      <template #cell-actions="{ row }">
-        <IconButton :icon="Eye" :href="`/grades/sections/${row.id}`" label="Open grade sheet" />
       </template>
     </BaseTable>
 

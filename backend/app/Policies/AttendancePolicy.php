@@ -10,7 +10,7 @@ use App\Policies\Concerns\ChecksSectionTeaching;
 
 /**
  * Attendance (`skills/attendance/SKILL.md` §8): the section's assigned
- * lecturers record, managers may correct, Faculty Admin reads, students read
+ * lecturers record, managers may correct, Department Admin reads, students read
  * only their own — and never mark.
  *
  * Called as `authorize('record', [AttendanceSession::class, $section])`.

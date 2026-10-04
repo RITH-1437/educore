@@ -1,7 +1,7 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
 import { Ban, Check, Download, FileCheck2, X } from '@lucide/vue'
-import { Head, router, useForm } from '@inertiajs/vue3'
+import { Head, Link, router, useForm } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseModal from '../../components/BaseModal.vue'
@@ -36,6 +36,8 @@ const revoke = async (row) => {
   }
 }
 
+const isInvoiceUnpaid = (row) => Boolean(row.invoice && row.invoice.status !== 'paid')
+
 const rejecting = ref(null)
 const rejectForm = useForm({ rejection_reason: '' })
 const openReject = (row) => {
@@ -58,7 +60,7 @@ const columns = [
 <template>
   <Head title="Documents - EduCore" />
   <div class="space-y-6">
-    <PageHeader eyebrow="Operations" title="Document requests" :description="!canProcess ? 'Document requests (read-only).' : canRevoke ? 'Approve, reject and generate official documents. Generated PDFs are built from approved records only.' : 'Approve, reject and generate documents for your faculty’s students. Revoking an issued document is done by a University Admin.'" />
+    <PageHeader eyebrow="Operations" title="Document requests" :description="!canProcess ? 'Document requests (read-only).' : canRevoke ? 'Approve, reject and generate official documents. Generated PDFs are built from approved records only.' : 'Approve, reject and generate documents for your department’s students. Revoking an issued document is done by a University Admin.'" />
 
     <div class="max-w-xs">
       <BaseSelect v-model="status" :options="statusOptions" label="Status" @update:model-value="applyFilter" />
@@ -70,9 +72,41 @@ const columns = [
         <p class="font-mono text-caption text-muted dark:text-dark-muted">{{ row.student.student_number }}</p>
       </template>
       <template #cell-document="{ row }">
-        <p>{{ row.type.name }}<span v-if="row.semester" class="text-muted dark:text-dark-muted"> · {{ row.semester.name }}</span></p>
+        <div class="flex items-center gap-2">
+          <p class="font-medium text-text dark:text-dark-text">
+            {{ row.type.name }}<span v-if="row.semester" class="text-muted dark:text-dark-muted"> · {{ row.semester.name }}</span>
+          </p>
+          <span
+            v-if="row.requires_fee && row.fee_amount > 0"
+            class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+          >
+            ${{ Number(row.fee_amount).toFixed(2) }}
+          </span>
+          <span
+            v-else
+            class="inline-flex items-center rounded-full bg-surface-muted px-2 py-0.5 text-xs text-muted dark:bg-dark-surface-elevated dark:text-dark-muted"
+          >
+            Free
+          </span>
+        </div>
         <p v-if="row.reason" class="text-caption text-muted dark:text-dark-muted">{{ row.reason }}</p>
         <p v-if="row.rejection_reason" class="text-caption text-error">Rejected: {{ row.rejection_reason }}</p>
+        <div v-if="row.invoice" class="mt-1 flex items-center gap-1.5 text-caption">
+          <span class="text-muted dark:text-dark-muted">Invoice:</span>
+          <Link :href="`/invoices/${row.invoice.id}`" class="font-mono text-primary hover:underline">
+            {{ row.invoice.invoice_number }}
+          </Link>
+          <span
+            :class="[
+              'rounded px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider',
+              row.invoice.status === 'paid'
+                ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300'
+                : 'bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300'
+            ]"
+          >
+            {{ row.invoice.status }}
+          </span>
+        </div>
       </template>
       <template #cell-submitted="{ row }">{{ formatDate(row.submitted_at) }}</template>
       <template #cell-status="{ row }">
@@ -87,7 +121,14 @@ const columns = [
           <template v-if="canProcess">
             <IconButton v-if="row.status === 'pending'" :icon="Check" variant="success" label="Approve request" @click="approve(row)" />
             <IconButton v-if="row.status === 'pending'" :icon="X" variant="danger" label="Reject request" @click="openReject(row)" />
-            <IconButton v-if="row.status === 'approved'" :icon="FileCheck2" variant="primary" label="Generate PDF" @click="generate(row)" />
+            <IconButton
+              v-if="row.status === 'approved'"
+              :icon="FileCheck2"
+              variant="primary"
+              :label="isInvoiceUnpaid(row) ? 'Cannot generate: Invoice pending payment' : 'Generate PDF'"
+              :disabled="isInvoiceUnpaid(row)"
+              @click="generate(row)"
+            />
           </template>
           <IconButton v-if="canRevoke && row.document?.status === 'valid'" :icon="Ban" variant="danger" label="Revoke document" @click="revoke(row)" />
         </div>

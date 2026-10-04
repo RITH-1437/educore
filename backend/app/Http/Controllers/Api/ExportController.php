@@ -99,7 +99,7 @@ class ExportController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'CSV file (UTF-8 with BOM).', content: new OA\MediaType(mediaType: 'text/csv', schema: new OA\Schema(type: 'string'))),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not staff (Super Admin, University Admin, Faculty Admin).', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not staff (Super Admin, University Admin, Department Admin).', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
         ]
     )]
     public function enrollments(Request $request): StreamedResponse

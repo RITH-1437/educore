@@ -7,7 +7,7 @@ use App\Models\Student;
 /**
  * Whitelisted filter, sort and pagination input for student listings.
  *
- * Faculty, department and program filters all go through the student's
+ * Department and program filters both go through the student's
  * *current* (active) program.
  */
 final readonly class StudentListFilters
@@ -21,7 +21,6 @@ final readonly class StudentListFilters
 
     public function __construct(
         public ?string $search = null,
-        public ?int $facultyId = null,
         public ?int $departmentId = null,
         public ?int $programId = null,
         public ?string $status = null,
@@ -31,7 +30,7 @@ final readonly class StudentListFilters
     ) {}
 
     /**
-     * @param  array<string, mixed>  $input  `search`, `filters[faculty_id|department_id|program_id|status]`, `sort_by`, `sort_dir`, `per_page`
+     * @param  array<string, mixed>  $input  `search`, `filters[department_id|program_id|status]`, `sort_by`, `sort_dir`, `per_page`
      */
     public static function fromInput(array $input): self
     {
@@ -44,7 +43,6 @@ final readonly class StudentListFilters
 
         return new self(
             search: $search === '' ? null : $search,
-            facultyId: self::toNullableInt($filters['faculty_id'] ?? null),
             departmentId: self::toNullableInt($filters['department_id'] ?? null),
             programId: self::toNullableInt($filters['program_id'] ?? null),
             status: in_array($status, Student::STATUSES, true) ? $status : null,
@@ -67,7 +65,6 @@ final readonly class StudentListFilters
         ], fn ($value) => $value !== null);
 
         $filters = array_filter([
-            'faculty_id' => $this->facultyId,
             'department_id' => $this->departmentId,
             'program_id' => $this->programId,
             'status' => $this->status,

@@ -8,7 +8,7 @@ use App\Dto\User\UserListFilters;
 use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Http\Resources\UserResource;
-use App\Models\Faculty;
+use App\Models\Department;
 use App\Models\Role;
 use App\Models\User;
 use App\Services\UserService;
@@ -50,7 +50,7 @@ class UserController extends Controller
 
         return Inertia::render('Users/Create', [
             'roles' => $this->rolesForSelect(),
-            'faculties' => $this->facultiesForSelect(),
+            'departments' => $this->departmentsForSelect(),
         ]);
     }
 
@@ -71,9 +71,9 @@ class UserController extends Controller
             // `resolve()` instead of the resource instance: Inertia treats a bare
             // `JsonResource` as a `Responsable`, so it would nest the payload under
             // `data` and the page would read `props.user.data.name`.
-            'user' => (new UserResource($user->load('role', 'faculty:id,name')))->resolve(),
+            'user' => (new UserResource($user->load('role', 'department:id,name')))->resolve(),
             'roles' => $this->rolesForSelect(),
-            'faculties' => $this->facultiesForSelect(),
+            'departments' => $this->departmentsForSelect(),
         ]);
     }
 
@@ -106,13 +106,13 @@ class UserController extends Controller
     }
 
     /**
-     * Faculties a Faculty Admin can be assigned to.
+     * Departments a Department Admin can be assigned to.
      *
      * @return list<array{id: int, name: string}>
      */
-    private function facultiesForSelect(): array
+    private function departmentsForSelect(): array
     {
-        return Faculty::query()->orderBy('name')->get(['id', 'name'])
-            ->map(fn (Faculty $faculty) => ['id' => $faculty->id, 'name' => $faculty->name])->all();
+        return Department::query()->orderBy('name')->get(['id', 'name'])
+            ->map(fn (Department $department) => ['id' => $department->id, 'name' => $department->name])->all();
     }
 }

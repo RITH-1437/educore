@@ -47,7 +47,7 @@ class EnrollmentService
      * The filtered, ordered enrollment list (shared by the list and the CSV export).
      *
      * @param  array<string, mixed>  $filters  search, student_id, section_id, semester_id, status
-     * @param  User|null  $viewer  limits a Faculty Admin to their faculty (`BelongsToFaculty`)
+     * @param  User|null  $viewer  limits a Department Admin to their department (`BelongsToDepartment`)
      * @return Builder<Enrollment>
      */
     public function query(array $filters, ?User $viewer = null): Builder

@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\BelongsToFaculty;
-use App\Support\FacultyScope;
+use App\Models\Concerns\BelongsToDepartment;
+use App\Support\DepartmentScope;
 use Database\Factories\EnrollmentFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -30,7 +30,7 @@ use Illuminate\Support\Carbon;
  */
 class Enrollment extends Model
 {
-    use BelongsToFaculty;
+    use BelongsToDepartment;
 
     /** @use HasFactory<EnrollmentFactory> */
     use HasFactory;
@@ -89,12 +89,12 @@ class Enrollment extends Model
     }
 
     /**
-     * Unit ownership (`App\Support\FacultyScope`).
+     * Unit ownership (`App\Support\DepartmentScope`).
      *
      * @param  Builder<self>  $query
      */
-    public function scopeInFaculty(Builder $query, int $facultyId): void
+    public function scopeInDepartment(Builder $query, int $departmentId): void
     {
-        $query->where(fn (Builder $q) => $q->whereIn('section_id', FacultyScope::sectionIds($facultyId))->orWhereIn('student_id', FacultyScope::studentIds($facultyId)));
+        $query->where(fn (Builder $q) => $q->whereIn('section_id', DepartmentScope::sectionIds($departmentId))->orWhereIn('student_id', DepartmentScope::studentIds($departmentId)));
     }
 }

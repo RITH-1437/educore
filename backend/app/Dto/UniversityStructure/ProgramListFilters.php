@@ -7,8 +7,8 @@ use App\Models\Program;
 /**
  * Whitelisted filter, sort and pagination input for program listings.
  *
- * `facultyId` filters through the department, so the faculty → department →
- * program cascade used by the UI maps to one query.
+ * `departmentId` is the unit filter: a program belongs to exactly one
+ * department.
  */
 final readonly class ProgramListFilters
 {
@@ -21,7 +21,6 @@ final readonly class ProgramListFilters
 
     public function __construct(
         public ?string $search = null,
-        public ?int $facultyId = null,
         public ?int $departmentId = null,
         public ?string $degreeLevel = null,
         public ?bool $isActive = null,
@@ -31,7 +30,7 @@ final readonly class ProgramListFilters
     ) {}
 
     /**
-     * @param  array<string, mixed>  $input  `search`, `filters[faculty_id|department_id|degree_level|is_active]`, `sort_by`, `sort_dir`, `per_page`
+     * @param  array<string, mixed>  $input  `search`, `filters[department_id|degree_level|is_active]`, `sort_by`, `sort_dir`, `per_page`
      */
     public static function fromInput(array $input): self
     {
@@ -44,7 +43,6 @@ final readonly class ProgramListFilters
 
         return new self(
             search: $search === '' ? null : $search,
-            facultyId: self::toNullableInt($filters['faculty_id'] ?? null),
             departmentId: self::toNullableInt($filters['department_id'] ?? null),
             degreeLevel: in_array($level, Program::DEGREE_LEVELS, true) ? $level : null,
             isActive: self::toNullableBool($filters['is_active'] ?? null),
@@ -67,7 +65,6 @@ final readonly class ProgramListFilters
         ], fn ($value) => $value !== null);
 
         $filters = array_filter([
-            'faculty_id' => $this->facultyId,
             'department_id' => $this->departmentId,
             'degree_level' => $this->degreeLevel,
             'is_active' => $this->isActive === null ? null : ($this->isActive ? '1' : '0'),

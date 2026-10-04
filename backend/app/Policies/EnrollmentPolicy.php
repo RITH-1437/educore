@@ -48,7 +48,7 @@ class EnrollmentPolicy
 
     private function staff(User $user): bool
     {
-        return $this->manage($user) || $user->isRole(Role::FacultyAdmin->value);
+        return $this->manage($user) || $user->isRole(Role::DepartmentAdmin->value);
     }
 
     private function manage(User $user): bool

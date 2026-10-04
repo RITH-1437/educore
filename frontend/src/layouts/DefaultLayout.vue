@@ -4,8 +4,10 @@ import { Head, router, usePage } from '@inertiajs/vue3'
 import AppSidebar from '../components/layout/AppSidebar.vue'
 import AppTopbar from '../components/layout/AppTopbar.vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
+import ToastRegion from '../components/ToastRegion.vue'
 import { useNavigation } from '../composables/useNavigation'
 import { useTheme } from '../composables/useTheme'
+import { toast } from '../composables/useToast'
 
 const COLLAPSE_KEY = 'educore_sidebar_collapsed'
 const FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
@@ -88,7 +90,16 @@ watch(mobileOpen, async (open) => {
   }
 })
 
+// Server flash messages become bottom-right toasts. `success` fires once per
+// server response (history Back/Forward restores pages without one, so old
+// messages never reappear); the first page load is read on mount.
+const showFlash = (flash) => {
+  toast.success(flash?.success)
+  toast.error(flash?.error)
+}
+
 onMounted(() => {
+  showFlash(page.props.flash)
   const onChange = (event) => {
     desktop.value = event.matches
     if (event.matches) closeDrawer()
@@ -102,6 +113,7 @@ onMounted(() => {
     router.on('start', () => { navigating.value = true }),
     router.on('finish', () => { navigating.value = false }),
     router.on('navigate', () => { mobileOpen.value = false }),
+    router.on('success', (event) => showFlash(event.detail.page.props.flash)),
   )
 })
 
@@ -145,8 +157,6 @@ onBeforeUnmount(() => {
       <AppTopbar :theme="theme" @open-navigation="openDrawer" @toggle-theme="toggleTheme" />
 
       <main id="main-content" tabindex="-1" class="mx-auto w-full max-w-[1280px] px-4 pb-12 pt-4 focus:outline-none sm:px-6 lg:px-8 lg:pt-6" :aria-busy="navigating">
-        <div v-if="page.props.flash?.success" class="mb-6 rounded-lg border border-success/20 bg-success/5 px-4 py-3 text-small text-success motion-safe:animate-slide-down dark:text-green-300" role="status">{{ page.props.flash.success }}</div>
-        <div v-if="page.props.flash?.error" class="mb-6 rounded-lg border border-error/20 bg-error/5 px-4 py-3 text-small text-error motion-safe:animate-slide-down dark:text-red-300" role="alert">{{ page.props.flash.error }}</div>
         <div :key="pageKey" class="motion-safe:animate-page-in transition-opacity duration-200 ease-out" :class="navigating ? 'opacity-70' : ''">
           <slot />
         </div>
@@ -154,5 +164,6 @@ onBeforeUnmount(() => {
     </div>
 
     <ConfirmDialog />
+    <ToastRegion />
   </div>
 </template>

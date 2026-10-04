@@ -12,6 +12,8 @@ const props = defineProps({
   suffix: { type: String, default: '' },
   donut: { type: Boolean, default: true },
   details: { type: Array, default: () => [] },
+  // Optional slice colours (e.g. the brand chart series on the landing page); defaults to the palettes below.
+  colors: { type: Array, default: null },
 })
 
 const canvas = ref(null)
@@ -26,6 +28,7 @@ const PALETTE_LIGHT = [
 const PALETTE_DARK = [
   '#3B82F6', '#34D399', '#FBBF24', '#A78BFA', '#F472B6', '#22D3EE', '#FB923C', '#94A3B8',
 ]
+const palette = () => props.colors ?? (dark.value ? PALETTE_DARK : PALETTE_LIGHT)
 
 const total = computed(() => props.values.reduce((sum, v) => sum + (Number(v) || 0), 0))
 const rows = computed(() =>
@@ -37,7 +40,7 @@ const rows = computed(() =>
       detail: props.details[i] || lbl,
       value: val,
       percentage: pct,
-      color: (dark.value ? PALETTE_DARK : PALETTE_LIGHT)[i % PALETTE_LIGHT.length],
+      color: palette()[i % palette().length],
     }
   }).filter((r) => r.value > 0 || props.labels.length <= 6)
 )
@@ -47,7 +50,7 @@ function build() {
   if (!canvas.value) return
 
   const isDark = dark.value
-  const colors = isDark ? PALETTE_DARK : PALETTE_LIGHT
+  const colors = palette()
   const backgroundColors = props.labels.map((_, i) => colors[i % colors.length])
   const borderColor = isDark ? '#1E293B' : '#FFFFFF'
 

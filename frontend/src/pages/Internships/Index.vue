@@ -1,6 +1,6 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { Building2, Eye } from '@lucide/vue'
+import { Building2 } from '@lucide/vue'
 import { Head, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import BaseSelect from '../../components/BaseSelect.vue'
@@ -25,7 +25,6 @@ const columns = [
   { key: 'position', label: 'Position' },
   { key: 'dates', label: 'Dates' },
   { key: 'status', label: 'Status' },
-  { key: 'actions', label: 'Actions', align: 'right' },
 ]
 </script>
 
@@ -42,7 +41,7 @@ const columns = [
       <BaseSelect v-model="status" :options="statusOptions" label="Status" @update:model-value="apply" />
     </div>
 
-    <BaseTable :columns="columns" :rows="internships.data" caption="Internships" empty-title="No internships" empty-description="Applications from students appear here.">
+    <BaseTable :columns="columns" :rows="internships.data" :row-href="(row) => `/internships/${row.id}`" caption="Internships" empty-title="No internships" empty-description="Applications from students appear here.">
       <template #cell-student="{ row }">
         <p class="font-medium">{{ row.student.full_name }}</p>
         <p class="font-mono text-caption text-muted dark:text-dark-muted">{{ row.student.student_number }}</p>
@@ -53,7 +52,6 @@ const columns = [
       </template>
       <template #cell-dates="{ row }">{{ formatDate(row.start_date) }} – {{ formatDate(row.end_date) }}</template>
       <template #cell-status="{ row }"><StatusBadge v-bind="statusBadge(row.status)" /></template>
-      <template #cell-actions="{ row }"><div class="flex justify-end"><IconButton :icon="Eye" :href="`/internships/${row.id}`" label="Open internship" /></div></template>
     </BaseTable>
 
     <Pagination :links="internships.meta?.links ?? []" />

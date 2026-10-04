@@ -4,7 +4,7 @@
     @if ($program)
         <tr><td class="label">Program</td><td>{{ $program->name }} ({{ $program->code }})</td></tr>
         @if ($program->department)
-            <tr><td class="label">Department</td><td>{{ $program->department->name }}@if ($program->department->faculty), {{ $program->department->faculty->name }}@endif</td></tr>
+            <tr><td class="label">Department</td><td>{{ $program->department->name }}</td></tr>
         @endif
     @endif
     <tr><td class="label">Status</td><td>{{ ucfirst($student->status) }}</td></tr>

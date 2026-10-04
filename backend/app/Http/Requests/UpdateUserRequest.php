@@ -22,14 +22,14 @@ class UpdateUserRequest extends FormRequest
             'phone' => ['nullable', 'string', 'max:50'],
             'role_id' => ['required', Rule::exists('roles', 'id')],
             'is_active' => ['sometimes', 'boolean'],
-            // Only a Faculty Admin has a faculty; it limits what they can see.
-            'faculty_id' => ['nullable', 'integer', Rule::exists('faculties', 'id')->whereNull('deleted_at'), Rule::prohibitedIf(fn () => ! $this->isFacultyAdminRole())],
+            // Only a Department Admin has a department; it limits what they can see.
+            'department_id' => ['nullable', 'integer', Rule::exists('departments', 'id')->whereNull('deleted_at'), Rule::prohibitedIf(fn () => ! $this->isDepartmentAdminRole())],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
         ];
     }
 
-    private function isFacultyAdminRole(): bool
+    private function isDepartmentAdminRole(): bool
     {
-        return Role::query()->whereKey($this->input('role_id'))->value('slug') === RoleSlug::FacultyAdmin->value;
+        return Role::query()->whereKey($this->input('role_id'))->value('slug') === RoleSlug::DepartmentAdmin->value;
     }
 }

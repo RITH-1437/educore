@@ -123,7 +123,7 @@ class DocumentController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Approved.', content: new OA\JsonContent(ref: '#/components/schemas/DocumentRequestResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a manager, or a Faculty Admin outside the student\'s faculty.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a manager, or a Department Admin outside the student\'s department.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Not pending.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
         ]
     )]
@@ -146,7 +146,7 @@ class DocumentController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Rejected.', content: new OA\JsonContent(ref: '#/components/schemas/DocumentRequestResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a manager, or a Faculty Admin outside the student\'s faculty.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a manager, or a Department Admin outside the student\'s department.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Not pending.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Reason missing.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
@@ -169,7 +169,7 @@ class DocumentController extends Controller
         responses: [
             new OA\Response(response: 201, description: 'Generated.', content: new OA\JsonContent(ref: '#/components/schemas/DocumentRequestResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a manager, or a Faculty Admin outside the student\'s faculty.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a manager, or a Department Admin outside the student\'s department.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Not approved, or no data for the document.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
         ]
     )]
@@ -193,7 +193,7 @@ class DocumentController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Revoked.', content: new OA\JsonContent(ref: '#/components/schemas/DocumentRequestResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin (revoking is not delegated to Faculty Admins).', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin (revoking is not delegated to Department Admins).', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Already revoked.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
         ]
     )]
@@ -250,7 +250,7 @@ class DocumentController extends Controller
         return response()->json(['data' => $result]);
     }
 
-    public const RELATIONS = ['type', 'semester.academicYear', 'student', 'document'];
+    public const RELATIONS = ['type', 'semester.academicYear', 'student', 'document', 'invoice'];
 
     /** Staff: every request (optionally by status); student: their own. */
     public function listFor(Request $request): LengthAwarePaginator
@@ -277,7 +277,15 @@ class DocumentController extends Controller
     public static function typeOptions(): array
     {
         return DocumentType::query()->where('is_active', true)->whereIn('code', DocumentType::GENERATABLE)->orderBy('sort_order')->get()
-            ->map(fn (DocumentType $type) => ['id' => $type->id, 'code' => $type->code, 'name' => $type->name, 'description' => $type->description, 'needs_semester' => $type->needsSemester()])
+            ->map(fn (DocumentType $type) => [
+                'id' => $type->id,
+                'code' => $type->code,
+                'name' => $type->name,
+                'description' => $type->description,
+                'requires_fee' => $type->requires_fee,
+                'fee_amount' => (float) $type->fee_amount,
+                'needs_semester' => $type->needsSemester(),
+            ])
             ->values()->all();
     }
 }

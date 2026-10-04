@@ -13,7 +13,7 @@ class RoleSeeder extends Seeder
         $roles = [
             [Role::SuperAdmin->value, 'Super Admin', 'Full platform and user/role management.'],
             [Role::UniversityAdmin->value, 'University Admin', 'University-wide administration.'],
-            [Role::FacultyAdmin->value, 'Faculty / Department Admin', 'Administration within an assigned faculty or department.'],
+            [Role::DepartmentAdmin->value, 'Department Admin', 'Administration within an assigned department.'],
             [Role::Lecturer->value, 'Lecturer', 'Teaching and grading their assigned courses.'],
             [Role::Student->value, 'Student', 'Own profile, registration, grades and documents.'],
         ];

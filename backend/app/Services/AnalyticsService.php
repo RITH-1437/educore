@@ -11,7 +11,7 @@ use App\Models\Invoice;
 use App\Models\Lecturer;
 use App\Models\Semester;
 use App\Models\Student;
-use App\Support\FacultyScope;
+use App\Support\DepartmentScope;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 
@@ -76,21 +76,21 @@ class AnalyticsService
     }
 
     /**
-     * The people and teaching numbers of overview() for one faculty
-     * (`docs/34_Faculty-Admin-Dashboard-Report.md`), on the ownership rules of
-     * `App\Support\FacultyScope`: students through their programs, lecturers
+     * The people and teaching numbers of overview() for one department
+     * (`docs/39_Department-Only-Structure-Report.md`), on the ownership rules of
+     * `App\Support\DepartmentScope`: students through their programs, lecturers
      * through their department, sections through their course. Semester
      * figures are null when there is no semester.
      *
      * @return array{students_active: int, lecturers_active: int, sections: int|null, students_enrolled: int|null}
      */
-    public function facultyOverview(int $facultyId, ?Semester $semester): array
+    public function departmentOverview(int $departmentId, ?Semester $semester): array
     {
         return [
-            'students_active' => Student::query()->inFaculty($facultyId)->where('status', Student::STATUS_ACTIVE)->count(),
-            'lecturers_active' => Lecturer::query()->inFaculty($facultyId)->where('is_active', true)->count(),
-            'sections' => $semester ? $this->sections($semester)->whereIn('sections.course_offering_id', FacultyScope::offeringIds($facultyId))->count() : null,
-            'students_enrolled' => $semester ? (int) $this->enrollments($semester)->whereIn('enrollments.student_id', FacultyScope::studentIds($facultyId))->distinct()->count('enrollments.student_id') : null,
+            'students_active' => Student::query()->inDepartment($departmentId)->where('status', Student::STATUS_ACTIVE)->count(),
+            'lecturers_active' => Lecturer::query()->inDepartment($departmentId)->where('is_active', true)->count(),
+            'sections' => $semester ? $this->sections($semester)->whereIn('sections.course_offering_id', DepartmentScope::offeringIds($departmentId))->count() : null,
+            'students_enrolled' => $semester ? (int) $this->enrollments($semester)->whereIn('enrollments.student_id', DepartmentScope::studentIds($departmentId))->distinct()->count('enrollments.student_id') : null,
         ];
     }
 
@@ -209,10 +209,23 @@ class AnalyticsService
 
         return [
             'documents' => $this->statusRows($count(DB::table('document_requests')), DocumentRequest::STATUSES),
-            'internships' => $this->statusRows($count(DB::table('internships')), Internship::STATUSES),
+            'internships' => $this->internshipStatuses(),
             'invoices' => $this->statusRows($count(DB::table('invoices')->whereNull('deleted_at')), Invoice::STATUSES),
             'finance' => $finance->all(),
         ];
+    }
+
+    /**
+     * Internships per status, every status listed (zeros included). Read-only.
+     *
+     * @return list<array{status: string, total: int}>
+     */
+    public function internshipStatuses(): array
+    {
+        $counts = DB::table('internships')->groupBy('status')->selectRaw('status, count(*) as total')
+            ->pluck('total', 'status')->map(fn ($n) => (int) $n);
+
+        return $this->statusRows($counts, Internship::STATUSES);
     }
 
     // ---------------------------------------------------------------- helpers

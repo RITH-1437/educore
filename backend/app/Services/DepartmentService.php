@@ -7,7 +7,6 @@ use App\Exceptions\BusinessRuleException;
 use App\Models\Department;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -34,18 +33,20 @@ class DepartmentService
     private const CHILD_TABLES = ['programs', 'courses', 'lecturers'];
 
     /**
+     * `$viewer` limits a Department Admin to their department (`BelongsToDepartment`).
+     *
      * @return LengthAwarePaginator<int, Department>
      */
-    /** `$viewer` limits a Faculty Admin to their faculty (`BelongsToFaculty`). */
     public function paginate(DepartmentListFilters $filters, ?User $viewer = null): LengthAwarePaginator
     {
         return Department::query()
             ->when($viewer, fn ($query) => $query->visibleTo($viewer))
-            ->with('faculty:id,code,name,university_id')
+            ->with('university:id,code,name')
+            ->withCount('programs')
             ->search($filters->search)
             ->when(
-                $filters->facultyId,
-                fn ($query, $id) => $query->where('faculty_id', $id),
+                $filters->universityId,
+                fn ($query, $id) => $query->where('university_id', $id),
             )
             ->when(
                 $filters->isActive !== null,
@@ -54,30 +55,6 @@ class DepartmentService
             ->orderBy($filters->sortBy, $filters->sortDir)
             ->orderBy('id')
             ->paginate($filters->perPage);
-    }
-
-    /**
-     * Departments for exactly the given faculties, for the faculty → department
-     * tree rendered on the faculty list screen.
-     *
-     * Scoping to the visible faculties avoids paginating the whole university
-     * structure into a page that only shows one slice of it.
-     *
-     * @param  list<int|string>  $facultyIds
-     * @return Collection<int, Department>
-     */
-    public function listForFaculties(array $facultyIds): Collection
-    {
-        if ($facultyIds === []) {
-            return collect();
-        }
-
-        return Department::query()
-            ->whereIn('faculty_id', $facultyIds)
-            ->orderBy('faculty_id')
-            ->orderBy('name')
-            ->orderBy('id')
-            ->get();
     }
 
     /**
@@ -93,9 +70,9 @@ class DepartmentService
      */
     public function update(Department $department, array $attributes): Department
     {
-        // Moving a department to another faculty is allowed; its children keep
-        // pointing at the same department id, so their references stay valid
-        // (`skills/faculty-department/SKILL.md` §10).
+        // Moving a department to another university is allowed; its children
+        // keep pointing at the same department id, so their references stay
+        // valid (`skills/faculty-department/SKILL.md` §10).
         unset($attributes['is_active']);
 
         return DB::transaction(function () use ($department, $attributes) {

@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\BelongsToFaculty;
-use App\Support\FacultyScope;
+use App\Models\Concerns\BelongsToDepartment;
 use Database\Factories\LecturerFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -33,7 +32,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
  */
 class Lecturer extends Model
 {
-    use BelongsToFaculty;
+    use BelongsToDepartment;
 
     /** @use HasFactory<LecturerFactory> */
     use HasFactory;
@@ -111,12 +110,12 @@ class Lecturer extends Model
     }
 
     /**
-     * Unit ownership (`App\Support\FacultyScope`).
+     * Unit ownership (`App\Support\DepartmentScope`).
      *
      * @param  Builder<self>  $query
      */
-    public function scopeInFaculty(Builder $query, int $facultyId): void
+    public function scopeInDepartment(Builder $query, int $departmentId): void
     {
-        $query->whereIn('department_id', FacultyScope::departmentIds($facultyId));
+        $query->where('department_id', $departmentId);
     }
 }

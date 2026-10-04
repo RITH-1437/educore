@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\BelongsToFaculty;
-use App\Support\FacultyScope;
+use App\Models\Concerns\BelongsToDepartment;
+use App\Support\DepartmentScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,6 +21,7 @@ use Illuminate\Support\Carbon;
  * @property int $document_type_id
  * @property int|null $academic_year_id
  * @property int|null $semester_id
+ * @property int|null $invoice_id
  * @property string|null $reason
  * @property string $status
  * @property Carbon $submitted_at
@@ -32,10 +33,11 @@ use Illuminate\Support\Carbon;
  * @property-read DocumentType $type
  * @property-read Semester|null $semester
  * @property-read Document|null $document
+ * @property-read Invoice|null $invoice
  */
 class DocumentRequest extends Model
 {
-    use BelongsToFaculty;
+    use BelongsToDepartment;
 
     public const STATUS_PENDING = 'pending';
 
@@ -48,7 +50,7 @@ class DocumentRequest extends Model
     public const STATUSES = [self::STATUS_PENDING, self::STATUS_APPROVED, self::STATUS_REJECTED, self::STATUS_GENERATED];
 
     protected $fillable = [
-        'student_id', 'document_type_id', 'academic_year_id', 'semester_id', 'reason', 'status',
+        'student_id', 'document_type_id', 'academic_year_id', 'semester_id', 'invoice_id', 'reason', 'status',
         'submitted_at', 'processed_by', 'processed_at', 'rejection_reason', 'notes',
     ];
 
@@ -87,13 +89,18 @@ class DocumentRequest extends Model
         return $this->hasOne(Document::class);
     }
 
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
+    }
+
     /**
-     * Unit ownership (`App\Support\FacultyScope`).
+     * Unit ownership (`App\Support\DepartmentScope`).
      *
      * @param  Builder<self>  $query
      */
-    public function scopeInFaculty(Builder $query, int $facultyId): void
+    public function scopeInDepartment(Builder $query, int $departmentId): void
     {
-        $query->whereIn('student_id', FacultyScope::studentIds($facultyId));
+        $query->whereIn('student_id', DepartmentScope::studentIds($departmentId));
     }
 }

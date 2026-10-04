@@ -38,7 +38,7 @@ const navForRole = (role) => {
         label: 'Academic structure',
         items: [
           { label: 'University', href: '/universities', icon: Building2 },
-          { label: 'Faculties & departments', href: '/faculties', icon: School },
+          { label: 'Departments', href: '/departments', icon: School },
           { label: 'Programs', href: '/programs', icon: BookMarked },
           { label: 'Academic years', href: '/academic-years', icon: Calendar },
         ],
@@ -52,15 +52,15 @@ const navForRole = (role) => {
         ],
       },
       { label: 'Academics', items: [{ label: 'Courses', href: '/courses', icon: Library }, { label: 'Offerings & sections', href: '/offerings', icon: TableProperties }, { label: 'Enrollments', href: '/enrollments', icon: ListChecks }, { label: 'Rooms', href: '/rooms', icon: MapPin }, { label: 'Grades', href: '/grades', icon: Award }, { label: 'Grading scale', href: '/grading-scale', icon: Scale }] },
-      { label: 'Operations', items: [{ label: 'Announcements', href: '/announcements', icon: Megaphone }, { label: 'Documents', href: '/documents', icon: FileText }, { label: 'Internships', href: '/internships', icon: Briefcase }, { label: 'Invoices', href: '/invoices', icon: Receipt }] },
+      { label: 'Operations', items: [{ label: 'Announcements', href: '/announcements', icon: Megaphone }, { label: 'Documents', href: '/documents', icon: FileText }, { label: 'Document types', href: '/document-types', icon: FileCheck }, { label: 'Internships', href: '/internships', icon: Briefcase }, { label: 'Invoices', href: '/invoices', icon: Receipt }] },
       { label: 'System', items: [{ label: 'Audit logs', href: '/audit-logs', icon: ShieldCheck }, { label: 'Error logs', href: '/error-logs', icon: FileWarning }] },
     ]
   }
 
-  if (['university-admin', 'faculty-admin'].includes(role)) {
+  if (['university-admin', 'department-admin'].includes(role)) {
     const structure = [
       { label: 'University', href: '/universities', icon: Building2 },
-      { label: 'Faculties & departments', href: '/faculties', icon: School },
+      { label: 'Departments', href: '/departments', icon: School },
       { label: 'Programs', href: '/programs', icon: BookMarked },
       { label: 'Courses', href: '/courses', icon: Library },
       { label: 'Offerings & sections', href: '/offerings', icon: TableProperties },
@@ -71,13 +71,13 @@ const navForRole = (role) => {
     if (role === 'university-admin') structure.push({ label: 'Academic years', href: '/academic-years', icon: Calendar })
 
     return [
-      // Analytics is institution-wide, so University Admin only (not Faculty Admin).
+      // Analytics is institution-wide, so University Admin only (not Department Admin).
       { label: 'Overview', items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }, ...(role === 'university-admin' ? [{ label: 'Analytics', href: '/analytics', icon: BarChart3 }] : [])] },
       { label: 'Academic structure', items: structure },
       { label: 'People', items: [{ label: 'Students', href: '/students', icon: GraduationCap }, { label: 'Lecturers', href: '/lecturers', icon: UserRound }] },
       { label: 'Assessment', items: [{ label: 'Grades', href: '/grades', icon: Award }, { label: 'Grading scale', href: '/grading-scale', icon: Scale }] },
-      // Finance is limited to university admins (Faculty Admin has no access).
-      { label: 'Operations', items: [{ label: 'Announcements', href: '/announcements', icon: Megaphone }, { label: 'Documents', href: '/documents', icon: FileText }, { label: 'Internships', href: '/internships', icon: Briefcase }, ...(role === 'university-admin' ? [{ label: 'Invoices', href: '/invoices', icon: Receipt }] : [])] },
+      // Finance and type configuration are limited to university admins (Department Admin has no access).
+      { label: 'Operations', items: [{ label: 'Announcements', href: '/announcements', icon: Megaphone }, { label: 'Documents', href: '/documents', icon: FileText }, ...(role === 'university-admin' ? [{ label: 'Document types', href: '/document-types', icon: FileCheck }] : []), { label: 'Internships', href: '/internships', icon: Briefcase }, ...(role === 'university-admin' ? [{ label: 'Invoices', href: '/invoices', icon: Receipt }] : [])] },
     ]
   }
 
@@ -114,7 +114,7 @@ const SECTION_LABELS = {
   users: 'Users & roles',
   'academic-years': 'Academic years',
   universities: 'University',
-  faculties: 'Faculties & departments',
+  departments: 'Departments',
   programs: 'Programs',
   courses: 'Courses',
   lecturers: 'Lecturers',
@@ -135,6 +135,7 @@ const SECTION_LABELS = {
   'grading-scale': 'Grading scale',
   'my-documents': 'My documents',
   documents: 'Documents',
+  'document-types': 'Document types',
   invoices: 'Invoices',
   announcements: 'Announcements',
   analytics: 'Analytics',

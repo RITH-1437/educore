@@ -1,4 +1,5 @@
 <script setup>
+import { router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
 import EmptyState from './EmptyState.vue'
@@ -14,6 +15,8 @@ const props = defineProps({
   errorTitle: { type: String, default: 'Unable to load records' },
   sortable: { type: Boolean, default: false },
   rowClickable: { type: Boolean, default: false },
+  // (row) => url. Makes every row open its record (UI-COMPONENTS §4) instead of a View/Eye action.
+  rowHref: { type: Function, default: null },
   emptyTitle: { type: String, default: 'No records found' },
   emptyDescription: { type: String, default: 'There are no records to display yet.' },
   caption: { type: String, default: '' },
@@ -32,6 +35,25 @@ const visibleRows = computed(() => {
     return sortDirection.value === 'asc' ? order : -order
   })
 })
+
+const clickable = computed(() => props.rowClickable || Boolean(props.rowHref))
+
+// Controls inside a row (buttons, links, inputs) keep their own behaviour, and
+// selecting text in a row does not navigate.
+const CONTROLS = 'a, button, input, select, textarea, label, [role="button"]'
+const ignored = (event) => {
+  const control = event.target.closest(CONTROLS)
+  return (control && control !== event.currentTarget) || Boolean(window.getSelection()?.toString())
+}
+
+const open = (row, event) => {
+  if (!clickable.value || ignored(event)) return
+  if (!props.rowHref) return emit('row-click', row)
+  const href = props.rowHref(row)
+  // Ctrl/⌘-click and middle-click open a new tab, like a normal link.
+  if (event.ctrlKey || event.metaKey || event.button === 1) window.open(href, '_blank', 'noopener')
+  else router.visit(href)
+}
 
 const sort = (column) => {
   if (!props.sortable || column.sortable === false) return
@@ -89,10 +111,11 @@ const sort = (column) => {
             v-for="row in visibleRows"
             :key="row[rowKey]"
             class="transition-colors duration-150 hover:bg-background dark:hover:bg-dark-surface-2/50"
-            :class="rowClickable ? 'cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary' : ''"
-            :tabindex="rowClickable ? 0 : undefined"
-            @click="rowClickable && emit('row-click', row)"
-            @keydown.enter="rowClickable && emit('row-click', row)"
+            :class="clickable ? 'cursor-pointer focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary' : ''"
+            :tabindex="clickable ? 0 : undefined"
+            @click="open(row, $event)"
+            @auxclick="$event.button === 1 && open(row, $event)"
+            @keydown.enter="open(row, $event)"
           >
             <td
               v-for="column in columns"

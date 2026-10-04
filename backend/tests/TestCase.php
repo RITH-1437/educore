@@ -4,7 +4,6 @@ namespace Tests;
 
 use App\Enums\Role;
 use App\Models\Department;
-use App\Models\Faculty;
 use App\Models\Program;
 use App\Models\Role as RoleModel;
 use App\Models\Section;
@@ -24,28 +23,28 @@ abstract class TestCase extends BaseTestCase
         $this->withoutMiddleware(ValidateCsrfToken::class);
     }
 
-    // ------------------------------------------- Faculty Admin unit scoping ---
+    // ------------------------------------------- Department Admin unit scoping ---
 
-    /** A Faculty Admin assigned to the faculty (`docs/32_Faculty-Admin-Scoping-Report.md`). */
-    protected function facultyAdminFor(int|Faculty|null $faculty): User
+    /** A Department Admin assigned to the department (`docs/39_Department-Only-Structure-Report.md`). */
+    protected function departmentAdminFor(int|Department|null $department): User
     {
-        $role = RoleModel::query()->firstWhere('slug', Role::FacultyAdmin->value)
-            ?? RoleModel::factory()->withSlug(Role::FacultyAdmin->value)->create();
+        $role = RoleModel::query()->firstWhere('slug', Role::DepartmentAdmin->value)
+            ?? RoleModel::factory()->withSlug(Role::DepartmentAdmin->value)->create();
 
-        return User::factory()->create(['role_id' => $role->id, 'faculty_id' => $faculty instanceof Faculty ? $faculty->id : $faculty]);
+        return User::factory()->create(['role_id' => $role->id, 'department_id' => $department instanceof Department ? $department->id : $department]);
     }
 
-    /** The faculty that owns a section (through its course's department). */
-    protected function facultyOfSection(Section $section): int
+    /** The department that owns a section (through its course). */
+    protected function departmentOfSection(Section $section): int
     {
-        return (int) $section->offering->course->department->faculty_id;
+        return (int) $section->offering->course->department_id;
     }
 
-    /** Give the student an active program in the faculty (a new department + program). */
-    protected function placeInFaculty(Student $student, int|Faculty $faculty): void
+    /** Give the student an active program in the department (a new program). */
+    protected function placeInDepartment(Student $student, int|Department $department): void
     {
-        $facultyId = $faculty instanceof Faculty ? $faculty->id : $faculty;
-        $program = Program::factory()->create(['department_id' => Department::factory()->create(['faculty_id' => $facultyId])->id]);
+        $departmentId = $department instanceof Department ? $department->id : $department;
+        $program = Program::factory()->create(['department_id' => $departmentId]);
         StudentProgram::query()->create(['student_id' => $student->id, 'program_id' => $program->id, 'started_on' => now()->toDateString(), 'status' => StudentProgram::STATUS_ACTIVE]);
     }
 

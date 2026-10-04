@@ -133,7 +133,7 @@ class UniversityController extends Controller
 
         $university = $this->universities->create($request->validated());
 
-        return (new UniversityResource($university->loadCount('faculties')))->response()->setStatusCode(201);
+        return (new UniversityResource($university->loadCount('departments')))->response()->setStatusCode(201);
     }
 
     #[OA\Get(
@@ -178,7 +178,7 @@ class UniversityController extends Controller
     {
         $this->authorize('view', $university);
 
-        return new UniversityResource($university->loadCount('faculties'));
+        return new UniversityResource($university->loadCount('departments'));
     }
 
     #[OA\Put(
@@ -282,7 +282,7 @@ class UniversityController extends Controller
 
         $this->universities->update($university, $request->validated());
 
-        return new UniversityResource($university->refresh()->loadCount('faculties'));
+        return new UniversityResource($university->refresh()->loadCount('departments'));
     }
 
     #[OA\Post(
@@ -330,13 +330,13 @@ class UniversityController extends Controller
 
         $this->universities->makeCurrent($university);
 
-        return new UniversityResource($university->refresh()->loadCount('faculties'));
+        return new UniversityResource($university->refresh()->loadCount('departments'));
     }
 
     #[OA\Delete(
         path: '/universities/{university}',
         summary: 'Delete a university',
-        description: 'Hard delete. Refused with 409 while the university is current or still has faculties.',
+        description: 'Hard delete. Refused with 409 while the university is current or still has departments.',
         operationId: 'deleteUniversity',
         tags: ['University Structure'],
         security: [['sanctum' => []]],
@@ -368,7 +368,7 @@ class UniversityController extends Controller
             ),
             new OA\Response(
                 response: 409,
-                description: 'The university is current or still has faculties.',
+                description: 'The university is current or still has departments.',
                 content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
             ),
         ]

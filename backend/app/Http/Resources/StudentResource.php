@@ -60,7 +60,6 @@ class StudentResource extends JsonResource
     {
         $program = $row->relationLoaded('program') ? $row->program : null;
         $department = $program?->relationLoaded('department') ? $program->department : null;
-        $faculty = $department?->relationLoaded('faculty') ? $department->faculty : null;
 
         return [
             'id' => $row->id,
@@ -73,7 +72,6 @@ class StudentResource extends JsonResource
                     'id' => $department->id,
                     'code' => $department->code,
                     'name' => $department->name,
-                    'faculty' => $faculty ? ['id' => $faculty->id, 'code' => $faculty->code, 'name' => $faculty->name] : null,
                 ] : null,
             ] : null,
             'started_on' => $row->started_on?->toDateString(),

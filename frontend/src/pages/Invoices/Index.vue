@@ -1,6 +1,6 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { Download, Eye, Plus, Search } from '@lucide/vue'
+import { Download, Plus, Search } from '@lucide/vue'
 import { exportUrl } from '../../utils/exports'
 import { Head, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
@@ -32,7 +32,6 @@ const columns = [
   { key: 'total', label: 'Total', align: 'right' },
   { key: 'balance', label: 'Balance', align: 'right' },
   { key: 'status', label: 'Status' },
-  { key: 'actions', label: 'Actions', align: 'right' },
 ]
 </script>
 
@@ -52,7 +51,7 @@ const columns = [
       <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
     </form>
 
-    <BaseTable :columns="columns" :rows="invoices.data" caption="Invoices" empty-title="No invoices" empty-description="Create an invoice to bill a student.">
+    <BaseTable :columns="columns" :rows="invoices.data" :row-href="(row) => `/invoices/${row.id}`" caption="Invoices" empty-title="No invoices" empty-description="Create an invoice to bill a student.">
       <template #cell-number="{ row }">
         <p class="font-mono font-medium">{{ row.invoice_number }}</p>
         <p class="text-caption text-muted dark:text-dark-muted">{{ row.title }}</p>
@@ -65,9 +64,6 @@ const columns = [
       <template #cell-total="{ row }"><span class="tabular-nums">{{ money(row.total, row.currency) }}</span></template>
       <template #cell-balance="{ row }"><span class="font-semibold tabular-nums">{{ money(row.status === 'cancelled' ? 0 : row.balance, row.currency) }}</span></template>
       <template #cell-status="{ row }"><StatusBadge v-bind="invoiceBadge(row.status)" /></template>
-      <template #cell-actions="{ row }">
-        <div class="flex justify-end"><IconButton :icon="Eye" :href="`/invoices/${row.id}`" :label="`Open ${row.invoice_number}`" /></div>
-      </template>
     </BaseTable>
 
     <Pagination :links="invoices.meta?.links ?? []" />

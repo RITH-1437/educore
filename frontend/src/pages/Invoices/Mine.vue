@@ -1,7 +1,6 @@
 <script setup>
-import IconButton from '../../components/IconButton.vue'
 import { Head } from '@inertiajs/vue3'
-import { AlertTriangle, Eye, Receipt, Wallet } from '@lucide/vue'
+import { AlertTriangle, Receipt, Wallet } from '@lucide/vue'
 import BaseTable from '../../components/BaseTable.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import StatCard from '../../components/StatCard.vue'
@@ -19,7 +18,6 @@ const columns = [
   { key: 'total', label: 'Total', align: 'right' },
   { key: 'balance', label: 'Balance', align: 'right' },
   { key: 'status', label: 'Status' },
-  { key: 'actions', label: 'Details', align: 'right' },
 ]
 </script>
 
@@ -35,7 +33,7 @@ const columns = [
       <StatCard :label="`Overdue (${row.currency})`" :value="money(row.overdue, row.currency)" :icon="AlertTriangle" :tone="row.overdue > 0 ? 'warning' : 'muted'" />
     </div>
 
-    <BaseTable :columns="columns" :rows="data" caption="My invoices" empty-title="No invoices" empty-description="Invoices issued to you appear here.">
+    <BaseTable :columns="columns" :rows="data" :row-href="(row) => `/invoices/${row.id}`" caption="My invoices" empty-title="No invoices" empty-description="Invoices issued to you appear here.">
       <template #cell-number="{ row }">
         <p class="font-mono font-medium">{{ row.invoice_number }}</p>
         <p class="text-caption text-muted dark:text-dark-muted">{{ row.title }}</p>
@@ -44,7 +42,6 @@ const columns = [
       <template #cell-total="{ row }"><span class="tabular-nums">{{ money(row.total, row.currency) }}</span></template>
       <template #cell-balance="{ row }"><span class="font-semibold tabular-nums">{{ money(row.status === 'cancelled' ? 0 : row.balance, row.currency) }}</span></template>
       <template #cell-status="{ row }"><StatusBadge v-bind="invoiceBadge(row.status)" /></template>
-      <template #cell-actions="{ row }"><div class="flex justify-end"><IconButton :icon="Eye" :href="`/invoices/${row.id}`" :label="`View ${row.invoice_number}`" /></div></template>
     </BaseTable>
   </div>
 </template>

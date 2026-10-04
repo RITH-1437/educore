@@ -26,7 +26,7 @@ class UniversityService
     public function paginate(UniversityListFilters $filters): LengthAwarePaginator
     {
         return University::query()
-            ->withCount('faculties')
+            ->withCount('departments')
             ->when($filters->search, function ($query, $search) {
                 $query->where(function ($q) use ($search) {
                     $q->where('code', 'ilike', "%{$search}%")
@@ -104,14 +104,14 @@ class UniversityService
                 throw new BusinessRuleException('The current university cannot be deleted.');
             }
 
-            // `withTrashed()` matters: a soft-deleted faculty still points at
+            // `withTrashed()` matters: a soft-deleted department still points at
             // this university, so a hard delete would fail on the foreign key
             // instead of returning a clean business-rule message.
-            $facultyCount = $university->faculties()->withTrashed()->count();
+            $departmentCount = $university->departments()->withTrashed()->count();
 
-            if ($facultyCount > 0) {
+            if ($departmentCount > 0) {
                 throw new BusinessRuleException(
-                    "This university still has {$facultyCount} faculty/faculties and cannot be deleted."
+                    "This university still has {$departmentCount} department(s) and cannot be deleted."
                 );
             }
 

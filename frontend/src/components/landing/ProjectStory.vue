@@ -1,75 +1,73 @@
 <script setup>
-import { Building2, Compass, FolderKanban, Users } from '@lucide/vue'
+import { Compass, Lightbulb, Target } from '@lucide/vue'
 import Reveal from './Reveal.vue'
 
-const facts = [
-  { icon: Building2, title: 'Designed for university environments', text: 'Built around the real structure of universities, faculties, programs, and student life.' },
-  { icon: Compass, title: 'Focused on Cambodian university workflows', text: 'Workflows shaped around how Cambodian universities operate day to day.' },
-  { icon: FolderKanban, title: 'A modular monolith', text: 'Focused modules on one connected codebase — simple to operate, easy to extend.' },
-  { icon: Users, title: 'Practical academic administration', text: 'Prioritizing the records, documents, and schedules staff actually manage.' },
+const story = [
+  {
+    icon: Target,
+    title: 'What EduCore is',
+    text: 'A university digital administration platform: academic structure, student services, administration, documents and communication in one secure web application.',
+  },
+  {
+    icon: Lightbulb,
+    title: 'Why we built it',
+    text: 'Many universities still depend on paper forms, spreadsheets and disconnected tools. Students queue at offices for documents, and staff re-type the same records. We wanted to show that one well-structured platform can replace that.',
+  },
+  {
+    icon: Compass,
+    title: 'Cambodian university focus',
+    text: 'EduCore is designed around how Cambodian universities are organised and run day to day, from faculties and programs to semesters, invoices and official documents.',
+  },
 ]
 
-const status = [
-  { label: 'Authentication, roles, users & admin dashboard', state: 'Implemented', tone: 'bg-teal-50 text-teal-700' },
-  { label: 'University, faculty, department & academic calendar', state: 'Implemented', tone: 'bg-teal-50 text-teal-700' },
-  { label: 'Programs, courses, students & lecturers', state: 'Planned', tone: 'bg-amber-50 text-amber-700' },
-  { label: 'Analytics & advanced tooling', state: 'Future', tone: 'bg-slate-100 text-slate-500' },
+const team = [
+  { name: 'Rin Nairith', photo: '/assets/images/people/nairith.jpg' },
+  { name: 'Yong Lyhor', photo: '/assets/images/people/lyhor.png' },
 ]
 </script>
 
 <template>
-  <section id="story" class="scroll-mt-24 bg-white py-20 sm:py-28">
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <div class="grid items-start gap-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-16">
-        <Reveal>
-          <p class="text-xs font-semibold tracking-[0.2em] text-blue-600 uppercase">Project Story</p>
-          <h2 class="font-display mt-3 text-3xl font-bold tracking-tight text-slate-950 sm:text-4xl">
-            Built as a Digital Foundation for Cambodian Universities
-          </h2>
-          <p class="mt-4 text-lg leading-relaxed text-slate-600">
-            EduCore was created as a university-focused digital administration platform with the goal of
-            demonstrating how academic and administrative processes can be organized within one modern
-            system.
-          </p>
+  <section id="about" class="scroll-mt-24 bg-background py-20 sm:py-24 dark:bg-dark-bg" aria-labelledby="about-title">
+    <div class="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[3fr_2fr] lg:gap-16 lg:px-8">
+      <Reveal>
+        <p class="text-caption font-semibold tracking-widest text-primary uppercase dark:text-dark-primary">Project story</p>
+        <h2 id="about-title" class="font-display mt-3 text-h2 text-balance text-primary-dark dark:text-dark-ink">
+          Built for the future of university administration.
+        </h2>
 
-          <div class="mt-8 grid gap-4 sm:grid-cols-2">
-            <Reveal v-for="(f, i) in facts" :key="f.title" :delay="i * 90" class="rounded-xl border border-slate-200 bg-slate-50 p-5">
-              <span class="flex h-9 w-9 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-slate-200">
-                <component :is="f.icon" class="h-4.5 w-4.5 text-blue-600" />
-              </span>
-              <h3 class="font-display mt-3 text-sm font-semibold text-slate-900">{{ f.title }}</h3>
-              <p class="mt-1.5 text-sm leading-relaxed text-slate-500">{{ f.text }}</p>
-            </Reveal>
-          </div>
-        </Reveal>
-
-        <Reveal from="right" class="rounded-2xl border border-slate-200 bg-slate-50 p-6 sm:p-8">
-          <div class="flex items-center justify-between">
-            <h3 class="font-display text-base font-semibold text-slate-900">Project status</h3>
-            <span class="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-600">
-              Working progress
+        <div class="mt-8 space-y-6">
+          <div v-for="item in story" :key="item.title" class="flex gap-4">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary dark:bg-dark-primary/15 dark:text-dark-primary">
+              <component :is="item.icon" class="h-5 w-5" aria-hidden="true" />
             </span>
+            <div>
+              <h3 class="text-small font-semibold text-primary-dark dark:text-dark-ink">{{ item.title }}</h3>
+              <p class="mt-1 text-small text-muted dark:text-dark-muted">{{ item.text }}</p>
+            </div>
           </div>
-          <p class="mt-2 text-sm text-slate-500">
-            EduCore is built module by module. This page reflects the current state honestly.
-          </p>
-          <ul class="mt-6 space-y-3">
-            <li
-              v-for="s in status"
-              :key="s.label"
-              class="flex items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white px-4 py-3.5"
-            >
-              <span class="text-sm font-medium text-slate-700">{{ s.label }}</span>
-              <span class="shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold" :class="s.tone">{{ s.state }}</span>
-            </li>
-          </ul>
-          <p class="mt-5 text-sm text-slate-500">
-            Built by
-            <span class="font-semibold text-slate-800">Rin Nairith &amp; Yong Lyhor</span> as a university
-            digital administration platform.
-          </p>
-        </Reveal>
-      </div>
+        </div>
+      </Reveal>
+
+      <Reveal from="right" class="self-start rounded-xl border border-border-default bg-surface p-6 shadow-sm dark:border-dark-border dark:bg-dark-surface">
+        <p class="text-caption font-semibold tracking-widest text-muted uppercase dark:text-dark-muted">The team</p>
+        <ul class="mt-5 grid grid-cols-2 gap-4">
+          <li v-for="member in team" :key="member.name" class="flex flex-col items-center text-center">
+            <img
+              :src="member.photo"
+              :alt="`Portrait of ${member.name}`"
+              width="96"
+              height="96"
+              loading="lazy"
+              decoding="async"
+              class="h-24 w-24 rounded-pill object-cover object-top ring-4 ring-primary/10 dark:ring-dark-primary/20"
+            />
+            <p class="mt-3 text-small font-semibold text-primary-dark dark:text-dark-ink">{{ member.name }}</p>
+            <p class="text-caption text-muted dark:text-dark-muted">Developer</p>
+          </li>
+        </ul>
+        <p class="mt-4 text-small text-muted dark:text-dark-muted">EduCore is our thesis and portfolio project.</p>
+
+      </Reveal>
     </div>
   </section>
 </template>

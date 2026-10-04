@@ -39,12 +39,6 @@ use OpenApi\Attributes as OA;
                 new OA\Property(property: 'id', type: 'integer', format: 'int64'),
                 new OA\Property(property: 'code', type: 'string', example: 'CSE'),
                 new OA\Property(property: 'name', type: 'string'),
-                new OA\Property(property: 'faculty_id', type: 'integer', format: 'int64'),
-                new OA\Property(property: 'faculty', type: 'object', nullable: true, properties: [
-                    new OA\Property(property: 'id', type: 'integer', format: 'int64'),
-                    new OA\Property(property: 'code', type: 'string', example: 'ENG'),
-                    new OA\Property(property: 'name', type: 'string'),
-                ]),
             ]
         ),
         new OA\Property(property: 'position', type: 'string', nullable: true, example: 'Senior Lecturer'),

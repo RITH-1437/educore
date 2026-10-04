@@ -9,7 +9,6 @@ use App\Models\Announcement;
 use App\Models\Course;
 use App\Models\Department;
 use App\Models\Enrollment;
-use App\Models\Faculty;
 use App\Models\Program;
 use App\Models\Section;
 use App\Models\StoredFile;
@@ -27,12 +26,11 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * Announcements (module 9.19, `skills/announcements`).
  *
  * Audiences: `all`, `students`, `lecturers`, `staff` (administrators), or one
- * `faculty` / `department` / `program` / `section` / `course`. Membership is
+ * `department` / `program` / `section` / `course`. Membership is
  * resolved from authoritative relations when the feed is read:
  *
  * | Audience   | Students                                   | Lecturers                         |
  * |------------|--------------------------------------------|-----------------------------------|
- * | faculty    | current program's department's faculty     | own department's faculty          |
  * | department | current program's department               | own department                    |
  * | program    | current program                            | —                                 |
  * | section    | open (pending / confirmed) enrollment      | assigned to the section           |
@@ -65,7 +63,7 @@ class AnnouncementService
                     ->when($m['lecturer'], fn ($w) => $w->orWhere('audience_type', 'lecturers'))
                     ->when($m['staff'], fn ($w) => $w->orWhere('audience_type', 'staff'));
 
-                foreach (['faculty', 'department', 'program', 'section', 'course'] as $type) {
+                foreach (['department', 'program', 'section', 'course'] as $type) {
                     if ($m[$type] !== []) {
                         $q->orWhere(fn ($w) => $w->where('audience_type', $type)->whereIn('audience_id', $m[$type]));
                     }
@@ -93,7 +91,6 @@ class AnnouncementService
         $openIn = fn ($sections) => DB::table('enrollments')->whereIn('status', Enrollment::OPEN_STATUSES)->whereNull('deleted_at')->whereIn('section_id', $sections)->select('student_id');
         $teaching = fn ($sections) => DB::table('section_lecturers')->whereIn('section_id', $sections)->select('lecturer_id');
         $courseSections = fn () => DB::table('sections')->join('course_offerings', 'course_offerings.id', '=', 'sections.course_offering_id')->where('course_offerings.course_id', $id)->select('sections.id');
-        $facultyDepartments = fn () => DB::table('departments')->where('faculty_id', $id)->select('id');
         $roles = fn (array $slugs) => fn (Builder $q) => $q->whereHas('role', fn ($r) => $r->whereIn('slug', $slugs));
         $members = fn ($students, $lecturers = null) => fn (Builder $q) => $q->whereIn('id', $studentUsers($students))
             ->when($lecturers !== null, fn ($w) => $w->orWhereIn('id', $lecturerUsers($lecturers)));
@@ -102,10 +99,9 @@ class AnnouncementService
             'all' => fn (Builder $q) => $q,
             'students' => $roles([Role::Student->value]),
             'lecturers' => $roles([Role::Lecturer->value]),
-            'staff' => $roles([Role::SuperAdmin->value, Role::UniversityAdmin->value, Role::FacultyAdmin->value]),
+            'staff' => $roles([Role::SuperAdmin->value, Role::UniversityAdmin->value, Role::DepartmentAdmin->value]),
             'program' => $members($inPrograms([$id])),
             'department' => $members($inPrograms(DB::table('programs')->where('department_id', $id)->select('id')), DB::table('lecturers')->where('department_id', $id)->select('id')),
-            'faculty' => $members($inPrograms(DB::table('programs')->whereIn('department_id', $facultyDepartments())->select('id')), DB::table('lecturers')->whereIn('department_id', $facultyDepartments())->select('id')),
             'section' => $members($openIn([$id]), $teaching([$id])),
             'course' => $members($openIn($courseSections()), $teaching($courseSections())),
             default => fn (Builder $q) => $q->whereRaw('false'),
@@ -293,7 +289,6 @@ class AnnouncementService
             $sections = Section::query()->whereIn('status', ['open', 'active'])->with('offering.course:id,code', 'offering.semester:id,name')->get();
 
             return [
-                'faculty' => Faculty::query()->orderBy('name')->get()->map(fn ($m) => ['id' => $m->id, 'label' => $label('faculty', $m)])->all(),
                 'department' => Department::query()->orderBy('name')->get()->map(fn ($m) => ['id' => $m->id, 'label' => $label('department', $m)])->all(),
                 'program' => Program::query()->orderBy('name')->get()->map(fn ($m) => ['id' => $m->id, 'label' => $label('program', $m)])->all(),
                 'section' => $sections->map(fn ($m) => ['id' => $m->id, 'label' => $label('section', $m)])->sortBy('label')->values()->all(),
@@ -421,20 +416,19 @@ class AnnouncementService
     }
 
     /**
-     * @return array{student: bool, lecturer: bool, staff: bool, faculty: list<int>, department: list<int>, program: list<int>, section: list<int>, course: list<int>}
+     * @return array{student: bool, lecturer: bool, staff: bool, department: list<int>, program: list<int>, section: list<int>, course: list<int>}
      */
     private function memberships(User $user): array
     {
-        $m = ['student' => false, 'lecturer' => false, 'staff' => false, 'faculty' => [], 'department' => [], 'program' => [], 'section' => [], 'course' => []];
+        $m = ['student' => false, 'lecturer' => false, 'staff' => false, 'department' => [], 'program' => [], 'section' => [], 'course' => []];
 
         if ($user->isRole(Role::Student->value) && ($student = $user->student) !== null) {
             $m['student'] = true;
-            $program = $student->currentProgram()->with('program.department:id,faculty_id')->first()?->program;
+            $program = $student->currentProgram()->with('program:id,department_id')->first()?->program;
 
             if ($program !== null) {
                 $m['program'] = [$program->id];
                 $m['department'] = [$program->department_id];
-                $m['faculty'] = array_filter([$program->department?->faculty_id]);
             }
 
             $sections = Enrollment::query()->where('student_id', $student->getKey())->whereIn('status', Enrollment::OPEN_STATUSES)->pluck('section_id');
@@ -442,13 +436,11 @@ class AnnouncementService
             $m['course'] = $this->coursesOf($sections->all());
         } elseif ($user->isRole(Role::Lecturer->value) && ($lecturer = $user->lecturer) !== null) {
             $m['lecturer'] = true;
-            $lecturer->loadMissing('department:id,faculty_id');
             $m['department'] = [$lecturer->department_id];
-            $m['faculty'] = array_filter([$lecturer->department?->faculty_id]);
             $sections = $lecturer->sections()->pluck('sections.id')->all();
             $m['section'] = array_map('intval', $sections);
             $m['course'] = $this->coursesOf($sections);
-        } elseif ($user->isRole(Role::SuperAdmin->value) || $user->isRole(Role::UniversityAdmin->value) || $user->isRole(Role::FacultyAdmin->value)) {
+        } elseif ($user->isRole(Role::SuperAdmin->value) || $user->isRole(Role::UniversityAdmin->value) || $user->isRole(Role::DepartmentAdmin->value)) {
             $m['staff'] = true;
         }
 

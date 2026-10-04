@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\Models\Concerns\BelongsToFaculty;
-use App\Support\FacultyScope;
+use App\Models\Concerns\BelongsToDepartment;
+use App\Support\DepartmentScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -38,7 +38,7 @@ use Illuminate\Support\Carbon;
  */
 class Internship extends Model
 {
-    use BelongsToFaculty;
+    use BelongsToDepartment;
 
     public const STATUS_DRAFT = 'draft';
 
@@ -109,12 +109,12 @@ class Internship extends Model
     }
 
     /**
-     * Unit ownership (`App\Support\FacultyScope`).
+     * Unit ownership (`App\Support\DepartmentScope`).
      *
      * @param  Builder<self>  $query
      */
-    public function scopeInFaculty(Builder $query, int $facultyId): void
+    public function scopeInDepartment(Builder $query, int $departmentId): void
     {
-        $query->whereIn('student_id', FacultyScope::studentIds($facultyId));
+        $query->whereIn('student_id', DepartmentScope::studentIds($departmentId));
     }
 }

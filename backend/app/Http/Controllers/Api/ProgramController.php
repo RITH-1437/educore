@@ -20,7 +20,7 @@ use OpenApi\Attributes as OA;
 /**
  * Program endpoints (module 9.5).
  *
- * Reads are open to Super Admin, University Admin and Faculty Admin; writes to
+ * Reads are open to Super Admin, University Admin and Department Admin; writes to
  * Super Admin and University Admin — see `ProgramPolicy`. Every operation
  * documents 401 and 403.
  */
@@ -33,13 +33,12 @@ class ProgramController extends Controller
     #[OA\Get(
         path: '/programs',
         summary: 'List programs',
-        description: 'Paginated programs. Supports case-insensitive search over code and name, filtering by faculty, department, degree level and active state, whitelisted sorting and a capped page size.',
+        description: 'Paginated programs. Supports case-insensitive search over code and name, filtering by department, degree level and active state, whitelisted sorting and a capped page size.',
         operationId: 'listPrograms',
         tags: ['University Structure'],
         security: [['sanctum' => []]],
         parameters: [
             new OA\QueryParameter(name: 'search', description: 'Partial match against `code` or `name`.', schema: new OA\Schema(type: 'string'), example: 'Computer'),
-            new OA\QueryParameter(name: 'filters[faculty_id]', description: 'Only programs whose department belongs to this faculty.', schema: new OA\Schema(type: 'integer', format: 'int64')),
             new OA\QueryParameter(name: 'filters[department_id]', description: 'Only programs of this department.', schema: new OA\Schema(type: 'integer', format: 'int64')),
             new OA\QueryParameter(name: 'filters[degree_level]', description: 'Degree level.', schema: new OA\Schema(type: 'string', enum: Program::DEGREE_LEVELS)),
             new OA\QueryParameter(name: 'filters[is_active]', description: 'Active (1) or archived (0) programs.', schema: new OA\Schema(type: 'boolean')),
@@ -84,7 +83,7 @@ class ProgramController extends Controller
 
         $program = $this->programs->create($request->validated());
 
-        return (new ProgramResource($program->load('department.faculty:id,code,name')))
+        return (new ProgramResource($program->load('department:id,code,name')))
             ->response()
             ->setStatusCode(201);
     }
@@ -107,7 +106,7 @@ class ProgramController extends Controller
     {
         $this->authorize('view', $program);
 
-        return new ProgramResource($program->load(['department.faculty:id,code,name', 'courses']));
+        return new ProgramResource($program->load(['department:id,code,name', 'courses']));
     }
 
     #[OA\Post(
@@ -133,7 +132,7 @@ class ProgramController extends Controller
 
         $this->programs->addCourse($program, Course::query()->findOrFail($request->validated('course_id')), $request->validated());
 
-        return (new ProgramResource($program->load(['department.faculty:id,code,name', 'courses'])))
+        return (new ProgramResource($program->load(['department:id,code,name', 'courses'])))
             ->response()
             ->setStatusCode(201);
     }
@@ -164,7 +163,7 @@ class ProgramController extends Controller
 
         $this->programs->updateCourse($program, $course, $request->validated());
 
-        return new ProgramResource($program->load(['department.faculty:id,code,name', 'courses']));
+        return new ProgramResource($program->load(['department:id,code,name', 'courses']));
     }
 
     #[OA\Delete(
@@ -235,7 +234,7 @@ class ProgramController extends Controller
 
         $this->programs->update($program, $request->validated());
 
-        return new ProgramResource($program->refresh()->load('department.faculty:id,code,name'));
+        return new ProgramResource($program->refresh()->load('department:id,code,name'));
     }
 
     #[OA\Post(

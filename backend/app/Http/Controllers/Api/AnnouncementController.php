@@ -27,7 +27,7 @@ class AnnouncementController extends Controller
     #[OA\Get(
         path: '/announcements/feed',
         summary: "The signed-in user's announcement feed",
-        description: 'Published announcements whose audience includes the caller (everyone, their role group, faculty, department, program, sections or courses), newest first.',
+        description: 'Published announcements whose audience includes the caller (everyone, their role group, department, program, sections or courses), newest first.',
         operationId: 'announcementFeed',
         tags: ['Announcements'],
         security: [['sanctum' => []]],

@@ -30,7 +30,7 @@ class StudentManagementTest extends TestCase
 
     private User $universityAdmin;
 
-    private User $facultyAdmin;
+    private User $departmentAdmin;
 
     private User $lecturer;
 
@@ -44,7 +44,7 @@ class StudentManagementTest extends TestCase
 
         $this->superAdmin = User::factory()->superAdmin()->create();
         $this->universityAdmin = $this->userWithRole(Role::UniversityAdmin->value);
-        $this->facultyAdmin = $this->userWithRole(Role::FacultyAdmin->value);
+        $this->departmentAdmin = $this->userWithRole(Role::DepartmentAdmin->value);
         $this->lecturer = $this->userWithRole(Role::Lecturer->value);
         $this->studentUser = $this->userWithRole(Role::Student->value, 'me@test.test');
         $this->program = Program::factory()->create(['department_id' => Department::factory()->create()->id]);
@@ -74,19 +74,19 @@ class StudentManagementTest extends TestCase
         $this->actingAs($this->studentUser)->putJson("/api/students/{$own->id}", $this->updatePayload($own))->assertForbidden();
     }
 
-    public function test_faculty_admin_reads_but_cannot_write(): void
+    public function test_department_admin_reads_but_cannot_write(): void
     {
         $student = $this->makeStudent();
-        $this->facultyAdmin->update(['faculty_id' => $this->program->department->faculty_id]);
+        $this->departmentAdmin->update(['department_id' => $this->program->department_id]);
         $elsewhere = Student::factory()->create();
 
-        $this->actingAs($this->facultyAdmin)->getJson("/api/students/{$elsewhere->id}")->assertForbidden();
-        $this->actingAs($this->facultyAdmin)->getJson('/api/students')->assertOk()->assertJsonCount(1, 'data');
-        $this->actingAs($this->facultyAdmin)->get('/students')->assertOk();
-        $this->actingAs($this->facultyAdmin)->getJson("/api/students/{$student->id}")->assertOk();
-        $this->actingAs($this->facultyAdmin)->postJson('/api/students', $this->createPayload())->assertForbidden();
-        $this->actingAs($this->facultyAdmin)->postJson("/api/students/{$student->id}/status", ['status' => 'suspended'])->assertForbidden();
-        $this->actingAs($this->facultyAdmin)->deleteJson("/api/students/{$student->id}")->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->getJson("/api/students/{$elsewhere->id}")->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->getJson('/api/students')->assertOk()->assertJsonCount(1, 'data');
+        $this->actingAs($this->departmentAdmin)->get('/students')->assertOk();
+        $this->actingAs($this->departmentAdmin)->getJson("/api/students/{$student->id}")->assertOk();
+        $this->actingAs($this->departmentAdmin)->postJson('/api/students', $this->createPayload())->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->postJson("/api/students/{$student->id}/status", ['status' => 'suspended'])->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->deleteJson("/api/students/{$student->id}")->assertForbidden();
     }
 
     // ------------------------------------------------------------ screens ---

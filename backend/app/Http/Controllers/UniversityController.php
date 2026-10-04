@@ -64,7 +64,7 @@ class UniversityController extends Controller
             // `resolve()` instead of the resource instance: Inertia treats a bare
             // `JsonResource` as a `Responsable`, so it would nest the payload under
             // `data` and the page would read `props.university.data.code`.
-            'university' => (new UniversityResource($university->loadCount('faculties')))->resolve(),
+            'university' => (new UniversityResource($university->loadCount('departments')))->resolve(),
         ]);
     }
 

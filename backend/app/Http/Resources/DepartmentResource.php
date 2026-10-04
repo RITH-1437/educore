@@ -18,13 +18,13 @@ class DepartmentResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'faculty_id' => $this->faculty_id,
-            'faculty' => $this->whenLoaded('faculty', fn () => [
-                'id' => $this->faculty->id,
-                'code' => $this->faculty->code,
-                'name' => $this->faculty->name,
-                'university_id' => $this->faculty->university_id,
+            'university_id' => $this->university_id,
+            'university' => $this->whenLoaded('university', fn () => [
+                'id' => $this->university->id,
+                'code' => $this->university->code,
+                'name' => $this->university->name,
             ]),
+            'programs_count' => $this->whenCounted('programs'),
             'code' => $this->code,
             'name' => $this->name,
             'head_name' => $this->head_name,

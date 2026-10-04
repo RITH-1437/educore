@@ -7,11 +7,9 @@ use App\Enums\Role as RoleSlug;
 use App\Http\Requests\StoreLecturerRequest;
 use App\Http\Requests\UpdateLecturerRequest;
 use App\Http\Resources\DepartmentResource;
-use App\Http\Resources\FacultyResource;
 use App\Http\Resources\LecturerResource;
 use App\Http\Resources\SectionResource;
 use App\Models\Department;
-use App\Models\Faculty;
 use App\Models\Lecturer;
 use App\Models\User;
 use App\Services\LecturerService;
@@ -57,7 +55,6 @@ class LecturerController extends Controller
                 ->values(),
             'filters' => [
                 'search' => $filters->search,
-                'faculty_id' => $filters->facultyId,
                 'department_id' => $filters->departmentId,
                 'employment_type' => $filters->employmentType,
                 'is_active' => $filters->isActive,
@@ -82,7 +79,7 @@ class LecturerController extends Controller
 
         return Inertia::render('Lecturers/Edit', [
             // `resolve()` so the page reads `props.lecturer.staff_number`, not `.data.…`.
-            'lecturer' => (new LecturerResource($lecturer->load(['user', 'department.faculty:id,code,name'])))->resolve(),
+            'lecturer' => (new LecturerResource($lecturer->load(['user', 'department:id,code,name'])))->resolve(),
             'sections' => SectionResource::collection(
                 $lecturer->sections()->with(['offering.course:id,code,name,credits', 'offering.semester.academicYear:id,code'])->get()
             )->resolve(),
@@ -133,13 +130,10 @@ class LecturerController extends Controller
     /**
      * @return array<string, mixed>
      */
-    /** Filter / form options; a Faculty Admin only gets their own faculty's. */
+    /** Filter / form options; a Department Admin only gets their own department's. */
     private function lookups(): array
     {
         return [
-            'faculties' => FacultyResource::collection(
-                Faculty::query()->visibleTo(request()->user())->where('is_active', true)->orderBy('name')->get()
-            ),
             'departments' => DepartmentResource::collection(
                 Department::query()->visibleTo(request()->user())->where('is_active', true)->orderBy('name')->get()
             ),

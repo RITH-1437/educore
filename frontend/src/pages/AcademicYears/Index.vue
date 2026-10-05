@@ -2,7 +2,8 @@
 import IconButton from '../../components/IconButton.vue'
 import { Head, router } from '@inertiajs/vue3'
 import { ref } from 'vue'
-import { CircleCheckBig, CirclePlay, Pencil, Plus, Search, Star, Trash2 } from '@lucide/vue'
+import { useLiveFilters } from '../../composables/useLiveFilters'
+import { CircleCheckBig, CirclePlay, Pencil, Plus, Star, Trash2 } from '@lucide/vue'
 import BaseBadge from '../../components/BaseBadge.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
@@ -38,11 +39,11 @@ const columns = [
   { key: 'actions', label: 'Actions', align: 'right' },
 ]
 
-const applyFilters = () =>
+const applyFilters = (options = {}) =>
   router.get(
     '/academic-years',
     { search: search.value || undefined, filters: status.value ? { status: status.value } : undefined },
-    { preserveState: true, replace: true },
+    { preserveState: true, replace: true, ...options },
   )
 
 const changeStatus = (academicYear, nextStatus) => {
@@ -60,6 +61,9 @@ const deleteYear = async (academicYear) => {
     router.delete(`/academic-years/${academicYear.id}`)
   }
 }
+// Soft search: the list follows the filters as they change — typed text after a
+// short pause, picked options at once — so there is no search button.
+const { applyNow, searching } = useLiveFilters(applyFilters, { text: [search], choices: [status] })
 </script>
 
 <template>
@@ -72,10 +76,9 @@ const deleteYear = async (academicYear) => {
     </PageHeader>
 
     <BaseCard padding="sm">
-      <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="applyFilters">
-        <BaseInput v-model="search" type="search" label="Search" placeholder="Code or name" class="w-full sm:max-w-xs" />
-        <BaseSelect v-model="status" label="Status" :options="STATUSES" @change="applyFilters" />
-        <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
+      <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="applyNow">
+        <BaseInput v-model="search" :loading="searching" type="search" label="Search" placeholder="Code or name" class="w-full sm:max-w-xs" />
+        <BaseSelect v-model="status" label="Status" :options="STATUSES" />
       </form>
     </BaseCard>
 

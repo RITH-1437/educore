@@ -1,9 +1,10 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { Download, Search } from '@lucide/vue'
+import { Download } from '@lucide/vue'
 import { exportUrl } from '../../utils/exports'
 import { Head, router } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
+import { useLiveFilters } from '../../composables/useLiveFilters'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseSelect from '../../components/BaseSelect.vue'
 import BaseTable from '../../components/BaseTable.vue'
@@ -24,12 +25,12 @@ const to = ref(props.filters.to ?? '')
 const areaOptions = computed(() => [{ value: '', label: 'All areas' }, ...props.areas.map((a) => ({ value: a, label: a.replace('_', ' ') }))])
 // Exports what the list currently shows (the applied filters, not unsaved input).
 const csvUrl = computed(() => exportUrl('/audit-logs/export', { search: props.filters.search, filters: { area: props.filters.area }, from: props.filters.from, to: props.filters.to }))
-const apply = () => router.get('/audit-logs', {
+const apply = (options = {}) => router.get('/audit-logs', {
   search: search.value || undefined,
   filters: area.value ? { area: area.value } : undefined,
   from: from.value || undefined,
   to: to.value || undefined,
-}, { preserveState: true, replace: true })
+}, { preserveState: true, replace: true, ...options })
 
 const columns = [
   { key: 'when', label: 'When' },
@@ -37,6 +38,9 @@ const columns = [
   { key: 'actor', label: 'Who' },
   { key: 'target', label: 'Record' },
 ]
+// Soft search: the list follows the filters as they change — typed text after a
+// short pause, picked options at once — so there is no search button.
+const { applyNow, searching } = useLiveFilters(apply, { text: [search], choices: [area, from, to] })
 </script>
 
 <template>
@@ -46,12 +50,11 @@ const columns = [
       <template #actions><IconButton :icon="Download" :href="csvUrl" native size="md" label="Export CSV" /></template>
     </PageHeader>
 
-    <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] lg:items-end" @submit.prevent="apply">
-      <BaseInput v-model="search" name="search" label="Search" placeholder="Description, person or action" />
+    <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr] lg:items-end" @submit.prevent="applyNow">
+      <BaseInput v-model="search" :loading="searching" name="search" label="Search" placeholder="Description, person or action" />
       <BaseSelect v-model="area" :options="areaOptions" label="Area" />
       <BaseInput v-model="from" name="from" label="From" type="date" />
       <BaseInput v-model="to" name="to" label="To" type="date" />
-      <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
     </form>
 
     <BaseTable :columns="columns" :rows="logs.data" :row-href="(row) => `/audit-logs/${row.id}`" caption="Audit log entries" empty-title="No entries" empty-description="Sensitive actions appear here as they happen.">

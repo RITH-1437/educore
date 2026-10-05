@@ -39,6 +39,13 @@ const removers = []
 // search/pagination query updates on the same page.
 const pageKey = computed(() => page.url.split('?')[0])
 
+// Live filters swap the list under the user's cursor. While they do, the page
+// keeps at least the height it had, so fewer results never make it jump or
+// pull the scroll position; moving to another page releases the hold.
+const content = ref(null)
+const heldHeight = ref(0)
+watch(pageKey, () => { heldHeight.value = 0 })
+
 const persistCollapsed = (value) => {
   collapsed.value = value
   try {
@@ -110,7 +117,12 @@ onMounted(() => {
   window.addEventListener('keydown', onKeydown)
   removers.push(
     () => window.removeEventListener('keydown', onKeydown),
-    router.on('start', () => { navigating.value = true }),
+    // Quiet visits (live filters: no progress bar) keep the page as it is; only navigations dim it.
+    router.on('start', (event) => {
+      const quiet = event.detail.visit.showProgress === false
+      navigating.value = !quiet
+      if (quiet && content.value) heldHeight.value = Math.max(heldHeight.value, content.value.offsetHeight)
+    }),
     router.on('finish', () => { navigating.value = false }),
     router.on('navigate', () => { mobileOpen.value = false }),
     router.on('success', (event) => showFlash(event.detail.page.props.flash)),
@@ -157,7 +169,7 @@ onBeforeUnmount(() => {
       <AppTopbar :theme="theme" @open-navigation="openDrawer" @toggle-theme="toggleTheme" />
 
       <main id="main-content" tabindex="-1" class="mx-auto w-full max-w-[1280px] px-4 pb-12 pt-4 focus:outline-none sm:px-6 lg:px-8 lg:pt-6" :aria-busy="navigating">
-        <div :key="pageKey" class="motion-safe:animate-page-in transition-opacity duration-200 ease-out" :class="navigating ? 'opacity-70' : ''">
+        <div ref="content" :key="pageKey" class="motion-safe:animate-page-in transition-opacity duration-200 ease-out" :class="navigating ? 'opacity-70' : ''" :style="heldHeight ? { minHeight: `${heldHeight}px` } : undefined">
           <slot />
         </div>
       </main>

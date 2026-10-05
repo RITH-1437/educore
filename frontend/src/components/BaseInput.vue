@@ -1,4 +1,5 @@
 <script setup>
+import { LoaderCircle } from '@lucide/vue'
 import { computed, useAttrs, useId } from 'vue'
 
 const props = defineProps({
@@ -15,6 +16,8 @@ const props = defineProps({
   required: { type: Boolean, default: false },
   id: { type: String, default: '' },
   hint: { type: String, default: '' },
+  /** Shows a small spinner at the end of the field (e.g. while live search results load). */
+  loading: { type: Boolean, default: false },
 })
 
 defineEmits(['update:modelValue'])
@@ -90,13 +93,17 @@ const message = computed(() =>
         :aria-required="required || undefined"
         :aria-invalid="error ? 'true' : 'false'"
         :aria-describedby="error ? errorId : undefined"
-        :class="[field, error ? errorField : '', { 'pl-10': $slots.leading, 'pr-10': $slots.trailing }]"
+        :aria-busy="loading || undefined"
+        :class="[field, error ? errorField : '', { 'pl-10': $slots.leading, 'pr-10': $slots.trailing || loading }]"
         v-bind="inputAttrs"
         @input="$emit('update:modelValue', $event.target.value)"
       />
 
       <div v-if="$slots.trailing" class="absolute inset-y-0 right-0 flex items-center pr-2">
         <slot name="trailing" />
+      </div>
+      <div v-else-if="loading" class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-muted dark:text-dark-muted" aria-hidden="true">
+        <LoaderCircle class="h-4 w-4 animate-spin motion-reduce:animate-none" />
       </div>
     </div>
 

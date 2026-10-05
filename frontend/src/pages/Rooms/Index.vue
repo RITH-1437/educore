@@ -2,7 +2,8 @@
 import IconButton from '../../components/IconButton.vue'
 import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { Pencil, Plus, Search, Trash2 } from '@lucide/vue'
+import { useLiveFilters } from '../../composables/useLiveFilters'
+import { Pencil, Plus, Trash2 } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
@@ -27,7 +28,7 @@ const canManage = computed(() => ['super-admin', 'university-admin'].includes(pa
 const typeOptions = computed(() => props.types.map((value) => ({ value, label: value.charAt(0).toUpperCase() + value.slice(1) })))
 
 const search = ref(props.filters.search ?? '')
-const applySearch = () => router.get('/rooms', { search: search.value || undefined }, { preserveState: true, replace: true })
+const applySearch = (options = {}) => router.get('/rooms', { search: search.value || undefined }, { preserveState: true, replace: true, ...options })
 
 const editing = ref(null)
 const show = ref(false)
@@ -64,6 +65,9 @@ const columns = [
   { key: 'is_active', label: 'Status' },
   { key: 'actions', label: 'Actions', align: 'right' },
 ]
+// Soft search: the list follows the filters as they change — typed text after a
+// short pause, picked options at once — so there is no search button.
+const { applyNow, searching } = useLiveFilters(applySearch, { text: [search] })
 </script>
 
 <template>
@@ -76,9 +80,8 @@ const columns = [
     </PageHeader>
 
     <BaseCard padding="sm">
-      <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="applySearch">
-        <BaseInput v-model="search" label="Search" placeholder="Code, name or building" class="w-full sm:max-w-sm" />
-        <IconButton :icon="Search" type="submit" size="md" label="Search rooms" />
+      <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="applyNow">
+        <BaseInput v-model="search" :loading="searching" label="Search" placeholder="Code, name or building" class="w-full sm:max-w-sm" />
       </form>
     </BaseCard>
 

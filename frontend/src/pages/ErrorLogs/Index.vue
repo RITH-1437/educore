@@ -2,7 +2,8 @@
 import IconButton from '../../components/IconButton.vue'
 import { Head, Link, router, usePage } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
-import { AlertCircle, FileText, FunnelX, Search, Server } from '@lucide/vue'
+import { useLiveFilters } from '../../composables/useLiveFilters'
+import { AlertCircle, FileText, FunnelX, Server } from '@lucide/vue'
 import BaseBadge from '../../components/BaseBadge.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import BaseCard from '../../components/BaseCard.vue'
@@ -64,13 +65,13 @@ const hasActiveFilters = computed(() =>
   method.value !== ''
 )
 
-const applyFilters = () => {
+const applyFilters = (options = {}) => {
   const params = {}
   if (search.value) params.search = search.value
   if (statusCode.value) params['filters[status_code]'] = statusCode.value
   if (statusGroup.value) params['filters[status_group]'] = statusGroup.value
   if (method.value) params['filters[method]'] = method.value
-  router.get('/error-logs', params, { preserveState: true, replace: true })
+  router.get('/error-logs', params, { preserveState: true, replace: true, ...options })
 }
 
 const clearFilters = () => {
@@ -78,7 +79,7 @@ const clearFilters = () => {
   statusCode.value = ''
   statusGroup.value = ''
   method.value = ''
-  applyFilters()
+  applyNow()
 }
 
 const formatDate = (dateString) => {
@@ -98,6 +99,9 @@ const getStatusBadgeVariant = (code) => {
   if (code >= 500) return 'error'
   return 'muted'
 }
+// Soft search: the list follows the filters as they change — typed text after a
+// short pause, picked options at once — so there is no search button.
+const { applyNow, searching } = useLiveFilters(applyFilters, { text: [search], choices: [statusCode, statusGroup, method] })
 </script>
 
 <template>
@@ -134,9 +138,9 @@ const getStatusBadgeVariant = (code) => {
     </div>
 
     <BaseCard padding="sm">
-      <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="applyFilters">
+      <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="applyNow">
         <BaseInput
-          v-model="search"
+          v-model="search" :loading="searching"
           label="Search"
           placeholder="Path, message, exception class"
           class="w-full sm:max-w-xs"
@@ -162,7 +166,6 @@ const getStatusBadgeVariant = (code) => {
           placeholder="All methods"
           class="w-full sm:w-40"
         />
-        <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
       </form>
     </BaseCard>
 

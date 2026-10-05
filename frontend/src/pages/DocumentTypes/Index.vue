@@ -2,6 +2,7 @@
 import { FileText, Pencil, Plus, Trash2 } from '@lucide/vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
+import { useLiveFilters } from '../../composables/useLiveFilters'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseModal from '../../components/BaseModal.vue'
@@ -80,9 +81,11 @@ const remove = (type) => {
   }
 }
 
-const applySearch = () => {
-  router.get('/document-types', { search: search.value || undefined }, { preserveState: true, replace: true })
+const applySearch = (options = {}) => {
+  router.get('/document-types', { search: search.value || undefined }, { preserveState: true, replace: true, ...options })
 }
+// Soft search: the list follows the box as you type (Enter applies at once).
+const { applyNow, searching } = useLiveFilters(applySearch, { text: [search] })
 
 const columns = [
   { key: 'name', label: 'Document type' },
@@ -119,11 +122,11 @@ const columns = [
     <div class="flex items-center justify-between gap-4">
       <div class="max-w-xs flex-1">
         <BaseInput
-          v-model="search"
+          v-model="search" :loading="searching"
           name="search"
           placeholder="Search by code or name..."
           type="search"
-          @keydown.enter="applySearch"
+          @keydown.enter.prevent="applyNow"
         />
       </div>
     </div>

@@ -1,8 +1,9 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
 import { computed, ref, watch } from 'vue'
+import { useLiveFilters } from '../../composables/useLiveFilters'
 import { Head, router } from '@inertiajs/vue3'
-import { FunnelX, Pencil, Plus, Search, Trash2, X } from '@lucide/vue'
+import { FunnelX, Pencil, Plus, Trash2, X } from '@lucide/vue'
 import PageHeader from '../../components/PageHeader.vue'
 import { useConfirm } from '../../composables/useConfirm'
 import BaseCard from '../../components/BaseCard.vue'
@@ -23,7 +24,6 @@ const selectedRole = ref(props.filters.role ?? '')
 watch(
   () => props.filters,
   (f) => {
-    search.value = f.search ?? ''
     selectedRole.value = f.role ?? ''
   },
 )
@@ -43,26 +43,26 @@ const columns = [
   { key: 'actions', label: 'Actions', align: 'right' },
 ]
 
-const doSearch = () => {
+const doSearch = (options = {}) => {
   router.get(
     '/users',
     {
       search: search.value || undefined,
       role: selectedRole.value || undefined,
     },
-    { preserveState: true, replace: true },
+    { preserveState: true, replace: true, ...options },
   )
 }
 
 const filterByRole = (slug) => {
   selectedRole.value = slug || ''
-  doSearch()
+  applyNow()
 }
 
 const clearFilters = () => {
   search.value = ''
   selectedRole.value = ''
-  router.get('/users', {}, { preserveState: true, replace: true })
+  applyNow()
 }
 
 const { confirm } = useConfirm()
@@ -70,6 +70,9 @@ const { confirm } = useConfirm()
 const deleteUser = async (user) => {
   if (await confirm({ title: 'Delete user?', message: `Delete user "${user.name}"? This cannot be undone.`, confirmLabel: 'Delete', destructive: true })) router.delete(`/users/${user.id}`)
 }
+// Soft search: the list follows the filters as they change — typed text after a
+// short pause, picked options at once — so there is no search button.
+const { applyNow, searching } = useLiveFilters(doSearch, { text: [search], choices: [selectedRole] })
 </script>
 
 <template>
@@ -80,22 +83,20 @@ const deleteUser = async (user) => {
     </PageHeader>
 
     <BaseCard padding="sm">
-      <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="doSearch">
-        <BaseInput v-model="search" label="Search accounts" placeholder="Name or email" class="w-full sm:max-w-sm" />
+      <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="applyNow">
+        <BaseInput v-model="search" :loading="searching" label="Search accounts" placeholder="Name or email" class="w-full sm:max-w-sm" />
         <div class="w-full sm:w-56">
           <label for="role-filter" class="block text-small font-medium text-ink dark:text-dark-ink">Role</label>
           <select
             id="role-filter"
             v-model="selectedRole"
             class="mt-1.5 block w-full rounded-md border border-border-default bg-surface px-3 py-2 text-small text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-dark-border dark:bg-dark-surface dark:text-dark-ink"
-            @change="doSearch"
           >
             <option value="">All roles</option>
             <option v-for="r in roles" :key="r.slug || r.id" :value="r.slug">{{ r.name }}</option>
           </select>
         </div>
         <div class="flex gap-1">
-          <IconButton :icon="Search" type="submit" size="md" label="Search accounts" />
           <IconButton v-if="search || selectedRole" :icon="FunnelX" size="md" label="Clear filters" @click="clearFilters" />
         </div>
       </form>

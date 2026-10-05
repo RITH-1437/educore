@@ -120,6 +120,11 @@ Routing is handled by Inertia on the server (`routes/web.php` +
   (`?page=&per_page=&search=&sort_by=&sort_dir=&filters[...]`) defined in
   `skills/api/SKILL.md`.
 - Tables: `BaseTable` with slot columns, pagination footer, and empty state.
+- Filter bars search live — no search button: wire the page's visit through
+  `composables/useLiveFilters.js` (`text` refs debounced, `choices` refs at
+  once; the visit function must spread the `options` it receives into
+  `router.get`) and bind `searching` to the search field's `loading`
+  (`docs/branding/UI-COMPONENTS.md` §4).
 
 ## JavaScript (no TypeScript)
 

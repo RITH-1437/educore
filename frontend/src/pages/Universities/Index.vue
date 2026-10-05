@@ -2,7 +2,8 @@
 import IconButton from '../../components/IconButton.vue'
 import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
-import { FunnelX, Pencil, Plus, School, Search, Star, Trash2, X } from '@lucide/vue'
+import { useLiveFilters } from '../../composables/useLiveFilters'
+import { FunnelX, Pencil, Plus, School, Star, Trash2, X } from '@lucide/vue'
 import BaseBadge from '../../components/BaseBadge.vue'
 import BaseButton from '../../components/BaseButton.vue'
 import PageHeader from '../../components/PageHeader.vue'
@@ -39,7 +40,6 @@ const STATUS_OPTIONS = [
 watch(
   () => props.filters,
   (f) => {
-    search.value = f.search ?? ''
     status.value = f.status ?? ''
   },
 )
@@ -67,25 +67,25 @@ const columns = [
 
 const isEmpty = computed(() => (props.universities?.data ?? []).length === 0)
 
-const applyFilters = () =>
+const applyFilters = (options = {}) =>
   router.get(
     '/universities',
     {
       search: search.value || undefined,
       status: status.value || undefined,
     },
-    { preserveState: true, replace: true },
+    { preserveState: true, replace: true, ...options },
   )
 
 const clearFilters = () => {
   search.value = ''
   status.value = ''
-  router.get('/universities', {}, { preserveState: true, replace: true })
+  applyNow()
 }
 
 const filterByStatus = (val) => {
   status.value = val
-  applyFilters()
+  applyNow()
 }
 
 const openCreate = () => {
@@ -111,6 +111,9 @@ const destroy = async (university) => {
     router.delete(`/universities/${university.id}`)
   }
 }
+// Soft search: the list follows the filters as they change — typed text after a
+// short pause, picked options at once — so there is no search button.
+const { applyNow, searching } = useLiveFilters(applyFilters, { text: [search], choices: [status] })
 </script>
 
 <template>
@@ -124,21 +127,19 @@ const destroy = async (university) => {
     </PageHeader>
 
     <BaseCard padding="sm">
-      <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="applyFilters">
-        <BaseInput v-model="search" label="Search" placeholder="Code or name" class="w-full sm:max-w-xs" />
+      <form class="flex flex-col gap-3 sm:flex-row sm:items-end" @submit.prevent="applyNow">
+        <BaseInput v-model="search" :loading="searching" label="Search" placeholder="Code or name" class="w-full sm:max-w-xs" />
         <div class="w-full sm:w-44">
           <label for="state-filter" class="block text-small font-medium text-ink dark:text-dark-ink">State</label>
           <select
             id="state-filter"
             v-model="status"
             class="mt-1.5 block w-full rounded-md border border-border-default bg-surface px-3 py-2 text-small text-ink focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary dark:border-dark-border dark:bg-dark-surface dark:text-dark-ink"
-            @change="applyFilters"
           >
             <option v-for="opt in STATUS_OPTIONS" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
           </select>
         </div>
         <div class="flex gap-1">
-          <IconButton :icon="Search" type="submit" size="md" label="Search universities" />
           <IconButton v-if="search || status" :icon="FunnelX" size="md" label="Clear filters" @click="clearFilters" />
         </div>
       </form>

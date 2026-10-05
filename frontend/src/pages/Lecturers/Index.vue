@@ -2,7 +2,8 @@
 import IconButton from '../../components/IconButton.vue'
 import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { FunnelX, Pencil, Plus, Search, Trash2, UserCheck, UserX } from '@lucide/vue'
+import { useLiveFilters } from '../../composables/useLiveFilters'
+import { FunnelX, Pencil, Plus, Trash2, UserCheck, UserX } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
@@ -48,7 +49,7 @@ const stateOptions = [
 
 const hasFilters = computed(() => Boolean(search.value || departmentId.value || employmentType.value || activeState.value !== ''))
 
-const applyFilters = () => {
+const applyFilters = (options = {}) => {
   const filters = {
     department_id: departmentId.value || undefined,
     employment_type: employmentType.value || undefined,
@@ -57,7 +58,7 @@ const applyFilters = () => {
   router.get(
     '/lecturers',
     { search: search.value || undefined, filters: Object.values(filters).some((v) => v !== undefined) ? filters : undefined },
-    { preserveState: true, replace: true },
+    { preserveState: true, replace: true, ...options },
   )
 }
 
@@ -66,7 +67,7 @@ const clearFilters = () => {
   departmentId.value = ''
   employmentType.value = ''
   activeState.value = ''
-  router.get('/lecturers', {}, { preserveState: true, replace: true })
+  applyNow()
 }
 
 const columns = [
@@ -136,6 +137,9 @@ const destroy = async (lecturer) => {
     router.delete(`/lecturers/${lecturer.id}`, { preserveScroll: true })
   }
 }
+// Soft search: the list follows the filters as they change — typed text after a
+// short pause, picked options at once — so there is no search button.
+const { applyNow, searching } = useLiveFilters(applyFilters, { text: [search], choices: [departmentId, employmentType, activeState] })
 </script>
 
 <template>
@@ -148,13 +152,12 @@ const destroy = async (lecturer) => {
     </PageHeader>
 
     <BaseCard padding="sm">
-      <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_2fr_1fr_1fr_auto] lg:items-end" @submit.prevent="applyFilters">
-        <BaseInput v-model="search" label="Search" placeholder="Name, staff no., email" />
+      <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_2fr_1fr_1fr_auto] lg:items-end" @submit.prevent="applyNow">
+        <BaseInput v-model="search" :loading="searching" label="Search" placeholder="Name, staff no., email" />
         <BaseSelect v-model="departmentId" label="Department" :options="departmentOptions" placeholder="All departments" />
         <BaseSelect v-model="employmentType" label="Type" :options="typeOptions" placeholder="All types" />
         <BaseSelect v-model="activeState" label="Status" :options="stateOptions" placeholder="All" />
         <div class="flex gap-2">
-          <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
           <IconButton v-if="hasFilters" :icon="FunnelX" size="md" label="Clear filters" @click="clearFilters" />
         </div>
       </form>

@@ -2,7 +2,8 @@
 import IconButton from '../../components/IconButton.vue'
 import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { Archive, ArchiveRestore, Pencil, Plus, Search, Trash2 } from '@lucide/vue'
+import { useLiveFilters } from '../../composables/useLiveFilters'
+import { Archive, ArchiveRestore, Pencil, Plus, Trash2 } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import { useConfirm } from '../../composables/useConfirm'
@@ -56,7 +57,7 @@ const activeFilterOptions = [
   { value: 'false', label: 'Archived' },
 ]
 
-const applyFilters = () =>
+const applyFilters = (options = {}) =>
   router.get(
     '/departments',
     {
@@ -66,7 +67,7 @@ const applyFilters = () =>
         is_active: isActive.value === '' ? undefined : isActive.value,
       },
     },
-    { preserveState: true, replace: true },
+    { preserveState: true, replace: true, ...options },
   )
 
 const openModal = () => {
@@ -93,6 +94,9 @@ const destroy = async (department) => {
     router.delete(`/departments/${department.id}`)
   }
 }
+// Soft search: the list follows the filters as they change — typed text after a
+// short pause, picked options at once — so there is no search button.
+const { applyNow, searching } = useLiveFilters(applyFilters, { text: [search], choices: [universityId, isActive] })
 </script>
 
 <template>
@@ -105,11 +109,10 @@ const destroy = async (department) => {
     </PageHeader>
 
     <BaseCard padding="sm">
-      <form class="flex flex-col gap-3 lg:flex-row lg:items-end" @submit.prevent="applyFilters">
-        <BaseInput v-model="search" label="Search departments" placeholder="Code or name" class="w-full lg:max-w-xs" />
+      <form class="flex flex-col gap-3 lg:flex-row lg:items-end" @submit.prevent="applyNow">
+        <BaseInput v-model="search" :loading="searching" label="Search departments" placeholder="Code or name" class="w-full lg:max-w-xs" />
         <BaseSelect v-if="showUniversity" v-model="universityId" label="University" :options="universityOptions" placeholder="All universities" class="w-full lg:max-w-xs" />
         <BaseSelect v-model="isActive" label="State" :options="activeFilterOptions" />
-        <IconButton :icon="Search" type="submit" size="md" label="Search departments" />
       </form>
     </BaseCard>
 

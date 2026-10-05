@@ -1,9 +1,10 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { Calculator, Download, Plus, Search } from '@lucide/vue'
+import { Calculator, Download, Plus } from '@lucide/vue'
 import { exportUrl } from '../../utils/exports'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
+import { useLiveFilters } from '../../composables/useLiveFilters'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseModal from '../../components/BaseModal.vue'
@@ -27,7 +28,7 @@ const status = ref(props.filters.status ?? '')
 const statusOptions = computed(() => [{ value: '', label: 'All statuses' }, ...props.statuses.map((value) => ({ value, label: invoiceBadge(value).label }))])
 // Exports what the list currently shows (the applied filters, not unsaved input).
 const csvUrl = computed(() => exportUrl('/invoices/export', { search: props.filters.search, filters: { status: props.filters.status } }))
-const apply = () => router.get('/invoices', { search: search.value || undefined, filters: status.value ? { status: status.value } : undefined }, { preserveState: true, replace: true })
+const apply = (options = {}) => router.get('/invoices', { search: search.value || undefined, filters: status.value ? { status: status.value } : undefined }, { preserveState: true, replace: true, ...options })
 
 const showTuitionModal = ref(false)
 const tuitionForm = useForm({
@@ -68,6 +69,9 @@ const columns = [
   { key: 'balance', label: 'Balance', align: 'right' },
   { key: 'status', label: 'Status' },
 ]
+// Soft search: the list follows the filters as they change — typed text after a
+// short pause, picked options at once — so there is no search button.
+const { applyNow, searching } = useLiveFilters(apply, { text: [search], choices: [status] })
 </script>
 
 <template>
@@ -81,10 +85,9 @@ const columns = [
       </template>
     </PageHeader>
 
-    <form class="grid gap-3 sm:grid-cols-[2fr_1fr_auto] sm:items-end" @submit.prevent="apply">
-      <BaseInput v-model="search" name="search" label="Search" placeholder="Invoice number, title, student…" />
+    <form class="grid gap-3 sm:grid-cols-[2fr_1fr] sm:items-end" @submit.prevent="applyNow">
+      <BaseInput v-model="search" :loading="searching" name="search" label="Search" placeholder="Invoice number, title, student…" />
       <BaseSelect v-model="status" :options="statusOptions" label="Status" />
-      <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
     </form>
 
     <BaseTable :columns="columns" :rows="invoices.data" :row-href="(row) => `/invoices/${row.id}`" caption="Invoices" empty-title="No invoices" empty-description="Create an invoice to bill a student.">

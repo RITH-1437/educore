@@ -1,6 +1,6 @@
 <script setup>
 import { router } from '@inertiajs/vue3'
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 import { ChevronDown, ChevronUp } from '@lucide/vue'
 import EmptyState from './EmptyState.vue'
 import ErrorState from './ErrorState.vue'
@@ -23,6 +23,20 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['sort', 'row-click', 'retry'])
+
+// While the list is live-filtered (quiet visits, `useLiveFilters`), the columns
+// keep the widths they had, so rows change without the table re-flowing, and
+// "no results" keeps the header. A new page mounts a fresh table.
+const table = ref(null)
+const frozenWidths = ref(null)
+let stopListening = null
+onMounted(() => {
+  stopListening = router.on('start', (event) => {
+    if (event.detail.visit.showProgress !== false || frozenWidths.value || !table.value?.tHead) return
+    frozenWidths.value = [...table.value.tHead.rows[0].cells].map((cell) => cell.getBoundingClientRect().width)
+  })
+})
+onBeforeUnmount(() => stopListening?.())
 const sortKey = ref('')
 const sortDirection = ref('asc')
 
@@ -72,14 +86,17 @@ const sort = (column) => {
     <div v-else-if="error" class="p-6 sm:p-10">
       <ErrorState :title="errorTitle" @retry="emit('retry')" />
     </div>
-    <div v-else-if="rows.length === 0" class="p-8 sm:p-12">
+    <div v-else-if="rows.length === 0 && !frozenWidths" class="p-8 sm:p-12">
       <EmptyState :title="emptyTitle" :description="emptyDescription">
         <template v-if="$slots['empty-action']" #action><slot name="empty-action" /></template>
       </EmptyState>
     </div>
     <div v-else class="overflow-x-auto" tabindex="0" role="region" :aria-label="caption || 'Data table'">
-      <table class="min-w-full divide-y divide-border-default dark:divide-dark-border">
+      <table ref="table" class="min-w-full divide-y divide-border-default dark:divide-dark-border" :class="frozenWidths ? 'table-fixed' : ''">
         <caption v-if="caption" class="sr-only">{{ caption }}</caption>
+        <colgroup v-if="frozenWidths">
+          <col v-for="(width, index) in frozenWidths" :key="index" :style="{ width: `${width}px` }" />
+        </colgroup>
         <thead class="bg-background/70 dark:bg-dark-surface-2/50">
           <tr>
             <th
@@ -107,6 +124,11 @@ const sort = (column) => {
           </tr>
         </thead>
         <tbody class="divide-y divide-border-default dark:divide-dark-border">
+          <tr v-if="!visibleRows.length">
+            <td :colspan="columns.length" class="p-8 sm:p-12">
+              <EmptyState :title="emptyTitle" :description="emptyDescription" />
+            </td>
+          </tr>
           <tr
             v-for="row in visibleRows"
             :key="row[rowKey]"

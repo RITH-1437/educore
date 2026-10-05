@@ -596,3 +596,12 @@ A module is not done until its report exists and its tests pass — never label
   internships and invoices by status as donuts with a rows toggle
   (`docs/27_Analytics-and-Reporting-Report.md` §7). `[Open]` Refresh the shared
   chart palette (slot 8 reads gray; dark set above the lightness band).
+- `[Done]` Live (soft) search (2026-10-05): the search buttons are gone from
+  the 14 list filter bars (Users, Academic years, Universities, Departments,
+  Programs, Courses, Offerings, Rooms, Enrollments, Students, Lecturers,
+  Invoices, Audit logs, Error logs) and Document types searches as you type.
+  Text applies after a 300 ms pause, choices at once, Enter immediately; the
+  update keeps the scroll position, shows no progress bar, does not dim the
+  page and shows a spinner in the search field (`useLiveFilters`,
+  `docs/branding/UI-COMPONENTS.md` §4). The list stays still while typing:
+  page height held, table columns frozen, "no results" under the kept header.

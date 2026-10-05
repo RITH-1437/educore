@@ -92,7 +92,7 @@ Icon vocabulary — reuse, do not invent per page:
 | Approve · reject | `Check` · `X` | Submit / send · publish | `Send` |
 | Publish / release (visibility) · hide | `Eye` · `EyeOff` | Return to draft · withdraw · reverse | `Undo2` |
 | Finalize · reopen | `Lock` · `LockOpen` | Revoke · cancel record | `Ban` |
-| Apply filters / search | `Search` | Clear filters | `FunnelX` |
+| ~~Apply filters / search~~ — removed 2026-10-05: filter bars apply live (§4) | — | Clear filters | `FunnelX` |
 | Download / export CSV | `Download` | Make current | `Star` |
 | Enroll / assign person · drop | `UserPlus` · `UserMinus` | Deactivate · reactivate person | `UserX` · `UserCheck` |
 | Module links | the sidebar icon of that module (Attendance `UserCheck`, Assignments `ClipboardList`, Exams `FileCheck`, Grades `Award`, Grading scale `Scale`, Faculties `School`, Internships `Briefcase`, Announcements `Megaphone`) | | |
@@ -179,6 +179,19 @@ Tables are the backbone of this administration platform.
   publish / release (visibility) actions.
 - **Sorting:** header toggles `sort_by`/`sort_dir` (see `skills/api/SKILL.md`).
 - **Filtering/search:** toolbar above the table; consistent across all tables.
+- **Live (soft) search, no search button (2026-10-05):** filter bars apply as
+  they change — typed text 300 ms after the last keystroke, selects and dates
+  at once, Enter immediately (`composables/useLiveFilters.js`). The update is
+  quiet: scroll kept, no top progress bar, the page is not dimmed (the layout
+  only dims visits that show progress), and the search field shows a small
+  spinner (`BaseInput` `loading`, `aria-busy`) while results load. Identical
+  filter values never send a second request; *Clear filters* (`FunnelX`)
+  stays. Never copy the server's `filters.search` back into the field after a
+  visit — it would overwrite what the user is still typing.
+  The list stays still while it changes: the page keeps at least the height
+  it had (`DefaultLayout`, released on the next page), `BaseTable` freezes its
+  column widths on the first live update (`table-fixed` + `colgroup`), and
+  "no results" is a row under the kept header instead of replacing the table.
 - **Pagination:** `Pagination` footer; shared `useDataTable` composable.
 - **Responsive:** allow horizontal scroll on mobile; never hide columns without a
   plan (mobile card view is acceptable for key screens).

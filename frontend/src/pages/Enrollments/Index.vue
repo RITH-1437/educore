@@ -3,7 +3,8 @@ import IconButton from '../../components/IconButton.vue'
 import { exportUrl } from '../../utils/exports'
 import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { CircleCheckBig, Download, Search, UserMinus, UserPlus } from '@lucide/vue'
+import { useLiveFilters } from '../../composables/useLiveFilters'
+import { CircleCheckBig, Download, UserMinus, UserPlus } from '@lucide/vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseSelect from '../../components/BaseSelect.vue'
@@ -33,7 +34,7 @@ const semesterId = ref(props.filters.semester_id ?? '')
 const status = ref(props.filters.status ?? '')
 // Exports what the list currently shows (the applied filters, not unsaved input).
 const csvUrl = computed(() => exportUrl('/enrollments/export', { search: props.filters.search, filters: { semester_id: props.filters.semester_id, section_id: props.filters.section_id, status: props.filters.status } }))
-const applyFilters = () => router.get('/enrollments', { search: search.value || undefined, semester_id: semesterId.value || undefined, status: status.value || undefined }, { preserveState: true, replace: true })
+const applyFilters = (options = {}) => router.get('/enrollments', { search: search.value || undefined, semester_id: semesterId.value || undefined, status: status.value || undefined }, { preserveState: true, replace: true, ...options })
 
 const semesterOptions = computed(() => props.semesters.map((s) => ({ value: s.id, label: s.label })))
 const statusOptions = computed(() => props.statuses.map((value) => ({ value, label: label(value) })))
@@ -57,6 +58,9 @@ const columns = [
   { key: 'status', label: 'Status' },
   { key: 'actions', label: 'Actions', align: 'right' },
 ]
+// Soft search: the list follows the filters as they change — typed text after a
+// short pause, picked options at once — so there is no search button.
+const { applyNow, searching } = useLiveFilters(applyFilters, { text: [search], choices: [semesterId, status] })
 </script>
 
 <template>
@@ -75,11 +79,10 @@ const columns = [
     </BaseCard>
 
     <BaseCard padding="sm">
-      <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_2fr_1fr_auto] lg:items-end" @submit.prevent="applyFilters">
-        <BaseInput v-model="search" label="Search" placeholder="Student ID or name" />
+      <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_2fr_1fr] lg:items-end" @submit.prevent="applyNow">
+        <BaseInput v-model="search" :loading="searching" label="Search" placeholder="Student ID or name" />
         <BaseSelect v-model="semesterId" label="Semester" :options="semesterOptions" placeholder="All semesters" />
         <BaseSelect v-model="status" label="Status" :options="statusOptions" placeholder="All" />
-        <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
       </form>
     </BaseCard>
 

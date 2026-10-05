@@ -2,7 +2,8 @@
 import IconButton from '../../components/IconButton.vue'
 import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { Eye, Plus, Search, Settings2 } from '@lucide/vue'
+import { useLiveFilters } from '../../composables/useLiveFilters'
+import { Eye, Plus, Settings2 } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
@@ -37,7 +38,7 @@ const courseOptions = computed(() => props.courses.map((course) => ({ value: cou
 const statusOptions = computed(() => props.statuses.map((value) => ({ value, label: label(value) })))
 const hasFilters = computed(() => Boolean(search.value || semesterId.value || status.value))
 
-const applyFilters = () => router.get('/offerings', { search: search.value || undefined, semester_id: semesterId.value || undefined, status: status.value || undefined }, { preserveState: true, replace: true })
+const applyFilters = (options = {}) => router.get('/offerings', { search: search.value || undefined, semester_id: semesterId.value || undefined, status: status.value || undefined }, { preserveState: true, replace: true, ...options })
 
 const columns = [
   { key: 'course', label: 'Course' },
@@ -51,6 +52,9 @@ const columns = [
 const showCreate = ref(false)
 const form = useForm({ course_id: '', semester_id: '', status: 'draft', max_enrollments: '' })
 const submit = () => form.post('/offerings', { preserveScroll: true, onSuccess: () => { showCreate.value = false } })
+// Soft search: the list follows the filters as they change — typed text after a
+// short pause, picked options at once — so there is no search button.
+const { applyNow, searching } = useLiveFilters(applyFilters, { text: [search], choices: [semesterId, status] })
 </script>
 
 <template>
@@ -63,11 +67,10 @@ const submit = () => form.post('/offerings', { preserveScroll: true, onSuccess: 
     </PageHeader>
 
     <BaseCard padding="sm">
-      <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_2fr_1fr_auto] lg:items-end" @submit.prevent="applyFilters">
-        <BaseInput v-model="search" label="Search" placeholder="Course code or name" />
+      <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_2fr_1fr] lg:items-end" @submit.prevent="applyNow">
+        <BaseInput v-model="search" :loading="searching" label="Search" placeholder="Course code or name" />
         <BaseSelect v-model="semesterId" label="Semester" :options="semesterOptions" placeholder="All semesters" />
         <BaseSelect v-model="status" label="Status" :options="statusOptions" placeholder="All" />
-        <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
       </form>
     </BaseCard>
 

@@ -2,7 +2,8 @@
 import IconButton from '../../components/IconButton.vue'
 import { Head, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
-import { FunnelX, Plus, Search, Settings2 } from '@lucide/vue'
+import { useLiveFilters } from '../../composables/useLiveFilters'
+import { FunnelX, Plus, Settings2 } from '@lucide/vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import BaseInput from '../../components/BaseInput.vue'
@@ -40,16 +41,16 @@ const programOptions = computed(() => props.programs.map((program) => ({ value: 
 const statusOptions = computed(() => props.statuses.map((value) => ({ value, label: value.charAt(0).toUpperCase() + value.slice(1) })))
 const hasFilters = computed(() => Boolean(search.value || departmentId.value || programId.value || status.value))
 
-const applyFilters = () => {
+const applyFilters = (options = {}) => {
   const filters = { department_id: departmentId.value || undefined, program_id: programId.value || undefined, status: status.value || undefined }
-  router.get('/students', { search: search.value || undefined, filters: Object.values(filters).some((v) => v !== undefined) ? filters : undefined }, { preserveState: true, replace: true })
+  router.get('/students', { search: search.value || undefined, filters: Object.values(filters).some((v) => v !== undefined) ? filters : undefined }, { preserveState: true, replace: true, ...options })
 }
 const clearFilters = () => {
   search.value = ''
   departmentId.value = ''
   programId.value = ''
   status.value = ''
-  router.get('/students', {}, { preserveState: true, replace: true })
+  applyNow()
 }
 
 const columns = [
@@ -89,6 +90,9 @@ const submitCreate = () =>
       return payload
     })
     .post('/students', { preserveScroll: true, onSuccess: () => { showCreate.value = false } })
+// Soft search: the list follows the filters as they change — typed text after a
+// short pause, picked options at once — so there is no search button.
+const { applyNow, searching } = useLiveFilters(applyFilters, { text: [search], choices: [departmentId, programId, status] })
 </script>
 
 <template>
@@ -101,13 +105,12 @@ const submitCreate = () =>
     </PageHeader>
 
     <BaseCard padding="sm">
-      <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_2fr_2fr_1fr_auto] lg:items-end" @submit.prevent="applyFilters">
-        <BaseInput v-model="search" label="Search" placeholder="Name, student ID, email" />
+      <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_2fr_2fr_1fr_auto] lg:items-end" @submit.prevent="applyNow">
+        <BaseInput v-model="search" :loading="searching" label="Search" placeholder="Name, student ID, email" />
         <BaseSelect v-model="departmentId" label="Department" :options="departmentOptions" placeholder="All departments" />
         <BaseSelect v-model="programId" label="Program" :options="programOptions" placeholder="All programs" />
         <BaseSelect v-model="status" label="Status" :options="statusOptions" placeholder="All" />
         <div class="flex gap-2">
-          <IconButton :icon="Search" type="submit" size="md" label="Apply filters" />
           <IconButton v-if="hasFilters" :icon="FunnelX" size="md" label="Clear filters" @click="clearFilters" />
         </div>
       </form>

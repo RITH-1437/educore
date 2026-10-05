@@ -1,10 +1,11 @@
 // Shared helpers for the in-app inbox (docs/42_In-App-Notification-Inbox-Report.md).
-import { Bell, Briefcase, CalendarCheck, ClipboardList, FileText, GraduationCap, Megaphone, Receipt, ShieldCheck } from '@lucide/vue'
+import { Bell, Briefcase, CalendarCheck, ClipboardList, FileText, FolderOpen, GraduationCap, Megaphone, Receipt, ShieldCheck } from '@lucide/vue'
 
 // One Lucide icon per message kind; the colour stays the primary tint for all.
 export const kindIcon = (kind) => ({
   announcement: Megaphone,
   assignment: ClipboardList,
+  material: FolderOpen,
   document: FileText,
   enrollment: CalendarCheck,
   grade: GraduationCap,

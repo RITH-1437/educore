@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\CourseController;
+use App\Http\Controllers\CourseMaterialsController;
 use App\Http\Controllers\CourseOfferingController;
 use App\Http\Controllers\CourseworkController;
 use App\Http\Controllers\DashboardController;
@@ -176,6 +177,16 @@ Route::middleware(['auth', 'role:super-admin,university-admin,department-admin,l
     Route::post('/assignments/{assignment}/submit', [CourseworkController::class, 'submit'])->name('assignments.submit');
     Route::post('/submissions/{submission}/grade', [CourseworkController::class, 'grade'])->name('submissions.grade');
     Route::get('/submissions/{submission}/file', [CourseworkController::class, 'download'])->name('submissions.file');
+});
+
+// Course materials (report 44): shared on the section's coursework page
+// (`CourseMaterialPolicy`); students find their courses' materials together.
+Route::middleware(['auth', 'role:student'])->get('/my-materials', [CourseMaterialsController::class, 'mine'])->name('materials.mine');
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin,lecturer,student'])->group(function () {
+    Route::post('/coursework/sections/{section}/materials', [CourseMaterialsController::class, 'store'])->name('materials.store');
+    Route::put('/materials/{material}', [CourseMaterialsController::class, 'update'])->name('materials.update');
+    Route::delete('/materials/{material}', [CourseMaterialsController::class, 'destroy'])->name('materials.destroy');
+    Route::get('/materials/{material}/file', [CourseMaterialsController::class, 'download'])->name('materials.file');
 });
 
 // Examinations: one page per section, scoped by `ExamPolicy` (lecturers of the

@@ -11,7 +11,17 @@ erDiagram
     ENROLLMENTS ||--o{ ASSIGNMENT_SUBMISSIONS : "submits"
     ASSIGNMENTS ||--o{ ASSIGNMENT_SUBMISSIONS : "collects"
     ENROLLMENTS ||--o| GRADES : "final grade"
+    SECTIONS ||--o{ COURSE_MATERIALS : "shares"
 
+    COURSE_MATERIALS {
+        bigint id PK
+        bigint section_id FK
+        varchar title
+        text description
+        varchar kind "file or link"
+        varchar url "link only"
+        bigint created_by FK
+    }
     ASSIGNMENTS {
         bigint id PK
         bigint section_id FK

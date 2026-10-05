@@ -220,18 +220,18 @@ secure web environment.
 
 ### 6.2 Specific Objectives
 
-1. **Centralize academic information** — one consistent record for the university structure, courses, and academic periods. [Planned]
-2. **Manage student records** — store and maintain student profiles and academic status. [Planned]
-3. **Manage lecturer information** — store lecturer profiles, departments, and assignments. [Planned]
-4. **Manage courses and programs** — maintain programs, courses, offerings, and prerequisites. [Planned]
-5. **Support enrollment** — let students register for course sections with validation. [Planned]
-6. **Manage attendance** — record and view attendance per section with calculated percentages. [Planned]
-7. **Manage examinations and grades** — support exams, grade entry, and GPA calculation. [Planned]
-8. **Support document requests** — digital request, approval, generation, and QR verification of documents. [Planned]
-9. **Support invoices and payment records** — record invoices, items, and payments with statuses. [Planned]
-10. **Provide notifications** — announcements delivered by email and Telegram. [Planned]
-11. **Provide analytics** — dashboards and reports for the main academic and administrative areas. [Planned]
-12. **Maintain audit trails** — record important administrative and academic actions. [Planned]
+1. **Centralize academic information** — one consistent record for the university structure, courses, and academic periods. [Implemented]
+2. **Manage student records** — store and maintain student profiles and academic status. [Implemented]
+3. **Manage lecturer information** — store lecturer profiles, departments, and assignments. [Implemented]
+4. **Manage courses and programs** — maintain programs, courses, offerings, and prerequisites. [Implemented]
+5. **Support enrollment** — let students register for course sections with validation. [Implemented]
+6. **Manage attendance** — record and view attendance per section with calculated percentages. [Implemented]
+7. **Manage examinations and grades** — support exams, grade entry, and GPA calculation. [Implemented]
+8. **Support document requests** — digital request, approval, generation, and QR verification of documents. [Implemented]
+9. **Support invoices and payment records** — record invoices, items, and payments with statuses. [Implemented]
+10. **Provide notifications** — announcements delivered by email and Telegram. [Implemented]
+11. **Provide analytics** — dashboards and reports for the main academic and administrative areas. [Implemented]
+12. **Maintain audit trails** — record important administrative and academic actions. [Implemented]
 
 Each objective is scoped to the initial release. The objectives deliberately avoid
 promising outcomes the initial project does not intend to deliver (such as predictive
@@ -401,8 +401,8 @@ users, main business activities, and expected outputs.
   lifecycle (active/inactive/suspended/graduated/withdrawn), program history
   with transfers, guarded delete, `/api/students`, seeded students. See
   [13_Student-Management-Report.md](13_Student-Management-Report.md).
-- **Not yet delivered `[Planned]`:** enrollment/grade/document views per student
-  and lecturer access via sections.
+- **Since delivered:** enrollment, grade and document views per student (9.9,
+  9.14, 9.16) and lecturer access via sections (9.8).
 
 ### 9.3 Lecturer Management [Implemented]
 
@@ -467,8 +467,8 @@ users, main business activities, and expected outputs.
   program curriculum editor (course ↔ program with required flag and suggested
   semester), delete guards, `/api/courses`, seeded catalog. Faculty Admin is
   read-only. See [11_Course-Management-Report.md](11_Course-Management-Report.md).
-- **Not yet delivered `[Planned]`:** course offerings and sections — they need
-  lecturers, rooms and the timetable (9.3 / 9.8 / 9.10).
+- **Since delivered:** course offerings and sections (9.8), with lecturers,
+  rooms and the timetable (9.3 / 9.10).
 
 ### 9.8 Class / Section Management [Implemented]
 
@@ -524,8 +524,11 @@ users, main business activities, and expected outputs.
 - **Delivered:** draft → published assignments per section with due dates
   inside the semester, private file submissions in MinIO (replaceable until
   graded, late work flagged), grading with feedback, authorized downloads,
-  lecturer coursework page and student "My assignments". Lecturer-attached
-  materials remain [Planned]. See [18_Assignments-Report.md](18_Assignments-Report.md).
+  lecturer coursework page and student "My assignments". Lecturers also share
+  course materials (files and links) with their sections; students find them
+  under "Course materials" and are notified. See
+  [18_Assignments-Report.md](18_Assignments-Report.md) and
+  [44_Course-Materials-Report.md](44_Course-Materials-Report.md).
 
 ### 9.13 Examinations [Implemented]
 

@@ -14,6 +14,8 @@ const props = defineProps({
   /** Navigates with Inertia; with `native`, renders a plain <a> (file downloads, CSV exports). */
   href: { type: String, default: '' },
   native: { type: Boolean, default: false },
+  /** With `native`: open in a new tab (external links), with `rel="noopener noreferrer"`. */
+  newTab: { type: Boolean, default: false },
   /**
    * default — muted, primary on hover (most actions) · primary — filled, the
    * page's main create action · success — approve / complete / restore ·
@@ -48,7 +50,7 @@ const iconClass = computed(() => (props.size === 'md' ? 'h-5 w-5' : 'h-4 w-4'))
 
 <template>
   <BaseTooltip :content="label">
-    <a v-if="href && native && !disabled" :href="href" :class="classes" :aria-label="label">
+    <a v-if="href && native && !disabled" :href="href" :class="classes" :aria-label="label" :target="newTab ? '_blank' : undefined" :rel="newTab ? 'noopener noreferrer' : undefined">
       <component :is="icon" :class="iconClass" aria-hidden="true" />
     </a>
     <Link v-else-if="href && !disabled" :href="href" :class="classes" :aria-label="label">

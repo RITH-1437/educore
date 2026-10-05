@@ -392,7 +392,7 @@ A module is not done until its report exists and its tests pass — never label
   caching in the container entrypoint, after a cached config let the suite
   reset the development database.
 - `[Done]` Assignment and exam scores are weighted into course grades (9.14).
-  `[Open]` Lecturer-attached materials are not built.
+  `[Done]` Lecturer-attached course materials (report 44).
 - `[Done]` 9.13 Examinations (`exams`, `exam_results`). Report:
   `docs/19_Examinations-Report.md`.
 - `[Done]` Exam result corrections are audited (9.24).
@@ -611,3 +611,12 @@ A module is not done until its report exists and its tests pass — never label
   (`docs/20_Grades-and-GPA-Report.md`, update section).
 - `[Done]` Audit log list (2026-10-05): the time column moved to the end and
   is labelled *Timestamp* (right-aligned).
+- `[Done]` Course materials (2026-10-06): a section's lecturers (and managers)
+  share files (private MinIO, 20 MB, documents / slides / sheets / archives /
+  images) or http(s) links with the section; its students read and download
+  them on the section page and on `/my-materials`, and are told by inbox /
+  optional email / Telegram; Department Admins over the section read; changes
+  are audited; sections with materials cannot be deleted. The student sidebar
+  is now grouped (Overview, Learning, Records). Business-overview objectives
+  and stale "not yet delivered" notes corrected. Report:
+  `docs/44_Course-Materials-Report.md`.

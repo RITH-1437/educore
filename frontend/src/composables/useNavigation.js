@@ -12,6 +12,7 @@ import {
   FileCheck,
   FileText,
   FileWarning,
+  FolderOpen,
   GraduationCap,
   LayoutDashboard,
   Library,
@@ -82,19 +83,27 @@ const navForRole = (role) => {
   }
 
   if (role === 'student') {
-    return [{ label: 'Workspace', items: [
-      { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
-      { label: 'Course registration', href: '/registration', icon: ListChecks },
-      { label: 'My timetable', href: '/timetable', icon: CalendarClock },
-      { label: 'My attendance', href: '/my-attendance', icon: UserCheck },
-      { label: 'My assignments', href: '/my-assignments', icon: ClipboardList },
-      { label: 'My exams', href: '/my-exams', icon: FileCheck },
-      { label: 'Grades & GPA', href: '/my-grades', icon: Award },
-      { label: 'My documents', href: '/my-documents', icon: FileText },
-      { label: 'My invoices', href: '/my-invoices', icon: Receipt },
-      { label: 'My internship', href: '/my-internships', icon: Briefcase },
-      { label: 'Announcements', href: '/announcements', icon: Megaphone },
-    ] }]
+    // Groups of at most seven (skills/admin-navigation); each folds.
+    return [
+      { label: 'Overview', items: [
+        { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
+        { label: 'Announcements', href: '/announcements', icon: Megaphone },
+      ] },
+      { label: 'Learning', items: [
+        { label: 'Course registration', href: '/registration', icon: ListChecks },
+        { label: 'My timetable', href: '/timetable', icon: CalendarClock },
+        { label: 'Course materials', href: '/my-materials', icon: FolderOpen },
+        { label: 'My assignments', href: '/my-assignments', icon: ClipboardList },
+        { label: 'My exams', href: '/my-exams', icon: FileCheck },
+        { label: 'My attendance', href: '/my-attendance', icon: UserCheck },
+      ] },
+      { label: 'Records', items: [
+        { label: 'Grades & GPA', href: '/my-grades', icon: Award },
+        { label: 'My documents', href: '/my-documents', icon: FileText },
+        { label: 'My invoices', href: '/my-invoices', icon: Receipt },
+        { label: 'My internship', href: '/my-internships', icon: Briefcase },
+      ] },
+    ]
   }
 
   if (role === 'lecturer') {
@@ -127,6 +136,7 @@ const SECTION_LABELS = {
   attendance: 'Attendance',
   'my-attendance': 'My attendance',
   'my-assignments': 'My assignments',
+  'my-materials': 'Course materials',
   coursework: 'Coursework',
   'my-exams': 'My exams',
   exams: 'Examinations',

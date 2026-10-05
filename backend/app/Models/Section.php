@@ -52,6 +52,12 @@ class Section extends Model
         return $this->hasMany(Assignment::class)->orderBy('due_at');
     }
 
+    /** Shared handouts and links, newest first (report 44). */
+    public function materials(): HasMany
+    {
+        return $this->hasMany(CourseMaterial::class)->latest('created_at')->latest('id');
+    }
+
     public function exams(): HasMany
     {
         return $this->hasMany(Exam::class)->orderByRaw('scheduled_date IS NULL, scheduled_date, start_time');

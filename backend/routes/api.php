@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CourseController;
+use App\Http\Controllers\Api\CourseMaterialController;
 use App\Http\Controllers\Api\CourseOfferingController;
 use App\Http\Controllers\Api\DepartmentController;
 use App\Http\Controllers\Api\DepartmentDashboardController;
@@ -120,6 +121,14 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,department
     Route::post('/assignments/{assignment}/submissions', [AssignmentController::class, 'submit'])->name('api.assignments.submit');
     Route::post('/submissions/{submission}/grade', [AssignmentController::class, 'grade'])->name('api.submissions.grade');
     Route::get('/submissions/{submission}/file', [AssignmentController::class, 'download'])->name('api.submissions.file');
+
+    // Course materials (report 44): `CourseMaterialPolicy` — the section's
+    // lecturers / managers share, its staff and enrolled students read.
+    Route::get('/sections/{section}/materials', [CourseMaterialController::class, 'index'])->name('api.sections.materials');
+    Route::post('/sections/{section}/materials', [CourseMaterialController::class, 'store'])->name('api.sections.materials.store');
+    Route::match(['put', 'patch'], '/materials/{material}', [CourseMaterialController::class, 'update'])->name('api.materials.update');
+    Route::delete('/materials/{material}', [CourseMaterialController::class, 'destroy'])->name('api.materials.destroy');
+    Route::get('/materials/{material}/file', [CourseMaterialController::class, 'download'])->name('api.materials.file');
 
     // Examinations: `ExamPolicy` scopes every call to the section's lecturers /
     // managers (write), Department Admin (read) and enrolled students (schedule +

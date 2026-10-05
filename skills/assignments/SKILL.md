@@ -62,6 +62,10 @@ grade submissions (results feed into the grade components in
 - Lecturer: manage assignments + submissions of their section.
 - Student: view assignments; submit only own (enrollment) submission.
 - Others: read-only where visible (e.g. view-only class materials).
+- **Course materials** (`docs/44_Course-Materials-Report.md`): the section's
+  lecturers and managers share files (private MinIO, `academics.material_*`
+  limits) or http(s) links via `CourseMaterialService`; `CourseMaterialPolicy`
+  mirrors the coursework readers; students are notified (`CourseMaterialAdded`).
 
 ## 9. Validation rules
 

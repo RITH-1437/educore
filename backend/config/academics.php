@@ -30,4 +30,9 @@ return [
 
     'submission_mimes' => ['pdf', 'docx', 'zip', 'png', 'jpg', 'jpeg'],
 
+    // Course materials lecturers share (report 44): documents, slides, sheets, archives, images.
+    'material_max_kb' => (int) env('MATERIAL_MAX_KB', 20480),
+
+    'material_mimes' => ['pdf', 'docx', 'pptx', 'xlsx', 'txt', 'zip', 'png', 'jpg', 'jpeg'],
+
 ];

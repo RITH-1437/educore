@@ -14,6 +14,7 @@ import EmptyState from '../../components/EmptyState.vue'
 import ErrorAlert from '../../components/ErrorAlert.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
+import MaterialsCard from '../../components/coursework/MaterialsCard.vue'
 import SubmitWork from '../../components/coursework/SubmitWork.vue'
 import { useConfirm } from '../../composables/useConfirm'
 import { formatDue, toLocalInput } from '../../utils/coursework'
@@ -27,6 +28,11 @@ const props = defineProps({
   canReview: { type: Boolean, default: false },
   acceptedTypes: { type: Array, default: () => [] },
   maxKb: { type: Number, default: 10240 },
+  // Course materials (report 44).
+  materials: { type: Array, default: () => [] },
+  canShare: { type: Boolean, default: false },
+  materialTypes: { type: Array, default: () => [] },
+  materialMaxKb: { type: Number, default: 20480 },
 })
 
 const { confirm } = useConfirm()
@@ -99,6 +105,8 @@ const badge = (status) => ({ submitted: 'active', late: 'pending', graded: 'comp
         <IconButton :icon="Plus" size="md" variant="primary" label="New assignment" @click="openCreate" />
       </template>
     </PageHeader>
+
+    <MaterialsCard :section-id="section.id" :materials="materials" :can-share="canShare" :accepted-types="materialTypes" :max-kb="materialMaxKb" />
 
     <BaseCard v-if="!assignments.length">
       <EmptyState title="No assignments yet" :description="canManage ? 'Create one — it stays a draft until you publish it.' : 'Assignments appear here once they are published.'" />

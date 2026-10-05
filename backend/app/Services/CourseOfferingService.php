@@ -41,6 +41,7 @@ class CourseOfferingService
         'enrollments' => 'enrollments',
         'attendance_sessions' => 'attendance sessions',
         'assignments' => 'assignments',
+        'course_materials' => 'course materials',
         'exams' => 'exams',
     ];
 

@@ -10,7 +10,7 @@ use OpenApi\Attributes as OA;
     type: 'object',
     properties: [
         new OA\Property(property: 'id', type: 'string', format: 'uuid'),
-        new OA\Property(property: 'kind', type: 'string', enum: ['announcement', 'assignment', 'document', 'enrollment', 'grade', 'internship', 'finance', 'security', 'general']),
+        new OA\Property(property: 'kind', type: 'string', enum: ['announcement', 'assignment', 'material', 'document', 'enrollment', 'grade', 'internship', 'finance', 'security', 'general']),
         new OA\Property(property: 'title', type: 'string', example: 'Document request approved: transcript'),
         new OA\Property(property: 'body', type: 'string'),
         new OA\Property(property: 'url', type: 'string', nullable: true, description: 'In-app path the message points to.', example: '/my-documents'),

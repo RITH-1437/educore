@@ -67,6 +67,8 @@ enrollments
 | From | Relationship | To | Description |
 |---|---|---|---|
 | `sections` | 1 → N | `assignments` | A section's tasks |
+| `sections` | 1 → N | `course_materials` | Handouts and links shared with the section (report 44) |
+| `course_materials` | 1 → 0..1 | `files` | A file material's stored object (polymorphic `fileable`) |
 | `assignments` | 1 → N | `assignment_submissions` | A task's submissions |
 | `enrollments` | 1 → N | `assignment_submissions` | Each submission belongs to an enrolled student |
 

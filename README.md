@@ -111,7 +111,8 @@ shows what is in the database. See
 [`docs/database/seed-strategy.md`](docs/database/seed-strategy.md).
 
 Optional: `MAX_SEMESTER_CREDITS` (default `24`) sets the per-semester credit
-limit used by enrollment (`backend/config/academics.php`).
+limit used by enrollment, and `MATERIAL_MAX_KB` (default `20480`) the largest
+course-material upload (`backend/config/academics.php`).
 
 ## 8. Access the application
 
@@ -143,6 +144,7 @@ limit used by enrollment (`backend/config/academics.php`).
 | `/my-attendance`            | My attendance per course   | Student |
 | `/coursework/sections/{id}` | Section assignments, submissions, grading | Super admin, University admin, Department admin (read, own department), the section's lecturers, enrolled students (submit) |
 | `/my-assignments`           | My assignments + uploads   | Student |
+| `/my-materials`             | Course materials of my sections (files, links) | Student (read); shared on `/coursework/sections/{id}` by its lecturers |
 | `/exams/sections/{id}`      | Section exams + results grid | Super admin, University admin, Department admin (read, own department), the section's lecturers; enrolled students (schedule, released results) |
 | `/my-exams`                 | My exam schedule + results | Student |
 | `/grades`                   | Sections awaiting grade approval | Super admin, University admin (Department admin read-only, own department) |

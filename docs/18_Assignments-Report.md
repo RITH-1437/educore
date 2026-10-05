@@ -10,7 +10,7 @@
 Section coursework: lecturers create draft assignments, publish them, review
 and grade submissions; enrolled students upload one private file per
 assignment (replaceable until graded), with late work flagged. Staff get a
-read-only view. Not built: lecturer-attached materials, rubrics, plagiarism
+read-only view. Not built: rubrics, plagiarism
 checks, notifications (9.19/9.20), and feeding scores into grades (9.14).
 
 ## 2. Data model

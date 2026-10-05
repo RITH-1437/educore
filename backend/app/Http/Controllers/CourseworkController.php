@@ -7,12 +7,15 @@ use App\Http\Requests\AssignmentRequest;
 use App\Http\Requests\GradeSubmissionRequest;
 use App\Http\Requests\SubmitAssignmentRequest;
 use App\Http\Resources\AssignmentResource;
+use App\Http\Resources\CourseMaterialResource;
 use App\Http\Resources\SubmissionResource;
 use App\Models\Assignment;
 use App\Models\AssignmentSubmission;
+use App\Models\CourseMaterial;
 use App\Models\Enrollment;
 use App\Models\Section;
 use App\Services\AssignmentService;
+use App\Services\CourseMaterialService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -29,6 +32,7 @@ class CourseworkController extends Controller
     public function __construct(
         private readonly AssignmentService $assignments,
         private readonly ApiAssignmentController $api,
+        private readonly CourseMaterialService $materials,
     ) {}
 
     public function section(Request $request, Section $section): Response
@@ -58,6 +62,11 @@ class CourseworkController extends Controller
             'canReview' => $canReview,
             'acceptedTypes' => config('academics.submission_mimes'),
             'maxKb' => config('academics.submission_max_kb'),
+            // Course materials (report 44): the same readers as the coursework.
+            'materials' => CourseMaterialResource::collection($this->materials->listFor($section))->resolve(),
+            'canShare' => $request->user()->can('create', [CourseMaterial::class, $section]),
+            'materialTypes' => config('academics.material_mimes'),
+            'materialMaxKb' => config('academics.material_max_kb'),
         ]);
     }
 

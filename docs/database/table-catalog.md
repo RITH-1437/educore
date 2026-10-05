@@ -34,6 +34,7 @@ most important relationships. 50 business tables + 8 framework tables.
 | 25 | `attendance_records` | Raw presence record per student per session | Attendance | Attendance Record | → `attendance_sessions`, → `enrollments` |
 | 26 | `assignments` | Task in a section with deadline & grading config | Assessment | Assignment | → `sections`, ← `assignment_submissions` |
 | 27 | `assignment_submissions` | A student's submission + score/feedback | Assessment | Submission | → `assignments`, → `enrollments` |
+| 27a | `course_materials` | Handout / slides / link a section's lecturers share (report 44) | Assessment | CourseMaterial | → `sections`, → `users` (creator), ← `files` (polymorphic) |
 | 28 | `exams` | Assessment (midterm/final/quiz/practical) in a section | Examination & Grading | Exam | → `sections`, ← `exam_results` |
 | 29 | `exam_results` | Student score for one exam | Examination & Grading | Exam Result | → `exams`, → `enrollments` |
 | 30 | `grades` | Final grade for an enrollment | Examination & Grading | Grade | → `enrollments` (1–1), → `grading_scales` (through letter/points) |

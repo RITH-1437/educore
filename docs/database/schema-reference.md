@@ -898,6 +898,44 @@ Indexes:
 
 ---
 
+### Table: course_materials
+
+Purpose: a handout, slide deck or link a section's lecturers share with the section (report 44).
+
+Columns:
+
+| Column | Type | Nullable | Default | Description |
+|---|---|---|---|---|
+| id | bigint | no | PK | |
+| section_id | bigint | no | | FK → sections.id |
+| title | varchar(255) | no | | |
+| description | text | yes | | Optional note |
+| kind | varchar(10) | no | | file/link |
+| url | varchar(2048) | yes | | Required for `link` (http/https) |
+| created_by | bigint | yes | | FK → users.id |
+| created_at/updated_at | timestamptz | no | ts | |
+
+Relationships:
+
+- belongs to `sections`; created by a `users` row
+- a `file` material has one `files` row (fileable = CourseMaterial, private)
+
+Constraints:
+
+- CHECK `kind IN ('file','link')`; CHECK a link has a `url`
+- FK `section_id` RESTRICT (a section with materials is not deleted); FK `created_by` SET NULL
+
+Indexes:
+
+- PK `id`; IDX `(section_id, created_at)`
+
+Business Rules:
+
+- Shared and removed by the section's lecturers and managers; read by its staff and enrolled students.
+- Removing a material deletes its stored object.
+
+---
+
 ## Module 8 — Examination & Grading
 
 ### Table: exams

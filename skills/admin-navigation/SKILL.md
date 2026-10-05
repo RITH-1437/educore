@@ -101,9 +101,10 @@ Announcements — each arrives with its module; until then only Dashboard.
 
 ### Student
 
-Dashboard · My courses · Timetable · Attendance · Grades & GPA · Documents ·
-Invoices · Announcements — each arrives with its module; until then only
-Dashboard.
+Three folding groups (2026-10-06): **Overview** (Dashboard, Announcements) ·
+**Learning** (Course registration, My timetable, Course materials, My
+assignments, My exams, My attendance) · **Records** (Grades & GPA, My
+documents, My invoices, My internship).
 
 ## Prohibitions
 

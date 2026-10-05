@@ -385,6 +385,11 @@ documented operations.
 | POST | `/api/assignments/{assignment}/submissions` | Sanctum + student enrolled in the section (multipart file) | Documented |
 | POST | `/api/submissions/{submission}/grade` | Sanctum + managers or a lecturer of the section | Documented |
 | GET | `/api/submissions/{submission}/file` | Sanctum + staff, a lecturer of the section, or the submitting student | Documented |
+| GET | `/api/sections/{section}/materials` | Sanctum + the section's lecturers, managers, a Department Admin over it, enrolled students (report 44) | Documented |
+| POST | `/api/sections/{section}/materials` | Sanctum + the section's lecturers or managers; multipart file or http(s) link | Documented |
+| PUT, PATCH | `/api/materials/{material}` | Sanctum + the section's lecturers or managers | Both documented |
+| DELETE | `/api/materials/{material}` | Sanctum + the section's lecturers or managers; 204 | Documented |
+| GET | `/api/materials/{material}/file` | Sanctum + anyone who reads the section's materials; 404 for a link | Documented |
 | GET | `/api/sections/{section}/exams` | Sanctum + managers, Faculty Admin, a lecturer of the section, or an enrolled student | Documented |
 | POST | `/api/sections/{section}/exams` | Sanctum + managers or a lecturer of the section | Documented |
 | GET | `/api/exams/{exam}` | Sanctum + staff, a lecturer of the section (roster), or an enrolled student (own released result) | Documented |
@@ -537,6 +542,8 @@ Re-ran Swagger generation and a scripted method/path comparison of
 | Undocumented / extra operations after password change / reset | 0 / 0 |
 | After reports 30–42 (incl. the in-app inbox, 3 operations) — re-run 2026-10-05: route definitions / operations / OpenAPI paths / schemas | 203 / 222 / 141 / 161 |
 | Undocumented / extra operations after the 2026-10-05 re-run (A-10 fixed) | 0 / 0 |
+| After course materials (report 44, 6 operations) — re-run 2026-10-06: route definitions / operations / OpenAPI paths / schemas | 208 / 228 / 144 / 162 |
+| Undocumented / extra operations after course materials | 0 / 0 |
 
 - **A-09 — PATCH aliases undocumented.** `PATCH` on `/api/assignments/{assignment}`,
   `/api/exams/{exam}`, `/api/offerings/{offering}`, `/api/rooms/{room}`,
@@ -652,3 +659,18 @@ Web routes (Inertia, session): `GET /inbox`, `POST /inbox/{notification}/open`
 /inbox/{notification}/read`, `POST /inbox/read-all`. Schemas
 `InboxNotification`, `InboxNotificationCollection`. See
 `docs/42_In-App-Notification-Inbox-Report.md`.
+
+## Course materials (2026-10-06)
+
+| Method | URI | Action | Auth | Notes |
+|---|---|---|---|---|
+| GET | `/api/sections/{section}/materials` | `CourseMaterialController::index` | Sanctum | Section lecturers, managers, Department Admin over it, enrolled students |
+| POST | `/api/sections/{section}/materials` | `CourseMaterialController::store` | Sanctum | Lecturers of the section, managers; `kind=file` (multipart, 20 MB) or `kind=link` |
+| PUT/PATCH | `/api/materials/{material}` | `CourseMaterialController::update` | Sanctum | Title / note; a link also its URL |
+| DELETE | `/api/materials/{material}` | `CourseMaterialController::destroy` | Sanctum | Removes the stored file too |
+| GET | `/api/materials/{material}/file` | `CourseMaterialController::download` | Sanctum | Private object streamed; 404 for a link |
+
+Web: `GET /my-materials` (students), `POST /coursework/sections/{section}/materials`,
+`PUT|DELETE /materials/{material}`, `GET /materials/{material}/file`. Schema
+`CourseMaterial`; the inbox `kind` gains `material`. See
+`docs/44_Course-Materials-Report.md`.

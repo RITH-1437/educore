@@ -13,8 +13,8 @@ Authorization decides what an authenticated user may do. Identity is handled in
 | Role | Scope |
 | --- | --- |
 | **Super Admin** | Entire platform; system settings; audit log; user/role management. |
-| **University Admin** | University-level: faculties, departments, programs, students, lecturers, courses, semesters, announcements, docs, payments, reports. |
-| **Faculty / Department Admin** | Students/lecturers/courses/classes/schedules/attendance/reviews within their assigned faculty or department only. |
+| **University Admin** | University-level: departments, programs, students, lecturers, courses, semesters, announcements, docs, payments, reports. |
+| **Department Admin** | Students/lecturers/courses/classes/schedules/attendance/reviews within their assigned department only. |
 | **Lecturer** | Their assigned courses: attendance, assignments, exams, grades, materials, announcements. |
 | **Student** | Their own data only: profile, registration, timetable, attendance, grades, GPA, document requests, invoices, announcements. |
 
@@ -32,14 +32,18 @@ Authorization decides what an authenticated user may do. Identity is handled in
 - Scope queries to the user where relevant (a lecturer only sees their
   sections; a student only their own records) — use query scopes +
   policies, not filters the client can tamper with.
-- Faculty Admin scope: `users.faculty_id` → `User::facultyScope()`. Unit-owned
-  models use `BelongsToFaculty` (`visibleTo($user)` for lists,
-  `isVisibleTo($user)` in policies); ownership rules live in
-  `App\Support\FacultyScope`. New unit-owned lists must pass the viewer
-  (`docs/32_Faculty-Admin-Scoping-Report.md`).
-- Abilities a Faculty Admin may use *within* their faculty take the record and
-  must be authorized with it (`authorize('process', $documentRequest)`), never
-  at class level (`docs/33_Faculty-Admin-Request-Handling-Report.md`).
+- Department Admin scope (the faculty level was removed in report 39):
+  `users.department_id` → `User::departmentScope()`. Unit-owned models use
+  `BelongsToDepartment` (`visibleTo($user)` for lists, `isVisibleTo($user)` in
+  policies); ownership rules live in `App\Support\DepartmentScope`. New
+  unit-owned lists must pass the viewer
+  (`docs/39_Department-Only-Structure-Report.md`, formerly report 32).
+- Abilities a Department Admin may use *within* their department take the
+  record and must be authorized with it (`authorize('process', $documentRequest)`),
+  never at class level (`docs/33_Faculty-Admin-Request-Handling-Report.md`).
+- Per-user data with no unit (notification preferences, the in-app inbox) is
+  resolved through the caller's own relation with no user id in the path;
+  someone else's record answers 404 (`docs/42_In-App-Notification-Inbox-Report.md`).
 - **Never trust frontend authorization.** Hiding a button is UX only; the API
   must reject unauthorized access with `403`.
 

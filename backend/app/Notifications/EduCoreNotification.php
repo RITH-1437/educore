@@ -20,6 +20,9 @@ use Throwable;
  * - Email goes out when the notification is critical (document status,
  *   finance) or the user kept email on; Telegram only when the user opted in
  *   and linked a chat. Inactive accounts receive nothing.
+ * - Every notification with a `toInbox()` message is also stored in the
+ *   user's in-app inbox (`database` channel, `docs/42_In-App-Notification-Inbox-Report.md`);
+ *   it cannot be turned off and never holds secrets (a reset link has no inbox message).
  */
 abstract class EduCoreNotification extends Notification implements ShouldQueue
 {
@@ -52,6 +55,10 @@ abstract class EduCoreNotification extends Notification implements ShouldQueue
         $preferences = $notifiable instanceof User ? $notifiable->preferences() : null;
         $channels = [];
 
+        if ($notifiable instanceof User && method_exists($this, 'toInbox')) {
+            $channels[] = 'database';
+        }
+
         if (filled($notifiable->email ?? null) && ($this->critical || ($preferences?->notify_by_email ?? true))) {
             $channels[] = 'mail';
         }
@@ -61,6 +68,17 @@ abstract class EduCoreNotification extends Notification implements ShouldQueue
         }
 
         return $channels;
+    }
+
+    /**
+     * The stored inbox row: `kind` (icon group), `title`, `body` and an in-app
+     * `url` path, rendered once at send time.
+     *
+     * @return array{kind: string, title: string, body: string, url: string|null}
+     */
+    public function toDatabase(object $notifiable): array
+    {
+        return ['kind' => 'general', 'url' => null, ...$this->toInbox($notifiable)];
     }
 
     public function failed(Throwable $e): void

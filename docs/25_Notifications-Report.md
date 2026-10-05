@@ -2,7 +2,7 @@
 
 - **Date:** 2026-10-02
 - **Modules:** 9.20 Email Notifications, 9.21 Telegram Notifications
-- **Status:** `[Implemented]` (class reminders, password emails and an in-app inbox `[Future]`)
+- **Status:** `[Implemented]` (class reminders `[Future]`; password emails shipped in report 29; the in-app inbox in report 42)
 - **Depends on:** 9.9, 9.14, 9.16, 9.18, 9.19 (the events), Redis queue
 - **Infrastructure:** new `queue` and `scheduler` containers (same backend image)
 
@@ -29,6 +29,8 @@ linked a chat. Not built: class-start reminders, password-reset emails (no
 password-reset flow exists yet), an in-app notification inbox (the existing
 `notifications` table has a bigint id, while Laravel's database channel needs a
 UUID — left unused), automatic Telegram chat linking through a bot webhook.
+*(Update: password-reset emails shipped in report 29; the in-app inbox — with
+the table rekeyed to a UUID — in `docs/42_In-App-Notification-Inbox-Report.md`.)*
 
 ## 2. Data model
 

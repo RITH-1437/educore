@@ -3,7 +3,9 @@ import { computed } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import { Bell, CalendarDays, ChevronRight, KeyRound, LogOut, Menu, Moon, Sun } from '@lucide/vue'
 import BaseDropdown from '../BaseDropdown.vue'
+import BaseTooltip from '../BaseTooltip.vue'
 import { useNavigation } from '../../composables/useNavigation'
+import { unreadLabel } from '../../utils/notifications'
 
 defineProps({
   theme: { type: String, default: 'light' },
@@ -13,6 +15,8 @@ const emit = defineEmits(['open-navigation', 'toggle-theme'])
 const page = usePage()
 const user = computed(() => page.props.auth?.user ?? null)
 const initial = computed(() => user.value?.name?.slice(0, 1)?.toUpperCase() ?? 'U')
+// In-app inbox (report 42): refreshed with every page visit.
+const unread = computed(() => page.props.auth?.unread_notifications ?? 0)
 const { breadcrumbs } = useNavigation()
 
 const todayLabel = computed(() => new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }))
@@ -43,6 +47,13 @@ const logout = () => router.post('/logout')
     </span>
 
     <div class="flex items-center gap-1 sm:gap-2">
+      <BaseTooltip content="Notifications" placement="bottom">
+        <Link href="/inbox" class="relative inline-flex h-11 w-11 items-center justify-center rounded-md text-muted transition-colors duration-150 hover:bg-surface hover:text-ink focus-visible:outline-2 focus-visible:outline-primary dark:text-dark-muted dark:hover:bg-dark-surface-2 dark:hover:text-dark-ink" :aria-label="unread ? `Notifications, ${unread} unread` : 'Notifications'">
+          <Bell class="h-5 w-5" aria-hidden="true" />
+          <span v-if="unread" class="absolute right-1 top-1 flex h-5 min-w-5 items-center justify-center rounded-pill bg-primary px-1 text-caption font-semibold leading-none text-white ring-2 ring-surface dark:bg-dark-primary dark:text-dark-bg dark:ring-dark-surface" aria-hidden="true">{{ unreadLabel(unread) }}</span>
+        </Link>
+      </BaseTooltip>
+
       <button type="button" class="inline-flex h-11 w-11 items-center justify-center rounded-md text-muted transition-colors duration-150 hover:bg-surface hover:text-ink focus-visible:outline-2 focus-visible:outline-primary dark:text-dark-muted dark:hover:bg-dark-surface-2 dark:hover:text-dark-ink" :aria-label="theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'" @click="emit('toggle-theme')">
         <Sun v-if="theme === 'dark'" class="h-5 w-5" aria-hidden="true" />
         <Moon v-else class="h-5 w-5" aria-hidden="true" />

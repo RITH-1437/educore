@@ -82,13 +82,13 @@ class NotificationTest extends TestCase
         $optional = new TestNotification;
         $critical = new InvoiceIssued(app(InvoiceService::class)->create($this->invoicePayload()));
 
-        // Defaults: email only (no chat linked).
-        $this->assertSame(['mail'], $optional->via($user));
+        // Defaults: inbox + email (no chat linked). The in-app inbox cannot be turned off (report 42).
+        $this->assertSame(['database', 'mail'], $optional->via($user));
 
         NotificationPreference::query()->create(['user_id' => $user->id, 'notify_by_email' => false, 'notify_by_telegram' => true, 'telegram_chat_id' => '123456789']);
         $user->refresh();
-        $this->assertSame([TelegramChannel::class], $optional->via($user));
-        $this->assertSame(['mail', TelegramChannel::class], $critical->via($user)); // critical ignores the email opt-out
+        $this->assertSame(['database', TelegramChannel::class], $optional->via($user));
+        $this->assertSame(['database', 'mail', TelegramChannel::class], $critical->via($user)); // critical ignores the email opt-out
 
         $user->update(['is_active' => false]);
         $this->assertSame([], $critical->via($user->refresh()));

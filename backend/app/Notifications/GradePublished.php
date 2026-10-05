@@ -29,6 +29,12 @@ class GradePublished extends EduCoreNotification
         return "Your final grade for {$this->course()} has been approved.\n\n".$this->link('/my-grades');
     }
 
+    /** @return array{kind: string, title: string, body: string, url: string} */
+    public function toInbox(object $notifiable): array
+    {
+        return ['kind' => 'grade', 'title' => "Grade published: {$this->course()}", 'body' => "Your final grade for {$this->course()} has been approved.", 'url' => '/my-grades'];
+    }
+
     private function course(): string
     {
         $course = $this->grade->loadMissing('enrollment.section.offering.course')->enrollment->section->offering->course;

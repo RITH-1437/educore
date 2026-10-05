@@ -19,4 +19,10 @@ class TestNotification extends EduCoreNotification
     {
         return 'EduCore: your Telegram notifications are working.';
     }
+
+    /** @return array{kind: string, title: string, body: string, url: string} */
+    public function toInbox(object $notifiable): array
+    {
+        return ['kind' => 'general', 'title' => 'EduCore test notification', 'body' => 'Your in-app notifications are working.', 'url' => '/notifications'];
+    }
 }

@@ -442,6 +442,9 @@ documented operations.
 | GET | `/api/notification-preferences` | Sanctum, any role (own only) | Documented |
 | PUT | `/api/notification-preferences` | Sanctum, any role (own only) | Documented |
 | POST | `/api/notification-preferences/test` | Sanctum, any role; `throttle:notification-test` (3/min) | Documented |
+| GET | `/api/notifications` | Sanctum, any role (own inbox only; `filters[status]`, `meta.unread_count`) | Documented |
+| POST | `/api/notifications/{notification}/read` | Sanctum, any role (own only; UUID, 404 otherwise) | Documented |
+| POST | `/api/notifications/read-all` | Sanctum, any role (own only) | Documented |
 | GET | `/api/internship-companies` | Sanctum + staff (all) or a student (active only) | Documented |
 | POST | `/api/internship-companies` | Sanctum + super-admin or university-admin | Documented |
 | PUT, PATCH | `/api/internship-companies/{company}` | Sanctum + super-admin or university-admin | Both documented |
@@ -532,12 +535,20 @@ Re-ran Swagger generation and a scripted method/path comparison of
 | Undocumented / extra operations after 9.24 | 0 / 0 |
 | After password change / reset (3 operations added): route definitions / operations / OpenAPI paths / schemas | 190 / 209 / 128 / 159 |
 | Undocumented / extra operations after password change / reset | 0 / 0 |
+| After reports 30–42 (incl. the in-app inbox, 3 operations) — re-run 2026-10-05: route definitions / operations / OpenAPI paths / schemas | 203 / 222 / 141 / 161 |
+| Undocumented / extra operations after the 2026-10-05 re-run (A-10 fixed) | 0 / 0 |
 
 - **A-09 — PATCH aliases undocumented.** `PATCH` on `/api/assignments/{assignment}`,
   `/api/exams/{exam}`, `/api/offerings/{offering}`, `/api/rooms/{room}`,
   `/api/schedule-entries/{entry}` and `/api/sections/{section}` was routed but
   only the PUT operation was annotated. Added `OA\Patch` operations mirroring
   each PUT (same request schema and full-update validation — see R-03).
+- **A-10 — document-type annotations (2026-10-05).** `PATCH
+  /api/document-types/{documentType}` (report 40) was routed but undocumented,
+  and its 13 error responses pointed `ref` at a *schema* — invalid for an
+  OpenAPI response object, so Swagger UI showed them without a body. Added the
+  `OA\Patch` operation mirroring the PUT and rewrote the responses with a
+  description and a JSON body like every other controller.
 - **R-01** is resolved (inactive accounts are refused at sign-in).
 - The *Validation Results* section below is the original 2026-09-28 snapshot.
 
@@ -625,3 +636,19 @@ endpoints and the department dashboard endpoint:
 
 See `docs/39_Department-Only-Structure-Report.md`.
 
+## In-app notification inbox (2026-10-05)
+
+Three operations, always on the caller's own notifications (no user id in any
+path; another user's id or a non-UUID answers 404):
+
+| Method | URI | Action | Auth | Notes |
+|---|---|---|---|---|
+| GET | `/api/notifications` | `NotificationController::index` | Sanctum, any role | `filters[status]=unread\|read`, `per_page` ≤ 100; `meta.unread_count` |
+| POST | `/api/notifications/{notification}/read` | `NotificationController::read` | Sanctum, any role | 200 with the notification |
+| POST | `/api/notifications/read-all` | `NotificationController::readAll` | Sanctum, any role | `{message, marked}` |
+
+Web routes (Inertia, session): `GET /inbox`, `POST /inbox/{notification}/open`
+(marks read, redirects to the stored in-app path only), `POST
+/inbox/{notification}/read`, `POST /inbox/read-all`. Schemas
+`InboxNotification`, `InboxNotificationCollection`. See
+`docs/42_In-App-Notification-Inbox-Report.md`.

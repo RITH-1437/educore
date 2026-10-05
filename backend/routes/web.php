@@ -21,6 +21,7 @@ use App\Http\Controllers\EnrollmentController;
 use App\Http\Controllers\ErrorLogController;
 use App\Http\Controllers\ExamsController;
 use App\Http\Controllers\GradesController;
+use App\Http\Controllers\InboxController;
 use App\Http\Controllers\InternshipsController;
 use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\LecturerController;
@@ -304,6 +305,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationPreferencesController::class, 'edit'])->name('notifications.edit');
     Route::put('/notifications', [NotificationPreferencesController::class, 'update'])->name('notifications.update');
     Route::post('/notifications/test', [NotificationPreferencesController::class, 'test'])->middleware('throttle:notification-test')->name('notifications.test');
+});
+
+// In-app inbox (report 42): every signed-in user, own notifications only.
+Route::middleware('auth')->prefix('/inbox')->name('inbox.')->group(function () {
+    Route::get('/', [InboxController::class, 'index'])->name('index');
+    Route::post('/read-all', [InboxController::class, 'readAll'])->name('read-all');
+    Route::post('/{notification}/open', [InboxController::class, 'open'])->whereUuid('notification')->name('open');
+    Route::post('/{notification}/read', [InboxController::class, 'read'])->whereUuid('notification')->name('read');
 });
 
 // Public verification page (module 9.17) — no sign-in.

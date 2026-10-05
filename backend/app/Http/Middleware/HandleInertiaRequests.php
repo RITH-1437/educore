@@ -27,6 +27,8 @@ class HandleInertiaRequests extends Middleware
                         'slug' => $user->role->slug,
                     ] : null,
                 ] : null,
+                // Top-bar bell badge (in-app inbox, report 42).
+                'unread_notifications' => $user ? $user->unreadNotifications()->count() : 0,
             ],
             'flash' => [
                 'success' => session('success'),

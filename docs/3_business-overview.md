@@ -649,9 +649,12 @@ users, main business activities, and expected outputs.
 - **Delivered:** queued, retried emails for registration confirmation, grade
   approval, document request status, invoices and payments (always sent),
   announcements and assignment reminders, with a per-user opt-out for
-  non-critical mail and a queue worker container. Password-related emails are
-  [Future] (no password-reset flow yet).
-  See [25_Notifications-Report.md](25_Notifications-Report.md).
+  non-critical mail and a queue worker container. Password-reset links and
+  password-change notices are emailed (report 29). Every notification is also
+  kept in an in-app inbox with an unread bell in the top bar (180-day
+  retention; report 42). Class-start reminders are [Future].
+  See [25_Notifications-Report.md](25_Notifications-Report.md) and
+  [42_In-App-Notification-Inbox-Report.md](42_In-App-Notification-Inbox-Report.md).
 
 ### 9.21 Telegram Notifications [Implemented]
 

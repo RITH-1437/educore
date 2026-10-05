@@ -26,7 +26,7 @@ Columns:
 | password | varchar(255) | no | | Hashed |
 | remember_token | varchar(100) | yes | | Sanctum/session remember |
 | role_id | bigint | no | | FK → roles.id |
-| faculty_id | bigint | yes | | FK → faculties.id; Faculty Admin only — the faculty whose data they may read (`docs/32_Faculty-Admin-Scoping-Report.md`) |
+| department_id | bigint | yes | | FK → departments.id; Department Admin only — the department whose data they may read (`docs/39_Department-Only-Structure-Report.md`) |
 | phone | varchar(50) | yes | | Contact |
 | avatar_key | varchar(255) | yes | | MinIO key |
 | is_active | boolean | no | true | Account usable |
@@ -36,20 +36,21 @@ Columns:
 Relationships:
 
 - belongs to `roles` (1–1)
-- belongs to `faculties` (N–1, optional; Faculty Admin only)
+- belongs to `departments` (N–1, optional; Department Admin only)
 - has one `students`, has one `lecturers`
 - has many `audit_logs`, `announcements` (author), `document_requests.processed_by`, `payments.received_by`
+- has many `notifications` (morph; in-app inbox, report 42)
 
 Constraints:
 
 - UQ `email`
 - FK `role_id` → `roles.id` RESTRICT
-- FK `faculty_id` → `faculties.id` SET NULL (`fk_users_faculty`)
+- FK `department_id` → `departments.id` SET NULL (`fk_users_department`)
 - `is_active` not null
 
 Indexes:
 
-- PK `id`; UQ `email`; IDX `role_id`; IDX `faculty_id` (`idx_users_faculty`)
+- PK `id`; UQ `email`; IDX `role_id`; IDX `department_id` (`idx_users_department`)
 
 Business Rules:
 
@@ -89,7 +90,7 @@ Indexes:
 
 Business Rules:
 
-- System roles: `super_admin`, `university_admin`, `faculty_admin`, `lecturer`, `student`.
+- System roles (slugs): `super-admin`, `university-admin`, `department-admin` (was `faculty-admin` before report 39), `lecturer`, `student`.
 - `is_system = true` rows are never hard-deleted.
 
 ---
@@ -194,7 +195,7 @@ Columns:
 
 Relationships:
 
-- has many `faculties`
+- has many `departments`
 
 Constraints:
 
@@ -206,9 +207,16 @@ Indexes:
 
 ---
 
-### Table: faculties
+### Table: faculties (removed)
 
-Purpose: broad academic division (e.g. Faculty of Engineering).
+Dropped by `2026_10_05_120000_remove_faculty_level` (report 39): departments
+now belong to the university directly (University → Department → Program).
+
+---
+
+### Table: departments
+
+Purpose: academic unit of the university (e.g. Computer Science); the unit a Department Admin administers.
 
 Columns:
 
@@ -218,56 +226,23 @@ Columns:
 | university_id | bigint | no | | FK → universities.id |
 | code | varchar(50) | no | UQ | |
 | name | varchar(255) | no | | |
-| dean_name | varchar(255) | yes | | |
-| description | text | yes | | |
-| is_active | boolean | no | true | |
-| created_at/updated_at/deleted_at | | | ts | soft delete allowed |
-
-Relationships:
-
-- belongs to `universities`
-- has many `departments`
-
-Constraints:
-
-- UQ `code`
-- FK `university_id` → `universities.id` RESTRICT
-
-Indexes:
-
-- PK `id`; UQ `code`; IDX `university_id`
-
----
-
-### Table: departments
-
-Purpose: sub-division of a faculty (e.g. Computer Science).
-
-Columns:
-
-| Column | Type | Nullable | Default | Description |
-|---|---|---|---|---|
-| id | bigint | no | PK | |
-| faculty_id | bigint | no | | FK → faculties.id |
-| code | varchar(50) | no | UQ | |
-| name | varchar(255) | no | | |
 | head_name | varchar(255) | yes | | |
 | description | text | yes | | |
 | is_active | boolean | no | true | |
 
 Relationships:
 
-- belongs to `faculties`
-- has many `programs`, `courses`, `lecturers`
+- belongs to `universities`
+- has many `programs`, `courses`, `lecturers`; has many `users` (Department Admins)
 
 Constraints:
 
-- UQ `code`
-- FK `faculty_id` → `faculties.id` RESTRICT
+- UQ `code`; UQ `(university_id, name)` (`uq_departments_university_id_name`)
+- FK `university_id` → `universities.id` RESTRICT
 
 Indexes:
 
-- PK `id`; UQ `code`; IDX `faculty_id`
+- PK `id`; UQ `code`; IDX `university_id` (`idx_departments_university`)
 
 ---
 
@@ -286,6 +261,7 @@ Columns:
 | degree_level | varchar(50) | no | | bachelor/master/phd/… |
 | duration_years | smallint | yes | | |
 | credits_required | numeric(5,1) | yes | | Graduation credits |
+| tuition_per_credit | numeric(8,2) | yes | 50.00 | Automatic tuition rate (report 41) |
 | is_active | boolean | no | true | |
 
 Relationships:
@@ -1153,6 +1129,7 @@ Columns:
 | name | varchar(150) | no | | |
 | description | text | yes | | |
 | requires_fee | boolean | no | false | |
+| fee_amount | numeric(10,2) | no | 0 | Billed when a request is approved (report 40) |
 | is_active | boolean | no | true | |
 | sort_order | smallint | no | 0 | |
 
@@ -1175,6 +1152,11 @@ Columns:
 | document_type_id | bigint | no | | FK → document_types.id |
 | academic_year_id | bigint | yes | | FK → academic_years.id |
 | semester_id | bigint | yes | | FK → semesters.id |
+| invoice_id | bigint | yes | | FK → invoices.id; the fee invoice (report 40) |
+| is_fee_waived | boolean | no | false | Fee waived (report 41) |
+| waived_by | bigint | yes | | FK → users.id |
+| waived_at | timestamp | yes | | |
+| waiver_reason | varchar(500) | yes | | |
 | reason | text | yes | | |
 | status | varchar(20) | no | `pending` | pending/approved/rejected/generated |
 | submitted_at | timestamptz | no | now | |
@@ -1185,17 +1167,18 @@ Columns:
 
 Relationships:
 
-- belongs to `students`, `document_types`
+- belongs to `students`, `document_types`; optionally to `invoices` (fee)
 - has one `documents`
 
 Constraints:
 
 - CHECK `status`
 - FK `student_id` RESTRICT; FK `document_type_id` RESTRICT; FK `processed_by` SET NULL
+- FK `invoice_id` SET NULL (`fk_document_requests_invoice`); FK `waived_by` SET NULL
 
 Indexes:
 
-- PK `id`; IDX `(status, submitted_at)`; IDX `student_id`
+- PK `id`; IDX `(status, submitted_at)`; IDX `student_id`; IDX `invoice_id`
 
 ---
 
@@ -1322,6 +1305,7 @@ Columns:
 |---|---|---|---|---|
 | id | bigint | no | PK | |
 | student_id | bigint | no | | FK → students.id |
+| semester_id | bigint | yes | | FK → semesters.id; tuition invoices (report 41) |
 | invoice_number | varchar(50) | no | UQ | Human-facing |
 | title | varchar(255) | no | | |
 | description | text | yes | | |
@@ -1345,11 +1329,11 @@ Constraints:
 
 - UQ `invoice_number`; CHECK `status`
 - CHECK `total >= 0`; CHECK `0 <= amount_paid <= total`
-- FK `student_id` RESTRICT
+- FK `student_id` RESTRICT; FK `semester_id` SET NULL
 
 Indexes:
 
-- PK `id`; UQ `invoice_number`; IDX `(student_id, status)`; IDX `due_date`
+- PK `id`; UQ `invoice_number`; IDX `(student_id, status)`; IDX `due_date`; IDX `(student_id, semester_id)`
 
 ---
 
@@ -1435,7 +1419,7 @@ Columns:
 | title | varchar(255) | no | | |
 | body | text | no | | |
 | announcement_type | varchar(30) | yes | `general` | general/academic/administrative/event |
-| audience_type | varchar(30) | no | `all` | all/students/lecturers/staff/faculty/department/program/section/course |
+| audience_type | varchar(30) | no | `all` | all/students/lecturers/staff/department/program/section/course (`faculty` removed in report 39) |
 | audience_id | bigint | yes | | Target entity id |
 | publish_state | varchar(20) | no | `draft` | draft/published/archived |
 | published_at | timestamptz | yes | | |
@@ -1443,7 +1427,7 @@ Columns:
 Relationships:
 
 - belongs to `users` (author)
-- targets `faculties`/`departments`/`programs`/`sections`/`courses` via `audience_type`+`audience_id`
+- targets `departments`/`programs`/`sections`/`courses` via `audience_type`+`audience_id`
 - may have `files`
 
 Constraints:
@@ -1459,17 +1443,17 @@ Indexes:
 
 ### Table: notifications
 
-Purpose: Laravel in-app notifications (queued).
+Purpose: the in-app inbox — rows written by Laravel's `database` notification channel (report 42).
 
 Columns:
 
 | Column | Type | Nullable | Default | Description |
 |---|---|---|---|---|
-| id | bigint | no | PK | |
+| id | uuid | no | PK | Generated by the channel (bigint before report 42) |
 | notifiable_type | varchar(255) | no | | Morph type |
 | notifiable_id | bigint | no | | Morph id |
 | type | varchar(255) | no | | Notification class |
-| data | jsonb | yes | | Semi-structured payload |
+| data | jsonb | no | | `kind`, `title`, `body`, `url` rendered at send time |
 | read_at | timestamptz | yes | | |
 | created_at/updated_at | timestamptz | no | ts | |
 
@@ -1480,6 +1464,11 @@ Relationships:
 Indexes:
 
 - PK `id`; IDX `(notifiable_type, notifiable_id)`; IDX `read_at`
+
+Business Rules:
+
+- Read and marked only by the recipient; deleted after 180 days (`notifications:prune`).
+- Never stores password-reset links.
 
 ---
 
@@ -1627,7 +1616,7 @@ Indexes:
 
 ### Table: internship_evaluations
 
-Purpose: supervisor/faculty evaluation of an internship.
+Purpose: company-supervisor / academic evaluation of an internship.
 
 Columns:
 
@@ -1635,7 +1624,7 @@ Columns:
 |---|---|---|---|---|
 | id | bigint | no | PK | |
 | internship_id | bigint | no | | FK → internships.id |
-| evaluator_type | varchar(30) | no | | supervisor/faculty |
+| evaluator_type | varchar(30) | no | | supervisor/academic (`faculty` before report 39) |
 | evaluator_name | varchar(150) | yes | | |
 | score | numeric(5,2) | yes | | CHECK 0–100 |
 | rating | varchar(20) | yes | | |

@@ -28,6 +28,12 @@ class InternshipStatusChanged extends EduCoreNotification
         return $this->sentence()."\n\n".$this->link('/my-internships');
     }
 
+    /** @return array{kind: string, title: string, body: string, url: string} */
+    public function toInbox(object $notifiable): array
+    {
+        return ['kind' => 'internship', 'title' => 'Internship '.str_replace('_', ' ', $this->internship->status).': '.$this->internship->position_title, 'body' => $this->sentence(), 'url' => '/my-internships'];
+    }
+
     private function sentence(): string
     {
         $what = "your internship “{$this->internship->position_title}” at {$this->internship->loadMissing('company')->company->name}";

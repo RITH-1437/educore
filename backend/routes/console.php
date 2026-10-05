@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Semester;
+use App\Services\InboxService;
 use App\Services\InvoiceService;
 use App\Services\ReminderService;
 use App\Services\TuitionInvoiceService;
@@ -29,6 +30,13 @@ Artisan::command('notifications:assignment-reminders', function (ReminderService
 })->purpose('Remind students of assignments due within 24 hours');
 
 Schedule::command('notifications:assignment-reminders')->dailyAt('07:00');
+
+// In-app inbox (report 42): stored notifications are kept for 180 days.
+Artisan::command('notifications:prune {--days='.InboxService::RETENTION_DAYS.' : Delete notifications older than this many days}', function (InboxService $inbox) {
+    $this->info($inbox->prune(max(1, (int) $this->option('days'))).' notification(s) deleted.');
+})->purpose('Delete in-app notifications past the retention period');
+
+Schedule::command('notifications:prune')->dailyAt('01:00');
 
 // Tuition (module 9.18): generate semester tuition invoices from course enrollments.
 Artisan::command('tuition:generate {semester : ID or code of the semester} {--due-date= : Due date for generated invoices (YYYY-MM-DD)} {--rate= : Override rate per credit} {--department= : Filter by department ID} {--program= : Filter by program ID} {--dry-run : Run in preview mode without creating invoices}', function (TuitionInvoiceService $service) {

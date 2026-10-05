@@ -7,14 +7,14 @@ most important relationships. 50 business tables + 8 framework tables.
 
 | # | Table | Purpose | Module | Primary Entity | Important Relationships |
 |---|---|---|---|---|---|
-| 1 | `users` | Accounts with login/credentials & RBAC role | Identity & Access | User | → `roles` (N–1), → `faculties` (N–1, Faculty Admin scope), → `students` (1–1), → `lecturers` (1–1), → `audit_logs` (1–N as actor) |
+| 1 | `users` | Accounts with login/credentials & RBAC role | Identity & Access | User | → `roles` (N–1), → `departments` (N–1, Department Admin scope), ← `notifications` (1–N, in-app inbox), → `students` (1–1), → `lecturers` (1–1), → `audit_logs` (1–N as actor) |
 | 2 | `roles` | The 5 system roles (super-admin, admin, registrar, lecturer, student) | Identity & Access | Role | ← `users` (1–N), → `permissions` (N–N via `permission_role`) |
 | 3 | `permissions` | Granular permission catalog | Identity & Access | Permission | → `roles` (N–N via `permission_role`) |
 | 4 | `permission_role` | Pivot linking roles ↔ permissions | Identity & Access | Pivot | `role_id` → `roles`, `permission_id` → `permissions` |
 | 5 | `settings` | System/institution key-value config | Identity & Access | Setting | — |
-| 6 | `universities` | The institution itself (system-level root) | University Structure | University | → `faculties` (1–N) |
-| 7 | `faculties` | Broad academic division | University Structure | Faculty | → `universities`, ← `departments` (1–N) |
-| 8 | `departments` | Sub-division of a faculty | University Structure | Department | → `faculties`, ← `programs` (1–N), ← `courses` (1–N), ← `lecturers` (1–N) |
+| 6 | `universities` | The institution itself (system-level root) | University Structure | University | → `departments` (1–N) |
+| 7 | ~~`faculties`~~ | Removed in report 39 (departments sit directly under the university) | — | — | — |
+| 8 | `departments` | Academic unit of the university | University Structure | Department | → `universities`, ← `programs` (1–N), ← `courses` (1–N), ← `lecturers` (1–N) |
 | 9 | `programs` | A degree track within a department (unique `code`; unique `(department_id, name)`) | University Structure | Program | → `departments`, → `courses` (N–N via `course_programs`), ← `students` (N–N via `student_programs`) |
 | 10 | `academic_years` | e.g. 2026–2027 | Academic Management | Academic Year | ← `semesters` (1–N), ← `enrollments` snapshot |
 | 11 | `semesters` | Term within an academic year | Academic Management | Semester | → `academic_years`, ← `course_offerings` (1–N), ← `enrollments` snapshot |
@@ -49,12 +49,12 @@ most important relationships. 50 business tables + 8 framework tables.
 | 40 | `invoice_items` | Line items on an invoice | Finance | Invoice Item | → `invoices` |
 | 41 | `payments` | Records of received payments | Finance | Payment | → `invoices`, → `received_by` (users) |
 | 42 | `announcements` | Published messages with audience targeting | Communication | Announcement | → `author_id` (users), target via `audience_type`/`audience_id`, attachments via `files` |
-| 43 | `notifications` | In-app queued notifications (Laravel) | Communication | Notification | `notifiable` polymorphic → users |
+| 43 | `notifications` | In-app inbox: stored notifications, UUID key (report 42) | Communication | Notification | `notifiable` polymorphic → users |
 | 44 | `notification_preferences` | Per-user channel/target preferences | Communication | Preference | → `users` (1–1) |
 | 45 | `internship_companies` | Lean company records | Internship | Company | ← `internships` (1–N) |
 | 46 | `internships` | Student application + internship record lifecycle | Internship | Internship | → `students`, → `internship_companies`, ← `internship_reports`, ← `internship_evaluations` |
 | 47 | `internship_reports` | Student-submitted internship reports | Internship | Report | → `internships`, file via `files` |
-| 48 | `internship_evaluations` | Supervisor/faculty evaluations | Internship | Evaluation | → `internships` |
+| 48 | `internship_evaluations` | Company-supervisor / academic evaluations | Internship | Evaluation | → `internships` |
 | 49 | `audit_logs` | Append-only record of sensitive actions | Audit & Security | Audit Log | → `actor_id` (users, nullable), `auditable` polymorphic |
 | 50 | `error_logs` | Append-only record of HTTP 404/5xx responses (module 9.25) | Diagnostics | Error Log | → `user_id` (users, nullable, `SET NULL`) |
 

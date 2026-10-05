@@ -29,6 +29,12 @@ class InvoiceIssued extends EduCoreNotification
         return "New invoice {$this->invoice->invoice_number}: {$this->amount()}, due {$this->invoice->due_date->toDateString()}.\n\n".$this->link("/invoices/{$this->invoice->id}");
     }
 
+    /** @return array{kind: string, title: string, body: string, url: string} */
+    public function toInbox(object $notifiable): array
+    {
+        return ['kind' => 'finance', 'title' => "Invoice {$this->invoice->invoice_number}: {$this->invoice->title}", 'body' => "A new invoice of {$this->amount()} has been issued to you, due {$this->invoice->due_date->toDateString()}.", 'url' => "/invoices/{$this->invoice->id}"];
+    }
+
     private function amount(): string
     {
         return number_format((float) $this->invoice->total, 2).' '.$this->invoice->currency;

@@ -196,6 +196,11 @@ Tables are the backbone of this administration platform.
 | Action card | 20px | `radius-lg` | `border-default` | `shadow-sm`, hover lift |
 | Warning card | 20px | `radius-lg` | warning tint border | — |
 | Empty card | 24px | `radius-lg` | dashed `border-muted` | none |
+| List card (2026-10-05) | 0 (`BaseCard padding="none"`); rows `px-5 py-4`, divided by `border-default` | `radius-lg` | `border-default` | `shadow-sm` |
+
+**List card:** the card does not clip its content (row tooltips must escape it), so a
+tinted row rounds its own corners (`first:rounded-t-xl last:rounded-b-xl`). Used by the
+notification inbox (report 42).
 
 **KPI card structure:** label (`small`/`muted`) → value (`h4`-large, 24px/700) →
 optional delta chip (positive `success`, negative `error`).
@@ -271,6 +276,16 @@ Semantic states for actions: `info` = informational, `warning` = attention,
 
 - Breadcrumbs left (context), user menu + notifications right.
 - Height ≈ 56–64px; `border-default` bottom.
+- **Notification bell (2026-10-05, report 42):** a 44px `Bell` link to `/inbox`
+  before the theme toggle, styled like it (`muted`, `surface` hover), tooltip
+  placed **below** (the bar is at the top of the viewport). Unread count: a
+  `primary` pill in the top-right corner — `h-5 min-w-5 px-1`, `caption` 600,
+  white text, a 2px `surface` ring to separate it from the icon; `9+` above
+  nine; hidden at zero. The count is in the accessible name ("Notifications,
+  3 unread"); the pill itself is `aria-hidden`.
+- **Unread rows** (inbox): light `primary` tint (`primary`/5, dark
+  `dark-primary`/10), bold title, and a `primary` dot + "New" text — colour is
+  never the only signal.
 
 ### Tabs
 

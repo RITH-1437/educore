@@ -2,7 +2,11 @@
 import { Link } from '@inertiajs/vue3'
 
 defineProps({
-  padding: { type: String, default: 'md', validator: (value) => ['sm', 'md', 'lg'].includes(value) },
+  /**
+   * `none` is for flush content such as a divided list. It does not clip
+   * (tooltips must escape the card), so tinted rows round their own corners.
+   */
+  padding: { type: String, default: 'md', validator: (value) => ['none', 'sm', 'md', 'lg'].includes(value) },
   hoverable: { type: Boolean, default: false },
   bordered: { type: Boolean, default: true },
   href: { type: String, default: '' },
@@ -10,7 +14,7 @@ defineProps({
   title: { type: String, default: '' },
 })
 
-const paddings = { sm: 'p-4', md: 'p-5', lg: 'p-6' }
+const paddings = { none: '', sm: 'p-4', md: 'p-5', lg: 'p-6' }
 </script>
 
 <template>

@@ -27,4 +27,10 @@ class AnnouncementPublished extends EduCoreNotification
     {
         return "Announcement: {$this->announcement->title}\n\n".Str::limit($this->announcement->body, 3000)."\n\n".$this->link('/announcements');
     }
+
+    /** @return array{kind: string, title: string, body: string, url: string} */
+    public function toInbox(object $notifiable): array
+    {
+        return ['kind' => 'announcement', 'title' => $this->announcement->title, 'body' => Str::limit($this->announcement->body, 280), 'url' => '/announcements'];
+    }
 }

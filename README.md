@@ -101,10 +101,10 @@ Or via Make: `make seed`. To drop and re-seed in one step: `make migrate-fresh`.
 
 The seed is idempotent and produces only what a fresh installation needs: the
 five roles, **one account per role** — `admin@educore.kh` / `admin@123`
-(Super Admin), `university@educore.kh` / `university@123`, `faculty@educore.kh`
-/ `faculty@123`, `lecturer@educore.kh` / `lecturer@123` and
+(Super Admin), `university@educore.kh` / `university@123`, `department@educore.kh`
+/ `department@123` (Department Admin), `lecturer@educore.kh` / `lecturer@123` and
 `student@educore.kh` / `student@123` (development only — change them) — plus
-the default grading scale and the requestable document types. No demo people or records are seeded: universities, faculties,
+the default grading scale and the requestable document types. No demo people or records are seeded: universities, departments,
 programs, courses, students, lecturers and everything else are entered through
 the application, and every screen (including the public landing page's figures)
 shows what is in the database. See
@@ -128,58 +128,61 @@ limit used by enrollment (`backend/config/academics.php`).
 | Path                        | Page                       | Who can write |
 | --------------------------- | -------------------------- | ------------- |
 | `/admin/dashboard`          | Admin dashboard            | — |
-| `/dashboard`                | Student academic dashboard (GPA, credits, attendance, today's classes, due work, exams, grades); Faculty admin: requests waiting for them and their faculty's headline numbers; other roles see their workspace preview | — |
-| `/users`                    | Users management (assign a Faculty Admin's faculty) | Super admin   |
+| `/dashboard`                | Student academic dashboard (GPA, credits, attendance, today's classes, due work, exams, grades); Department admin: requests waiting for them and their department's headline numbers; other roles see their workspace preview | — |
+| `/users`                    | Users management (assign a Department Admin's department) | Super admin   |
 | `/academic-years`           | Academic years & semesters | Super admin, University admin |
 | `/universities`             | University record          | Super admin, University admin |
 | `/universities/{id}/edit`   | Edit university            | Super admin, University admin |
-| `/faculties`                | Faculties + departments    | Super admin, University admin |
-| `/programs`                 | Programs (degree tracks)   | Super admin, University admin (Faculty admin read-only, own faculty) |
+| `/departments`              | Departments (archive, reactivate, delete guards) | Super admin, University admin (Department admin read-only, own department) |
+| `/programs`                 | Programs (degree tracks)   | Super admin, University admin (Department admin read-only, own department) |
 | `/programs/{id}/edit`       | Edit program               | Super admin, University admin |
-| `/courses`                  | Course catalog             | Super admin, University admin (Faculty admin read-only, own faculty) |
+| `/courses`                  | Course catalog             | Super admin, University admin (Department admin read-only, own department) |
 | `/courses/{id}/edit`        | Edit course + prerequisites | Super admin, University admin |
 | `/attendance`               | Take attendance (my sections) | Lecturer |
-| `/attendance/sections/{id}` | Attendance register + rates | Super admin, University admin, Faculty admin (read, own faculty), the section's lecturers |
+| `/attendance/sections/{id}` | Attendance register + rates | Super admin, University admin, Department admin (read, own department), the section's lecturers |
 | `/my-attendance`            | My attendance per course   | Student |
-| `/coursework/sections/{id}` | Section assignments, submissions, grading | Super admin, University admin, Faculty admin (read, own faculty), the section's lecturers, enrolled students (submit) |
+| `/coursework/sections/{id}` | Section assignments, submissions, grading | Super admin, University admin, Department admin (read, own department), the section's lecturers, enrolled students (submit) |
 | `/my-assignments`           | My assignments + uploads   | Student |
-| `/exams/sections/{id}`      | Section exams + results grid | Super admin, University admin, Faculty admin (read, own faculty), the section's lecturers; enrolled students (schedule, released results) |
+| `/exams/sections/{id}`      | Section exams + results grid | Super admin, University admin, Department admin (read, own department), the section's lecturers; enrolled students (schedule, released results) |
 | `/my-exams`                 | My exam schedule + results | Student |
-| `/grades`                   | Sections awaiting grade approval | Super admin, University admin (Faculty admin read-only, own faculty) |
-| `/grades/sections/{id}`     | Section grade sheet: compute, submit, approve, return, finalize, reopen | Super admin (reopen), University admin (approve, finalize), Faculty admin (read, own faculty), the section's lecturers (compute, submit) |
-| `/grading-scale`            | Grading scale              | Super admin, University admin (Faculty admin and lecturers read-only) |
+| `/grades`                   | Sections awaiting grade approval | Super admin, University admin (Department admin read-only, own department) |
+| `/grades/sections/{id}`     | Section grade sheet: compute, submit, approve, return, finalize, reopen | Super admin (reopen), University admin (approve, finalize), Department admin (read, own department), the section's lecturers (compute, submit) |
+| `/grading-scale`            | Grading scale              | Super admin, University admin (Department admin and lecturers read-only) |
 | `/my-grades`                | My grades + semester / cumulative GPA | Student |
 | `/my-documents`             | Request documents, download PDFs | Student |
-| `/documents`                | Document request queue: approve, reject, generate, revoke | Super admin, University admin; Faculty admin for their faculty's students (no revoke) |
+| `/documents`                | Document request queue: approve, reject, generate, revoke, waive fee | Super admin, University admin; Department admin for their department's students (no revoke) |
+| `/document-types`           | Requestable document types and fees | Super admin, University admin |
 | `/verify/{code}`            | Public document verification (no sign-in, rate limited) | — |
 | `/invoices`                 | Invoices: create, edit, record / reverse payments, cancel, export CSV | Super admin, University admin |
 | `/my-invoices`              | My invoices, payments and balance | Student |
 | `/announcements`            | Announcement feed (own audience) | Every signed-in role |
 | `/announcements/manage`     | Write, publish, archive announcements | Super admin, University admin (any audience), Lecturer (own sections / courses) |
 | `/notifications`            | My notification settings (email opt-out, Telegram chat) | Every signed-in user (own only) |
+| `/inbox`                    | My in-app notifications (bell in the top bar): open, mark read | Every signed-in user (own only) |
 | `/my-internships`           | Apply for an internship, follow it, submit reports | Student |
-| `/internships`              | Internship queue: review, approve, start, complete, evaluate | Super admin, University admin; Faculty admin for their faculty's students |
-| `/internship-companies`     | Host companies | Super admin, University admin (Faculty admin read-only) |
+| `/internships`              | Internship queue: review, approve, start, complete, evaluate | Super admin, University admin; Department admin for their department's students |
+| `/internship-companies`     | Host companies | Super admin, University admin (Department admin read-only) |
 | `/analytics`                | Analytics: enrollment, academic performance, workload; CSV per table | Super admin, University admin |
 | `/audit-logs`               | Audit trail (read-only): sign-ins and sensitive changes; CSV export | Super admin |
 | `/account/password`         | Change my password (other sessions are signed out) | Every signed-in user |
 | `/forgot-password`          | Request a password reset link by email (rate limited) | Guests |
-| `/rooms`                    | Rooms                      | Super admin, University admin (Faculty admin read-only, own faculty) |
+| `/rooms`                    | Rooms                      | Super admin, University admin (Department admin read-only, own department) |
 | `/timetable`                | My weekly timetable        | Student, Lecturer |
-| `/enrollments`              | Enrollment management; export CSV | Super admin, University admin (Faculty admin read-only + export, own faculty) |
+| `/enrollments`              | Enrollment management; export CSV | Super admin, University admin (Department admin read-only + export, own department) |
 | `/registration`             | Course registration (self-service) | Student |
-| `/offerings`                | Offerings & sections       | Super admin, University admin (Faculty admin read-only, own faculty) |
+| `/offerings`                | Offerings & sections       | Super admin, University admin (Department admin read-only, own department) |
 | `/offerings/{id}`           | Manage sections + lecturers | Super admin, University admin |
-| `/students`                 | Student profiles, status, program | Super admin, University admin (Faculty admin read-only, own faculty) |
+| `/students`                 | Student profiles, status, program | Super admin, University admin (Department admin read-only, own department) |
 | `/students/{id}/edit`       | Manage student             | Super admin, University admin |
-| `/lecturers`                | Lecturer profiles + accounts | Super admin, University admin (Faculty admin read-only, own faculty) |
+| `/lecturers`                | Lecturer profiles + accounts | Super admin, University admin (Department admin read-only, own department) |
 | `/lecturers/{id}/edit`      | Edit lecturer              | Super admin, University admin |
 | `/error-logs`                | System error logs (404/5xx, read-only) | Super admin only (no write) |
 
-Faculty Admin has **read-only** access to `/universities`, `/faculties`, `/programs`, `/courses`, `/lecturers` and `/students`; the
-write controls are hidden in the UI and the routes still reject the request with
-`403`. Report:
-[`docs/7_Faculty-and-Department-Report.md`](docs/7_Faculty-and-Department-Report.md).
+Department Admin has **read-only** access to `/universities`, `/departments`, `/programs`, `/courses`, `/lecturers` and `/students`, limited to their
+department; the write controls are hidden in the UI and the routes still reject the request with
+`403`. Reports:
+[`docs/7_Faculty-and-Department-Report.md`](docs/7_Faculty-and-Department-Report.md),
+[`docs/39_Department-Only-Structure-Report.md`](docs/39_Department-Only-Structure-Report.md).
 
 `/error-logs` is not on the sidebar — it is a diagnostic tool reached by typing
 the URL directly, recording only HTTP 404/5xx responses (never 401/403/409/422,
@@ -345,7 +348,8 @@ The `backend/` folder is a standard Laravel 12 application.
 - Scheduled commands (`routes/console.php`, run by the `scheduler` container):
   `php artisan invoices:refresh-statuses` (daily 00:10, marks unpaid past-due
   invoices overdue) and `php artisan notifications:assignment-reminders`
-  (daily 07:00). Queued jobs (notifications) run in the `queue` container;
+  (daily 07:00) and `php artisan notifications:prune` (daily 01:00, deletes
+  in-app notifications older than 180 days). Queued jobs (notifications) run in the `queue` container;
   watch them with `docker compose --project-directory . -f docker/docker-compose.yml logs -f queue`.
 - Notifications: email via `MAIL_MAILER` (`log` in development — messages land
   in `storage/logs/laravel.log`); Telegram via `TELEGRAM_BOT_TOKEN` in `.env`

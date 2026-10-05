@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\InternshipController;
 use App\Http\Controllers\Api\InvoiceController;
 use App\Http\Controllers\Api\LecturerController;
 use App\Http\Controllers\Api\LecturerDashboardController;
+use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\NotificationPreferenceController;
 use App\Http\Controllers\Api\PasswordController;
 use App\Http\Controllers\Api\ProgramController;
@@ -364,6 +365,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/notification-preferences/test', [NotificationPreferenceController::class, 'test'])
         ->middleware('throttle:notification-test')
         ->name('api.notification-preferences.test');
+});
+
+// In-app inbox (report 42): always the caller's own notifications.
+Route::middleware('auth:sanctum')->prefix('/notifications')->name('api.notifications.')->group(function () {
+    Route::get('/', [NotificationController::class, 'index'])->name('index');
+    Route::post('/read-all', [NotificationController::class, 'readAll'])->name('read-all');
+    Route::post('/{notification}/read', [NotificationController::class, 'read'])->whereUuid('notification')->name('read');
 });
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

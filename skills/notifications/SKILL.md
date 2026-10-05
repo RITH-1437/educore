@@ -19,8 +19,16 @@ Notifications dispatched on the Redis queue.
   confirmations, password-related messages, administrative notices.
 - **Telegram** — announcements, class/assignment reminders, important academic
   notifications.
-- Built via Laravel Notifications (`app/Notifications`); one notification class
-  may define several channels.
+- **In-app inbox** — every notification is also stored (`database` channel,
+  `notifications` table with a UUID key) and shown at `/inbox` with an unread
+  bell in the top bar. Always on; 180-day retention (`notifications:prune`).
+  See `docs/42_In-App-Notification-Inbox-Report.md`.
+- Built via Laravel Notifications (`app/Notifications`), extending
+  `EduCoreNotification`; one notification class may define several channels.
+  A new class must define `toMail()` and a `toInbox()` message
+  (`kind`, `title`, `body`, in-app `url`; `toTelegram()` optional). Never put a
+  secret (reset token, password) in `toInbox()` — leave the method out and keep
+  the class mail-only, like `ResetPasswordLink`.
 
 ## Dispatch & queueing
 

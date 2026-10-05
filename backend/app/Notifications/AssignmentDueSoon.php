@@ -26,6 +26,12 @@ class AssignmentDueSoon extends EduCoreNotification
         return "Reminder: “{$this->assignment->title}” ({$this->course()}) is due {$this->due()}.\n\n".$this->link('/my-assignments');
     }
 
+    /** @return array{kind: string, title: string, body: string, url: string} */
+    public function toInbox(object $notifiable): array
+    {
+        return ['kind' => 'assignment', 'title' => "Due soon: {$this->assignment->title}", 'body' => "“{$this->assignment->title}” ({$this->course()}) is due {$this->due()} and you have not submitted it yet.", 'url' => '/my-assignments'];
+    }
+
     private function course(): string
     {
         return $this->assignment->loadMissing('section.offering.course')->section->offering->course->code;

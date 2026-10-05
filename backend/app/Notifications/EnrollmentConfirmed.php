@@ -26,6 +26,12 @@ class EnrollmentConfirmed extends EduCoreNotification
         return "Registration confirmed: {$this->course()}, section {$this->enrollment->section->code}.\n\n".$this->link('/timetable');
     }
 
+    /** @return array{kind: string, title: string, body: string, url: string} */
+    public function toInbox(object $notifiable): array
+    {
+        return ['kind' => 'enrollment', 'title' => "Registration confirmed: {$this->course()}", 'body' => "You are registered in {$this->course()}, section {$this->enrollment->section->code}.", 'url' => '/timetable'];
+    }
+
     private function course(): string
     {
         $course = $this->enrollment->loadMissing('section.offering.course')->section->offering->course;

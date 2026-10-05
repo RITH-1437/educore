@@ -37,10 +37,10 @@
 | 9.17 | Digital Document Verification | `[Implemented]` |
 | 9.18 | Invoices & Payment Records | `[Implemented]` (invoice & receipt PDF download in report 23) |
 | 9.19 | Announcements | `[Implemented]` (file attachments in report 24) |
-| 9.20 | Email Notifications | `[Implemented]` (password emails `[Future]`) |
+| 9.20 | Email Notifications | `[Implemented]` (password emails in report 29; in-app inbox in report 42) |
 | 9.21 | Telegram Notifications | `[Implemented]` (class reminders `[Future]`) |
-| 9.22 | Internship Management | `[Implemented]` (opportunity postings, letter document `[Future]`) |
-| 9.23 | Analytics & Reporting | `[Implemented]` (CSV & PDF exports, modern Pie/Donut charts in report 27 & 31; faculty-scoped views `[Future]`) |
+| 9.22 | Internship Management | `[Implemented]` (opportunity postings `[Future]`; letter document in report 30) |
+| 9.23 | Analytics & Reporting | `[Implemented]` (CSV & PDF exports, modern Pie/Donut charts in report 27 & 31; department-scoped views `[Future]`) |
 | 9.24 | Audit Logs & Security | `[Implemented]` (CSV export in report 31; retention `[Future]`) |
 
 > No module is documented as implemented unless it is genuinely tested and running
@@ -274,7 +274,8 @@ operations, `AnnouncementSeeder`, 6 feature tests. Report:
 
 **9.20 / 9.21 Email & Telegram Notifications** `[Implemented]` — table
 `notification_preferences` (no schema change; `notifications` unused — its
-bigint id does not fit Laravel's UUID database channel). Delivered:
+bigint id did not fit Laravel's UUID database channel; rekeyed and used by the
+in-app inbox of report 42). Delivered:
 `EduCoreNotification` base (queue `notifications`, after commit, 3 tries,
 critical vs optional email, Telegram opt-in), `TelegramChannel` (Bot API via
 the HTTP client), seven notifications wired into enrollment, grading,
@@ -432,9 +433,9 @@ A module is not done until its report exists and its tests pass — never label
   scoping).
 - `[Done]` 9.20 / 9.21 Email & Telegram Notifications. Report:
   `docs/25_Notifications-Report.md`. `[Done]` Password-reset emails (report
-  29). `[Open]` Class-start reminders, in-app inbox, automatic Telegram chat
-  linking (bot webhook), surfacing repeated delivery failures in the audit log
-  (9.24).
+  29). `[Done]` In-app inbox (report 42). `[Open]` Class-start reminders,
+  automatic Telegram chat linking (bot webhook), surfacing repeated delivery
+  failures in the audit log (9.24).
 - `[Done]` 9.22 Internship Management. Report:
   `docs/26_Internship-Management-Report.md`. `[Open]` Opportunity postings,
   supervisor logins. `[Done]` Internship letter document. `[Done]` Faculty
@@ -548,6 +549,23 @@ A module is not done until its report exists and its tests pass — never label
   Admin manage types at `/document-types` (`/api/document-types` CRUD; types
   with requests cannot be deleted — deactivate instead). Report:
   `docs/40_Document-Fee-Billing-and-Type-Management-Report.md`.
-
-
-
+- `[Done]` Audit fix (2026-10-05): the frontend had not followed report 39's
+  removal of the faculty level. Saving a Department Admin on `/users/{id}/edit`
+  silently cleared their department (the page still sent `faculty_id` for the
+  old `faculty-admin` slug), and none could be assigned on `/users/create`;
+  recording the university-side internship evaluation failed (422 — the card
+  sent `faculty`, the API takes `academic`); the Super Admin dashboard and
+  `/universities` linked to the removed `/faculties` (404) and showed blank /
+  zero faculty counts; Course, Program, Lecturer and Student lists offered an
+  empty *Faculty* filter the backend ignored. All now use departments (the
+  lists filter by `filters[department_id]`, the student form narrows programs
+  by department). `DepartmentAdminScopingTest` pins the web user screens and
+  the department filters; README and `docs/database/` were brought in line;
+  migration `2026_10_05_170000` drops `faculty` from the announcement audience
+  CHECK (`AnnouncementTest` asserts the database refuses it).
+  Report: `docs/39_Department-Only-Structure-Report.md` §7.
+- `[Done]` In-app notification inbox (2026-10-05): every notification is also
+  stored (`notifications` rekeyed to UUID) and shown at `/inbox` with an
+  unread bell in the top bar; open / mark read / mark all; reset links never
+  stored; 180-day retention (`notifications:prune`). Report:
+  `docs/42_In-App-Notification-Inbox-Report.md`.

@@ -33,6 +33,14 @@ class DocumentRequestUpdated extends EduCoreNotification
             ."\n\n".$this->link('/my-documents');
     }
 
+    /** @return array{kind: string, title: string, body: string, url: string} */
+    public function toInbox(object $notifiable): array
+    {
+        $reason = $this->request->status === DocumentRequest::STATUS_REJECTED && $this->request->rejection_reason ? ' Reason: '.$this->request->rejection_reason : '';
+
+        return ['kind' => 'document', 'title' => 'Document request '.$this->status().': '.$this->name(), 'body' => $this->sentence().$reason, 'url' => '/my-documents'];
+    }
+
     private function sentence(): string
     {
         return match ($this->request->status) {

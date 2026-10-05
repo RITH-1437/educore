@@ -41,6 +41,7 @@ class InternshipService
 {
     public function __construct(
         private readonly AuditLogger $audit,
+        private readonly StaffNotifier $staff,
     ) {}
 
     // -------------------------------------------------------------- companies
@@ -106,7 +107,12 @@ class InternshipService
 
     public function submit(Internship $internship): Internship
     {
-        return $this->move($internship, [Internship::STATUS_DRAFT], Internship::STATUS_SUBMITTED, null, null, ['submitted_at' => now()], notify: false);
+        $internship = $this->move($internship, [Internship::STATUS_DRAFT], Internship::STATUS_SUBMITTED, null, null, ['submitted_at' => now()], notify: false);
+
+        // The student made this move; the staff who review it are told instead (report 43).
+        $this->staff->internshipSubmitted($internship);
+
+        return $internship;
     }
 
     public function review(Internship $internship, User $by): Internship

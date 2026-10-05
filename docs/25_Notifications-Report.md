@@ -23,6 +23,7 @@ if it still fails, logged. Users manage their own channels on a settings page.
 | Announcement published (9.19) | `AnnouncementPublished` | every active member of the audience | optional |
 | Assignment due within 24 h, not submitted (daily 07:00) | `AssignmentDueSoon` | each such student | optional |
 | "Send me a test" | `TestNotification` | the caller | optional |
+| Document request / internship application submitted (report 43) | `DocumentRequestSubmitted`, `InternshipSubmitted` | staff who can process it | optional |
 
 Telegram carries the same messages as plain text, for users who opted in and
 linked a chat. Not built: class-start reminders, password-reset emails (no

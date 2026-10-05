@@ -49,4 +49,11 @@ class DepartmentScope
     {
         return DB::table('student_programs')->select('student_id')->whereIn('program_id', self::programIds($departmentId));
     }
+
+    /** The inverse of `studentIds()`: every department a student belongs to. */
+    public static function departmentIdsOf(int $studentId): Builder
+    {
+        return DB::table('programs')->select('department_id')
+            ->whereIn('id', DB::table('student_programs')->select('program_id')->where('student_id', $studentId));
+    }
 }

@@ -504,8 +504,9 @@ A module is not done until its report exists and its tests pass — never label
   / cancel / evaluate / edit internships of their faculty's students; revoke
   and companies stay with managers; abilities now require the record. Report:
   `docs/33_Faculty-Admin-Request-Handling-Report.md`. `[Done]` Waiting requests
-  and internships are counted on their dashboard (report 34). `[Open]` Faculty
-  Admin sections and schedules, email / Telegram notices of new requests.
+  and internships are counted on their dashboard (report 34). `[Done]` Email /
+  Telegram / inbox notices of new requests (report 43). `[Open]` Department
+  Admin sections and schedules.
 - `[Done]` Faculty Admin dashboard (2026-10-03): `/dashboard` shows the
   document requests and internships waiting for them (each count opens the
   queue filtered to that status) and their faculty's headline numbers for the
@@ -569,3 +570,9 @@ A module is not done until its report exists and its tests pass — never label
   unread bell in the top bar; open / mark read / mark all; reset links never
   stored; 180-day retention (`notifications:prune`). Report:
   `docs/42_In-App-Notification-Inbox-Report.md`.
+- `[Done]` Staff request notices (2026-10-05): a submitted document request or
+  internship application notifies the staff who can process it — active Super
+  Admins, University Admins and the Department Admins of the student's
+  department — in the inbox, by optional email and by Telegram
+  (`StaffNotifier`, `DocumentRequestSubmitted`, `InternshipSubmitted`). Report:
+  `docs/43_Staff-Request-Notices-Report.md`.

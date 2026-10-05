@@ -652,7 +652,9 @@ users, main business activities, and expected outputs.
   non-critical mail and a queue worker container. Password-reset links and
   password-change notices are emailed (report 29). Every notification is also
   kept in an in-app inbox with an unread bell in the top bar (180-day
-  retention; report 42). Class-start reminders are [Future].
+  retention; report 42). Staff who process document requests and internship
+  applications are told when a new one is submitted (report 43).
+  Class-start reminders are [Future].
   See [25_Notifications-Report.md](25_Notifications-Report.md) and
   [42_In-App-Notification-Inbox-Report.md](42_In-App-Notification-Inbox-Report.md).
 

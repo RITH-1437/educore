@@ -29,6 +29,8 @@ follows the message's link), *mark as read* and *mark all as read*.
 | `InternshipStatusChanged` | `internship` | `/my-internships` |
 | `PasswordChanged` (change or reset) | `security` | — (stays on the inbox) |
 | `TestNotification` | `general` | `/notifications` |
+| `DocumentRequestSubmitted` (staff, report 43) | `document` | `/documents?filters[status]=pending` |
+| `InternshipSubmitted` (staff, report 43) | `internship` | `/internships/{id}` |
 | `ResetPasswordLink` | **never stored** — the link carries a reset token | — |
 
 Not built: live push (the count refreshes on every page visit, not in the

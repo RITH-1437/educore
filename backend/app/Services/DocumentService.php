@@ -46,6 +46,7 @@ class DocumentService
         private readonly GradingService $grading,
         private readonly GpaService $gpa,
         private readonly InvoiceService $invoices,
+        private readonly StaffNotifier $staff,
     ) {}
 
     /**
@@ -82,7 +83,7 @@ class DocumentService
                 throw new BusinessRuleException("You already have an open request for this {$type->name}.");
             }
 
-            return DocumentRequest::query()->create([
+            $request = DocumentRequest::query()->create([
                 'student_id' => $student->getKey(),
                 'document_type_id' => $type->getKey(),
                 'semester_id' => $semester?->getKey(),
@@ -91,6 +92,11 @@ class DocumentService
                 'status' => DocumentRequest::STATUS_PENDING,
                 'submitted_at' => now(),
             ])->refresh();
+
+            // Queued after commit: the staff who can approve it hear about it (report 43).
+            $this->staff->documentRequested($request);
+
+            return $request;
         });
     }
 

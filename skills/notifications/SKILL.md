@@ -80,6 +80,8 @@ Notifications dispatched on the Redis queue.
 - Assignment deadline approaching
 - Grade published
 - Payment recorded / invoice due
+- New document request / internship application → the staff who can process
+  it (`StaffNotifier`, `docs/43_Staff-Request-Notices-Report.md`)
 
 ## Prohibitions
 

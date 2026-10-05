@@ -582,3 +582,9 @@ A module is not done until its report exists and its tests pass — never label
   probe 404s are no longer recorded, `/faculties/*` redirects to
   `/departments`, and the classmap was regenerated. Report:
   `docs/8_System-Error-Logs-Report.md` §11. `[Open]` Error-log retention.
+- `[Done]` Static sample dashboard removed (2026-10-05): a student account not
+  yet linked to a profile (e.g. the seeded `student@educore.kh`) landed on
+  `RoleDashboard`, a fake "Sample dashboard" with placeholder cards and a
+  hard-coded list of "planned tools". The page and the controller's hard-coded
+  array are gone; `/dashboard` renders `Student/Dashboard` with no data and a
+  "No student profile" notice (`docs/21_Student-Academic-Dashboard-Report.md`).

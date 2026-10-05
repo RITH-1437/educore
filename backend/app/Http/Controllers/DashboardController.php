@@ -105,10 +105,10 @@ class DashboardController extends Controller
     ): Response {
         $user = $request->user();
 
-        // Students with a profile get their academic dashboard (module 9.15).
-        if ($user->isRole('student') && $user->student !== null) {
+        // Students get their academic dashboard (module 9.15); no linked profile = no academic data.
+        if ($user->isRole('student')) {
             return Inertia::render('Student/Dashboard', [
-                'dashboard' => $students->build($user->student),
+                'dashboard' => $user->student ? $students->build($user->student) : null,
                 'userName' => $user->name,
             ]);
         }
@@ -137,17 +137,7 @@ class DashboardController extends Controller
             ]);
         }
 
-        $role = $user->role?->slug;
-        $dashboard = [
-            'title' => 'Student Dashboard',
-            'description' => 'A preview of personal academic information and student services.',
-            'areas' => ['My courses', 'Timetable', 'Attendance', 'Grades and GPA', 'Documents and announcements'],
-        ];
-
-        return Inertia::render('RoleDashboard', [
-            ...$dashboard,
-            'role' => $role,
-            'userName' => $user->name,
-        ]);
+        // The route admits only the four roles above.
+        abort(403);
     }
 }

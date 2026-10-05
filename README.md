@@ -128,7 +128,7 @@ limit used by enrollment (`backend/config/academics.php`).
 | Path                        | Page                       | Who can write |
 | --------------------------- | -------------------------- | ------------- |
 | `/admin/dashboard`          | Admin dashboard            | — |
-| `/dashboard`                | Student academic dashboard (GPA, credits, attendance, today's classes, due work, exams, grades); Department admin: requests waiting for them and their department's headline numbers; other roles see their workspace preview | — |
+| `/dashboard`                | Student academic dashboard (GPA, credits, attendance, today's classes, due work, exams, grades); Department admin: requests waiting for them and their department's headline numbers; Lecturer and University admin: their own dashboards. A student account not yet linked to a profile sees a "No student profile" notice | — |
 | `/users`                    | Users management (assign a Department Admin's department) | Super admin   |
 | `/academic-years`           | Academic years & semesters | Super admin, University admin |
 | `/universities`             | University record          | Super admin, University admin |

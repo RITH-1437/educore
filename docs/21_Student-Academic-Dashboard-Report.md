@@ -57,6 +57,10 @@ aggregate of the module's own counts, not a second attendance formula.
 | Another student / a lecturer | 403 | — |
 
 A student account with no linked profile keeps the generic `RoleDashboard`.
+*(Update 2026-10-05: the static `RoleDashboard` sample page was removed. Such an
+account now gets `Student/Dashboard` with `dashboard: null`, which shows a "No
+student profile" notice and a link to announcements — the same pattern as the
+Lecturer dashboard.)*
 
 ## 4. Endpoints
 

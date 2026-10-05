@@ -147,9 +147,9 @@ class StudentDashboardTest extends TestCase
                 ->where('dashboard.credits.current', 4)
                 ->has('dashboard.today', 1));
 
-        // A student account without a profile keeps the generic workspace page.
+        // A student account without a profile gets the same page with no data (its "not linked" state).
         $orphan = User::factory()->create(['role_id' => $this->student->user->role_id]);
-        $this->actingAs($orphan)->get('/dashboard')->assertOk()->assertInertia(fn (Assert $page) => $page->component('RoleDashboard'));
+        $this->actingAs($orphan)->get('/dashboard')->assertOk()->assertInertia(fn (Assert $page) => $page->component('Student/Dashboard')->where('dashboard', null));
     }
 
     private function newSection(Semester $semester, Course $course): Section

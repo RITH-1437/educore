@@ -605,3 +605,7 @@ A module is not done until its report exists and its tests pass — never label
   page and shows a spinner in the search field (`useLiveFilters`,
   `docs/branding/UI-COMPONENTS.md` §4). The list stays still while typing:
   page height held, table columns frozen, "no results" under the kept header.
+- `[Done]` Grading scale page redesign (2026-10-05): summary tiles, a lettered
+  0–100% scale bar shaded by grade points with the pass mark, a modern band
+  table, and an inline editor with live preview and live rule checks
+  (`docs/20_Grades-and-GPA-Report.md`, update section).

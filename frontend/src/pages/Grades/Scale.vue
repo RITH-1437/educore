@@ -1,13 +1,14 @@
 <script setup>
-import { Plus, Trash2 } from '@lucide/vue'
-import IconButton from '../../components/IconButton.vue'
 import { Head, useForm } from '@inertiajs/vue3'
-import BaseButton from '../../components/BaseButton.vue'
+import { computed } from 'vue'
+import BaseBadge from '../../components/BaseBadge.vue'
 import BaseCard from '../../components/BaseCard.vue'
-import BaseInput from '../../components/BaseInput.vue'
-import ErrorAlert from '../../components/ErrorAlert.vue'
 import PageHeader from '../../components/PageHeader.vue'
+import StatCard from '../../components/StatCard.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
+import ScaleBar from '../../components/grades/ScaleBar.vue'
+import ScaleEditor from '../../components/grades/ScaleEditor.vue'
+import { bandTone, scaleRanges } from '../../utils/grades'
 
 const props = defineProps({
   scale: { type: Object, required: true },
@@ -18,62 +19,72 @@ const props = defineProps({
 const form = useForm({
   bands: props.scale.data.map((band) => ({ grade: band.grade, min_percentage: band.min_percentage, grade_point: band.grade_point, is_pass: band.is_pass })),
 })
-const add = () => form.bands.push({ grade: '', min_percentage: '', grade_point: '', is_pass: true })
-const remove = (i) => form.bands.splice(i, 1)
-const save = () => form.put('/grading-scale', { preserveScroll: true })
-const fieldError = (i, field) => form.errors[`bands.${i}.${field}`]
+const save = () => form.put('/grading-scale', { preserveScroll: true, onSuccess: () => form.defaults() })
+
+// Saved scale, top grade first (as the server returns it).
+const saved = computed(() => scaleRanges(props.scale.data))
+const maxPoints = computed(() => Math.max(0, ...saved.value.map((band) => band.points)))
+const top = computed(() => saved.value[0] ?? null)
+const lowestPass = computed(() => [...saved.value].reverse().find((band) => band.is_pass) ?? null)
+const pct = (value) => `${Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 })}%`
+
+const metrics = computed(() => [
+  { label: 'Grades', value: saved.value.length, detail: `${saved.value.filter((band) => band.is_pass).length} passing, ${saved.value.filter((band) => !band.is_pass).length} failing` },
+  { label: 'Pass mark', value: lowestPass.value ? pct(lowestPass.value.min) : '—', detail: lowestPass.value ? `Lowest pass: ${lowestPass.value.grade}` : 'No passing grade', tone: 'success' },
+  { label: 'Top grade', value: top.value?.grade ?? '—', detail: top.value ? `From ${pct(top.value.min)} · ${top.value.points.toFixed(2)} points` : '', tone: 'secondary' },
+  { label: 'Grade points', value: `0 – ${maxPoints.value.toFixed(2)}`, detail: 'Used for GPA', tone: 'muted' },
+])
 </script>
 
 <template>
   <Head title="Grading scale - EduCore" />
-  <div class="mx-auto max-w-4xl space-y-6">
-    <PageHeader eyebrow="Grades & GPA" title="Grading scale" :description="`The “${scale.name}” scale maps a course total to a letter grade and grade points.`" />
+  <div class="mx-auto max-w-5xl space-y-6">
+    <PageHeader eyebrow="Grades & GPA" title="Grading scale" :description="`The “${scale.name}” scale turns a course total (0–100%) into a letter grade and the grade points used for GPA.`" />
 
-    <BaseCard v-if="!canEdit" padding="lg">
-      <div class="-mx-2 overflow-x-auto">
-        <table class="min-w-full">
-          <caption class="sr-only">Grading scale</caption>
-          <thead>
-            <tr class="border-b border-border-default text-left text-caption font-semibold uppercase tracking-wider text-muted dark:border-dark-border dark:text-dark-muted">
-              <th scope="col" class="px-2 py-2">Grade</th>
-              <th scope="col" class="px-2 py-2">Range</th>
-              <th scope="col" class="px-2 py-2 text-right">Grade points</th>
-              <th scope="col" class="px-2 py-2">Result</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-border-default dark:divide-dark-border">
-            <tr v-for="band in scale.data" :key="band.grade">
-              <td class="px-2 py-2 text-small font-semibold text-ink dark:text-dark-ink">{{ band.grade }}</td>
-              <td class="px-2 py-2 text-small tabular-nums">{{ band.min_percentage }}% – {{ band.max_percentage }}%</td>
-              <td class="px-2 py-2 text-right text-small tabular-nums">{{ band.grade_point.toFixed(2) }}</td>
-              <td class="px-2 py-2"><StatusBadge :status="band.is_pass ? 'completed' : 'failed'" :label="band.is_pass ? 'Pass' : 'Fail'" /></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <section class="grid grid-cols-2 gap-4 xl:grid-cols-4" aria-label="Scale at a glance">
+      <StatCard v-for="metric in metrics" :key="metric.label" v-bind="metric" />
+    </section>
+
+    <BaseCard padding="lg" title="Scale">
+      <template #description>{{ canEdit ? 'Updates as you edit the bands below.' : 'Hover or focus a band for its exact range.' }}</template>
+      <template v-if="canEdit && form.isDirty" #actions><BaseBadge variant="warning">Preview — not saved</BaseBadge></template>
+      <ScaleBar :bands="canEdit ? form.bands : scale.data" />
     </BaseCard>
 
-    <BaseCard v-else padding="lg" title="Bands">
-      <template #description>Give each grade its minimum percentage. The lowest band starts at 0%; higher bands need at least as many grade points. Approved grades keep their letters; drafts use the new scale when recomputed.</template>
-      <form class="space-y-3" @submit.prevent="save">
-        <div v-for="(band, i) in form.bands" :key="i" class="grid items-start gap-3 sm:grid-cols-[1fr_1fr_1fr_auto_auto]">
-          <BaseInput v-model="band.grade" :name="`grade-${i}`" label="Grade" required :error="fieldError(i, 'grade')" />
-          <BaseInput v-model="band.min_percentage" :name="`min-${i}`" label="From (%)" type="number" required :error="fieldError(i, 'min_percentage')" />
-          <BaseInput v-model="band.grade_point" :name="`point-${i}`" label="Grade points" type="number" required :error="fieldError(i, 'grade_point')" />
-          <label class="flex items-center gap-2 pt-8 text-small text-ink dark:text-dark-ink">
-            <input v-model="band.is_pass" type="checkbox" class="size-4 rounded border-border-default text-primary focus-visible:outline-2 focus-visible:outline-primary" />
-            Pass
-          </label>
-          <IconButton class="sm:mt-7" :icon="Trash2" variant="danger" :disabled="form.bands.length <= 2" :label="`Remove grade ${band.grade || i + 1}`" @click="remove(i)" />
-        </div>
+    <BaseCard v-if="canEdit" padding="lg" title="Bands">
+      <template #description>Give each grade the percentage it starts at; the lowest starts at 0%, and a higher band needs at least as many grade points. Approved grades keep their letters; drafts use the new scale when recomputed.</template>
+      <ScaleEditor :form="form" @save="save" />
+    </BaseCard>
 
-        <ErrorAlert v-if="form.errors.bands" title="Could not save" :message="form.errors.bands" />
-
-        <div class="flex flex-wrap justify-between gap-2 border-t border-border-default pt-4 dark:border-dark-border">
-          <IconButton :icon="Plus" size="md" label="Add band" @click="add" />
-          <BaseButton type="submit" :loading="form.processing">Save scale</BaseButton>
-        </div>
-      </form>
+    <BaseCard v-else padding="none">
+      <table class="min-w-full">
+        <caption class="sr-only">Grading scale bands</caption>
+        <thead>
+          <tr class="border-b border-border-default text-left text-caption font-semibold uppercase tracking-wider text-muted dark:border-dark-border dark:text-dark-muted">
+            <th scope="col" class="px-5 py-3">Grade</th>
+            <th scope="col" class="px-5 py-3">Range</th>
+            <th scope="col" class="px-5 py-3">Grade points</th>
+            <th scope="col" class="px-5 py-3 text-right">Result</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-border-default dark:divide-dark-border">
+          <tr v-for="band in saved" :key="band.grade">
+            <td class="px-5 py-3">
+              <span class="inline-flex h-9 min-w-9 items-center justify-center rounded-lg px-2 text-small font-semibold" :class="bandTone(band, maxPoints)">{{ band.grade }}</span>
+            </td>
+            <td class="px-5 py-3 text-small tabular-nums text-ink dark:text-dark-ink">{{ pct(band.min) }} – {{ pct(band.max) }}</td>
+            <td class="px-5 py-3">
+              <div class="flex items-center gap-3">
+                <span class="w-10 text-small font-semibold tabular-nums text-ink dark:text-dark-ink">{{ band.points.toFixed(2) }}</span>
+                <span class="hidden h-1.5 w-24 overflow-hidden rounded-pill bg-background sm:block dark:bg-dark-surface-2" aria-hidden="true">
+                  <span class="block h-full rounded-pill bg-primary dark:bg-dark-primary" :style="{ width: `${maxPoints ? (band.points / maxPoints) * 100 : 0}%` }" />
+                </span>
+              </div>
+            </td>
+            <td class="px-5 py-3 text-right"><StatusBadge :status="band.is_pass ? 'completed' : 'failed'" :label="band.is_pass ? 'Pass' : 'Fail'" /></td>
+          </tr>
+        </tbody>
+      </table>
     </BaseCard>
   </div>
 </template>

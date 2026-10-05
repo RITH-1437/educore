@@ -258,3 +258,21 @@ C 50 / 2.0 · D 45 / 1.0 · F 0 / 0.0) when no scale exists.
 - **GPA snapshots are rebuilt, not patched**, inside the same transaction as the
   grade change (`skills/grading-gpa` §12 — never stale).
 - Grade changes are not yet audited; that waits for 9.24 Audit Logs.
+
+## Update (2026-10-05): grading scale page redesign
+
+`/grading-scale` (`pages/Grades/Scale.vue`) now opens with four summary tiles
+(grades, pass mark, top grade, grade-point range) and a **scale bar**: the
+0–100% range split into the bands, each lettered and shaded by grade points
+(one hue, darker = more points; failing bands in the error tint with a "Fail"
+label), boundaries underneath (thinned on phones so they never collide), the
+pass mark highlighted, and a tooltip per band on hover or focus
+(`components/grades/ScaleBar.vue`). Readers get a table with letter tiles,
+ranges, a grade-point meter and Pass / Fail badges. Editors get one header row
+instead of repeated labels, the "To" column derived live, a Pass / Fail switch
+per band, the bar as a live preview ("Preview — not saved"), live checks that
+mirror the server's rules (`scaleIssues` in `utils/grades.js`: two to twenty
+bands, unique grades and starts, 0–100% / 0–5 points, lowest band at 0%,
+points never falling as the percentage rises), Save disabled until the scale
+is changed and valid, and Discard (`components/grades/ScaleEditor.vue`). No
+backend change: the same `PUT /grading-scale` saves it.

@@ -620,3 +620,11 @@ A module is not done until its report exists and its tests pass — never label
   is now grouped (Overview, Learning, Records). Business-overview objectives
   and stale "not yet delivered" notes corrected. Report:
   `docs/44_Course-Materials-Report.md`.
+- `[Done]` CI backend job (2026-10-06): `phpunit.xml` forced the Docker host and
+  credentials (`postgres` / `educore`) with `<server … force>`, so in GitHub
+  Actions — where the database is `127.0.0.1` / `postgres` — every database
+  test failed ("could not translate host name postgres"); this had been the case
+  since the users module (2026-09-25). Host, port, user and password are now
+  `<env>` defaults the environment overrides; the connection and the
+  `educore_test` database stay forced. Verified against a CI-identical
+  PostgreSQL container.

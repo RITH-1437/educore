@@ -359,7 +359,9 @@ The `backend/` folder is a standard Laravel 12 application.
   (empty disables the channel; never commit a real token).
 - Tests: PHPUnit (`php artisan test`). Linted and run by CI. The suite runs
   against its own `educore_test` database (`phpunit.xml`; created by
-  `docker/postgres/init/01-create-test-database.sh`), and `tests/TestCase`
+  `docker/postgres/init/01-create-test-database.sh`; host and credentials come
+  from the environment — the containers locally, `127.0.0.1` / `postgres` in
+  CI), and `tests/TestCase`
   refuses to refresh any database whose name does not end in `_test`, so your
   development data is never touched. Tests log nowhere (`LOG_CHANNEL=null`):
   `storage/logs/laravel.log` only holds development entries.

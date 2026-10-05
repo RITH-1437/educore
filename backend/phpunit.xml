@@ -20,11 +20,16 @@
 <php>
         <server name="APP_ENV" value="testing" force="true"/>
         <server name="DB_CONNECTION" value="pgsql" force="true"/>
-        <server name="DB_HOST" value="postgres" force="true"/>
-        <server name="DB_PORT" value="5432" force="true"/>
+        <!-- Always the dedicated test database (tests/TestCase refuses any other). -->
         <server name="DB_DATABASE" value="educore_test" force="true"/>
-        <server name="DB_USERNAME" value="educore" force="true"/>
-        <server name="DB_PASSWORD" value="educore@123" force="true"/>
+        <!-- Where it lives is the environment's choice: Docker Compose sets postgres /
+             educore, GitHub Actions 127.0.0.1 / postgres. These are only defaults:
+             <env> without force applies only when the variable is not set
+             (a <server> entry would always overwrite it). -->
+        <env name="DB_HOST" value="postgres"/>
+        <env name="DB_PORT" value="5432"/>
+        <env name="DB_USERNAME" value="educore"/>
+        <env name="DB_PASSWORD" value="educore@123"/>
         <server name="SESSION_DRIVER" value="array" force="true"/>
         <server name="CACHE_STORE" value="array" force="true"/>
         <server name="QUEUE_CONNECTION" value="sync" force="true"/>

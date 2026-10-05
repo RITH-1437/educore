@@ -626,5 +626,7 @@ A module is not done until its report exists and its tests pass — never label
   test failed ("could not translate host name postgres"); this had been the case
   since the users module (2026-09-25). Host, port, user and password are now
   `<env>` defaults the environment overrides; the connection and the
-  `educore_test` database stay forced. Verified against a CI-identical
-  PostgreSQL container.
+  `educore_test` database stay forced. Additionally, `tests/TestCase` now calls
+  `$this->withoutVite()` in `setUp()` so Inertia web page tests do not fail on
+  a missing `public/build/manifest.json` in backend-only test environments.
+

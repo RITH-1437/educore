@@ -9,7 +9,7 @@ import BaseSelect from '../../components/BaseSelect.vue'
 import EmptyState from '../../components/EmptyState.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import StatCard from '../../components/StatCard.vue'
-import StatusBadge from '../../components/StatusBadge.vue'
+import StatusBreakdownCard from '../../components/analytics/StatusBreakdownCard.vue'
 import BarChart from '../../components/charts/BarChart.vue'
 import PieChart from '../../components/charts/PieChart.vue'
 import { money } from '../../utils/finance'
@@ -53,7 +53,6 @@ const delay = (step) => ({ animationDelay: `${step * 60}ms` })
 const a = computed(() => props.academic)
 const hasGrades = computed(() => (a.value?.grade_distribution ?? []).some((g) => g.total > 0))
 const hasGpa = computed(() => (a.value?.gpa_distribution ?? []).some((g) => g.total > 0))
-const label = (s) => s.replaceAll('_', ' ').replace(/^./, (c) => c.toUpperCase())
 </script>
 
 <template>
@@ -231,14 +230,9 @@ const label = (s) => s.replaceAll('_', ' ').replace(/^./, (c) => c.toUpperCase()
       </div>
 
       <div class="grid gap-6 lg:grid-cols-3">
-        <BaseCard v-for="block in [{ title: 'Document requests', rows: administrative.documents, href: '/documents' }, { title: 'Internships', rows: administrative.internships, href: '/internships' }, { title: 'Invoices', rows: administrative.invoices, href: '/invoices' }]" :key="block.title" :title="block.title">
-          <ul class="divide-y divide-border-default dark:divide-dark-border">
-            <li v-for="row in block.rows" :key="row.status" class="flex items-center justify-between py-2">
-              <StatusBadge :status="row.status" :label="label(row.status)" />
-              <span class="text-small font-semibold tabular-nums text-ink dark:text-dark-ink">{{ row.total }}</span>
-            </li>
-          </ul>
-        </BaseCard>
+        <StatusBreakdownCard title="Document requests" :rows="administrative.documents" href="/documents" value-label="Requests" />
+        <StatusBreakdownCard title="Internships" :rows="administrative.internships" href="/internships" value-label="Internships" />
+        <StatusBreakdownCard title="Invoices" :rows="administrative.invoices" href="/invoices" value-label="Invoices" />
       </div>
     </section>
   </div>

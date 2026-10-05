@@ -14,6 +14,13 @@ const props = defineProps({
   details: { type: Array, default: () => [] },
   // Optional slice colours (e.g. the brand chart series on the landing page); defaults to the palettes below.
   colors: { type: Array, default: null },
+  // Palette slot per slice, so a category keeps its colour when others are left out
+  // (colour follows the entity, never its position). Defaults to the slice index.
+  slots: { type: Array, default: null },
+  // Off when the page already offers its own list view of the same numbers.
+  tableToggle: { type: Boolean, default: true },
+  // Stack the legend under the donut, for narrow cards (e.g. three in a row) where it would be squeezed.
+  legendBelow: { type: Boolean, default: false },
 })
 
 const canvas = ref(null)
@@ -29,6 +36,7 @@ const PALETTE_DARK = [
   '#3B82F6', '#34D399', '#FBBF24', '#A78BFA', '#F472B6', '#22D3EE', '#FB923C', '#94A3B8',
 ]
 const palette = () => props.colors ?? (dark.value ? PALETTE_DARK : PALETTE_LIGHT)
+const colorAt = (i) => { const colors = palette(); return colors[(props.slots?.[i] ?? i) % colors.length] }
 
 const total = computed(() => props.values.reduce((sum, v) => sum + (Number(v) || 0), 0))
 const rows = computed(() =>
@@ -40,7 +48,7 @@ const rows = computed(() =>
       detail: props.details[i] || lbl,
       value: val,
       percentage: pct,
-      color: palette()[i % palette().length],
+      color: colorAt(i),
     }
   }).filter((r) => r.value > 0 || props.labels.length <= 6)
 )
@@ -50,8 +58,7 @@ function build() {
   if (!canvas.value) return
 
   const isDark = dark.value
-  const colors = palette()
-  const backgroundColors = props.labels.map((_, i) => colors[i % colors.length])
+  const backgroundColors = props.labels.map((_, i) => colorAt(i))
   const borderColor = isDark ? '#1E293B' : '#FFFFFF'
 
   chart = new Chart(canvas.value, {
@@ -106,7 +113,7 @@ onMounted(() => {
   build()
 })
 
-watch(() => [props.labels, props.values, props.donut], () => build(), { deep: true })
+watch(() => [props.labels, props.values, props.donut, props.slots], () => build(), { deep: true })
 watch(showTable, (open) => {
   if (!open) setTimeout(build, 0)
 })
@@ -124,6 +131,7 @@ onBeforeUnmount(() => {
         Total: <strong class="text-ink dark:text-dark-ink">{{ total.toLocaleString() }}{{ suffix }}</strong>
       </span>
       <IconButton
+        v-if="tableToggle"
         :icon="showTable ? PieIcon : Table2"
         size="sm"
         :label="showTable ? 'Show chart view' : 'Show table view'"
@@ -131,7 +139,7 @@ onBeforeUnmount(() => {
       />
     </div>
 
-    <div v-show="!showTable" class="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:justify-around">
+    <div v-show="!showTable" :class="['flex flex-col items-center gap-4', legendBelow ? '' : 'sm:flex-row sm:items-center sm:justify-around']">
       <div class="relative h-56 w-56 flex-shrink-0">
         <canvas ref="canvas" :aria-label="label" role="img" />
         <div

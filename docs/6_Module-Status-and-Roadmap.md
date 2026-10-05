@@ -592,3 +592,7 @@ A module is not done until its report exists and its tests pass — never label
   Academic structure, People, …) folds and unfolds its items; folded groups are
   remembered per browser and the current page's group re-opens on arrival
   (`docs/branding/UI-COMPONENTS.md` §8).
+- `[Done]` Workload donuts on Analytics (2026-10-05): document requests,
+  internships and invoices by status as donuts with a rows toggle
+  (`docs/27_Analytics-and-Reporting-Report.md` §7). `[Open]` Refresh the shared
+  chart palette (slot 8 reads gray; dark set above the lightness band).

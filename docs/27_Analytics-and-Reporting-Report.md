@@ -123,3 +123,15 @@ exists). Web: `GET /analytics` (`Analytics/Index`, all sections in one page),
 Not verified: the rendered charts were not inspected in a browser in this
 session (no browser tool available); the build is clean and the data contract
 is tested.
+
+## 7. Update (2026-10-05): workload donuts
+
+The *Current workload* cards (document requests, internships, invoices by
+status) show a donut by default, with a toggle to the full list of rows (every
+status, zeros included, with its badge and share) and a link to the list page;
+the existing *Download workload as CSV* action exports the same numbers. Only
+statuses with records become slices, each in a fixed colour; more than six
+non-empty statuses open in the rows view; with no records the card shows an
+empty state. New component `components/analytics/StatusBreakdownCard.vue`;
+`PieChart` gained `slots`, `table-toggle` and `legend-below` (all optional, so
+existing charts are unchanged). Rules: `docs/branding/UI-COMPONENTS.md` §10.

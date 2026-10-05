@@ -365,6 +365,22 @@ Guidelines:
 - Respect dark mode via tokenized chart colors.
 - Use patterns (dashes) in addition to color when comparing series.
 
+**Status breakdown donuts (2026-10-05, Analytics workload):**
+
+- Part-to-whole at a glance only: slices are the statuses that have records;
+  each status keeps the palette slot of its place in the workflow
+  (`PieChart` `slots`), so a colour never moves when another status empties.
+- More than six non-empty statuses open in the rows view (a donut stops
+  reading beyond ~6 segments); a toggle switches donut ↔ rows, and the rows
+  list every status — zeros included — with its `StatusBadge` and share.
+- A value legend is always shown (identity is never colour alone); in cards
+  three-across it sits under the donut (`legend-below`) instead of being
+  squeezed beside it. No records → an empty state, not an empty ring.
+- Palette check (`validate_palette.js`, 2026-10-05): the shared `PieChart`
+  palette passes colour-blind and normal-vision separation; slot 8 (slate)
+  reads gray and the dark set sits above the lightness band — acceptable here
+  because labels are always visible, but a palette refresh is an open item.
+
 ---
 
 ## 11. Animation

@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
-import { Bell, CalendarDays, ChevronRight, KeyRound, LogOut, Menu, Moon, Sun } from '@lucide/vue'
+import { Bell, CalendarDays, ChevronRight, KeyRound, LogOut, Menu, Moon, Sun, UserRound } from '@lucide/vue'
 import BaseDropdown from '../BaseDropdown.vue'
 import BaseTooltip from '../BaseTooltip.vue'
 import { useNavigation } from '../../composables/useNavigation'
@@ -75,6 +75,9 @@ const logout = () => router.post('/logout')
             <p class="truncate text-caption text-muted dark:text-dark-muted">{{ user?.email }}</p>
           </div>
           <div class="p-1" role="menu">
+            <Link href="/account/profile" class="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-small text-ink hover:bg-surface focus-visible:outline-2 focus-visible:outline-primary dark:text-dark-ink dark:hover:bg-dark-surface-2" role="menuitem">
+              <UserRound class="h-4 w-4" aria-hidden="true" /> My profile
+            </Link>
             <Link href="/notifications" class="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-small text-ink hover:bg-surface focus-visible:outline-2 focus-visible:outline-primary dark:text-dark-ink dark:hover:bg-dark-surface-2" role="menuitem">
               <Bell class="h-4 w-4" aria-hidden="true" /> Notification settings
             </Link>

@@ -628,5 +628,18 @@ A module is not done until its report exists and its tests pass — never label
   `<env>` defaults the environment overrides; the connection and the
   `educore_test` database stay forced. Additionally, `tests/TestCase` now calls
   `$this->withoutVite()` in `setUp()` so Inertia web page tests do not fail on
-  a missing `public/build/manifest.json` in backend-only test environments.
+  a missing `public/build/manifest.json` in backend-only test environments, and
+  registers `frontend/src/pages` view finder paths via `config/inertia.php` so
+  component assertions locate Vue views outside Docker.
+- `[Done]` User Profile Portal & Student Feed (2026-10-06): every authenticated
+  role accesses a dedicated profile portal (`/account/profile` and
+  `GET/PUT /api/profile`) with verified credentials, institutional affiliation,
+  and editable contact information (phone, student residential address &
+  emergency contact, lecturer specialization). Students view their cumulative
+  GPA, earned credits, and active course load; lecturers view their appointment
+  and active teaching section count. The announcements feed resolves student/lecturer
+  audiences even when unlinked to a profile row, features category pills, and
+  links to the dashboard on empty state. Topbar user menu includes "My profile"
+  with `UserRound`. Report: `docs/45_Profile-Portal-Report.md`.
+
 

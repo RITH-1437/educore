@@ -422,24 +422,28 @@ class AnnouncementService
     {
         $m = ['student' => false, 'lecturer' => false, 'staff' => false, 'department' => [], 'program' => [], 'section' => [], 'course' => []];
 
-        if ($user->isRole(Role::Student->value) && ($student = $user->student) !== null) {
+        if ($user->isRole(Role::Student->value)) {
             $m['student'] = true;
-            $program = $student->currentProgram()->with('program:id,department_id')->first()?->program;
+            if (($student = $user->student) !== null) {
+                $program = $student->currentProgram()->with('program:id,department_id')->first()?->program;
 
-            if ($program !== null) {
-                $m['program'] = [$program->id];
-                $m['department'] = [$program->department_id];
+                if ($program !== null) {
+                    $m['program'] = [$program->id];
+                    $m['department'] = [$program->department_id];
+                }
+
+                $sections = Enrollment::query()->where('student_id', $student->getKey())->whereIn('status', Enrollment::OPEN_STATUSES)->pluck('section_id');
+                $m['section'] = $sections->map(fn ($id) => (int) $id)->all();
+                $m['course'] = $this->coursesOf($sections->all());
             }
-
-            $sections = Enrollment::query()->where('student_id', $student->getKey())->whereIn('status', Enrollment::OPEN_STATUSES)->pluck('section_id');
-            $m['section'] = $sections->map(fn ($id) => (int) $id)->all();
-            $m['course'] = $this->coursesOf($sections->all());
-        } elseif ($user->isRole(Role::Lecturer->value) && ($lecturer = $user->lecturer) !== null) {
+        } elseif ($user->isRole(Role::Lecturer->value)) {
             $m['lecturer'] = true;
-            $m['department'] = [$lecturer->department_id];
-            $sections = $lecturer->sections()->pluck('sections.id')->all();
-            $m['section'] = array_map('intval', $sections);
-            $m['course'] = $this->coursesOf($sections);
+            if (($lecturer = $user->lecturer) !== null) {
+                $m['department'] = [$lecturer->department_id];
+                $sections = $lecturer->sections()->pluck('sections.id')->all();
+                $m['section'] = array_map('intval', $sections);
+                $m['course'] = $this->coursesOf($sections);
+            }
         } elseif ($user->isRole(Role::SuperAdmin->value) || $user->isRole(Role::UniversityAdmin->value) || $user->isRole(Role::DepartmentAdmin->value)) {
             $m['staff'] = true;
         }

@@ -420,7 +420,7 @@ users, main business activities, and expected outputs.
   [14_Class-and-Section-Report.md](14_Class-and-Section-Report.md),
   [32_Faculty-Admin-Scoping-Report.md](32_Faculty-Admin-Scoping-Report.md), and
   [35_Lecturer-Dashboard-Report.md](35_Lecturer-Dashboard-Report.md).
-- **Not yet delivered `[Planned]`:** lecturer self-service profile editing.
+- **Delivered (Report 45):** user profile self-service portal (`/account/profile`, `/api/profile`) allowing students, lecturers and staff to view academic affiliation and update contact details and specializations. See [45_Profile-Portal-Report.md](45_Profile-Portal-Report.md).
 
 ### 9.4 Department Management [Implemented]
 

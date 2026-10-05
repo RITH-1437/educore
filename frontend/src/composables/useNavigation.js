@@ -160,7 +160,7 @@ const SECTION_LABELS = {
   'audit-logs': 'Audit logs',
 }
 
-const ACTION_LABELS = { create: 'New', edit: 'Edit' }
+const ACTION_LABELS = { create: 'New', edit: 'Edit', profile: 'Profile', password: 'Password' }
 
 export function useNavigation() {
   const page = usePage()

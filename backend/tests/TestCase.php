@@ -22,6 +22,15 @@ abstract class TestCase extends BaseTestCase
 
         $this->withoutMiddleware(ValidateCsrfToken::class);
         $this->withoutVite();
+
+        $frontendPages = base_path('../frontend/src/pages');
+        if (is_dir($frontendPages)) {
+            config(['inertia.pages.paths' => array_values(array_unique(array_merge(
+                config('inertia.pages.paths', [resource_path('js/pages')]),
+                [$frontendPages]
+            )))]);
+            $this->app->forgetInstance('inertia.view-finder');
+        }
     }
 
     // ------------------------------------------- Department Admin unit scoping ---

@@ -26,6 +26,7 @@ use App\Http\Controllers\Api\LecturerDashboardController;
 use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\NotificationPreferenceController;
 use App\Http\Controllers\Api\PasswordController;
+use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ProgramController;
 use App\Http\Controllers\Api\RoomController;
 use App\Http\Controllers\Api\ScheduleController;
@@ -385,6 +386,12 @@ Route::middleware('auth:sanctum')->prefix('/notifications')->name('api.notificat
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+// Profile self-service (every signed-in role).
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show'])->name('api.profile.show');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('api.profile.update');
 });
 
 // Public document verification (module 9.17): minimal data, logged, rate limited.

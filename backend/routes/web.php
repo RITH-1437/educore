@@ -27,6 +27,7 @@ use App\Http\Controllers\InternshipsController;
 use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\LecturerController;
 use App\Http\Controllers\NotificationPreferencesController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\RoomController;
@@ -60,8 +61,11 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password', [PasswordResetController::class, 'update'])->middleware('throttle:password-reset')->name('password.update');
 });
 
-// Change your own password (every signed-in role).
+// User profile portal and password change (every signed-in role).
 Route::middleware('auth')->group(function () {
+    Route::get('/account/profile', [ProfileController::class, 'show'])->name('account.profile');
+    Route::put('/account/profile', [ProfileController::class, 'update'])->name('account.profile.update');
+    Route::permanentRedirect('/profile', '/account/profile');
     Route::get('/account/password', [PasswordController::class, 'edit'])->name('account.password');
     Route::put('/account/password', [PasswordController::class, 'update'])->name('account.password.update');
 });

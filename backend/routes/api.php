@@ -391,8 +391,10 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Profile self-service (every signed-in role).
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profile', [ProfileController::class, 'show'])->name('api.profile.show');
-    Route::put('/profile', [ProfileController::class, 'update'])->name('api.profile.update');
+    Route::match(['put', 'post'], '/profile', [ProfileController::class, 'update'])->name('api.profile.update');
 });
+
+Route::get('/users/{user}/avatar', [ProfileController::class, 'avatar'])->name('api.avatar.show');
 
 // Public document verification (module 9.17): minimal data, logged, rate limited.
 Route::get('/verifications/{token}', [DocumentController::class, 'verify'])

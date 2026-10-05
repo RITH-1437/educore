@@ -1,17 +1,21 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import {
   Award,
   BookOpen,
   Building2,
   Calendar,
+  Camera,
   GraduationCap,
   KeyRound,
+  Link2,
   Mail,
   MapPin,
   Phone,
   ShieldCheck,
+  Trash2,
+  Upload,
   UserCheck,
   UserRound,
 } from '@lucide/vue'
@@ -33,6 +37,12 @@ const lecturer = computed(() => props.profile.lecturer)
 
 const initial = computed(() => u.value.name?.slice(0, 1)?.toUpperCase() ?? 'U')
 
+const avatarMode = ref('device')
+const fileInput = ref(null)
+const selectedFile = ref(null)
+const previewUrl = ref(null)
+const isRemoved = ref(false)
+
 const form = useForm({
   name: props.profile.name ?? '',
   phone: props.profile.phone ?? '',
@@ -40,11 +50,66 @@ const form = useForm({
   emergency_contact_name: props.profile.student?.emergency_contact_name ?? '',
   emergency_contact_phone: props.profile.student?.emergency_contact_phone ?? '',
   specialization: props.profile.lecturer?.specialization ?? '',
+  avatar: null,
+  avatar_url:
+    props.profile.avatar_key && (props.profile.avatar_key.startsWith('http://') || props.profile.avatar_key.startsWith('https://'))
+      ? props.profile.avatar_key
+      : '',
+  remove_avatar: false,
+})
+
+const onFileSelected = (event) => {
+  const file = event.target.files?.[0]
+  if (!file) return
+  selectedFile.value = file
+  form.avatar = file
+  form.remove_avatar = false
+  isRemoved.value = false
+
+  if (previewUrl.value && previewUrl.value.startsWith('blob:')) {
+    URL.revokeObjectURL(previewUrl.value)
+  }
+  previewUrl.value = URL.createObjectURL(file)
+}
+
+const onUrlChanged = () => {
+  if (form.avatar_url && (form.avatar_url.startsWith('http://') || form.avatar_url.startsWith('https://'))) {
+    previewUrl.value = form.avatar_url
+    form.remove_avatar = false
+    isRemoved.value = false
+  } else if (!form.avatar_url) {
+    previewUrl.value = null
+  }
+}
+
+const removeAvatar = () => {
+  selectedFile.value = null
+  form.avatar = null
+  form.avatar_url = ''
+  form.remove_avatar = true
+  isRemoved.value = true
+  if (fileInput.value) fileInput.value.value = ''
+  if (previewUrl.value && previewUrl.value.startsWith('blob:')) {
+    URL.revokeObjectURL(previewUrl.value)
+  }
+  previewUrl.value = null
+}
+
+const currentDisplayAvatar = computed(() => {
+  if (isRemoved.value) return null
+  if (previewUrl.value) return previewUrl.value
+  return props.profile.avatar_url ?? null
 })
 
 const submit = () => {
-  form.put('/account/profile', {
+  form.post('/account/profile', {
     preserveScroll: true,
+    forceFormData: true,
+    onSuccess: () => {
+      isRemoved.value = false
+      selectedFile.value = null
+      if (fileInput.value) fileInput.value.value = ''
+    },
   })
 }
 
@@ -65,19 +130,29 @@ const formatDate = (dateStr) => {
     <PageHeader
       eyebrow="Account"
       title="My Profile"
-      description="View your institutional affiliation, credentials, and manage your contact information."
+      description="View your institutional affiliation, credentials, and manage your avatar and contact information."
     />
 
     <!-- User identity card -->
     <BaseCard padding="lg">
       <div class="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center gap-4">
-          <div
-            class="flex h-16 w-16 shrink-0 items-center justify-center rounded-pill bg-primary text-h3 font-bold text-white shadow-sm dark:bg-dark-primary dark:text-dark-bg"
-            aria-hidden="true"
-          >
-            {{ initial }}
+          <div class="relative shrink-0">
+            <img
+              v-if="currentDisplayAvatar"
+              :src="currentDisplayAvatar"
+              :alt="u.name"
+              class="h-16 w-16 rounded-pill object-cover ring-2 ring-primary/20 shadow-xs dark:ring-dark-primary/30"
+            />
+            <div
+              v-else
+              class="flex h-16 w-16 items-center justify-center rounded-pill bg-primary text-h3 font-bold text-white shadow-sm dark:bg-dark-primary dark:text-dark-bg"
+              aria-hidden="true"
+            >
+              {{ initial }}
+            </div>
           </div>
+
           <div class="min-w-0">
             <div class="flex flex-wrap items-center gap-2">
               <h2 class="text-h4 font-bold text-ink dark:text-dark-ink">{{ u.name }}</h2>
@@ -237,13 +312,135 @@ const formatDate = (dateStr) => {
       </BaseCard>
     </template>
 
-    <!-- Contact & Personal Information Edit Form -->
-    <BaseCard title="Contact Information" padding="lg">
+    <!-- Profile Photo & Contact Information Edit Form -->
+    <BaseCard title="Profile Photo & Contact Details" padding="lg">
       <template #description>
-        Update your personal contact information. Official academic records must be changed via the registrar.
+        Personalize your avatar from your local device or a public image URL, and keep your contact details updated.
       </template>
 
-      <form class="space-y-5" @submit.prevent="submit">
+      <form class="space-y-6" @submit.prevent="submit">
+        <!-- Avatar Customization Block -->
+        <div class="rounded-lg border border-border-default bg-surface/50 p-4 dark:border-dark-border dark:bg-dark-surface/50 space-y-4">
+          <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-4">
+              <div class="relative shrink-0">
+                <img
+                  v-if="currentDisplayAvatar"
+                  :src="currentDisplayAvatar"
+                  :alt="form.name || u.name"
+                  class="h-16 w-16 rounded-pill object-cover ring-2 ring-primary shadow-xs dark:ring-dark-primary"
+                />
+                <div
+                  v-else
+                  class="flex h-16 w-16 items-center justify-center rounded-pill bg-primary text-h4 font-bold text-white shadow-xs dark:bg-dark-primary dark:text-dark-bg"
+                >
+                  {{ initial }}
+                </div>
+              </div>
+              <div>
+                <p class="text-small font-semibold text-ink dark:text-dark-ink">Avatar Photo</p>
+                <p class="text-caption text-muted dark:text-dark-muted">
+                  Upload an image from your device or paste a web URL.
+                </p>
+              </div>
+            </div>
+
+            <!-- Avatar Source Toggle Pills -->
+            <div class="inline-flex rounded-md p-1 bg-surface-2 dark:bg-dark-surface-2 border border-border-default dark:border-dark-border" role="tablist">
+              <button
+                type="button"
+                role="tab"
+                :aria-selected="avatarMode === 'device'"
+                class="inline-flex items-center gap-1.5 rounded px-3 py-1 text-caption font-medium transition-colors"
+                :class="avatarMode === 'device' ? 'bg-primary text-white shadow-xs dark:bg-dark-primary dark:text-dark-bg' : 'text-muted hover:text-ink dark:text-dark-muted dark:hover:text-dark-ink'"
+                @click="avatarMode = 'device'"
+              >
+                <Upload class="h-3.5 w-3.5" aria-hidden="true" />
+                From device
+              </button>
+              <button
+                type="button"
+                role="tab"
+                :aria-selected="avatarMode === 'url'"
+                class="inline-flex items-center gap-1.5 rounded px-3 py-1 text-caption font-medium transition-colors"
+                :class="avatarMode === 'url' ? 'bg-primary text-white shadow-xs dark:bg-dark-primary dark:text-dark-bg' : 'text-muted hover:text-ink dark:text-dark-muted dark:hover:text-dark-ink'"
+                @click="avatarMode = 'url'"
+              >
+                <Link2 class="h-3.5 w-3.5" aria-hidden="true" />
+                From URL
+              </button>
+            </div>
+          </div>
+
+          <!-- Mode: Device upload -->
+          <div v-if="avatarMode === 'device'" class="flex flex-wrap items-center gap-3 pt-2">
+            <input
+              ref="fileInput"
+              type="file"
+              accept="image/png,image/jpeg,image/jpg,image/webp"
+              class="hidden"
+              @change="onFileSelected"
+            />
+            <BaseButton
+              type="button"
+              variant="secondary"
+              size="sm"
+              @click="fileInput?.click()"
+            >
+              <Camera class="h-4 w-4 mr-1.5" aria-hidden="true" />
+              Choose image from device
+            </BaseButton>
+
+            <span v-if="selectedFile" class="text-caption font-medium text-ink dark:text-dark-ink">
+              {{ selectedFile.name }} ({{ Math.round(selectedFile.size / 1024) }} KB)
+            </span>
+            <span v-else class="text-caption text-muted dark:text-dark-muted">
+              Accepts JPG, PNG, or WebP up to 2 MB
+            </span>
+
+            <button
+              v-if="currentDisplayAvatar"
+              type="button"
+              class="ml-auto inline-flex items-center gap-1 text-caption font-medium text-error hover:underline dark:text-red-400"
+              @click="removeAvatar"
+            >
+              <Trash2 class="h-3.5 w-3.5" aria-hidden="true" />
+              Remove photo
+            </button>
+          </div>
+
+          <!-- Mode: URL input -->
+          <div v-else class="space-y-2 pt-2">
+            <div class="flex items-center gap-3">
+              <div class="flex-1">
+                <BaseInput
+                  v-model="form.avatar_url"
+                  name="avatar_url"
+                  label="Direct image URL"
+                  placeholder="https://example.com/avatar.jpg"
+                  hint="Provide a direct, public HTTPS image link."
+                  :error="form.errors.avatar_url"
+                  @input="onUrlChanged"
+                />
+              </div>
+              <button
+                v-if="currentDisplayAvatar"
+                type="button"
+                class="mt-6 inline-flex items-center gap-1 text-caption font-medium text-error hover:underline dark:text-red-400"
+                @click="removeAvatar"
+              >
+                <Trash2 class="h-3.5 w-3.5" aria-hidden="true" />
+                Remove
+              </button>
+            </div>
+          </div>
+
+          <p v-if="form.errors.avatar" class="text-caption text-error">
+            {{ form.errors.avatar }}
+          </p>
+        </div>
+
+        <!-- Name and Phone -->
         <div class="grid gap-4 sm:grid-cols-2">
           <BaseInput
             v-model="form.name"

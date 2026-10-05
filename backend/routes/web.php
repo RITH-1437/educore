@@ -64,11 +64,13 @@ Route::middleware('guest')->group(function () {
 // User profile portal and password change (every signed-in role).
 Route::middleware('auth')->group(function () {
     Route::get('/account/profile', [ProfileController::class, 'show'])->name('account.profile');
-    Route::put('/account/profile', [ProfileController::class, 'update'])->name('account.profile.update');
+    Route::match(['put', 'post'], '/account/profile', [ProfileController::class, 'update'])->name('account.profile.update');
     Route::permanentRedirect('/profile', '/account/profile');
     Route::get('/account/password', [PasswordController::class, 'edit'])->name('account.password');
     Route::put('/account/password', [PasswordController::class, 'update'])->name('account.password.update');
 });
+
+Route::get('/users/{user}/avatar', [ProfileController::class, 'avatar'])->name('avatar.show');
 
 Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])
     ->middleware('auth')

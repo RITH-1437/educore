@@ -268,7 +268,8 @@ documented operations.
 | POST | `/api/reset-password` | Public; `throttle:password-reset` | Documented |
 | GET | `/api/user` | `auth:sanctum` | Documented |
 | GET | `/api/profile` | `auth:sanctum` (caller's own profile payload) | Documented (Report 45) |
-| PUT | `/api/profile` | `auth:sanctum` (caller's own profile contact update) | Documented (Report 45) |
+| PUT, POST | `/api/profile` | `auth:sanctum` (caller's own profile contact / avatar update) | Documented (Report 45) |
+| GET | `/users/{user}/avatar` | Public (stream stored avatar or redirect to external avatar URL) | Documented (Report 45) |
 | GET | `/api/health` | Public | Documented |
 | GET | `/api/users` | Sanctum + super-admin (responses include `faculty_id`, `faculty`) | Documented |
 | POST | `/api/users` | Sanctum + super-admin (optional `faculty_id`, Faculty Admin role only) | Documented |

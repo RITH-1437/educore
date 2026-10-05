@@ -15,8 +15,9 @@ Every signed-in user (Super Admin, University Admin, Department Admin, Lecturer,
 1. Inspect verified institutional identity (name, email, role badge, department affiliation, account status, last login timestamp).
 2. For students: review official academic credentials (Student ID, current program, home department, enrollment date, gender, national ID) alongside an academic performance summary (cumulative GPA, earned/attempted credits, current course count).
 3. For lecturers: review faculty appointment details (Staff ID, academic title, position, department, employment type, active teaching section load) and research specialization.
-4. Update self-service contact information:
+4. Update self-service contact and avatar information:
    - All users: `name`, `phone`.
+   - Avatar personalization: upload an image file from local device (JPG, PNG, WebP up to 2 MB stored in MinIO/S3 under `avatars/{userId}/{uuid}.{ext}`) or enter an external image URL (HTTPS). Existing files are cleaned up upon replacement or removal.
    - Students: `address`, `emergency_contact_name`, `emergency_contact_phone`.
    - Lecturers: `specialization`.
 5. Access quick account security and notification actions (Change password link, Security & Alerts link).
@@ -69,6 +70,9 @@ flowchart TD
 |---|---|---|---|---|
 | `name` | string | All roles | `required`, `string`, `max:255` | `users.name` |
 | `phone` | string | All roles | `nullable`, `string`, `max:30` | `users.phone` |
+| `avatar` | file | All roles | `nullable`, `file`, `image`, `mimes:jpg,jpeg,png,webp`, `max:2048` | S3 `avatars/{userId}/{uuid}.{ext}` |
+| `avatar_url` | string | All roles | `nullable`, `url`, `max:2048`, `regex:/^https?:\/\//i` | `users.avatar_key` |
+| `remove_avatar` | boolean | All roles | `nullable`, `boolean` | Deletes file from S3, clears `avatar_key` |
 | `address` | string | Student | `nullable`, `string`, `max:255` | `students.address` |
 | `emergency_contact_name` | string | Student | `nullable`, `string`, `max:255` | `students.emergency_contact_name` |
 | `emergency_contact_phone` | string | Student | `nullable`, `string`, `max:30` | `students.emergency_contact_phone` |
@@ -84,9 +88,10 @@ flowchart TD
 | Action | Super Admin | University Admin | Department Admin | Lecturer | Student | Guest |
 |---|:---:|:---:|:---:|:---:|:---:|:---:|
 | `GET /account/profile` | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✗ 302 to `/login` |
-| `PUT /account/profile` | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✗ 302 to `/login` |
+| `PUT|POST /account/profile` | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✗ 302 to `/login` |
 | `GET /api/profile` | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✗ 401 Unauthorized |
-| `PUT /api/profile` | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✗ 401 Unauthorized |
+| `PUT|POST /api/profile` | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✓ (Own) | ✗ 401 Unauthorized |
+| `GET /users/{user}/avatar` | ✓ | ✓ | ✓ | ✓ | ✓ | ✓ (Public avatar streaming) |
 | `/profile` redirect | ✓ | ✓ | ✓ | ✓ | ✓ | ✗ 302 to `/login` |
 
 ---
@@ -96,17 +101,19 @@ flowchart TD
 | Method | Path | Controller | Purpose |
 |---|---|---|---|
 | `GET` | `/account/profile` | `ProfileController@show` | Renders Inertia page `Account/Profile` with full profile data |
-| `PUT` | `/account/profile` | `ProfileController@update` | Updates user details, flashes success message, redirects back |
+| `PUT`, `POST` | `/account/profile` | `ProfileController@update` | Updates user details / avatar, flashes success message, redirects back |
+| `GET` | `/users/{user}/avatar` | `ProfileController@avatar` | Streams stored avatar image from S3 or redirects to external avatar URL |
 | `GET` | `/profile` | N/A (Redirect) | Permanent redirect to `/account/profile` |
 | `GET` | `/api/profile` | `Api\ProfileController@show` | Returns JSON envelope `{"data": { ... }}` |
-| `PUT` | `/api/profile` | `Api\ProfileController@update` | Updates profile via API and returns updated payload |
+| `PUT`, `POST` | `/api/profile` | `Api\ProfileController@update` | Updates profile via API and returns updated payload |
 
 ---
 
 ## 6. UI & Design System Compliance
 
-- **Topbar Menu Integration:** Added *My profile* with `UserRound` icon to `frontend/src/components/layout/AppTopbar.vue` dropdown above *Notification settings*.
+- **Topbar Menu Integration:** Added *My profile* with `UserRound` icon to `frontend/src/components/layout/AppTopbar.vue` dropdown above *Notification settings*, and rendered user avatar image when `avatar_url` is present.
 - **Breadcrumb Navigation:** Configured `useNavigation.js` to map `account` -> `Account` and `profile` -> `Profile`.
+- **Avatar Mode Segmented Controls:** Provided seamless toggling between "From device" (with camera icon and file picker) and "From URL" (with link icon and live preview), with a "Remove photo" action.
 - **Card & Token Usage:** Built with `BaseCard`, `BaseBadge`, `BaseInput`, `BaseButton`, `StatCard`, and semantic colour tokens conforming to `docs/branding/`.
 - **Dark Mode Support:** Fully verified in both light and dark modes with proper background surfaces (`dark:bg-dark-surface`, `dark:text-dark-ink`).
 
@@ -124,7 +131,11 @@ flowchart TD
    - `test_student_can_update_contact_details`: Student contact fields saved to `students` table.
    - `test_lecturer_can_update_specialization`: Specialization saved to `lecturers` table.
    - `test_profile_update_validates_inputs`: 422 Unprocessable Content on invalid data.
-2. **Pint Code Style:** 613 files checked, 0 style issues found (`vendor/bin/pint --test` passes).
+   - `test_user_can_set_avatar_from_url`: Sets HTTPS image URL and verifies `avatar_url`.
+   - `test_user_can_upload_avatar_from_device`: Uploads image file to S3, tests storage assertion and streaming endpoint.
+   - `test_user_can_remove_avatar`: Clears avatar and deletes S3 object.
+   - `test_avatar_validation_rejects_invalid_file_and_url`: Validates MIME types, max size (2MB), and URL format.
+2. **Pint Code Style:** 612 files checked, 0 style issues found (`vendor/bin/pint --test` passes).
 3. **Database Seeder Invariance:** Verified `DatabaseSeederTest` passes with 0 demo records for fresh production installs.
 
 ---

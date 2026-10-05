@@ -5,7 +5,10 @@ namespace App\Services;
 use App\Enums\Role;
 use App\Models\Enrollment;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
 class ProfileService
 {
@@ -39,6 +42,7 @@ class ProfileService
                 'code' => $user->department->code,
             ] : null,
             'avatar_key' => $user->avatar_key,
+            'avatar_url' => $user->avatarUrl(),
             'is_active' => (bool) $user->is_active,
             'last_login_at' => $user->last_login_at?->toIso8601String(),
             'created_at' => $user->created_at?->toIso8601String(),
@@ -121,10 +125,10 @@ class ProfileService
      *
      * @param  array<string, mixed>  $input
      */
-    public function update(User $user, array $input): User
+    public function update(User $user, array $input, ?UploadedFile $avatarFile = null): User
     {
-        return DB::transaction(function () use ($user, $input) {
-            $userBefore = $user->only(['name', 'phone']);
+        return DB::transaction(function () use ($user, $input, $avatarFile) {
+            $userBefore = $user->only(['name', 'phone', 'avatar_key']);
 
             $userUpdates = [];
             if (array_key_exists('name', $input)) {
@@ -132,6 +136,21 @@ class ProfileService
             }
             if (array_key_exists('phone', $input)) {
                 $userUpdates['phone'] = $input['phone'];
+            }
+
+            // Avatar handling: remove, upload from device, or set from URL
+            if (! empty($input['remove_avatar'])) {
+                $this->deleteStoredAvatar($user->avatar_key);
+                $userUpdates['avatar_key'] = null;
+            } elseif ($avatarFile !== null) {
+                $this->deleteStoredAvatar($user->avatar_key);
+                $ext = strtolower($avatarFile->getClientOriginalExtension() ?: $avatarFile->extension() ?: 'jpg');
+                $key = "avatars/{$user->id}/".Str::uuid().".{$ext}";
+                Storage::disk($this->disk())->putFileAs(dirname($key), $avatarFile, basename($key), ['visibility' => 'public']);
+                $userUpdates['avatar_key'] = $key;
+            } elseif (array_key_exists('avatar_url', $input) && ! empty($input['avatar_url'])) {
+                $this->deleteStoredAvatar($user->avatar_key);
+                $userUpdates['avatar_key'] = $input['avatar_url'];
             }
 
             if (! empty($userUpdates)) {
@@ -165,12 +184,24 @@ class ProfileService
                 'profile.updated',
                 $user,
                 before: $userBefore,
-                after: $user->only(['name', 'phone']),
+                after: $user->only(['name', 'phone', 'avatar_key']),
                 description: 'User profile details updated.',
                 actor: $user,
             );
 
             return $user->refresh();
         });
+    }
+
+    public function disk(): string
+    {
+        return (string) config('academics.uploads_disk', 's3');
+    }
+
+    private function deleteStoredAvatar(?string $key): void
+    {
+        if (! empty($key) && ! str_starts_with($key, 'http://') && ! str_starts_with($key, 'https://')) {
+            Storage::disk($this->disk())->delete($key);
+        }
     }
 }

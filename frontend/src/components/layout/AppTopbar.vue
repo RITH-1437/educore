@@ -62,7 +62,8 @@ const logout = () => router.post('/logout')
       <BaseDropdown>
         <template #trigger="{ open, toggle }">
           <button type="button" class="flex min-h-11 items-center gap-2 rounded-md px-2 text-small text-ink transition-colors duration-150 hover:bg-surface focus-visible:outline-2 focus-visible:outline-primary dark:text-dark-ink dark:hover:bg-dark-surface-2" :aria-expanded="open" aria-haspopup="menu" aria-label="Account menu" @click="toggle">
-            <span class="flex h-8 w-8 items-center justify-center rounded-pill bg-primary text-caption font-semibold text-white dark:bg-dark-primary dark:text-dark-bg">{{ initial }}</span>
+            <img v-if="user?.avatar_url" :src="user.avatar_url" :alt="user.name" class="h-8 w-8 rounded-pill object-cover ring-1 ring-border-default dark:ring-dark-border" />
+            <span v-else class="flex h-8 w-8 items-center justify-center rounded-pill bg-primary text-caption font-semibold text-white dark:bg-dark-primary dark:text-dark-bg">{{ initial }}</span>
             <span class="hidden min-w-0 text-left md:block">
               <span class="block max-w-36 truncate text-small font-medium leading-4">{{ user?.name }}</span>
               <span class="block max-w-36 truncate text-caption leading-4 text-muted dark:text-dark-muted">{{ user?.role?.name }}</span>

@@ -8,6 +8,8 @@ use App\Models\Program;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
 
@@ -176,5 +178,83 @@ class ProfileTest extends TestCase
             ])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['name', 'phone']);
+    }
+
+    public function test_user_can_set_avatar_from_url(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->putJson('/api/profile', [
+                'name' => 'Avatar URL User',
+                'avatar_url' => 'https://images.example.com/profiles/avatar.png',
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.avatar_key', 'https://images.example.com/profiles/avatar.png')
+            ->assertJsonPath('data.avatar_url', 'https://images.example.com/profiles/avatar.png');
+
+        $this->assertSame('https://images.example.com/profiles/avatar.png', $user->refresh()->avatar_key);
+        $this->assertSame('https://images.example.com/profiles/avatar.png', $user->avatarUrl());
+    }
+
+    public function test_user_can_upload_avatar_from_device(): void
+    {
+        Storage::fake('s3');
+        $user = User::factory()->create();
+
+        $pngBytes = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+        $file = UploadedFile::fake()->createWithContent('my-photo.png', $pngBytes);
+
+        $this->actingAs($user)
+            ->post('/account/profile', [
+                'name' => 'Device Upload User',
+                'avatar' => $file,
+            ])
+            ->assertRedirect()
+            ->assertSessionHas('success');
+
+        $user->refresh();
+        $this->assertNotNull($user->avatar_key);
+        $this->assertStringStartsWith("avatars/{$user->id}/", $user->avatar_key);
+        Storage::disk('s3')->assertExists($user->avatar_key);
+
+        // Avatar endpoint serves the file
+        $response = $this->get("/users/{$user->id}/avatar");
+        $response->assertOk();
+    }
+
+    public function test_user_can_remove_avatar(): void
+    {
+        Storage::fake('s3');
+        $user = User::factory()->create(['avatar_key' => 'avatars/1/test.png']);
+        Storage::disk('s3')->put('avatars/1/test.png', 'fake image content');
+
+        $this->actingAs($user)
+            ->putJson('/api/profile', [
+                'name' => 'No Avatar User',
+                'remove_avatar' => true,
+            ])
+            ->assertOk()
+            ->assertJsonPath('data.avatar_key', null)
+            ->assertJsonPath('data.avatar_url', null);
+
+        $this->assertNull($user->refresh()->avatar_key);
+        Storage::disk('s3')->assertMissing('avatars/1/test.png');
+    }
+
+    public function test_avatar_validation_rejects_invalid_file_and_url(): void
+    {
+        $user = User::factory()->create();
+
+        $fakePdf = UploadedFile::fake()->create('document.pdf', 100, 'application/pdf');
+
+        $this->actingAs($user)
+            ->postJson('/api/profile', [
+                'name' => 'Bad Avatar User',
+                'avatar' => $fakePdf,
+                'avatar_url' => 'not-a-valid-url',
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['avatar', 'avatar_url']);
     }
 }

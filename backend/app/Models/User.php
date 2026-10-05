@@ -125,4 +125,20 @@ class User extends Authenticatable
     {
         return $this->isRole(RoleSlug::DepartmentAdmin->value) ? (int) ($this->department_id ?? 0) : null;
     }
+
+    /**
+     * The public or streamed URL to this user's avatar, or null if none is set.
+     */
+    public function avatarUrl(): ?string
+    {
+        if (empty($this->avatar_key)) {
+            return null;
+        }
+
+        if (str_starts_with($this->avatar_key, 'http://') || str_starts_with($this->avatar_key, 'https://')) {
+            return $this->avatar_key;
+        }
+
+        return route('avatar.show', ['user' => $this->getKey()]);
+    }
 }

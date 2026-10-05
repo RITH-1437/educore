@@ -13,13 +13,16 @@ class ProfileUpdateRequest extends FormRequest
     }
 
     /**
-     * @return array<string, list<string>>
+     * @return array<string, list<mixed>>
      */
     public function rules(): array
     {
         $rules = [
             'name' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:30'],
+            'avatar' => ['nullable', 'file', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'avatar_url' => ['nullable', 'url', 'max:2048', 'regex:/^https?:\/\//i'],
+            'remove_avatar' => ['nullable', 'boolean'],
         ];
 
         if ($this->user()?->isRole(Role::Student->value)) {

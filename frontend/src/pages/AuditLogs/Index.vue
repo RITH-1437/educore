@@ -33,10 +33,10 @@ const apply = (options = {}) => router.get('/audit-logs', {
 }, { preserveState: true, replace: true, ...options })
 
 const columns = [
-  { key: 'when', label: 'When' },
   { key: 'action', label: 'Action' },
   { key: 'actor', label: 'Who' },
   { key: 'target', label: 'Record' },
+  { key: 'when', label: 'Timestamp', align: 'right' },
 ]
 // Soft search: the list follows the filters as they change — typed text after a
 // short pause, picked options at once — so there is no search button.

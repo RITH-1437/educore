@@ -609,3 +609,5 @@ A module is not done until its report exists and its tests pass — never label
   0–100% scale bar shaded by grade points with the pass mark, a modern band
   table, and an inline editor with live preview and live rule checks
   (`docs/20_Grades-and-GPA-Report.md`, update section).
+- `[Done]` Audit log list (2026-10-05): the time column moved to the end and
+  is labelled *Timestamp* (right-aligned).

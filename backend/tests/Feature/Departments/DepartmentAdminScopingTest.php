@@ -72,6 +72,51 @@ class DepartmentAdminScopingTest extends TestCase
         $this->actingAs($this->departmentAdmin)->getJson('/api/users')->assertForbidden();
     }
 
+    /**
+     * The Users screens post `department_id` for the `department-admin` role
+     * (they still posted `faculty_id` for `faculty-admin` after report 39, so
+     * saving a Department Admin from the edit screen cleared the department).
+     */
+    public function test_web_user_screens_keep_a_department_admins_department(): void
+    {
+        $unitRole = RoleModel::query()->firstWhere('slug', Role::DepartmentAdmin->value);
+
+        $this->actingAs($this->admin)->get('/users/create')->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->component('Users/Create')->has('departments', 2)
+                ->where('roles', fn ($roles) => collect($roles)->contains('slug', Role::DepartmentAdmin->value)));
+
+        $this->actingAs($this->admin)->post('/users', ['name' => 'Sokha Unit', 'email' => 'sokha.unit@educore.kh', 'role_id' => $unitRole->id, 'department_id' => $this->mine->id, 'is_active' => true, 'password' => 'secret-password', 'password_confirmation' => 'secret-password'])
+            ->assertRedirect('/users');
+        $user = User::query()->firstWhere('email', 'sokha.unit@educore.kh');
+        $this->assertSame($this->mine->id, $user->department_id);
+
+        $this->actingAs($this->admin)->get("/users/{$user->id}/edit")->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('user.department_id', $this->mine->id)->where('user.role.slug', Role::DepartmentAdmin->value));
+
+        // Saving the edit screen with the department moves it, it does not drop it.
+        $this->actingAs($this->admin)->put("/users/{$user->id}", ['name' => 'Sokha Unit', 'email' => 'sokha.unit@educore.kh', 'role_id' => $unitRole->id, 'department_id' => $this->theirs->id, 'is_active' => true])
+            ->assertRedirect();
+        $this->assertSame($this->theirs->id, $user->fresh()->department_id);
+    }
+
+    public function test_people_and_catalog_lists_filter_by_department(): void
+    {
+        $myStudent = Student::factory()->inProgram(Program::factory()->create(['department_id' => $this->mine->id]))->create();
+        Student::factory()->inProgram(Program::factory()->create(['department_id' => $this->theirs->id]))->create();
+        $this->course($this->mine);
+        $this->course($this->theirs);
+
+        $this->actingAs($this->admin)->get("/students?filters[department_id]={$this->mine->id}")->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('filters.department_id', $this->mine->id)
+                ->has('students.data', 1)->where('students.data.0.id', $myStudent->id)->has('departments.data', 2));
+        $this->actingAs($this->admin)->get("/courses?filters[department_id]={$this->mine->id}")->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('filters.department_id', $this->mine->id)->has('courses.data', 1));
+
+        // The Super Admin dashboard counts departments (it pointed at the removed faculties).
+        $this->actingAs($this->admin)->get('/admin/dashboard')->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('stats.total_departments', 2));
+    }
+
     public function test_structure_and_people_lists_and_records_are_scoped(): void
     {
         [$myCourse, $theirCourse] = [$this->course($this->mine), $this->course($this->theirs)];

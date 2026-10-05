@@ -21,7 +21,7 @@ const props = defineProps({
 const metrics = computed(() => [
   { label: 'Total accounts', value: props.stats.total_users, detail: `${props.stats.active_users} active`, href: '/users', tone: 'primary' },
   { label: 'Academic years', value: props.stats.total_academic_years, detail: `${props.stats.active_academic_years} active`, href: '/academic-years', tone: 'secondary' },
-  { label: 'Faculties', value: props.stats.total_faculties, detail: 'Institution structure', href: '/faculties', tone: 'success' },
+  { label: 'Departments', value: props.stats.total_departments, detail: 'Institution structure', href: '/departments', tone: 'success' },
   { label: 'Programs', value: props.stats.total_programs, detail: `${props.stats.total_semesters} semesters`, href: '/programs', tone: 'warning' },
 ])
 
@@ -37,7 +37,7 @@ const attention = computed(() => {
 const areas = [
   { title: 'Users & roles', detail: 'Create accounts and assign platform roles.', href: '/users', icon: Users },
   { title: 'Academic calendar', detail: 'Years, semesters, and status transitions.', href: '/academic-years', icon: CalendarDays },
-  { title: 'Faculties & departments', detail: 'Organize the university structure.', href: '/faculties', icon: Landmark },
+  { title: 'Departments', detail: 'Organize the university structure.', href: '/departments', icon: Landmark },
   { title: 'Programs', detail: 'Degree tracks offered by each department.', href: '/programs', icon: BookOpen },
   { title: 'Courses', detail: 'Catalog, prerequisites and program curricula.', href: '/courses', icon: GraduationCap },
   { title: 'Offerings & sections', detail: 'Classes per semester and their lecturers.', href: '/offerings', icon: CalendarDays },

@@ -19,8 +19,7 @@ Identity & Access
 ```
 University Structure
 ├── universities
-├── faculties
-├── departments
+├── departments   (faculties removed in report 39)
 └── programs
 ```
 
@@ -133,7 +132,7 @@ Reporting reads from other modules and is **derived on demand**:
 - Grade reports ← `grades`, `exam_results`
 - GPA reports ← `gpa_records`
 - Course statistics ← `enrollments`, `grades`, `attendance_records`
-- Faculty/department statistics ← `departments`, `students`, `courses`
+- Department statistics ← `departments`, `students`, `courses`
 - Internship statistics ← `internships`
 - Administrative reports ← `document_requests`, `documents`, `invoices`
 

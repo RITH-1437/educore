@@ -18,7 +18,7 @@ conflict exists, the skill wins.
 | Rule | Convention | Example |
 |---|---|---|
 | Case | snake_case | `course_offerings` |
-| Number | plural | `faculties`, `enrollments` |
+| Number | plural | `departments`, `enrollments` |
 | Pivot | plural, alphabetical (or skill-named) | `course_programs`, `section_lecturers` |
 | Prefix | none | ✅ `semesters` ❌ `acad_semesters` |
 
@@ -52,7 +52,7 @@ conflict exists, the skill wins.
 
 | Behaviour | Use for |
 |---|---|
-| `RESTRICT` (default) | reference + historical data: `faculties`, `programs`, `sections`, `grades`, `invoices` |
+| `RESTRICT` (default) | reference + historical data: `departments`, `programs`, `sections`, `grades`, `invoices` |
 | `CASCADE` | line items that are meaningless without the parent: `invoice_items`, `permission_role`, `section_lecturers` |
 | `SET NULL` | optional links where the parent may vanish: `audit_logs.actor_id`, `*.recorded_by` |
 
@@ -90,7 +90,7 @@ conflict exists, the skill wins.
 ## 8. Soft delete
 
 - Add `deleted_at` **only** where history must survive a delete and the skill
-  allows it (users, faculties, enrollments, grades, documents, invoices).
+  allows it (users, departments, enrollments, grades, documents, invoices).
 - Never soft-delete lookup/reference data (roles, rooms, grading scales,
   document types) — correct mistakes instead.
 - High-value records use an audit trail instead of soft delete

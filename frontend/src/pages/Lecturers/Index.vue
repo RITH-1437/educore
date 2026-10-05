@@ -18,7 +18,6 @@ import { useConfirm } from '../../composables/useConfirm'
 
 const props = defineProps({
   lecturers: { type: Object, required: true },
-  faculties: { type: Object, required: true },
   departments: { type: Object, required: true },
   employmentTypes: { type: Array, default: () => [] },
   unlinkedAccounts: { type: Array, default: () => [] },
@@ -28,31 +27,30 @@ const props = defineProps({
 const page = usePage()
 const { confirm } = useConfirm()
 
-// Faculty Admin may read lecturers but not change them; write controls are
+// Department Admin may read lecturers but not change them; write controls are
 // hidden rather than left to fail with a 403 (`skills/lecturer-management/SKILL.md` §8).
 const canManage = computed(() => ['super-admin', 'university-admin'].includes(page.props.auth?.user?.role?.slug ?? ''))
 
-const faculties = computed(() => props.faculties?.data ?? [])
 const departments = computed(() => props.departments?.data ?? [])
 const typeLabel = (type) => type.replace('_', ' ').replace(/^./, (c) => c.toUpperCase())
 
 const search = ref(props.filters.search ?? '')
-const facultyId = ref(props.filters.faculty_id ?? '')
+const departmentId = ref(props.filters.department_id ?? '')
 const employmentType = ref(props.filters.employment_type ?? '')
 const activeState = ref(props.filters.is_active === null || props.filters.is_active === undefined ? '' : props.filters.is_active ? '1' : '0')
 
-const facultyOptions = computed(() => faculties.value.map((faculty) => ({ value: faculty.id, label: faculty.name })))
+const departmentOptions = computed(() => departments.value.map((department) => ({ value: department.id, label: department.name })))
 const typeOptions = computed(() => props.employmentTypes.map((type) => ({ value: type, label: typeLabel(type) })))
 const stateOptions = [
   { value: '1', label: 'Active' },
   { value: '0', label: 'Inactive' },
 ]
 
-const hasFilters = computed(() => Boolean(search.value || facultyId.value || employmentType.value || activeState.value !== ''))
+const hasFilters = computed(() => Boolean(search.value || departmentId.value || employmentType.value || activeState.value !== ''))
 
 const applyFilters = () => {
   const filters = {
-    faculty_id: facultyId.value || undefined,
+    department_id: departmentId.value || undefined,
     employment_type: employmentType.value || undefined,
     is_active: activeState.value === '' ? undefined : activeState.value,
   }
@@ -65,7 +63,7 @@ const applyFilters = () => {
 
 const clearFilters = () => {
   search.value = ''
-  facultyId.value = ''
+  departmentId.value = ''
   employmentType.value = ''
   activeState.value = ''
   router.get('/lecturers', {}, { preserveState: true, replace: true })
@@ -152,7 +150,7 @@ const destroy = async (lecturer) => {
     <BaseCard padding="sm">
       <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_2fr_1fr_1fr_auto] lg:items-end" @submit.prevent="applyFilters">
         <BaseInput v-model="search" label="Search" placeholder="Name, staff no., email" />
-        <BaseSelect v-model="facultyId" label="Faculty" :options="facultyOptions" placeholder="All faculties" />
+        <BaseSelect v-model="departmentId" label="Department" :options="departmentOptions" placeholder="All departments" />
         <BaseSelect v-model="employmentType" label="Type" :options="typeOptions" placeholder="All types" />
         <BaseSelect v-model="activeState" label="Status" :options="stateOptions" placeholder="All" />
         <div class="flex gap-2">
@@ -179,7 +177,6 @@ const destroy = async (lecturer) => {
       </template>
       <template #cell-department="{ row }">
         <span class="text-small">{{ row.department?.code }}</span>
-        <span v-if="row.department?.faculty" class="text-caption text-muted dark:text-dark-muted"> · {{ row.department.faculty.code }}</span>
       </template>
       <template #cell-employment_type="{ row }"><span class="whitespace-nowrap">{{ typeLabel(row.employment_type) }}</span></template>
       <template #cell-is_active="{ row }"><StatusBadge :status="row.is_active ? 'active' : 'inactive'" /></template>
@@ -201,7 +198,6 @@ const destroy = async (lecturer) => {
         <LecturerForm
           :form="createForm"
           mode="create"
-          :faculties="faculties"
           :departments="departments"
           :employment-types="employmentTypes"
           :unlinked-accounts="unlinkedAccounts"

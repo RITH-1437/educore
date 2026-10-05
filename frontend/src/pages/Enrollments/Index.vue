@@ -24,7 +24,7 @@ const props = defineProps({
 
 const page = usePage()
 const { confirm } = useConfirm()
-// Faculty Admin reads only; write controls are hidden (backend still enforces).
+// Department Admin reads only; write controls are hidden (backend still enforces).
 const canManage = computed(() => ['super-admin', 'university-admin'].includes(page.props.auth?.user?.role?.slug ?? ''))
 const label = (value) => value.charAt(0).toUpperCase() + value.slice(1)
 

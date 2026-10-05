@@ -41,9 +41,9 @@ class DocumentTypeController extends Controller
         ],
         responses: [
             new OA\Response(response: 200, description: 'Document type details with requests count.', content: new OA\JsonContent(ref: '#/components/schemas/DocumentTypeResourceResponse')),
-            new OA\Response(response: 401, ref: '#/components/schemas/ErrorResponse'),
-            new OA\Response(response: 403, ref: '#/components/schemas/ErrorResponse'),
-            new OA\Response(response: 404, ref: '#/components/schemas/ErrorResponse'),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 404, description: 'Not found.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
         ]
     )]
     public function show(DocumentType $documentType): DocumentTypeResource
@@ -63,9 +63,9 @@ class DocumentTypeController extends Controller
         requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/StoreDocumentTypeRequest')),
         responses: [
             new OA\Response(response: 201, description: 'Document type created.', content: new OA\JsonContent(ref: '#/components/schemas/DocumentTypeResourceResponse')),
-            new OA\Response(response: 401, ref: '#/components/schemas/ErrorResponse'),
-            new OA\Response(response: 403, ref: '#/components/schemas/ErrorResponse'),
-            new OA\Response(response: 422, ref: '#/components/schemas/ValidationErrorResponse'),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
     )]
     public function store(StoreDocumentTypeRequest $request): JsonResponse
@@ -90,10 +90,29 @@ class DocumentTypeController extends Controller
         requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/UpdateDocumentTypeRequest')),
         responses: [
             new OA\Response(response: 200, description: 'Document type updated.', content: new OA\JsonContent(ref: '#/components/schemas/DocumentTypeResourceResponse')),
-            new OA\Response(response: 401, ref: '#/components/schemas/ErrorResponse'),
-            new OA\Response(response: 403, ref: '#/components/schemas/ErrorResponse'),
-            new OA\Response(response: 404, ref: '#/components/schemas/ErrorResponse'),
-            new OA\Response(response: 422, ref: '#/components/schemas/ValidationErrorResponse'),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 404, description: 'Not found.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
+        ]
+    )]
+    #[OA\Patch(
+        path: '/document-types/{documentType}',
+        summary: 'Update document type (PATCH)',
+        description: 'Super Admin and University Admin only.',
+        operationId: 'patchDocumentType',
+        tags: ['Documents'],
+        security: [['sanctum' => []]],
+        parameters: [
+            new OA\PathParameter(name: 'documentType', required: true, schema: new OA\Schema(type: 'integer', format: 'int64')),
+        ],
+        requestBody: new OA\RequestBody(required: true, content: new OA\JsonContent(ref: '#/components/schemas/UpdateDocumentTypeRequest')),
+        responses: [
+            new OA\Response(response: 200, description: 'Document type updated.', content: new OA\JsonContent(ref: '#/components/schemas/DocumentTypeResourceResponse')),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 404, description: 'Not found.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
     )]
     public function update(UpdateDocumentTypeRequest $request, DocumentType $documentType): DocumentTypeResource
@@ -117,9 +136,9 @@ class DocumentTypeController extends Controller
         ],
         responses: [
             new OA\Response(response: 204, description: 'Document type deleted.'),
-            new OA\Response(response: 401, ref: '#/components/schemas/ErrorResponse'),
-            new OA\Response(response: 403, ref: '#/components/schemas/ErrorResponse'),
-            new OA\Response(response: 404, ref: '#/components/schemas/ErrorResponse'),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 404, description: 'Not found.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Type referenced by existing requests.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
         ]
     )]

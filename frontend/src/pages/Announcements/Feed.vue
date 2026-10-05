@@ -18,7 +18,7 @@ defineProps({
 <template>
   <Head title="Announcements - EduCore" />
   <div class="mx-auto max-w-3xl space-y-6">
-    <PageHeader eyebrow="Communication" title="Announcements" description="News addressed to you, your program, department, faculty, classes and courses.">
+    <PageHeader eyebrow="Communication" title="Announcements" description="News addressed to you, your program, department, classes and courses.">
       <template v-if="canManage" #actions>
         <IconButton :icon="SquarePen" href="/announcements/manage" size="md" variant="primary" label="Write an announcement" />
       </template>

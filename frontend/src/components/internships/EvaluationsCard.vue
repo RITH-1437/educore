@@ -29,17 +29,17 @@ const load = (type) => {
 }
 load('supervisor')
 
-const typeOptions = [{ value: 'supervisor', label: 'Company supervisor' }, { value: 'faculty', label: 'Faculty' }]
+const typeOptions = [{ value: 'supervisor', label: 'Company supervisor' }, { value: 'academic', label: 'Academic supervisor' }]
 const ratingOptions = computed(() => props.ratings.map((r) => ({ value: r, label: ratingLabel(r) })))
 const save = () => form.transform((d) => ({ ...d, rating: d.rating || null })).post(`/internships/${props.internship.id}/evaluations`, { preserveScroll: true })
 </script>
 
 <template>
   <BaseCard title="Evaluations" padding="lg">
-    <EmptyState v-if="!internship.evaluations.length" title="No evaluations yet" description="The supervisor's and the faculty's evaluations are recorded once the internship has started." />
+    <EmptyState v-if="!internship.evaluations.length" title="No evaluations yet" description="The company supervisor's and the academic supervisor's evaluations are recorded once the internship has started." />
     <dl v-else class="grid gap-4 sm:grid-cols-2">
       <div v-for="e in internship.evaluations" :key="e.id" class="rounded-lg border border-border-default p-4 dark:border-dark-border">
-        <dt class="text-caption font-semibold uppercase tracking-wider text-muted dark:text-dark-muted">{{ e.evaluator_type === 'supervisor' ? 'Company supervisor' : 'Faculty' }}<span v-if="e.evaluator_name"> · {{ e.evaluator_name }}</span></dt>
+        <dt class="text-caption font-semibold uppercase tracking-wider text-muted dark:text-dark-muted">{{ e.evaluator_type === 'supervisor' ? 'Company supervisor' : 'Academic supervisor' }}<span v-if="e.evaluator_name"> · {{ e.evaluator_name }}</span></dt>
         <dd class="mt-1 text-h4 font-semibold tabular-nums text-ink dark:text-dark-ink">{{ e.score ?? '—' }}<span class="text-small font-normal text-muted dark:text-dark-muted"> / 100 · {{ ratingLabel(e.rating) }}</span></dd>
         <dd v-if="e.comments" class="mt-1 whitespace-pre-line text-small text-muted dark:text-dark-muted">{{ e.comments }}</dd>
       </div>

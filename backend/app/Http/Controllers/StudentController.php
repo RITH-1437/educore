@@ -58,6 +58,7 @@ class StudentController extends Controller
                 ->values(),
             'filters' => [
                 'search' => $filters->search,
+                'department_id' => $filters->departmentId,
                 'program_id' => $filters->programId,
                 'status' => $filters->status,
             ],

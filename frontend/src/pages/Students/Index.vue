@@ -17,7 +17,7 @@ import StudentForm from '../../components/students/StudentForm.vue'
 
 const props = defineProps({
   students: { type: Object, required: true },
-  faculties: { type: Object, required: true },
+  departments: { type: Object, required: true },
   programs: { type: Array, default: () => [] },
   statuses: { type: Array, default: () => [] },
   genders: { type: Array, default: () => [] },
@@ -26,27 +26,27 @@ const props = defineProps({
 })
 
 const page = usePage()
-// Faculty Admin reads only; write controls are hidden (backend still enforces).
+// Department Admin reads only; write controls are hidden (backend still enforces).
 const canManage = computed(() => ['super-admin', 'university-admin'].includes(page.props.auth?.user?.role?.slug ?? ''))
-const faculties = computed(() => props.faculties?.data ?? [])
+const departments = computed(() => props.departments?.data ?? [])
 
 const search = ref(props.filters.search ?? '')
-const facultyId = ref(props.filters.faculty_id ?? '')
+const departmentId = ref(props.filters.department_id ?? '')
 const programId = ref(props.filters.program_id ?? '')
 const status = ref(props.filters.status ?? '')
 
-const facultyOptions = computed(() => faculties.value.map((faculty) => ({ value: faculty.id, label: faculty.name })))
+const departmentOptions = computed(() => departments.value.map((department) => ({ value: department.id, label: department.name })))
 const programOptions = computed(() => props.programs.map((program) => ({ value: program.id, label: `${program.code} — ${program.name}` })))
 const statusOptions = computed(() => props.statuses.map((value) => ({ value, label: value.charAt(0).toUpperCase() + value.slice(1) })))
-const hasFilters = computed(() => Boolean(search.value || facultyId.value || programId.value || status.value))
+const hasFilters = computed(() => Boolean(search.value || departmentId.value || programId.value || status.value))
 
 const applyFilters = () => {
-  const filters = { faculty_id: facultyId.value || undefined, program_id: programId.value || undefined, status: status.value || undefined }
+  const filters = { department_id: departmentId.value || undefined, program_id: programId.value || undefined, status: status.value || undefined }
   router.get('/students', { search: search.value || undefined, filters: Object.values(filters).some((v) => v !== undefined) ? filters : undefined }, { preserveState: true, replace: true })
 }
 const clearFilters = () => {
   search.value = ''
-  facultyId.value = ''
+  departmentId.value = ''
   programId.value = ''
   status.value = ''
   router.get('/students', {}, { preserveState: true, replace: true })
@@ -103,7 +103,7 @@ const submitCreate = () =>
     <BaseCard padding="sm">
       <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_2fr_2fr_1fr_auto] lg:items-end" @submit.prevent="applyFilters">
         <BaseInput v-model="search" label="Search" placeholder="Name, student ID, email" />
-        <BaseSelect v-model="facultyId" label="Faculty" :options="facultyOptions" placeholder="All faculties" />
+        <BaseSelect v-model="departmentId" label="Department" :options="departmentOptions" placeholder="All departments" />
         <BaseSelect v-model="programId" label="Program" :options="programOptions" placeholder="All programs" />
         <BaseSelect v-model="status" label="Status" :options="statusOptions" placeholder="All" />
         <div class="flex gap-2">
@@ -144,7 +144,7 @@ const submitCreate = () =>
 
     <BaseModal v-model="showCreate" title="New student" size="lg">
       <form class="space-y-5" @submit.prevent="submitCreate">
-        <StudentForm :form="createForm" mode="create" :faculties="faculties" :programs="programs" :genders="genders" :unlinked-accounts="unlinkedAccounts" />
+        <StudentForm :form="createForm" mode="create" :departments="departments" :programs="programs" :genders="genders" :unlinked-accounts="unlinkedAccounts" />
         <ErrorAlert v-if="Object.keys(createForm.errors).length" title="Check the form" message="Correct the highlighted fields and try again." />
         <div class="flex items-center gap-3">
           <BaseButton type="submit" :loading="createForm.processing">Create student</BaseButton>

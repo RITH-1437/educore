@@ -4,7 +4,7 @@
 - **Scope:** removal of the faculty level in the academic hierarchy, flattening structure to University → Department → Program; migration of `faculty-admin` to `department-admin`; direct assignment of unit admins to departments via `users.department_id`
 - **Status:** `[Implemented]`
 - **Depends on:** `docs/7_Faculty-and-Department-Report.md`, `docs/32_Faculty-Admin-Scoping-Report.md`, `docs/33_Faculty-Admin-Request-Handling-Report.md`, `docs/34_Faculty-Admin-Dashboard-Report.md`
-- **Schema change:** `2026_10_05_120000_remove_faculty_level.php` (table `faculties` dropped, `departments.university_id` added, `users.faculty_id` replaced by `users.department_id`, internship evaluator constraint updated)
+- **Schema change:** `2026_10_05_120000_remove_faculty_level.php` (table `faculties` dropped, `departments.university_id` added, `users.faculty_id` replaced by `users.department_id`, internship evaluator constraint updated); follow-up `2026_10_05_170000_drop_faculty_from_announcement_audiences.php` (§7)
 
 ---
 
@@ -129,3 +129,36 @@ All tests pass without failures:
 - Complete backend suite: **409 tests passed (3,916 assertions)**.
 - Code style: `vendor/bin/pint --test` clean.
 - Frontend build: `npm run build` clean.
+
+---
+
+## 7. Audit follow-up (2026-10-05): frontend and documentation
+
+The migration, backend and tests above were complete, but the Vue pages and
+several documents still assumed faculties. Found in a post-release audit and
+fixed:
+
+| Where | Symptom | Fix |
+|---|---|---|
+| `Users/Create`, `Users/Edit` | Looked for the `faculty-admin` slug and sent `faculty_id`: no department could be assigned, and **saving a Department Admin cleared their department** (`UpdateUserData` always writes `department_id`) | `department-admin` + `department_id`, options from the `departments` prop |
+| `Users/Index` | No unit shown under Department Admins | Shows the assigned department |
+| `EvaluationsCard` (internship) | Sent `evaluator_type: faculty` → **422** | `academic` ("Academic supervisor") |
+| `Admin/Dashboard` | "Faculties" tile blank, linked to the removed `/faculties` (404) | "Departments" (`stats.total_departments`) → `/departments` |
+| `Universities/Index`, `Universities/Edit` | "Faculties: 0", *Manage faculties* → 404 | `departments_count`, *Manage departments* |
+| Course / Program / Lecturer / Student lists | Empty *Faculty* filter sending `faculty_id`, ignored by the backend | *Department* filter (`filters[department_id]`, already supported by the list DTOs); `/students` now echoes it |
+| Course / Program / Lecturer forms | Empty *Faculty* pre-filter above the department | Removed; department full width |
+| Student form | Programs narrowed by a faculty that no longer exists | Narrowed by department; a program outside it is cleared |
+| Announcement pages | Copy mentioned faculty audiences | Removed |
+| `ck_announcements_audience` | Still allowed `faculty` (validation refused it, the database did not) | Migration `2026_10_05_170000_drop_faculty_from_announcement_audiences` drops it (any stray row → `staff`, as in §2) |
+| `README.md`, `docs/database/` | Seeded `faculty@educore.kh`, `/faculties` route, `faculties` table, `users.faculty_id`, evaluator `faculty` | Updated to the department-only schema |
+
+```mermaid
+flowchart LR
+  A[Users/Edit before] -->|faculty_id ignored| B[department_id = null]
+  B --> C[Department Admin sees no unit data]
+  D[Users/Edit after] -->|department_id| E[department kept / moved]
+```
+
+Tests added to `DepartmentAdminScopingTest`: the web create / edit / update
+round trip keeps a Department Admin's department, and the people and catalog
+lists filter by department (with the dashboard's department count).

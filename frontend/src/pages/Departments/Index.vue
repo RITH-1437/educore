@@ -25,7 +25,7 @@ const page = usePage()
 
 // A Department Admin may read the structure but not change it, so every write
 // control is hidden rather than left to fail with a 403
-// (`skills/faculty-department/SKILL.md` §8).
+// (`docs/39_Department-Only-Structure-Report.md`).
 const canManage = computed(() => ['super-admin', 'university-admin'].includes(page.props.auth?.user?.role?.slug ?? ''))
 
 const search = ref(props.filters.search ?? '')

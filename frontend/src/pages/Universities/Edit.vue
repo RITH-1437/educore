@@ -31,7 +31,7 @@ const makeCurrent = () => router.post(`/universities/${props.university.id}/curr
 const { confirm } = useConfirm()
 
 const destroy = async () => {
-  if (await confirm({ title: 'Delete university?', message: `Delete "${props.university.name}"? This is refused while it still has faculties.`, confirmLabel: 'Delete', destructive: true })) {
+  if (await confirm({ title: 'Delete university?', message: `Delete "${props.university.name}"? This is refused while it still has departments.`, confirmLabel: 'Delete', destructive: true })) {
     router.delete(`/universities/${props.university.id}`)
   }
 }
@@ -57,8 +57,8 @@ const destroy = async () => {
     <BaseCard padding="md">
       <dl class="grid gap-4 sm:grid-cols-3">
         <div>
-          <dt class="text-caption uppercase tracking-wide text-muted dark:text-dark-muted">Faculties</dt>
-          <dd class="mt-1 text-h4 font-semibold text-ink dark:text-dark-ink">{{ university.faculties_count ?? 0 }}</dd>
+          <dt class="text-caption uppercase tracking-wide text-muted dark:text-dark-muted">Departments</dt>
+          <dd class="mt-1 text-h4 font-semibold text-ink dark:text-dark-ink">{{ university.departments_count ?? 0 }}</dd>
         </div>
         <div>
           <dt class="text-caption uppercase tracking-wide text-muted dark:text-dark-muted">Current</dt>

@@ -10,8 +10,8 @@ Complete relationship catalog. Format:
 
 | From | Relationship | To | Description |
 |---|---|---|---|
-| `universities` | 1 → N | `faculties` | A university contains many faculties |
-| `faculties` | 1 → N | `departments` | A faculty has many departments |
+| `universities` | 1 → N | `departments` | A university contains many departments (faculty level removed in report 39) |
+| `departments` | 1 → N | `users` | A department is administered by its Department Admins (`users.department_id`) |
 | `departments` | 1 → N | `programs` | A department offers many programs |
 | `programs` | N ↔ N | `courses` | A program includes many courses; a course can serve many programs (via `course_programs`) |
 | `courses` | N ↔ N (self) | `courses` | Prerequisite edges via `course_prerequisites` (course → prerequisite_course) |
@@ -112,7 +112,7 @@ GPA = Σ(grade_points × credits) / Σ(credits)
 | From | Relationship | To | Description |
 |---|---|---|---|
 | `users` | 1 → N | `announcements` | Author |
-| `announcements` | → | `faculties`/`departments`/`programs`/`sections`/`courses` | Target via `audience_type` + `audience_id` |
+| `announcements` | → | `departments`/`programs`/`sections`/`courses` | Target via `audience_type` + `audience_id` |
 | `announcements` | → | `files` | Attachments |
 | `users` | 1 → N | `notifications` | Laravel `notifiable` morph |
 | `users` | 1 → 1 | `notification_preferences` | Channel preferences |
@@ -124,7 +124,7 @@ GPA = Σ(grade_points × credits) / Σ(credits)
 | `students` | 1 → N | `internships` | A student's internship lifecycle |
 | `internship_companies` | 1 → N | `internships` | A company hosts many internships |
 | `internships` | 1 → N | `internship_reports` | Student-submitted reports |
-| `internships` | 1 → N | `internship_evaluations` | Supervisor/faculty evaluations |
+| `internships` | 1 → N | `internship_evaluations` | Company-supervisor / academic evaluations |
 
 ## 11. Audit & Security
 

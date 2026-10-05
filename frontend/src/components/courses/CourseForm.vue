@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref, watch } from 'vue'
+import { computed } from 'vue'
 import BaseInput from '../BaseInput.vue'
 import BaseSelect from '../BaseSelect.vue'
 import BaseTextarea from '../BaseTextarea.vue'
@@ -8,7 +8,6 @@ import BaseTextarea from '../BaseTextarea.vue'
 // Inertia form (`form`) and the submit/cancel controls.
 const props = defineProps({
   form: { type: Object, required: true },
-  faculties: { type: Array, default: () => [] },
   departments: { type: Array, default: () => [] },
   levels: { type: Array, default: () => [] },
   /** Statuses an editor may pick (archiving has its own action). */
@@ -19,30 +18,16 @@ const props = defineProps({
 
 const titleCase = (value) => value.charAt(0).toUpperCase() + value.slice(1)
 
-// The faculty only narrows the department list — it is not submitted.
-const facultyId = ref(props.departments.find((department) => department.id === props.form.department_id)?.faculty_id ?? '')
-
-const facultyOptions = computed(() => props.faculties.map((faculty) => ({ value: faculty.id, label: `${faculty.code} — ${faculty.name}` })))
 const departmentOptions = computed(() =>
-  props.departments
-    .filter((department) => !facultyId.value || department.faculty_id === facultyId.value)
-    .map((department) => ({ value: department.id, label: `${department.code} — ${department.name}` })),
+  props.departments.map((department) => ({ value: department.id, label: `${department.code} — ${department.name}` })),
 )
 const levelOptions = computed(() => props.levels.map((level) => ({ value: level, label: titleCase(level) })))
 const statusOptions = computed(() => props.statuses.map((status) => ({ value: status, label: titleCase(status) })))
-
-watch(facultyId, () => {
-  const stillValid = props.departments.some((department) => department.id === props.form.department_id && (!facultyId.value || department.faculty_id === facultyId.value))
-  if (!stillValid) props.form.department_id = ''
-})
 </script>
 
 <template>
   <div class="space-y-5">
-    <div class="grid gap-5 sm:grid-cols-2">
-      <BaseSelect v-model="facultyId" label="Faculty" :options="facultyOptions" placeholder="All faculties" />
-      <BaseSelect v-model="form.department_id" label="Department" :options="departmentOptions" placeholder="Select a department" :error="form.errors.department_id" required />
-    </div>
+    <BaseSelect v-model="form.department_id" label="Department" :options="departmentOptions" placeholder="Select a department" :error="form.errors.department_id" required />
 
     <div class="grid gap-5 sm:grid-cols-2">
       <BaseInput v-model="form.code" name="code" label="Code" placeholder="CS201" :error="form.errors.code" required />

@@ -10,23 +10,30 @@ import BaseTextarea from '../BaseTextarea.vue'
 const props = defineProps({
   form: { type: Object, required: true },
   mode: { type: String, default: 'create', validator: (value) => ['create', 'edit'].includes(value) },
-  faculties: { type: Array, default: () => [] },
+  departments: { type: Array, default: () => [] },
   programs: { type: Array, default: () => [] },
   genders: { type: Array, default: () => [] },
   unlinkedAccounts: { type: Array, default: () => [] },
 })
 
 const accountMode = ref(props.form.user_id ? 'link' : 'new')
-const facultyId = ref('')
+// The department only narrows the program list — it is not submitted.
+const departmentId = ref('')
 
-const facultyOptions = computed(() => props.faculties.map((faculty) => ({ value: faculty.id, label: `${faculty.code} — ${faculty.name}` })))
+const departmentOptions = computed(() => props.departments.map((department) => ({ value: department.id, label: `${department.code} — ${department.name}` })))
 const programOptions = computed(() =>
   props.programs
-    .filter((program) => !facultyId.value || program.faculty_id === facultyId.value)
+    .filter((program) => !departmentId.value || program.department_id === departmentId.value)
     .map((program) => ({ value: program.id, label: `${program.code} — ${program.name}` })),
 )
 const genderOptions = computed(() => props.genders.map((gender) => ({ value: gender, label: gender.charAt(0).toUpperCase() + gender.slice(1) })))
 const accountOptions = computed(() => props.unlinkedAccounts.map((account) => ({ value: account.id, label: `${account.name} — ${account.email}` })))
+
+// Picking another department clears a program that no longer belongs to it.
+watch(departmentId, () => {
+  const stillValid = props.programs.some((program) => program.id === props.form.program_id && (!departmentId.value || program.department_id === departmentId.value))
+  if (!stillValid) props.form.program_id = ''
+})
 
 watch(accountMode, (value) => {
   if (value === 'link') {
@@ -96,7 +103,7 @@ watch(accountMode, (value) => {
     <fieldset v-if="mode === 'create'" class="space-y-4 border-t border-border-default pt-5 dark:border-dark-border">
       <legend class="text-label font-semibold text-ink dark:text-dark-ink">Program</legend>
       <div class="grid gap-5 sm:grid-cols-2">
-        <BaseSelect v-model="facultyId" label="Faculty" :options="facultyOptions" placeholder="All faculties" />
+        <BaseSelect v-model="departmentId" label="Department" :options="departmentOptions" placeholder="All departments" />
         <BaseSelect v-model="form.program_id" label="Program" :options="programOptions" placeholder="Select a program" :error="form.errors.program_id" required />
       </div>
     </fieldset>

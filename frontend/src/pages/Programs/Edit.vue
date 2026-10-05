@@ -13,7 +13,6 @@ import ProgramForm from '../../components/programs/ProgramForm.vue'
 
 const props = defineProps({
   program: { type: Object, required: true },
-  faculties: { type: Object, required: true },
   departments: { type: Object, required: true },
   degreeLevels: { type: Array, default: () => [] },
   availableCourses: { type: Array, default: () => [] },
@@ -35,10 +34,9 @@ const departments = computed(() => {
   const current = props.program.department
   return list.some((department) => department.id === current?.id) || !current
     ? list
-    : [...list, { id: current.id, code: current.code, name: current.name, faculty_id: current.faculty_id }]
+    : [...list, { id: current.id, code: current.code, name: current.name }]
 })
 
-const faculties = computed(() => props.faculties?.data ?? [])
 
 const submit = () => form.put(`/programs/${props.program.id}`, { preserveScroll: true })
 </script>
@@ -61,7 +59,7 @@ const submit = () => form.put(`/programs/${props.program.id}`, { preserveScroll:
 
     <BaseCard padding="lg">
       <form class="space-y-5" @submit.prevent="submit">
-        <ProgramForm :form="form" :faculties="faculties" :departments="departments" :degree-levels="degreeLevels" />
+        <ProgramForm :form="form" :departments="departments" :degree-levels="degreeLevels" />
 
         <div class="flex items-center gap-3">
           <BaseButton type="submit" :loading="form.processing">Save changes</BaseButton>

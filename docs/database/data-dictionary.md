@@ -21,7 +21,6 @@ snake_case; types follow `database-conventions.md`.
 | `lecturers.staff_number` | Official staff ID | UNIQUE |
 | `courses.code` | Course code (e.g. `CS101`) | UNIQUE |
 | `universities.code` | Institution code | UNIQUE |
-| `faculties.code` | Faculty code | UNIQUE |
 | `departments.code` | Department code | UNIQUE |
 | `programs.code` | Program code | UNIQUE |
 | `academic_years.code` | e.g. `2026-2027` | UNIQUE |

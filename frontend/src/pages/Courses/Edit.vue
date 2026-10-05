@@ -17,7 +17,6 @@ const props = defineProps({
   course: { type: Object, required: true },
   prerequisiteOptions: { type: Array, default: () => [] },
   gradingConfig: { type: Object, default: null },
-  faculties: { type: Object, required: true },
   departments: { type: Object, required: true },
   programs: { type: Array, default: () => [] },
   levels: { type: Array, default: () => [] },
@@ -45,10 +44,9 @@ const departments = computed(() => {
   const current = props.course.department
   return !current || list.some((department) => department.id === current.id)
     ? list
-    : [...list, { id: current.id, code: current.code, name: current.name, faculty_id: current.faculty_id }]
+    : [...list, { id: current.id, code: current.code, name: current.name }]
 })
 
-const faculties = computed(() => props.faculties?.data ?? [])
 
 const submit = () => form.put(`/courses/${props.course.id}`, { preserveScroll: true })
 const reactivate = () => router.post(`/courses/${props.course.id}/reactivate`, {}, { preserveScroll: true })
@@ -73,7 +71,7 @@ const reactivate = () => router.post(`/courses/${props.course.id}/reactivate`, {
 
     <BaseCard padding="lg">
       <form class="space-y-5" @submit.prevent="submit">
-        <CourseForm :form="form" :faculties="faculties" :departments="departments" :levels="levels" :status-locked="archived" />
+        <CourseForm :form="form" :departments="departments" :levels="levels" :status-locked="archived" />
 
         <div class="flex items-center gap-3">
           <BaseButton type="submit" :loading="form.processing">Save changes</BaseButton>

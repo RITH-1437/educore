@@ -18,7 +18,6 @@ import { useConfirm } from '../../composables/useConfirm'
 
 const props = defineProps({
   programs: { type: Object, required: true },
-  faculties: { type: Object, required: true },
   departments: { type: Object, required: true },
   degreeLevels: { type: Array, default: () => [] },
   filters: { type: Object, default: () => ({}) },
@@ -27,30 +26,29 @@ const props = defineProps({
 const page = usePage()
 const { confirm } = useConfirm()
 
-// Faculty Admin may read programs but not change them; write controls are
+// Department Admin may read programs but not change them; write controls are
 // hidden rather than left to fail with a 403 (`skills/program-management/SKILL.md` §8).
 const canManage = computed(() => ['super-admin', 'university-admin'].includes(page.props.auth?.user?.role?.slug ?? ''))
 
-const faculties = computed(() => props.faculties?.data ?? [])
 const departments = computed(() => props.departments?.data ?? [])
 
 const search = ref(props.filters.search ?? '')
-const facultyId = ref(props.filters.faculty_id ?? '')
+const departmentId = ref(props.filters.department_id ?? '')
 const degreeLevel = ref(props.filters.degree_level ?? '')
 const activeState = ref(props.filters.is_active === null || props.filters.is_active === undefined ? '' : props.filters.is_active ? '1' : '0')
 
-const facultyOptions = computed(() => faculties.value.map((faculty) => ({ value: faculty.id, label: faculty.name })))
+const departmentOptions = computed(() => departments.value.map((department) => ({ value: department.id, label: department.name })))
 const levelOptions = computed(() => props.degreeLevels.map((level) => ({ value: level, label: level.charAt(0).toUpperCase() + level.slice(1) })))
 const stateOptions = [
   { value: '1', label: 'Active' },
   { value: '0', label: 'Archived' },
 ]
 
-const hasFilters = computed(() => Boolean(search.value || facultyId.value || degreeLevel.value || activeState.value !== ''))
+const hasFilters = computed(() => Boolean(search.value || departmentId.value || degreeLevel.value || activeState.value !== ''))
 
 const applyFilters = () => {
   const filters = {
-    faculty_id: facultyId.value || undefined,
+    department_id: departmentId.value || undefined,
     degree_level: degreeLevel.value || undefined,
     is_active: activeState.value === '' ? undefined : activeState.value,
   }
@@ -63,7 +61,7 @@ const applyFilters = () => {
 
 const clearFilters = () => {
   search.value = ''
-  facultyId.value = ''
+  departmentId.value = ''
   degreeLevel.value = ''
   activeState.value = ''
   router.get('/programs', {}, { preserveState: true, replace: true })
@@ -130,7 +128,7 @@ const destroy = async (program) => {
     <BaseCard padding="sm">
       <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_2fr_1fr_1fr_auto] lg:items-end" @submit.prevent="applyFilters">
         <BaseInput v-model="search" label="Search" placeholder="Code or name" />
-        <BaseSelect v-model="facultyId" label="Faculty" :options="facultyOptions" placeholder="All faculties" />
+        <BaseSelect v-model="departmentId" label="Department" :options="departmentOptions" placeholder="All departments" />
         <BaseSelect v-model="degreeLevel" label="Level" :options="levelOptions" placeholder="All levels" />
         <BaseSelect v-model="activeState" label="Status" :options="stateOptions" placeholder="All" />
         <div class="flex gap-2">
@@ -153,7 +151,7 @@ const destroy = async (program) => {
       <template #cell-code="{ row }"><span class="font-semibold">{{ row.code }}</span></template>
       <template #cell-name="{ row }">
         <p class="font-medium">{{ row.name }}</p>
-        <p class="text-caption text-muted dark:text-dark-muted">{{ row.department?.name }}<template v-if="row.department?.faculty"> · {{ row.department.faculty.code }}</template></p>
+        <p class="text-caption text-muted dark:text-dark-muted">{{ row.department?.name }}</p>
       </template>
       <template #cell-degree_level="{ row }"><span class="capitalize">{{ row.degree_level }}</span></template>
       <template #cell-duration_years="{ row }">
@@ -178,7 +176,7 @@ const destroy = async (program) => {
 
     <BaseModal v-model="showCreate" title="New program" size="md">
       <form class="space-y-5" @submit.prevent="submitCreate">
-        <ProgramForm :form="createForm" :faculties="faculties" :departments="departments" :degree-levels="degreeLevels" />
+        <ProgramForm :form="createForm" :departments="departments" :degree-levels="degreeLevels" />
 
         <ErrorAlert v-if="Object.keys(createForm.errors).length" title="Check the form" message="Correct the highlighted fields and try again." />
 

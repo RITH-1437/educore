@@ -9,7 +9,7 @@ shows what is actually in the database (updated 2026-10-05, report 37).
 
 - **Idempotent** — re-running never duplicates rows (upsert by `slug` / `email` / `code`).
 - **Accounts only** — the seeded accounts have no lecturer/student profile or
-  faculty assignment; each role signs in to its dashboard's empty state until
+  department assignment; each role signs in to its dashboard's empty state until
   real records are linked in the application.
 - **Development credentials** — documented below; change or remove them before
   any real deployment.
@@ -18,7 +18,7 @@ shows what is actually in the database (updated 2026-10-05, report 37).
 
 | Step | Seeder | Data |
 |---|---|---|
-| 1 | `RoleSeeder` | the five platform roles (`super-admin`, `university-admin`, `faculty-admin`, `lecturer`, `student`) |
+| 1 | `RoleSeeder` | the five platform roles (`super-admin`, `university-admin`, `department-admin`, `lecturer`, `student`) |
 | 2 | `UserSeeder` | five accounts, one per role (table below) |
 | 3 | `GradingScaleSeeder` | the default letter scale grades are mapped against (the UI edits it but cannot create it) |
 | 4 | `DocumentTypeSeeder` | the requestable official document types (no create screen) |
@@ -27,7 +27,7 @@ shows what is actually in the database (updated 2026-10-05, report 37).
 |---|---|---|
 | `admin@educore.kh` | `admin@123` | Super Admin |
 | `university@educore.kh` | `university@123` | University Admin |
-| `faculty@educore.kh` | `faculty@123` | Faculty Admin |
+| `department@educore.kh` | `department@123` | Department Admin |
 | `lecturer@educore.kh` | `lecturer@123` | Lecturer |
 | `student@educore.kh` | `student@123` | Student |
 
@@ -47,22 +47,19 @@ them as fixtures (`$this->seed(...)`): `UniversityStructureSeeder`,
 
 The seeder is idempotent — re-running it matches rows on natural keys rather
 than inserting duplicates, so `migrate:fresh --seed` and repeated `db:seed`
-both converge on 1 university / 3 faculties / 6 departments (when a test seeds it).
+both converge on 1 university / 6 departments (when a test seeds it; the faculty
+level was removed in report 39).
 
-| University | Faculty | Departments |
-|---|---|---|
-| `ITC` — Institute of Technology Cambodia | `ENG` | `CSE`, `EEE` |
-| | `SCI` | `PHY`, `MTH` |
-| | `HSS` | `ENG-L`, `ECO` |
+| University | Departments |
+|---|---|
+| `ITC` — Institute of Technology Cambodia | `CSE`, `EEE`, `PHY`, `MTH`, `ENG-L`, `ECO` |
 
 Invariants it enforces and tests assert:
 
 - Exactly one university row holds `is_current`. Promotion goes through
   `UniversityService::makeCurrent()`, so seeding and the UI share one code path.
-- Faculty `code` and `name` are matched on, honouring the new
-  `uq_faculties_name` constraint.
-- Department `code` is matched on inside its faculty, honouring
-  `uq_departments_faculty_id_name`.
+- Department `code` is matched on, and names stay unique per university
+  (`uq_departments_university_id_name`).
 - Every row is created active and not soft-deleted, so a seeded tree is never
   hidden behind the archive filters.
 - `ProgramSeeder` (runs after the structure) upserts 7 degree programs by their

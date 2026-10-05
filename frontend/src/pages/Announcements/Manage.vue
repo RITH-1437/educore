@@ -109,7 +109,7 @@ const remove = async (item) => {
 <template>
   <Head title="Manage announcements - EduCore" />
   <div class="space-y-6">
-    <PageHeader eyebrow="Communication" title="Manage announcements" :description="canTargetGroups ? 'Write to everyone, a role group or one faculty, department, program, section or course.' : 'Write to the sections and courses you teach.'">
+    <PageHeader eyebrow="Communication" title="Manage announcements" :description="canTargetGroups ? 'Write to everyone, a role group or one department, program, section or course.' : 'Write to the sections and courses you teach.'">
       <template #actions>
         <IconButton :icon="Megaphone" href="/announcements" size="md" label="View feed" />
         <IconButton :icon="Plus" size="md" variant="primary" label="New announcement" :disabled="!audienceOptions.length" @click="openCreate" />

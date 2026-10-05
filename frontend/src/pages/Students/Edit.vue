@@ -13,7 +13,6 @@ import { useConfirm } from '../../composables/useConfirm'
 
 const props = defineProps({
   student: { type: Object, required: true },
-  faculties: { type: Object, required: true },
   programs: { type: Array, default: () => [] },
   genders: { type: Array, default: () => [] },
 })
@@ -28,7 +27,6 @@ const form = useForm({
   emergency_contact_phone: s.emergency_contact_phone ?? '', enrollment_date: s.enrollment_date ?? '',
 })
 
-const faculties = computed(() => props.faculties?.data ?? [])
 const submit = () => form.put(`/students/${props.student.id}`, { preserveScroll: true })
 
 const destroy = async () => {
@@ -53,7 +51,7 @@ const destroy = async () => {
 
     <BaseCard title="Profile" padding="lg">
       <form class="space-y-6" @submit.prevent="submit">
-        <StudentForm :form="form" mode="edit" :faculties="faculties" :programs="programs" :genders="genders" />
+        <StudentForm :form="form" mode="edit" :programs="programs" :genders="genders" />
         <div class="flex flex-wrap items-center justify-between gap-3">
           <BaseButton type="submit" :loading="form.processing">Save changes</BaseButton>
           <IconButton :icon="Trash2" size="md" variant="danger" label="Delete profile" @click="destroy" />

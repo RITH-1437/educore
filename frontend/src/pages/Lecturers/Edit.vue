@@ -12,7 +12,6 @@ import LecturerForm from '../../components/lecturers/LecturerForm.vue'
 
 const props = defineProps({
   lecturer: { type: Object, required: true },
-  faculties: { type: Object, required: true },
   departments: { type: Object, required: true },
   employmentTypes: { type: Array, default: () => [] },
   sections: { type: Array, default: () => [] },
@@ -38,10 +37,9 @@ const departments = computed(() => {
   const current = props.lecturer.department
   return !current || list.some((department) => department.id === current.id)
     ? list
-    : [...list, { id: current.id, code: current.code, name: current.name, faculty_id: current.faculty_id }]
+    : [...list, { id: current.id, code: current.code, name: current.name }]
 })
 
-const faculties = computed(() => props.faculties?.data ?? [])
 
 const submit = () => form.put(`/lecturers/${props.lecturer.id}`, { preserveScroll: true })
 const toggleActive = () =>
@@ -66,7 +64,7 @@ const toggleActive = () =>
 
     <BaseCard padding="lg">
       <form class="space-y-6" @submit.prevent="submit">
-        <LecturerForm :form="form" mode="edit" :faculties="faculties" :departments="departments" :employment-types="employmentTypes" />
+        <LecturerForm :form="form" mode="edit" :departments="departments" :employment-types="employmentTypes" />
 
         <div class="flex items-center gap-3">
           <BaseButton type="submit" :loading="form.processing">Save changes</BaseButton>

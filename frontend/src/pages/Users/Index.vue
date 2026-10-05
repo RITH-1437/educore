@@ -124,7 +124,7 @@ const deleteUser = async (user) => {
           {{ row.role?.name }}
         </button>
         <span v-else class="text-small text-muted dark:text-dark-muted">—</span>
-        <p v-if="row.role?.slug === 'faculty-admin'" class="px-1.5 text-caption text-muted dark:text-dark-muted">{{ row.faculty ?? 'No faculty assigned' }}</p>
+        <p v-if="row.role?.slug === 'department-admin'" class="px-1.5 text-caption text-muted dark:text-dark-muted">{{ row.department ?? 'No department assigned' }}</p>
       </template>
       <template #cell-status="{ row }"><StatusBadge :status="row.is_active ? 'active' : 'inactive'" /></template>
       <template #cell-created_at="{ row }"><span class="text-muted dark:text-dark-muted">{{ row.created_at ? new Date(row.created_at).toLocaleDateString() : '—' }}</span></template>

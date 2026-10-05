@@ -18,7 +18,6 @@ import { useConfirm } from '../../composables/useConfirm'
 
 const props = defineProps({
   courses: { type: Object, required: true },
-  faculties: { type: Object, required: true },
   departments: { type: Object, required: true },
   programs: { type: Array, default: () => [] },
   levels: { type: Array, default: () => [] },
@@ -29,30 +28,29 @@ const props = defineProps({
 const page = usePage()
 const { confirm } = useConfirm()
 
-// Faculty Admin may read the catalog but not change it; write controls are
+// Department Admin may read the catalog but not change it; write controls are
 // hidden rather than left to fail with a 403 (`skills/course-management/SKILL.md` §8).
 const canManage = computed(() => ['super-admin', 'university-admin'].includes(page.props.auth?.user?.role?.slug ?? ''))
 
-const faculties = computed(() => props.faculties?.data ?? [])
 const departments = computed(() => props.departments?.data ?? [])
 const titleCase = (value) => value.charAt(0).toUpperCase() + value.slice(1)
 
 const search = ref(props.filters.search ?? '')
-const facultyId = ref(props.filters.faculty_id ?? '')
+const departmentId = ref(props.filters.department_id ?? '')
 const programId = ref(props.filters.program_id ?? '')
 const status = ref(props.filters.status ?? '')
 const level = ref(props.filters.course_level ?? '')
 
-const facultyOptions = computed(() => faculties.value.map((faculty) => ({ value: faculty.id, label: faculty.name })))
+const departmentOptions = computed(() => departments.value.map((department) => ({ value: department.id, label: department.name })))
 const programOptions = computed(() => props.programs.map((program) => ({ value: program.id, label: `${program.code} — ${program.name}` })))
 const statusOptions = computed(() => props.statuses.map((value) => ({ value, label: titleCase(value) })))
 const levelOptions = computed(() => props.levels.map((value) => ({ value, label: titleCase(value) })))
 
-const hasFilters = computed(() => Boolean(search.value || facultyId.value || programId.value || status.value || level.value))
+const hasFilters = computed(() => Boolean(search.value || departmentId.value || programId.value || status.value || level.value))
 
 const applyFilters = () => {
   const filters = {
-    faculty_id: facultyId.value || undefined,
+    department_id: departmentId.value || undefined,
     program_id: programId.value || undefined,
     status: status.value || undefined,
     course_level: level.value || undefined,
@@ -66,7 +64,7 @@ const applyFilters = () => {
 
 const clearFilters = () => {
   search.value = ''
-  facultyId.value = ''
+  departmentId.value = ''
   programId.value = ''
   status.value = ''
   level.value = ''
@@ -138,7 +136,7 @@ const destroy = async (course) => {
     <BaseCard padding="sm">
       <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:items-end xl:grid-cols-[2fr_2fr_2fr_1fr_1fr_auto]" @submit.prevent="applyFilters">
         <BaseInput v-model="search" label="Search" placeholder="Code or name" />
-        <BaseSelect v-model="facultyId" label="Faculty" :options="facultyOptions" placeholder="All faculties" />
+        <BaseSelect v-model="departmentId" label="Department" :options="departmentOptions" placeholder="All departments" />
         <BaseSelect v-model="programId" label="Program" :options="programOptions" placeholder="All programs" />
         <BaseSelect v-model="level" label="Level" :options="levelOptions" placeholder="All levels" />
         <BaseSelect v-model="status" label="Status" :options="statusOptions" placeholder="All" />
@@ -162,7 +160,7 @@ const destroy = async (course) => {
       <template #cell-code="{ row }"><span class="font-semibold">{{ row.code }}</span></template>
       <template #cell-name="{ row }">
         <p class="font-medium">{{ row.name }}</p>
-        <p class="text-caption text-muted dark:text-dark-muted">{{ row.department?.name }}<template v-if="row.department?.faculty"> · {{ row.department.faculty.code }}</template></p>
+        <p class="text-caption text-muted dark:text-dark-muted">{{ row.department?.name }}</p>
       </template>
       <template #cell-course_level="{ row }"><span class="capitalize">{{ row.course_level ?? '—' }}</span></template>
       <template #cell-credits="{ row }"><span class="font-semibold tabular-nums">{{ row.credits }}</span></template>
@@ -187,7 +185,7 @@ const destroy = async (course) => {
 
     <BaseModal v-model="showCreate" title="New course" size="lg">
       <form class="space-y-5" @submit.prevent="submitCreate">
-        <CourseForm :form="createForm" :faculties="faculties" :departments="departments" :levels="levels" />
+        <CourseForm :form="createForm" :departments="departments" :levels="levels" />
 
         <ErrorAlert v-if="Object.keys(createForm.errors).length" title="Check the form" message="Correct the highlighted fields and try again." />
 

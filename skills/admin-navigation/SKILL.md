@@ -84,10 +84,11 @@ Academic years) · People (Students, Lecturers) · Academics (Courses, Sections,
 Enrollment) · Operations (Documents, Invoices, Announcements) — each item only
 once its module is `[Implemented]`.
 
-### Faculty Admin
+### Department Admin
 
-Dashboard · Academic structure (read-only: University, Faculties & departments,
-Programs), limited to their assigned faculty (`users.faculty_id`, `docs/32_Faculty-Admin-Scoping-Report.md`).
+Dashboard · Academic structure (read-only: University, Departments, Programs),
+limited to their assigned department (`users.department_id`,
+`docs/39_Department-Only-Structure-Report.md`).
 
 ### Lecturer
 

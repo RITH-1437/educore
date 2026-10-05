@@ -15,6 +15,7 @@ use App\Models\Semester;
 use App\Models\Student;
 use App\Models\User;
 use App\Services\EnrollmentService;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -119,6 +120,10 @@ class AnnouncementTest extends TestCase
         $as->postJson('/api/announcements', $this->payload(['audience_type' => 'section', 'audience_id' => null]))->assertJsonValidationErrors('audience_id');
         $as->postJson('/api/announcements', $this->payload(['audience_type' => 'program', 'audience_id' => 999999]))->assertJsonValidationErrors('audience_id');
         $as->postJson('/api/announcements', $this->payload(['announcement_type' => 'gossip']))->assertJsonValidationErrors('announcement_type');
+        // The faculty level is gone (report 39): refused by validation and by the database CHECK.
+        $as->postJson('/api/announcements', $this->payload(['audience_type' => 'faculty', 'audience_id' => 1]))->assertJsonValidationErrors('audience_type');
+        $this->expectException(QueryException::class);
+        Announcement::query()->create(['author_id' => $this->admin->id, 'title' => 'Old audience', 'body' => 'x', 'audience_type' => 'faculty', 'audience_id' => 1]);
     }
 
     public function test_lecturers_target_only_what_they_teach(): void

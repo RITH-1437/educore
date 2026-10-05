@@ -11,7 +11,6 @@ import BaseSelect from '../BaseSelect.vue'
 const props = defineProps({
   form: { type: Object, required: true },
   mode: { type: String, default: 'create', validator: (value) => ['create', 'edit'].includes(value) },
-  faculties: { type: Array, default: () => [] },
   departments: { type: Array, default: () => [] },
   employmentTypes: { type: Array, default: () => [] },
   unlinkedAccounts: { type: Array, default: () => [] },
@@ -19,22 +18,11 @@ const props = defineProps({
 
 const accountMode = ref(props.form.user_id ? 'link' : 'new')
 
-// The faculty only narrows the department list — it is not submitted.
-const facultyId = ref(props.departments.find((department) => department.id === props.form.department_id)?.faculty_id ?? '')
-
-const facultyOptions = computed(() => props.faculties.map((faculty) => ({ value: faculty.id, label: `${faculty.code} — ${faculty.name}` })))
 const departmentOptions = computed(() =>
-  props.departments
-    .filter((department) => !facultyId.value || department.faculty_id === facultyId.value)
-    .map((department) => ({ value: department.id, label: `${department.code} — ${department.name}` })),
+  props.departments.map((department) => ({ value: department.id, label: `${department.code} — ${department.name}` })),
 )
 const typeOptions = computed(() => props.employmentTypes.map((type) => ({ value: type, label: type.replace('_', ' ').replace(/^./, (c) => c.toUpperCase()) })))
 const accountOptions = computed(() => props.unlinkedAccounts.map((account) => ({ value: account.id, label: `${account.name} — ${account.email}` })))
-
-watch(facultyId, () => {
-  const stillValid = props.departments.some((department) => department.id === props.form.department_id && (!facultyId.value || department.faculty_id === facultyId.value))
-  if (!stillValid) props.form.department_id = ''
-})
 
 // Only one way of providing the account is submitted.
 watch(accountMode, (value) => {
@@ -100,10 +88,7 @@ watch(accountMode, (value) => {
         <BaseSelect v-model="form.employment_type" label="Employment type" :options="typeOptions" :error="form.errors.employment_type" />
       </div>
 
-      <div class="grid gap-5 sm:grid-cols-2">
-        <BaseSelect v-model="facultyId" label="Faculty" :options="facultyOptions" placeholder="All faculties" />
-        <BaseSelect v-model="form.department_id" label="Department" :options="departmentOptions" placeholder="Select a department" :error="form.errors.department_id" required />
-      </div>
+      <BaseSelect v-model="form.department_id" label="Department" :options="departmentOptions" placeholder="Select a department" :error="form.errors.department_id" required />
 
       <div class="grid gap-5 sm:grid-cols-2">
         <BaseInput v-model="form.position" name="position" label="Position" placeholder="Senior Lecturer" :error="form.errors.position" />

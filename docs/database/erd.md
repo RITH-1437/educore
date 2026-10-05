@@ -31,8 +31,7 @@ erDiagram
     USERS }o--|| ROLES : "has role"
     ROLES }o--o{ PERMISSIONS : "via permission_role"
 
-    UNIVERSITIES ||--o{ FACULTIES : "contains"
-    FACULTIES ||--o{ DEPARTMENTS : "contains"
+    UNIVERSITIES ||--o{ DEPARTMENTS : "contains"
     DEPARTMENTS ||--o{ PROGRAMS : "offers"
     PROGRAMS }o--o{ COURSES : "includes (course_programs)"
     DEPARTMENTS ||--o{ COURSES : "owns"
@@ -81,8 +80,7 @@ erDiagram
     USERS ||--o{ NOTIFICATIONS : "receives"
     ROLES }o--o{ PERMISSIONS : "via permission_role"
 
-    UNIVERSITIES ||--o{ FACULTIES : "contains"
-    FACULTIES ||--o{ DEPARTMENTS : "contains"
+    UNIVERSITIES ||--o{ DEPARTMENTS : "contains"
     DEPARTMENTS ||--o{ PROGRAMS : "offers"
     PROGRAMS }o--o{ COURSES : "via course_programs"
     PROGRAMS ||--o{ STUDENT_PROGRAMS : "has"

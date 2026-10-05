@@ -22,9 +22,9 @@ const props = defineProps({
 
 const page = usePage()
 
-// Faculty Admin may read the structure but not change it, so every write
+// Department Admin may read the structure but not change it, so every write
 // control is hidden rather than left to fail with a 403
-// (`skills/faculty-department/SKILL.md` §8).
+// (`docs/39_Department-Only-Structure-Report.md`).
 const canManage = computed(() => ['super-admin', 'university-admin'].includes(page.props.auth?.user?.role?.slug ?? ''))
 
 const search = ref(props.filters.search ?? '')
@@ -60,7 +60,7 @@ const columns = [
   { key: 'code', label: 'Code' },
   { key: 'name', label: 'University' },
   { key: 'short_name', label: 'Short name' },
-  { key: 'faculties_count', label: 'Faculties', align: 'center' },
+  { key: 'departments_count', label: 'Departments', align: 'center' },
   { key: 'is_current', label: 'State' },
   { key: 'actions', label: 'Actions', align: 'right' },
 ]
@@ -107,7 +107,7 @@ const makeCurrent = (university) => router.post(`/universities/${university.id}/
 const { confirm } = useConfirm()
 
 const destroy = async (university) => {
-  if (await confirm({ title: 'Delete university?', message: `Delete "${university.name}"? This is refused while it still has faculties.`, confirmLabel: 'Delete', destructive: true })) {
+  if (await confirm({ title: 'Delete university?', message: `Delete "${university.name}"? This is refused while it still has departments.`, confirmLabel: 'Delete', destructive: true })) {
     router.delete(`/universities/${university.id}`)
   }
 }
@@ -116,9 +116,9 @@ const destroy = async (university) => {
 <template>
   <Head title="University - EduCore" />
   <div class="space-y-6">
-    <PageHeader title="University" description="The single institution record that owns every faculty, program and course.">
+    <PageHeader title="University" description="The single institution record that owns every department, program and course.">
       <template #actions>
-        <IconButton :icon="School" href="/faculties" size="md" label="Manage faculties" />
+        <IconButton :icon="School" href="/departments" size="md" label="Manage departments" />
         <IconButton v-if="canManage" :icon="Plus" size="md" variant="primary" label="New university" @click="openCreate" />
       </template>
     </PageHeader>
@@ -176,8 +176,8 @@ const destroy = async (university) => {
       <template #cell-short_name="{ row }">
         <span class="text-muted dark:text-dark-muted">{{ row.short_name ?? '—' }}</span>
       </template>
-      <template #cell-faculties_count="{ row }">
-        <span class="font-semibold text-ink dark:text-dark-ink">{{ row.faculties_count ?? 0 }}</span>
+      <template #cell-departments_count="{ row }">
+        <span class="font-semibold text-ink dark:text-dark-ink">{{ row.departments_count ?? 0 }}</span>
       </template>
       <template #cell-is_current="{ row }">
         <button

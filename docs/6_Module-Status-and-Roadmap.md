@@ -588,3 +588,7 @@ A module is not done until its report exists and its tests pass — never label
   hard-coded list of "planned tools". The page and the controller's hard-coded
   array are gone; `/dashboard` renders `Student/Dashboard` with no data and a
   "No student profile" notice (`docs/21_Student-Academic-Dashboard-Report.md`).
+- `[Done]` Folding sidebar groups (2026-10-05): every group heading (Overview,
+  Academic structure, People, …) folds and unfolds its items; folded groups are
+  remembered per browser and the current page's group re-opens on arrival
+  (`docs/branding/UI-COMPONENTS.md` §8).

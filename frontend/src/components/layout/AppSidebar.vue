@@ -1,7 +1,7 @@
 <script setup>
 import { nextTick, onMounted, ref, watch } from 'vue'
 import { Link, usePage } from '@inertiajs/vue3'
-import { ChevronsLeft, ChevronsRight, X } from '@lucide/vue'
+import { ChevronDown, ChevronsLeft, ChevronsRight, X } from '@lucide/vue'
 import { useNavigation } from '../../composables/useNavigation'
 
 const props = defineProps({
@@ -19,6 +19,44 @@ const nav = ref(null)
 const appIcon = '/assets/logo/educore-favicon.svg'
 
 defineExpose({ focusClose: () => closeButton.value?.focus() })
+
+// Folded groups (by label), remembered like the sidebar's own collapse and
+// read before the first render so nothing opens and shuts on page load.
+const GROUPS_KEY = 'educore_sidebar_closed_groups'
+const readClosedGroups = () => {
+  try {
+    const stored = JSON.parse(localStorage.getItem(GROUPS_KEY) ?? '[]')
+    return new Set(Array.isArray(stored) ? stored : [])
+  } catch {
+    return new Set()
+  }
+}
+const closedGroups = ref(readClosedGroups())
+const saveClosedGroups = (next) => {
+  closedGroups.value = next
+  try {
+    localStorage.setItem(GROUPS_KEY, JSON.stringify([...next]))
+  } catch {
+    // preference simply won't persist
+  }
+}
+// The icon rail has no headings to click, so it always lists every item.
+const isOpen = (group) => props.collapsed || !closedGroups.value.has(group.label)
+const toggleGroup = (group) => {
+  const next = new Set(closedGroups.value)
+  if (!next.delete(group.label)) next.add(group.label)
+  saveClosedGroups(next)
+}
+// Arriving on a page opens its group, so the current item is never hidden.
+const openActiveGroup = () => {
+  const group = navGroups.value.find((candidate) => candidate.items.some((item) => !item.future && isActive(item.href)))
+  if (group && closedGroups.value.has(group.label)) {
+    const next = new Set(closedGroups.value)
+    next.delete(group.label)
+    saveClosedGroups(next)
+  }
+}
+openActiveGroup()
 
 const itemClass = (active, collapsed) => [
   'group relative flex min-h-11 items-center gap-3 rounded-lg px-3 text-small font-medium transition-colors duration-150 ease-out focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary motion-reduce:transition-none dark:focus-visible:outline-dark-primary',
@@ -68,7 +106,10 @@ const revealActive = () => {
 }
 
 onMounted(revealActive)
-watch(() => page.url, () => nextTick(revealActive))
+watch(() => page.url, () => {
+  openActiveGroup()
+  nextTick(revealActive)
+})
 watch(() => props.collapsed, () => {
   hideTip()
   nextTick(revealActive)
@@ -104,10 +145,22 @@ watch(() => props.collapsed, () => {
       aria-label="Primary navigation"
       @scroll.passive="placeTip"
     >
-      <section v-for="group in navGroups" :key="group.label">
-        <h2 v-if="!collapsed" class="mb-2 truncate px-3 text-caption font-semibold uppercase tracking-wider text-muted dark:text-dark-muted">{{ group.label }}</h2>
+      <section v-for="(group, index) in navGroups" :key="group.label">
+        <!-- Each group folds: the heading is a disclosure button for its list. -->
+        <h2 v-if="!collapsed" class="mb-1">
+          <button
+            type="button"
+            class="flex min-h-8 w-full items-center gap-2 rounded-md px-3 text-caption font-semibold uppercase tracking-wider text-muted transition-colors duration-150 hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:text-dark-muted dark:hover:text-dark-ink dark:focus-visible:outline-dark-primary motion-reduce:transition-none"
+            :aria-expanded="isOpen(group)"
+            :aria-controls="`nav-group-${index}`"
+            @click="toggleGroup(group)"
+          >
+            <span class="truncate">{{ group.label }}</span>
+            <ChevronDown class="ml-auto h-4 w-4 shrink-0 transition-transform duration-200 ease-out motion-reduce:transition-none" :class="isOpen(group) ? '' : '-rotate-90'" aria-hidden="true" />
+          </button>
+        </h2>
         <div v-else class="mx-3 mb-2 hidden border-t border-border-default dark:border-dark-border lg:block" aria-hidden="true" />
-        <ul class="space-y-1">
+        <ul v-show="isOpen(group)" :id="`nav-group-${index}`" class="space-y-1">
           <li v-for="item in group.items" :key="item.href">
             <Link
               v-if="!item.future"

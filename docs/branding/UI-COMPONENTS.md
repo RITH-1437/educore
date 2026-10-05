@@ -264,6 +264,13 @@ Semantic states for actions: `info` = informational, `warning` = attention,
 - Hover: surface tint; collapsed: icons only with tooltips.
 - Collapse/expand consistently; remember preference, read before the first
   render (no open-then-close animation on page load).
+- **Folding groups (2026-10-05):** in the labelled sidebar (desktop expanded
+  and the mobile drawer) every group heading is a disclosure button — label +
+  `ChevronDown` (rotated −90° when folded), `aria-expanded` / `aria-controls`
+  on its list. Folded groups are remembered per browser
+  (`educore_sidebar_closed_groups`, read before the first render). Arriving on
+  a page re-opens the group that holds it, so the current item is never
+  hidden. The icon rail has no headings and always lists every item.
 - Scrolling: the nav scrolls on its own in **both** states and never scrolls
   the page behind it (`overscroll-contain`); thin token scrollbar
   (`scrollbar-thin`) when expanded, hidden (`no-scrollbar`) when collapsed.

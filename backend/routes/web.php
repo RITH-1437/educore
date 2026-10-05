@@ -104,6 +104,10 @@ Route::middleware(['auth', 'role:super-admin,university-admin'])
         Route::delete('/{university}', [UniversityController::class, 'destroy'])->name('destroy');
     });
 
+// The faculty level was removed (report 39): old bookmarks land on departments
+// instead of a 404 in the error log.
+Route::permanentRedirect('/faculties/{path?}', '/departments')->where('path', '.*')->name('faculties.moved');
+
 Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])
     ->prefix('/departments')
     ->name('departments.')

@@ -576,3 +576,9 @@ A module is not done until its report exists and its tests pass — never label
   department — in the inbox, by optional email and by Telegram
   (`StaffNotifier`, `DocumentRequestSubmitted`, `InternshipSubmitted`). Report:
   `docs/43_Staff-Request-Notices-Report.md`.
+- `[Done]` Error-log review (2026-10-05): the 9 development rows were client
+  probes (Chrome DevTools, a desktop webview's IPC), old `/faculties` links and
+  one 500 from a stale autoload classmap during the report 39 refactor. Client
+  probe 404s are no longer recorded, `/faculties/*` redirects to
+  `/departments`, and the classmap was regenerated. Report:
+  `docs/8_System-Error-Logs-Report.md` §11. `[Open]` Error-log retention.

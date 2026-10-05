@@ -84,6 +84,33 @@ class ErrorLogManagementTest extends TestCase
         $this->assertDatabaseHas('error_logs', ['status_code' => 500]);
     }
 
+    /** Requests clients make by themselves (DevTools, a desktop webview's IPC) are not EduCore failures. */
+    public function test_client_probe_404s_are_not_recorded(): void
+    {
+        $before = ErrorLog::query()->count();
+
+        $this->get('/.well-known/appspecific/com.chrome.devtools.json')->assertNotFound();
+        $this->post('/plugin%3Awindow%7Cclose')->assertNotFound();
+        $this->assertSame($before, ErrorLog::query()->count());
+
+        // A real broken link is still recorded, and so is a 5xx on a probe path.
+        $this->get('/.well-known/security.txt')->assertNotFound();
+        $this->assertDatabaseHas('error_logs', ['status_code' => 404, 'url' => '/.well-known/security.txt']);
+        Route::get('/.well-known/appspecific/boom', fn () => abort(500));
+        $this->get('/.well-known/appspecific/boom')->assertServerError();
+        $this->assertDatabaseHas('error_logs', ['status_code' => 500, 'url' => '/.well-known/appspecific/boom']);
+    }
+
+    /** The faculty pages were removed (report 39); old bookmarks move to departments instead of 404ing. */
+    public function test_old_faculty_links_redirect_to_departments(): void
+    {
+        $before = ErrorLog::query()->count();
+
+        $this->get('/faculties')->assertStatus(301)->assertRedirect('/departments');
+        $this->get('/faculties/3/edit')->assertStatus(301)->assertRedirect('/departments');
+        $this->assertSame($before, ErrorLog::query()->count());
+    }
+
     public function test_503_response_is_recorded(): void
     {
         $url = '/test-503-'.uniqid();

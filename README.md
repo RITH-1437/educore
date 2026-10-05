@@ -186,7 +186,8 @@ department; the write controls are hidden in the UI and the routes still reject 
 
 `/error-logs` is not on the sidebar — it is a diagnostic tool reached by typing
 the URL directly, recording only HTTP 404/5xx responses (never 401/403/409/422,
-query strings, or request bodies). Report:
+query strings, request bodies, or 404s of browser / desktop-webview probes).
+Old `/faculties` links redirect to `/departments`. Report:
 [`docs/8_System-Error-Logs-Report.md`](docs/8_System-Error-Logs-Report.md).
 
 Pages are rendered by Laravel through Inertia.js. Nginx forwards `/api`,

@@ -149,6 +149,7 @@ fixed:
 | Course / Program / Lecturer forms | Empty *Faculty* pre-filter above the department | Removed; department full width |
 | Student form | Programs narrowed by a faculty that no longer exists | Narrowed by department; a program outside it is cleared |
 | Announcement pages | Copy mentioned faculty audiences | Removed |
+| `/faculties` bookmarks | 404 (two were in the error log) | `/faculties` and `/faculties/*` redirect (301) to `/departments` |
 | `ck_announcements_audience` | Still allowed `faculty` (validation refused it, the database did not) | Migration `2026_10_05_170000_drop_faculty_from_announcement_audiences` drops it (any stray row → `staff`, as in §2) |
 | `README.md`, `docs/database/` | Seeded `faculty@educore.kh`, `/faculties` route, `faculties` table, `users.faculty_id`, evaluator `faculty` | Updated to the department-only schema |
 

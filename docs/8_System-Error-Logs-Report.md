@@ -118,7 +118,8 @@ this is deliberately *not* `$exceptions->report()`:
 | `>= 500` | Unhandled failure | **Yes** |
 
 Logging `401`/`403`/`409`/`422` would bury genuine failures in noise and train
-admins to ignore the table.
+admins to ignore the table. For the same reason a `404` on a path the client
+requests by itself is skipped (§11); a `5xx` is always recorded.
 
 ---
 
@@ -277,3 +278,31 @@ assertions**. Full suite: **150 tests / 577 assertions**.
   distinct.
 - No automatic retention/pruning policy exists yet — the table will grow
   unbounded in a long-running deployment.
+
+---
+
+## 11. Update (2026-10-05): client probes and removed pages
+
+A review of the development log found 9 rows; none was an EduCore defect left
+open:
+
+| Rows | Request | Cause | Resolution |
+|---|---|---|---|
+| 5 | `GET /.well-known/appspecific/com.chrome.devtools.json` → 404 | Chrome requests it whenever DevTools is open | No longer recorded (client probe) |
+| 1 | `POST /plugin:window\|close` → 404 | IPC call of a desktop webview (Tauri) that had the app open | No longer recorded (client probe) |
+| 2 | `GET /faculties` → 404 | Links left after report 39 removed the faculty level (fixed in the report 39 §7 audit) | `/faculties` and `/faculties/*` now redirect (301) to `/departments`, so old bookmarks do not 404 |
+| 1 | `GET /admin/dashboard` → 500, `include(…/FacultyDashboardController.php)` | Composer's optimized classmap still listed a controller deleted during the report 39 refactor, for the moment before it was regenerated | Already gone; the classmap was regenerated (`composer dump-autoload --optimize` in the backend container) and holds no faculty classes |
+
+`ErrorLogRecorder::CLIENT_PROBES` lists the skipped paths — matched on the
+decoded path, for `404` only:
+
+- `.well-known/appspecific/…` (browser DevTools);
+- `plugin:<name>|<command>` (desktop webview IPC).
+
+Other `.well-known` paths (e.g. `security.txt`) are still recorded: a probe is
+skipped only when no EduCore page could ever have linked to it. Tests:
+`ErrorLogManagementTest::test_client_probe_404s_are_not_recorded` and
+`test_old_faculty_links_redirect_to_departments`.
+
+Existing rows are not deleted by this change — the table has no delete path
+(§9); retention is still an open follow-up (§10).

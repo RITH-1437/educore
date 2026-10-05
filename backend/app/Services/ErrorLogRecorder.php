@@ -23,7 +23,9 @@ use Throwable;
  * purpose — `401`, `403`, `409`, `422` — are normal control flow: a rejected
  * login, a permission check, a business-rule conflict, a validation failure.
  * Logging those would bury the real failures in noise and train admins to
- * ignore the table.
+ * ignore the table. For the same reason a 404 on a path the *client* requests
+ * by itself (browser DevTools, a desktop webview's IPC) is skipped — see
+ * `CLIENT_PROBES`.
  *
  * ## Safety
  *
@@ -47,6 +49,22 @@ class ErrorLogRecorder
     private const SERVER_ERROR_FLOOR = 500;
 
     /**
+     * Paths that clients request on their own, which no EduCore page links to.
+     * Their 404s are expected and are not recorded (a 5xx on them still is):
+     *
+     * - `.well-known/appspecific/…` — Chrome asks for
+     *   `com.chrome.devtools.json` whenever DevTools is open.
+     * - `plugin:<name>|<command>` — IPC calls of a desktop webview (Tauri)
+     *   that has the app open, sent to the page origin.
+     *
+     * @var list<string>
+     */
+    private const CLIENT_PROBES = [
+        '#^\.well-known/appspecific/#',
+        '#^plugin:[\w-]+\|#',
+    ];
+
+    /**
      * Longest exception message kept, so one pathological message cannot bloat
      * the row or blow past the column on an enormous stack trace.
      */
@@ -64,7 +82,7 @@ class ErrorLogRecorder
      */
     public function record(Request $request, int $status, ?Throwable $exception = null): ?ErrorLog
     {
-        if (! $this->isRecordable($status)) {
+        if (! $this->isRecordable($status) || ($status === 404 && $this->isClientProbe($request))) {
             return null;
         }
 
@@ -90,6 +108,19 @@ class ErrorLogRecorder
 
             return null;
         }
+    }
+
+    private function isClientProbe(Request $request): bool
+    {
+        $path = rawurldecode(ltrim($request->path(), '/'));
+
+        foreach (self::CLIENT_PROBES as $pattern) {
+            if (preg_match($pattern, $path) === 1) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 use OpenApi\Attributes as OA;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -32,7 +33,7 @@ class ExportController extends Controller
     /** Analytics tables that can be exported; the first group needs a semester. */
     public const ANALYTICS_TABLES = [
         'enrollment_by_program', 'attendance_by_course', 'grade_distribution', 'gpa_distribution', 'course_results',
-        'finance', 'workload',
+        'finance', 'workload', 'trends',
     ];
 
     private const SEMESTER_TABLES = ['enrollment_by_program', 'attendance_by_course', 'grade_distribution', 'gpa_distribution', 'course_results'];
@@ -163,18 +164,19 @@ class ExportController extends Controller
     #[OA\Get(
         path: '/analytics/export',
         summary: 'Export one analytics table as CSV',
-        description: 'The same figures as the analytics endpoints. Semester tables (`enrollment_by_program`, `attendance_by_course`, `grade_distribution`, `gpa_distribution`, `course_results`) use `semester_id` or the default semester (409 when none exists); `finance` and `workload` are point in time. Audited as `export.analytics`.',
+        description: 'The same figures as the analytics endpoints. Semester tables (`enrollment_by_program`, `attendance_by_course`, `grade_distribution`, `gpa_distribution`, `course_results`) use `semester_id` or the default semester (409 when none exists); `finance` and `workload` are point in time; `trends` covers the latest six semesters. `department_id` limits the figures to one department (a Department Admin always gets their own); `finance` is university-wide only (403 for a Department Admin, 422 with `department_id`). Audited as `export.analytics`.',
         operationId: 'exportAnalytics',
         tags: ['Analytics'],
         security: [['sanctum' => []]],
         parameters: [
             new OA\QueryParameter(name: 'table', required: true, schema: new OA\Schema(type: 'string', enum: self::ANALYTICS_TABLES)),
             new OA\QueryParameter(name: 'semester_id', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\QueryParameter(name: 'department_id', required: false, schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
             new OA\Response(response: 200, description: 'CSV file (UTF-8 with BOM).', content: new OA\MediaType(mediaType: 'text/csv', schema: new OA\Schema(type: 'string'))),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin, University Admin or Department Admin; another department; finance for a Department Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'No semester to report on.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Unknown table or semester.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
@@ -183,6 +185,12 @@ class ExportController extends Controller
     {
         Gate::authorize('view-analytics');
         $table = $request->validate(['table' => ['required', Rule::in(self::ANALYTICS_TABLES)]])['table'];
+        $department = $this->analyticsApi->departmentScope($request);
+        if ($table === 'finance' && $department !== null) {
+            // Finance is reported for the whole university only (report 47).
+            abort_if($request->user()->departmentScope() !== null, 403, 'Finance is not part of department analytics.');
+            throw ValidationException::withMessages(['department_id' => 'Finance is reported for the whole university only.']);
+        }
         $semester = in_array($table, self::SEMESTER_TABLES, true) ? $this->analyticsApi->semester($request) : null;
 
         if ($semester === null && in_array($table, self::SEMESTER_TABLES, true)) {
@@ -191,22 +199,25 @@ class ExportController extends Controller
 
         [$header, $rows] = match ($table) {
             'enrollment_by_program' => [['Program', 'Program name', 'Enrollments', 'Students'],
-                array_map(fn ($r) => [$r['code'], $r['name'], $r['enrollments'], $r['students']], $this->analytics->enrollment($semester)['by_program'])],
+                array_map(fn ($r) => [$r['code'], $r['name'], $r['enrollments'], $r['students']], $this->analytics->enrollment($semester, $department)['by_program'])],
             'attendance_by_course' => [['Course', 'Course name', 'Attendance rate (%)'],
-                array_map(fn ($r) => [$r['code'], $r['name'], $r['rate']], $this->analytics->academic($semester)['attendance_by_course'])],
+                array_map(fn ($r) => [$r['code'], $r['name'], $r['rate']], $this->analytics->academic($semester, $department)['attendance_by_course'])],
             'grade_distribution' => [['Grade', 'Students', 'Pass'],
-                array_map(fn ($r) => [$r['grade'], $r['total'], $r['is_pass']], $this->analytics->academic($semester)['grade_distribution'])],
+                array_map(fn ($r) => [$r['grade'], $r['total'], $r['is_pass']], $this->analytics->academic($semester, $department)['grade_distribution'])],
             'gpa_distribution' => [['Semester GPA band', 'Students'],
-                array_map(fn ($r) => [$r['band'], $r['total']], $this->analytics->academic($semester)['gpa_distribution'])],
+                array_map(fn ($r) => [$r['band'], $r['total']], $this->analytics->academic($semester, $department)['gpa_distribution'])],
             'course_results' => [['Course', 'Course name', 'Graded', 'Pass rate (%)', 'Average total', 'Average points'],
-                array_map(fn ($r) => [$r['code'], $r['name'], $r['graded'], $r['pass_rate'], $r['average_total'], $r['average_point']], $this->analytics->academic($semester)['courses'])],
+                array_map(fn ($r) => [$r['code'], $r['name'], $r['graded'], $r['pass_rate'], $r['average_total'], $r['average_point']], $this->analytics->academic($semester, $department)['courses'])],
             'finance' => [['Currency', 'Invoiced', 'Collected', 'Outstanding', 'Overdue', 'Overdue invoices', 'Collection rate (%)'],
                 array_map(fn ($r) => [$r['currency'], $r['invoiced'], $r['collected'], $r['outstanding'], $r['overdue'], $r['overdue_count'], $r['collection_rate']], $this->analytics->administrative()['finance'])],
-            'workload' => [['Area', 'Status', 'Total'], $this->workloadRows()],
+            'workload' => [['Area', 'Status', 'Total'], $this->workloadRows($department)],
+            'trends' => [['Semester', 'Status', 'Enrollments', 'Students enrolled', 'Attendance rate (%)', 'Pass rate (%)', 'Average semester GPA'],
+                array_map(fn ($r) => [$r['semester'], $r['status'], $r['enrollments'], $r['students_enrolled'], $r['attendance_rate'], $r['pass_rate'], $r['average_gpa']], $this->analytics->trends($department))],
         };
 
-        $this->audited('analytics', ['table' => $table, 'semester_id' => $semester?->id], count($rows));
-        $suffix = $semester ? '-'.str($semester->academicYear?->code.' '.$semester->name)->slug() : '';
+        $this->audited('analytics', ['table' => $table, 'semester_id' => $semester?->id, 'department_id' => $department], count($rows));
+        $suffix = ($department ? '-'.str($this->analyticsApi->departmentSummary($department)['code'] ?? 'department')->slug() : '')
+            .($semester ? '-'.str($semester->academicYear?->code.' '.$semester->name)->slug() : '');
 
         return CsvExport::download(CsvExport::filename('analytics-'.str_replace('_', '-', $table).$suffix), $header, $rows);
     }
@@ -220,11 +231,12 @@ class ExportController extends Controller
         security: [['sanctum' => []]],
         parameters: [
             new OA\QueryParameter(name: 'semester_id', required: false, schema: new OA\Schema(type: 'integer')),
+            new OA\QueryParameter(name: 'department_id', required: false, description: 'A department report (its students\' workload instead of finance). A Department Admin always gets their own.', schema: new OA\Schema(type: 'integer')),
         ],
         responses: [
             new OA\Response(response: 200, description: 'PDF file.', content: new OA\MediaType(mediaType: 'application/pdf')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin, University Admin or Department Admin, or another department.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'No semester to report on.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Unknown semester.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
@@ -233,6 +245,7 @@ class ExportController extends Controller
     {
         Gate::authorize('view-analytics');
         $semester = $this->analyticsApi->semester($request);
+        $departmentId = $this->analyticsApi->departmentScope($request);
 
         if ($semester === null) {
             throw new BusinessRuleException('There is no semester to report on.');
@@ -240,19 +253,21 @@ class ExportController extends Controller
 
         $semester->loadMissing('academicYear');
         $university = University::query()->where('is_current', true)->first();
+        $department = $this->analyticsApi->departmentSummary($departmentId);
 
-        $overview = $this->analytics->overview($semester);
-        $enrollment = $this->analytics->enrollment($semester);
-        $academic = $this->analytics->academic($semester);
-        $administrative = $this->analytics->administrative();
+        $overview = $this->analytics->overview($semester, $departmentId);
+        $enrollment = $this->analytics->enrollment($semester, $departmentId);
+        $academic = $this->analytics->academic($semester, $departmentId);
+        $administrative = $this->analytics->administrative($departmentId);
 
-        $this->audited('analytics_pdf', ['semester_id' => $semester->id], 1);
+        $this->audited('analytics_pdf', ['semester_id' => $semester->id, 'department_id' => $departmentId], 1);
 
-        $filename = 'analytics-report-'.str($semester->academicYear?->code.' '.$semester->name)->slug().'.pdf';
+        $filename = 'analytics-report-'.($department ? str($department['code'])->slug().'-' : '').str($semester->academicYear?->code.' '.$semester->name)->slug().'.pdf';
 
         $pdf = Pdf::loadView('analytics.pdf', [
             'semester' => $semester,
             'university' => $university,
+            'department' => $department,
             'generatedAt' => now()->format('Y-m-d H:i'),
             'overview' => $overview,
             'enrollment' => $enrollment,
@@ -269,13 +284,14 @@ class ExportController extends Controller
     /**
      * @return list<array{0: string, 1: string, 2: int}>
      */
-    private function workloadRows(): array
+    private function workloadRows(?int $departmentId = null): array
     {
-        $admin = $this->analytics->administrative();
+        $admin = $this->analytics->administrative($departmentId);
         $rows = [];
 
         foreach (['documents' => 'Document requests', 'internships' => 'Internships', 'invoices' => 'Invoices'] as $key => $area) {
-            foreach ($admin[$key] as $row) {
+            // A department's workload has no invoices (finance is university-wide).
+            foreach ($admin[$key] ?? [] as $row) {
                 $rows[] = [$area, $row['status'], $row['total']];
             }
         }

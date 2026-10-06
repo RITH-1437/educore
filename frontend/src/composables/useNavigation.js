@@ -72,8 +72,9 @@ const navForRole = (role) => {
     if (role === 'university-admin') structure.push({ label: 'Academic years', href: '/academic-years', icon: Calendar })
 
     return [
-      // Analytics is institution-wide, so University Admin only (not Department Admin).
-      { label: 'Overview', items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }, ...(role === 'university-admin' ? [{ label: 'Analytics', href: '/analytics', icon: BarChart3 }] : [])] },
+      // Analytics: the whole university (or a picked department) for a University
+      // Admin, their own department for a Department Admin (report 47).
+      { label: 'Overview', items: [{ label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard }, { label: 'Analytics', href: '/analytics', icon: BarChart3 }] },
       { label: 'Academic structure', items: structure },
       { label: 'People', items: [{ label: 'Students', href: '/students', icon: GraduationCap }, { label: 'Lecturers', href: '/lecturers', icon: UserRound }] },
       { label: 'Assessment', items: [{ label: 'Grades', href: '/grades', icon: Award }, { label: 'Grading scale', href: '/grading-scale', icon: Scale }] },

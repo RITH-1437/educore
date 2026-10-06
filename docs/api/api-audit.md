@@ -256,7 +256,7 @@ were **not changed** during this documentation-only audit.
 Application endpoint counts below exclude the four L5-Swagger/OAuth package
 routes (`api/documentation`, `api/documentation/asset/{asset}`,
 `api/documentation/ui`, `api/oauth2-callback`). Each combined update route
-contributes one PUT and one PATCH operation, so 211 route definitions yield 232
+contributes one PUT and one PATCH operation, so 212 route definitions yield 233
 documented operations.
 
 | Method | Path | Authentication / authorization | Documentation |
@@ -457,12 +457,13 @@ documented operations.
 | POST | `/api/internships/{internship}/evaluations` | Sanctum + super-admin or university-admin, or the student's Department Admin | Documented |
 | POST | `/api/internship-reports/{report}/review` | Sanctum + super-admin or university-admin, or the student's Department Admin | Documented |
 | GET | `/api/internship-reports/{report}/file` | Sanctum + staff, or the student | Documented |
-| GET | `/api/analytics/overview` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
-| GET | `/api/analytics/enrollment` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
-| GET | `/api/analytics/academic` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
-| GET | `/api/analytics/administrative` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
-| GET | `/api/analytics/export` | Sanctum + super-admin or university-admin (`view-analytics`; CSV, audited) | Documented |
-| GET | `/api/analytics/export/pdf` | Sanctum + super-admin or university-admin (`view-analytics`; PDF, audited) | Documented |
+| GET | `/api/analytics/overview` | Sanctum + super-admin or university-admin (any department or none), department-admin (own department; another or none assigned 403); `view-analytics` | Documented |
+| GET | `/api/analytics/enrollment` | Sanctum + super-admin or university-admin (any department or none), department-admin (own department; another or none assigned 403); `view-analytics` | Documented |
+| GET | `/api/analytics/academic` | Sanctum + super-admin or university-admin (any department or none), department-admin (own department; another or none assigned 403); `view-analytics` | Documented |
+| GET | `/api/analytics/administrative` | Sanctum + super-admin or university-admin (any department or none), department-admin (own department; another or none assigned 403); `view-analytics`; invoices / finance null for a department | Documented |
+| GET | `/api/analytics/trends` | Sanctum + super-admin or university-admin (any department or none), department-admin (own department; another or none assigned 403); `view-analytics` (report 47) | Documented |
+| GET | `/api/analytics/export` | Sanctum + super-admin or university-admin (any department or none), department-admin (own department; another or none assigned 403); `view-analytics`; CSV, audited; `finance` university-wide only | Documented |
+| GET | `/api/analytics/export/pdf` | Sanctum + super-admin or university-admin (any department or none), department-admin (own department; another or none assigned 403); `view-analytics`; PDF, audited | Documented |
 | GET | `/api/grading-scale` | Sanctum, any role | Documented |
 | PUT | `/api/grading-scale` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/courses/{course}/grading-config` | Sanctum + super-admin, university-admin or department-admin | Documented |
@@ -543,6 +544,8 @@ Re-ran Swagger generation and a scripted method/path comparison of
 | After annotating the profile operations: route definitions / operations / OpenAPI paths / schemas | 211 / 232 / 146 / 163 |
 | Undocumented / extra operations after the profile fix | 0 / 0 |
 | Endpoint Inventory rows vs routes (scripted, 2026-10-06): missing / stale before → after | 4 / 11 → 0 / 0 |
+| After department analytics (report 47, 1 operation added): route definitions / operations / OpenAPI paths / schemas | 212 / 233 / 147 / 165 |
+| Undocumented / extra operations after report 47 | 0 / 0 |
 
 - **A-09 — PATCH aliases undocumented.** `PATCH` on `/api/assignments/{assignment}`,
   `/api/exams/{exam}`, `/api/offerings/{offering}`, `/api/rooms/{room}`,
@@ -718,3 +721,23 @@ Rooms (`/api/rooms` writes) stay with Super Admin and University Admin. A
 Department Admin with no department manages nothing. The 403 descriptions of
 these operations in the OpenAPI document were updated. See
 `docs/46_Department-Admin-Sections-and-Schedules-Report.md`.
+
+## Department analytics and trends (2026-10-06)
+
+One operation added — `GET /api/analytics/trends` (`AnalyticsTrendsResponse`):
+enrollments, students enrolled, attendance rate, pass rate and average semester
+GPA for each of the latest six semesters, oldest first. Every analytics
+operation, the CSV export (new table `trends`) and the PDF report take an
+optional `department_id`:
+
+| Caller | Without `department_id` | With `department_id` |
+|---|---|---|
+| Super Admin / University Admin | Whole university (`department: null`) | That department (`422` if unknown) |
+| Department Admin | Their own department | Their own: `200`; another: `403` |
+| Department Admin with no department | `403` | `403` |
+
+Semester responses gain `department` (`AnalyticsDepartment`); for a department,
+`administrative.invoices` and `.finance` are `null`, and the `finance` CSV
+answers `403` to a Department Admin and `422` to a manager who passes
+`department_id`. Export audit entries record `department_id`. See
+`docs/47_Department-Analytics-and-Trends-Report.md`.

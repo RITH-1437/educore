@@ -41,7 +41,7 @@
 | 9.20 | Email Notifications | `[Implemented]` (password emails in report 29; in-app inbox in report 42) |
 | 9.21 | Telegram Notifications | `[Implemented]` (class reminders `[Future]`) |
 | 9.22 | Internship Management | `[Implemented]` (opportunity postings `[Future]`; letter document in report 30) |
-| 9.23 | Analytics & Reporting | `[Implemented]` (CSV & PDF exports, modern Pie/Donut charts in report 27 & 31; department-scoped views `[Future]`) |
+| 9.23 | Analytics & Reporting | `[Implemented]` (CSV & PDF exports, modern Pie/Donut charts in report 27 & 31; department views and semester trends in report 47) |
 | 9.24 | Audit Logs & Security | `[Implemented]` (CSV export in report 31; retention `[Future]`) |
 
 > No module is documented as implemented unless it is genuinely tested and running
@@ -450,8 +450,8 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` 9.23 Analytics & Reporting. Report:
   `docs/27_Analytics-and-Reporting-Report.md`. `[Done]` CSV exports. `[Done]` A
   faculty's headline numbers on the Faculty Admin dashboard (report 34).
-  `[Done]` Executive PDF export (report 27). `[Open]` The analytics page for
-  Department Admins, trends across semesters.
+  `[Done]` Executive PDF export (report 27). `[Done]` The analytics page for
+  Department Admins and trends across semesters (report 47).
 - `[Done]` 9.24 Audit Logs & Security. Report:
   `docs/28_Audit-Logs-and-Security-Report.md`. `[Done]` Audit CSV export. `[Open]` Audit retention,
   alerting on repeated notification failures, auditing low-risk
@@ -480,7 +480,8 @@ A module is not done until its report exists and its tests pass — never label
   Report: `docs/32_Faculty-Admin-Scoping-Report.md`. `[Done]` Request handling
   (report 33). `[Done]` Dashboard (report 34). `[Done]` Department-level
   admins (report 39 replaced the faculty tier). `[Done]` Sections / schedules
-  for their unit (report 46). `[Open]` The analytics page for Department Admins.
+  for their unit (report 46). `[Done]` The analytics page for Department
+  Admins (report 47).
 - `[Done]` Audit fix (2026-10-03): `/enrollments`, `/offerings/{offering}`,
   `/lecturers` and `/students` sent university-wide form options (students,
   open sections, lecturers, unlinked accounts) to a Faculty Admin; they are
@@ -665,3 +666,14 @@ A module is not done until its report exists and its tests pass — never label
   unassigned Department Admin manages nothing. The offering pages take
   `canManage` from `CourseOfferingPolicy` instead of a role list. Report:
   `docs/46_Department-Admin-Sections-and-Schedules-Report.md`.
+- `[Done]` Department analytics & trends (2026-10-06): every analytics figure,
+  CSV table and the PDF report can be limited to one department — people,
+  enrollment and GPA through its students, sections, attendance, grades and
+  course results through its courses, document requests and internships through
+  its students; finance stays university-wide. A Department Admin opens
+  `/analytics` (now in their sidebar) for their own department only (another
+  department or none assigned: 403); managers keep the university view and gain
+  a department filter. New `GET /api/analytics/trends` and a *Trends across
+  semesters* line chart trace enrollments, attendance, pass rate and average
+  GPA over the latest six semesters. Report:
+  `docs/47_Department-Analytics-and-Trends-Report.md`.

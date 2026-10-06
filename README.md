@@ -164,7 +164,7 @@ course-material upload (`backend/config/academics.php`).
 | `/my-internships`           | Apply for an internship, follow it, submit reports | Student |
 | `/internships`              | Internship queue: review, approve, start, complete, evaluate | Super admin, University admin; Department admin for their department's students |
 | `/internship-companies`     | Host companies | Super admin, University admin (Department admin read-only) |
-| `/analytics`                | Analytics: enrollment, academic performance, workload; CSV per table | Super admin, University admin |
+| `/analytics`                | Analytics: enrollment, academic performance, workload, trends across semesters; CSV per table, PDF | Super admin, University admin (whole university or one department); Department admin (own department) |
 | `/audit-logs`               | Audit trail (read-only): sign-ins and sensitive changes; CSV export | Super admin |
 | `/account/profile`          | My profile: affiliation, academic / teaching summary, contact details, avatar (upload or image URL); `/profile` redirects here | Every signed-in user (own only) |
 | `/account/password`         | Change my password (other sessions are signed out) | Every signed-in user |

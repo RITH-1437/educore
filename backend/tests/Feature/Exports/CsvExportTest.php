@@ -179,7 +179,7 @@ class CsvExportTest extends TestCase
         // Audited
         $this->assertTrue(AuditLog::query()->where('action', 'export.analytics_pdf')->exists());
 
-        // Non-managers forbidden
+        // A Department Admin without a department (report 47) and a student are refused.
         $this->actingAs($this->departmentAdmin)->get('/api/analytics/export/pdf')->assertForbidden();
         $this->actingAs($this->student->user)->get('/api/analytics/export/pdf')->assertForbidden();
     }

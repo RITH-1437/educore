@@ -7,6 +7,7 @@ use App\Models\AttendanceRecord;
 use App\Models\AttendanceSession;
 use App\Models\Course;
 use App\Models\CourseOffering;
+use App\Models\Department;
 use App\Models\Enrollment;
 use App\Models\GpaRecord;
 use App\Models\Grade;
@@ -149,19 +150,25 @@ class AnalyticsTest extends TestCase
         $this->actingAs($this->admin)->get('/analytics')->assertOk()->assertInertia(fn (Assert $page) => $page->component('Analytics/Index')->where('overview', null));
     }
 
-    public function test_managers_only(): void
+    public function test_access_by_role(): void
     {
-        $departmentAdmin = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::DepartmentAdmin->value)->create()->id]);
+        // Department Admins see their own department (report 47); one with no department sees nothing.
+        $departmentAdmin = $this->departmentAdminFor(Department::factory()->create());
+        $unassigned = $this->departmentAdminFor(null);
         $university = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::UniversityAdmin->value)->create()->id]);
 
-        foreach (['overview', 'enrollment', 'academic', 'administrative'] as $endpoint) {
-            $this->actingAs($departmentAdmin)->getJson("/api/analytics/{$endpoint}")->assertForbidden();
+        foreach (['overview', 'enrollment', 'academic', 'administrative', 'trends'] as $endpoint) {
+            $this->actingAs($departmentAdmin)->getJson("/api/analytics/{$endpoint}")->assertOk()->assertJsonPath('department.id', $departmentAdmin->department_id);
+            $this->actingAs($unassigned)->getJson("/api/analytics/{$endpoint}")->assertForbidden();
             $this->actingAs(Student::factory()->create()->user)->getJson("/api/analytics/{$endpoint}")->assertForbidden();
             $this->actingAs(Lecturer::factory()->create()->user)->getJson("/api/analytics/{$endpoint}")->assertForbidden();
-            $this->actingAs($university)->getJson("/api/analytics/{$endpoint}")->assertOk();
+            $this->actingAs($university)->getJson("/api/analytics/{$endpoint}")->assertOk()->assertJsonPath('department', null);
         }
 
-        $this->actingAs($departmentAdmin)->get('/analytics')->assertForbidden();
+        $this->actingAs($departmentAdmin)->get('/analytics')->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('scope.locked', true)->where('scope.department.id', $departmentAdmin->department_id)->has('departments', 0));
+        $this->actingAs($unassigned)->get('/analytics')->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('scope.unassigned', true)->where('overview', null)->where('administrative', null));
         $this->actingAs($university)->get("/analytics?semester_id={$this->other->id}")->assertOk()
             ->assertInertia(fn (Assert $page) => $page->where('semesterId', $this->other->id)->has('semesters', 2)->has('administrative.documents'));
     }

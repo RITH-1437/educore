@@ -325,7 +325,10 @@ managing companies stay with University Admin). Their dashboard shows the
 requests and internships waiting for them and the department's headline numbers.
 They create and run their department's offerings and sections — capacity,
 lecturers of their department, weekly class times in any room, under the usual
-timetable conflict checks; rooms stay with University Admin (report 46). See
+timetable conflict checks; rooms stay with University Admin (report 46). Their
+analytics page shows their department's enrollment, attendance, results and
+trends (report 47). See
+[47_Department-Analytics-and-Trends-Report.md](47_Department-Analytics-and-Trends-Report.md),
 [46_Department-Admin-Sections-and-Schedules-Report.md](46_Department-Admin-Sections-and-Schedules-Report.md),
 [39_Department-Only-Structure-Report.md](39_Department-Only-Structure-Report.md),
 [32_Faculty-Admin-Scoping-Report.md](32_Faculty-Admin-Scoping-Report.md),
@@ -708,10 +711,12 @@ users, main business activities, and expected outputs.
   grade and GPA distributions — plus the current workload (documents,
   internships, invoices, finance per currency), all computed live in SQL from
   the domain tables, each table downloadable as CSV, executive PDF report export,
-  and modern interactive Chart.js Pie/Donut charts with view-mode toggles. A Department Admin sees
-  their department's headline numbers on their dashboard; a
-  department-scoped analytics page and trends are [Future].
-  See [27_Analytics-and-Reporting-Report.md](27_Analytics-and-Reporting-Report.md),
+  and modern interactive Chart.js Pie/Donut charts with view-mode toggles. Every
+  figure can be limited to one department — a Department Admin always sees their
+  own department; managers pick one or the whole university — and the headline
+  figures are traced across the latest six semesters (report 47).
+  See [47_Department-Analytics-and-Trends-Report.md](47_Department-Analytics-and-Trends-Report.md),
+  [27_Analytics-and-Reporting-Report.md](27_Analytics-and-Reporting-Report.md),
   [31_CSV-Exports-Report.md](31_CSV-Exports-Report.md) and
   [34_Faculty-Admin-Dashboard-Report.md](34_Faculty-Admin-Dashboard-Report.md).
 

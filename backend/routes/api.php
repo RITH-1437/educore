@@ -363,12 +363,14 @@ Route::middleware(['auth:sanctum', 'role:super-admin'])->group(function () {
     Route::get('/audit-logs/{auditLog}', [AuditLogController::class, 'show'])->name('api.audit-logs.show');
 });
 
-// Analytics (module 9.23): institution-wide, so managers only (`view-analytics`).
-Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->prefix('/analytics')->name('api.analytics.')->group(function () {
+// Analytics (module 9.23): managers for the university or one department, a
+// Department Admin for their own department (`view-analytics`, report 47).
+Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,department-admin'])->prefix('/analytics')->name('api.analytics.')->group(function () {
     Route::get('/overview', [AnalyticsController::class, 'overview'])->name('overview');
     Route::get('/enrollment', [AnalyticsController::class, 'enrollment'])->name('enrollment');
     Route::get('/academic', [AnalyticsController::class, 'academic'])->name('academic');
     Route::get('/administrative', [AnalyticsController::class, 'administrative'])->name('administrative');
+    Route::get('/trends', [AnalyticsController::class, 'trends'])->name('trends');
     Route::get('/export', [ExportController::class, 'analytics'])->name('export');
     Route::get('/export/pdf', [ExportController::class, 'analyticsPdf'])->name('export.pdf');
 });

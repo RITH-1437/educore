@@ -394,6 +394,18 @@ Guidelines:
   reads gray and the dark set sits above the lightness band — acceptable here
   because labels are always visible, but a palette refresh is an open item.
 
+**Trend lines (2026-10-06, Analytics trends — `LineChart`):**
+
+- Change over time is a line, not columns: one series in `chart-primary`, a
+  2px line with 8px markers ringed in the surface colour, the x axis inset so
+  the first and last semester labels are never clipped.
+- One measure at a time on one value axis — a pill tab group switches between
+  counts and rates; two measures never share a chart (no dual axis). Rates
+  run 0–100 %, GPA 0–4.
+- Nothing to measure (`null`) leaves a gap in the line; it is never drawn as 0.
+  No legend (the card title and active tab name the series); hover tooltip
+  over the whole column; a "Show as table" toggle like `BarChart`.
+
 ---
 
 ## 11. Animation

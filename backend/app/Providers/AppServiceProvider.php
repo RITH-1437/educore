@@ -56,7 +56,9 @@ class AppServiceProvider extends ServiceProvider
 
         // Institution-wide analytics (module 9.23): managers only — Department Admin
         // would need unit scoping first (`skills/analytics-reporting` §12).
-        Gate::define('view-analytics', fn (User $user) => $user->isRole(Role::SuperAdmin->value) || $user->isRole(Role::UniversityAdmin->value));
+        // Managers see the university or any department; a Department Admin only
+        // their own (`AnalyticsController::departmentScope`, report 47).
+        Gate::define('view-analytics', fn (User $user) => $user->isRole(Role::SuperAdmin->value) || $user->isRole(Role::UniversityAdmin->value) || $user->isRole(Role::DepartmentAdmin->value));
 
         // Test notifications from the preferences page (modules 9.20 / 9.21).
         RateLimiter::for('notification-test', fn (Request $request) => Limit::perMinute(3)->by((string) $request->user()?->getKey()));

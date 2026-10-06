@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Analytics Report — {{ $semester->academicYear?->code }} {{ $semester->name }}</title>
+<title>Analytics Report — {{ $department ? $department['name'].' — ' : '' }}{{ $semester->academicYear?->code }} {{ $semester->name }}</title>
 <style>
     /* dompdf supports CSS 2.1 only; brand colours from docs/branding (navy #0F172A, primary #2563EB, muted #64748B). */
     @page { margin: 24mm 16mm 22mm 16mm; }
@@ -56,8 +56,11 @@
 </footer>
 
 <main>
-    <div class="doc-title">INSTITUTIONAL ANALYTICS REPORT</div>
+    <div class="doc-title">{{ $department ? 'DEPARTMENT ANALYTICS REPORT' : 'INSTITUTIONAL ANALYTICS REPORT' }}</div>
     <div class="doc-subtitle">
+        @if($department)
+            Department: <strong>{{ $department['name'] }} ({{ $department['code'] }})</strong> ·
+        @endif
         Reporting Period: <strong>{{ $semester->academicYear?->code }} — {{ $semester->name }}</strong> (Status: {{ ucfirst($semester->status->value) }})
     </div>
 
@@ -217,6 +220,31 @@
     </table>
     @endif
 
+    @if($administrative['finance'] === null)
+    <!-- Department report: its students' workload (finance is university-wide only) -->
+    <div class="section-title">5. Current Workload of the Department's Students</div>
+    <table class="grid">
+        <thead>
+            <tr>
+                <th style="width: 40%;">Area</th>
+                <th style="width: 40%;">Status</th>
+                <th style="width: 20%;" class="num">Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            @php($workload = collect(['Document requests' => $administrative['documents'], 'Internships' => $administrative['internships']])->flatMap(fn ($rows, $area) => collect($rows)->where('total', '>', 0)->map(fn ($r) => [$area, $r['status'], $r['total']]))->values())
+            @forelse($workload as [$area, $status, $total])
+            <tr>
+                <td>{{ $area }}</td>
+                <td>{{ ucfirst(str_replace('_', ' ', $status)) }}</td>
+                <td class="num">{{ $total }}</td>
+            </tr>
+            @empty
+            <tr><td colspan="3" class="center" style="color: #64748B;">No document requests or internships.</td></tr>
+            @endforelse
+        </tbody>
+    </table>
+    @else
     <!-- Finance & Administrative Workload -->
     <div class="section-title">5. Institutional Finance & Current Workload</div>
     <table class="grid">
@@ -245,6 +273,7 @@
             @endforelse
         </tbody>
     </table>
+    @endif
 </main>
 </body>
 </html>

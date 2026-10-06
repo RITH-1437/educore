@@ -316,10 +316,13 @@ Route::middleware(['auth', 'role:super-admin,university-admin,department-admin,s
     Route::get('/internship-reports/{report}/file', [InternshipsController::class, 'downloadReport'])->name('internship-reports.file');
 });
 
-// Analytics (module 9.23): managers only.
-Route::middleware(['auth', 'role:super-admin,university-admin'])->get('/analytics', AnalyticsPageController::class)->name('analytics');
-Route::middleware(['auth', 'role:super-admin,university-admin'])->get('/analytics/export', [ExportController::class, 'analytics'])->name('analytics.export');
-Route::middleware(['auth', 'role:super-admin,university-admin'])->get('/analytics/export/pdf', [ExportController::class, 'analyticsPdf'])->name('analytics.export.pdf');
+// Analytics (module 9.23): managers for the university or one department, a
+// Department Admin for their own department (`view-analytics`, report 47).
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])->group(function () {
+    Route::get('/analytics', AnalyticsPageController::class)->name('analytics');
+    Route::get('/analytics/export', [ExportController::class, 'analytics'])->name('analytics.export');
+    Route::get('/analytics/export/pdf', [ExportController::class, 'analyticsPdf'])->name('analytics.export.pdf');
+});
 
 // Notification settings (modules 9.20 / 9.21): every signed-in user, own only.
 Route::middleware('auth')->group(function () {

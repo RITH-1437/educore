@@ -11,6 +11,7 @@ import PageHeader from '../../components/PageHeader.vue'
 import StatCard from '../../components/StatCard.vue'
 import StatusBreakdownCard from '../../components/analytics/StatusBreakdownCard.vue'
 import BarChart from '../../components/charts/BarChart.vue'
+import LineChart from '../../components/charts/LineChart.vue'
 import PieChart from '../../components/charts/PieChart.vue'
 import { money } from '../../utils/finance'
 
@@ -20,45 +21,79 @@ const props = defineProps({
   overview: { type: Object, default: null },
   enrollment: { type: Object, default: null },
   academic: { type: Object, default: null },
-  administrative: { type: Object, required: true },
+  // Null for a Department Admin with no department (nothing to show).
+  administrative: { type: Object, default: null },
+  // Managers' department filter options; empty for a Department Admin.
+  departments: { type: Array, default: () => [] },
+  // Whose figures these are (report 47): the department (or null = university),
+  // whether it is fixed (Department Admin), and whether there is none to show.
+  scope: { type: Object, default: () => ({ department: null, locked: false, unassigned: false }) },
+  trends: { type: Array, default: () => [] },
 })
 
 // One filter row above the charts; changing it reloads every section.
 const semester = ref(props.semesterId ?? '')
+const department = ref(props.scope.locked ? '' : (props.scope.department?.id ?? ''))
 const semesterOptions = computed(() => props.semesters.map((s) => ({ value: s.id, label: `${s.name}${s.status === 'open' ? ' (open)' : ''}` })))
-const pick = (value) => router.get('/analytics', { semester_id: value || undefined }, { preserveState: true, preserveScroll: true, replace: true })
+const departmentOptions = computed(() => props.departments.map((d) => ({ value: d.id, label: `${d.name} (${d.code})` })))
+const reload = () => router.get('/analytics', { semester_id: semester.value || undefined, department_id: department.value || undefined }, { preserveState: true, preserveScroll: true, replace: true })
+const pick = () => reload()
+const scoped = computed(() => Boolean(props.scope.department))
+const scopeName = computed(() => props.scope.department?.name ?? 'the whole university')
 
 const enrollmentChartType = ref('bar')
 const gradeChartType = ref('pie')
 const gpaChartType = ref('pie')
 
-const pdfUrl = computed(() => exportUrl('/analytics/export/pdf', { semester_id: props.semesterId }))
-const csv = (table) => exportUrl('/analytics/export', { table, semester_id: props.semesterId })
+const departmentId = computed(() => props.scope.department?.id)
+const pdfUrl = computed(() => exportUrl('/analytics/export/pdf', { semester_id: props.semesterId, department_id: departmentId.value }))
+const csv = (table) => exportUrl('/analytics/export', { table, semester_id: props.semesterId, department_id: departmentId.value })
 const pct = (v) => (v === null || v === undefined ? '—' : `${v}%`)
 const o = computed(() => props.overview)
 // Headline numbers, laid out like the dashboard overview: four per row, no
 // icons, a short detail line on every card; counts that have a list link to
-// it, filtered to the semester where the list supports it.
+// it, filtered to the semester (and department) where the list supports it.
+// For a department, people figures are its students and teaching figures its
+// courses — the detail line says which.
+// A manager's department filter carries over to the lists (a Department Admin's are scoped already).
+const unitQuery = computed(() => (departmentId.value && !props.scope.locked ? `&filters[department_id]=${departmentId.value}` : ''))
 const metrics = computed(() => (!o.value ? [] : [
-  { label: 'Students enrolled', value: o.value.students_enrolled, detail: `${o.value.enrollments} enrollments this semester`, href: `/enrollments?semester_id=${props.semesterId}` },
-  { label: 'Active students', value: o.value.students_active, detail: 'All programs', href: '/students?filters[status]=active' },
-  { label: 'Sections', value: o.value.sections, detail: 'Running this semester', href: `/offerings?semester_id=${props.semesterId}` },
-  { label: 'Active lecturers', value: o.value.lecturers_active, detail: 'Teaching staff', href: '/lecturers?filters[is_active]=1' },
-  { label: 'Attendance rate', value: pct(o.value.attendance_rate), detail: 'Present + late of counted sessions' },
-  { label: 'Approved grades', value: o.value.grades_approved, detail: 'Approved or finalized this semester' },
-  { label: 'Pass rate', value: pct(o.value.pass_rate), detail: 'Grades with points above 0' },
-  { label: 'Average semester GPA', value: o.value.average_gpa === null ? '—' : o.value.average_gpa.toFixed(2), detail: 'Students with a semester GPA' },
+  { label: 'Students enrolled', value: o.value.students_enrolled, detail: scoped.value ? `${o.value.enrollments} enrollments by its students` : `${o.value.enrollments} enrollments this semester`, href: `/enrollments?semester_id=${props.semesterId}` },
+  { label: 'Active students', value: o.value.students_active, detail: scoped.value ? 'In its programs' : 'All programs', href: `/students?filters[status]=active${unitQuery.value}` },
+  { label: 'Sections', value: o.value.sections, detail: scoped.value ? 'Of its courses, running this semester' : 'Running this semester', href: `/offerings?semester_id=${props.semesterId}` },
+  { label: 'Active lecturers', value: o.value.lecturers_active, detail: scoped.value ? 'In the department' : 'Teaching staff', href: `/lecturers?filters[is_active]=1${unitQuery.value}` },
+  { label: 'Attendance rate', value: pct(o.value.attendance_rate), detail: scoped.value ? 'Present + late, in its courses' : 'Present + late of counted sessions' },
+  { label: 'Approved grades', value: o.value.grades_approved, detail: scoped.value ? 'Approved or final, in its courses' : 'Approved or finalized this semester' },
+  { label: 'Pass rate', value: pct(o.value.pass_rate), detail: scoped.value ? 'Points above 0, in its courses' : 'Grades with points above 0' },
+  { label: 'Average semester GPA', value: o.value.average_gpa === null ? '—' : o.value.average_gpa.toFixed(2), detail: scoped.value ? 'Its students with a semester GPA' : 'Students with a semester GPA' },
 ]))
 const delay = (step) => ({ animationDelay: `${step * 60}ms` })
 const a = computed(() => props.academic)
 const hasGrades = computed(() => (a.value?.grade_distribution ?? []).some((g) => g.total > 0))
 const hasGpa = computed(() => (a.value?.gpa_distribution ?? []).some((g) => g.total > 0))
+
+// Trends: one measure at a time on one axis (never two scales on one chart).
+const trendMetrics = [
+  { key: 'enrollments', label: 'Enrollments', valueLabel: 'Enrollments' },
+  { key: 'attendance_rate', label: 'Attendance', valueLabel: 'Attendance rate', suffix: '%', max: 100 },
+  { key: 'pass_rate', label: 'Pass rate', valueLabel: 'Pass rate', suffix: '%', max: 100 },
+  { key: 'average_gpa', label: 'Average GPA', valueLabel: 'Average semester GPA', max: 4, decimals: 2 },
+]
+const trendKey = ref('enrollments')
+const trend = computed(() => trendMetrics.find((m) => m.key === trendKey.value))
+const hasTrends = computed(() => props.trends.length > 1)
 </script>
 
 <template>
   <Head title="Analytics - EduCore" />
   <div class="space-y-8">
-    <PageHeader eyebrow="Reports" title="Analytics" description="Enrollment, academic performance and administrative workload. Academic figures use approved grades only.">
+    <PageHeader
+      :eyebrow="scope.locked && scope.department ? scope.department.name : 'Reports'"
+      title="Analytics"
+      :description="scope.unassigned
+        ? 'Department analytics follow the department you are assigned to.'
+        : `Enrollment, academic performance and administrative workload for ${scopeName}. Academic figures use approved grades only.`"
+    >
       <template v-if="overview" #actions>
         <a
           :href="pdfUrl"
@@ -70,8 +105,14 @@ const hasGpa = computed(() => (a.value?.gpa_distribution ?? []).some((g) => g.to
       </template>
     </PageHeader>
 
-    <div class="max-w-sm">
+    <BaseCard v-if="scope.unassigned">
+      <EmptyState title="No department assigned" description="Ask a Super Admin to assign your department; its analytics then appear here." />
+    </BaseCard>
+
+    <template v-else>
+    <div class="grid max-w-2xl gap-4 sm:grid-cols-2">
       <BaseSelect v-model="semester" :options="semesterOptions" label="Semester" placeholder="No semesters yet" @update:model-value="pick" />
+      <BaseSelect v-if="!scope.locked" v-model="department" :options="departmentOptions" label="Department" placeholder="All departments" @update:model-value="pick" />
     </div>
 
     <BaseCard v-if="!overview">
@@ -212,28 +253,61 @@ const hasGpa = computed(() => (a.value?.gpa_distribution ?? []).some((g) => g.to
       </BaseCard>
     </template>
 
-    <!-- Administrative workload: point in time, not filtered by semester. -->
+    <!-- Trends: the headline figures across the latest semesters, one measure at a time. -->
+    <BaseCard v-if="hasTrends" title="Trends across semesters" padding="lg">
+      <template #description>The latest {{ trends.length }} semesters, oldest first, on the same definitions as the numbers above.</template>
+      <template #actions><IconButton :icon="Download" :href="csv('trends')" native size="sm" label="Download trends as CSV" /></template>
+      <div class="mb-4 flex flex-wrap items-center gap-1.5" role="tablist" aria-label="Trend measure">
+        <button
+          v-for="m in trendMetrics"
+          :key="m.key"
+          type="button"
+          role="tab"
+          :aria-selected="trendKey === m.key"
+          class="inline-flex min-h-8 items-center rounded-pill px-3 text-caption font-medium transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-primary"
+          :class="trendKey === m.key
+            ? 'bg-primary text-white shadow-xs dark:bg-dark-primary dark:text-dark-bg'
+            : 'border border-border-default bg-surface text-muted hover:bg-muted-light/60 hover:text-ink dark:border-dark-border dark:bg-dark-surface dark:text-dark-muted dark:hover:bg-dark-muted/20 dark:hover:text-dark-ink'"
+          @click="trendKey = m.key"
+        >
+          {{ m.label }}
+        </button>
+      </div>
+      <LineChart
+        :label="`${trend.valueLabel} by semester`"
+        :value-label="trend.valueLabel"
+        :suffix="trend.suffix ?? ''"
+        :max="trend.max ?? null"
+        :decimals="trend.decimals ?? null"
+        :labels="trends.map((t) => t.semester)"
+        :values="trends.map((t) => t[trend.key])"
+      />
+    </BaseCard>
+
+    <!-- Administrative workload: point in time, not filtered by semester. A
+         department's covers its students' requests; finance is university-wide only. -->
     <section class="space-y-4" aria-labelledby="workload-heading">
       <div class="flex flex-wrap items-center justify-between gap-3">
         <h2 id="workload-heading" class="text-h4 font-semibold text-ink dark:text-dark-ink">Current workload</h2>
         <div class="flex flex-wrap gap-2">
-          <IconButton :icon="Download" :href="csv('finance')" native size="md" label="Download finance as CSV" />
+          <IconButton v-if="administrative.finance" :icon="Download" :href="csv('finance')" native size="md" label="Download finance as CSV" />
           <IconButton :icon="FileSpreadsheet" :href="csv('workload')" native size="md" label="Download workload as CSV" />
         </div>
       </div>
 
-      <div v-for="row in administrative.finance" :key="row.currency" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div v-for="row in administrative.finance ?? []" :key="row.currency" class="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard :label="`Invoiced (${row.currency})`" :value="money(row.invoiced, row.currency)" tone="muted" detail="Excluding cancelled invoices" />
         <StatCard :label="`Collected (${row.currency})`" :value="money(row.collected, row.currency)" tone="success" :detail="`${pct(row.collection_rate)} of invoiced`" />
         <StatCard :label="`Outstanding (${row.currency})`" :value="money(row.outstanding, row.currency)" tone="warning" detail="Invoiced minus collected" />
         <StatCard :label="`Overdue (${row.currency})`" :value="money(row.overdue, row.currency)" :tone="row.overdue > 0 ? 'warning' : 'muted'" :detail="`${row.overdue_count} invoice${row.overdue_count === 1 ? '' : 's'}`" />
       </div>
 
-      <div class="grid gap-6 lg:grid-cols-3">
+      <div class="grid gap-6" :class="administrative.invoices ? 'lg:grid-cols-3' : 'lg:grid-cols-2'">
         <StatusBreakdownCard title="Document requests" :rows="administrative.documents" href="/documents" value-label="Requests" />
         <StatusBreakdownCard title="Internships" :rows="administrative.internships" href="/internships" value-label="Internships" />
-        <StatusBreakdownCard title="Invoices" :rows="administrative.invoices" href="/invoices" value-label="Invoices" />
+        <StatusBreakdownCard v-if="administrative.invoices" title="Invoices" :rows="administrative.invoices" href="/invoices" value-label="Invoices" />
       </div>
     </section>
+    </template>
   </div>
 </template>

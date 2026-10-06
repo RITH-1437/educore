@@ -1,6 +1,6 @@
 # EduCore API Audit
 
-- **Date:** 2026-09-28 (refreshed 2026-10-02 — see *Re-audit 2026-10-02*)
+- **Date:** 2026-09-28 (refreshed 2026-10-02 — see *Re-audit 2026-10-02*; inventory re-checked 2026-10-06)
 - **Scope:** `routes/api.php`, API controllers, Form Requests, API Resources,
   models, policies/middleware, Swagger/OpenAPI, and frontend API service usage.
 - **Runtime:** Local Docker Compose development stack. No database schema or
@@ -256,7 +256,7 @@ were **not changed** during this documentation-only audit.
 Application endpoint counts below exclude the four L5-Swagger/OAuth package
 routes (`api/documentation`, `api/documentation/asset/{asset}`,
 `api/documentation/ui`, `api/oauth2-callback`). Each combined update route
-contributes one PUT and one PATCH operation, so 190 route definitions yield 209
+contributes one PUT and one PATCH operation, so 211 route definitions yield 232
 documented operations.
 
 | Method | Path | Authentication / authorization | Documentation |
@@ -267,12 +267,12 @@ documented operations.
 | POST | `/api/forgot-password` | Public; `throttle:password-reset` (5/min per email + IP); generic 202 | Documented |
 | POST | `/api/reset-password` | Public; `throttle:password-reset` | Documented |
 | GET | `/api/user` | `auth:sanctum` | Documented |
-| GET | `/api/profile` | `auth:sanctum` (caller's own profile payload) | Documented (Report 45) |
-| PUT, POST | `/api/profile` | `auth:sanctum` (caller's own profile contact / avatar update) | Documented (Report 45) |
-| GET | `/users/{user}/avatar` | Public (stream stored avatar or redirect to external avatar URL) | Documented (Report 45) |
+| GET | `/api/profile` | `auth:sanctum` (caller's own profile payload) | Documented |
+| PUT, POST | `/api/profile` | `auth:sanctum` (caller's own contact details / avatar; PUT JSON, POST multipart with `avatar`) | Both documented |
+| GET | `/api/users/{user}/avatar` | Public (profile photo); streams an uploaded avatar inline (`nosniff`), 404 for none or for an external URL avatar — never redirects (report 45) | Documented |
 | GET | `/api/health` | Public | Documented |
-| GET | `/api/users` | Sanctum + super-admin (responses include `faculty_id`, `faculty`) | Documented |
-| POST | `/api/users` | Sanctum + super-admin (optional `faculty_id`, Faculty Admin role only) | Documented |
+| GET | `/api/users` | Sanctum + super-admin (responses include `department_id`, `department`) | Documented |
+| POST | `/api/users` | Sanctum + super-admin (optional `department_id`, Department Admin role only) | Documented |
 | GET | `/api/users/{user}` | Sanctum + super-admin | Documented |
 | PUT, PATCH | `/api/users/{user}` | Sanctum + super-admin | Both documented |
 | DELETE | `/api/users/{user}` | Sanctum + super-admin | Documented |
@@ -286,32 +286,24 @@ documented operations.
 | POST | `/api/academic-years/{academicYear}/semesters` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/academic-years/{academicYear}/semesters/{semester}/status` | Sanctum + super-admin or university-admin | Documented |
 | DELETE | `/api/academic-years/{academicYear}/semesters/{semester}` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/universities` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/universities` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | POST | `/api/universities` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/universities/{university}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/universities/{university}` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | PUT, PATCH | `/api/universities/{university}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/universities/{university}` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/universities/{university}/current` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/university/dashboard` | Sanctum + super-admin or university-admin (report 36) | Documented |
-| GET | `/api/faculties` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
-| POST | `/api/faculties` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/faculties/{faculty}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
-| GET | `/api/faculties/{faculty}/dashboard` | Sanctum + super-admin or university-admin, or the faculty's own faculty-admin (report 34) | Documented |
-| PUT, PATCH | `/api/faculties/{faculty}` | Sanctum + super-admin or university-admin | Both documented |
-| DELETE | `/api/faculties/{faculty}` | Sanctum + super-admin or university-admin | Documented |
-| POST | `/api/faculties/{faculty}/archive` | Sanctum + super-admin or university-admin | Documented |
-| POST | `/api/faculties/{faculty}/reactivate` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/faculties-tree` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
-| GET | `/api/departments` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/departments` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | POST | `/api/departments` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/departments/{department}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/departments/{department}` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | PUT, PATCH | `/api/departments/{department}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/departments/{department}` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/departments/{department}/archive` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/departments/{department}/reactivate` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/programs` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/departments/{department}/dashboard` | Sanctum + super-admin or university-admin, or the department's own department-admin (report 39) | Documented |
+| GET | `/api/programs` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | POST | `/api/programs` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/programs/{program}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/programs/{program}` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | PUT, PATCH | `/api/programs/{program}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/programs/{program}` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/programs/{program}/archive` | Sanctum + super-admin or university-admin | Documented |
@@ -319,72 +311,72 @@ documented operations.
 | POST | `/api/programs/{program}/courses` | Sanctum + super-admin or university-admin | Documented |
 | PATCH | `/api/programs/{program}/courses/{course}` | Sanctum + super-admin or university-admin | Documented |
 | DELETE | `/api/programs/{program}/courses/{course}` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/courses` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/courses` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | POST | `/api/courses` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/courses/{course}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/courses/{course}` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | PUT, PATCH | `/api/courses/{course}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/courses/{course}` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/courses/{course}/archive` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/courses/{course}/reactivate` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/courses/{course}/prerequisites` | Sanctum + super-admin or university-admin | Documented |
 | DELETE | `/api/courses/{course}/prerequisites/{prerequisite}` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/lecturers` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/lecturers` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | POST | `/api/lecturers` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/lecturers/{lecturer}` | Sanctum + super-admin, university-admin, faculty-admin, or the lecturer themself | Documented |
+| GET | `/api/lecturers/{lecturer}` | Sanctum + super-admin, university-admin, department-admin, or the lecturer themself | Documented |
 | PUT, PATCH | `/api/lecturers/{lecturer}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/lecturers/{lecturer}` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/lecturers/{lecturer}/deactivate` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/lecturers/{lecturer}/reactivate` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/students` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/students` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | POST | `/api/students` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/students/{student}` | Sanctum + super-admin, university-admin, faculty-admin, or the student themself | Documented |
+| GET | `/api/students/{student}` | Sanctum + super-admin, university-admin, department-admin, or the student themself | Documented |
 | PUT, PATCH | `/api/students/{student}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/students/{student}` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/students/{student}/status` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/students/{student}/program` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/offerings` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/offerings` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | POST | `/api/offerings` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/offerings/{offering}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/offerings/{offering}` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | PUT, PATCH | `/api/offerings/{offering}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/offerings/{offering}` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/offerings/{offering}/sections` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/sections/{section}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/sections/{section}` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | PUT, PATCH | `/api/sections/{section}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/sections/{section}` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/sections/{section}/lecturers` | Sanctum + super-admin or university-admin | Documented |
 | DELETE | `/api/sections/{section}/lecturers/{lecturer}` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/lecturers/{lecturer}/sections` | Sanctum + staff, or the lecturer themself | Documented |
 | GET | `/api/lecturers/{lecturer}/dashboard` | Sanctum + staff, or the lecturer themself (report 35) | Documented |
-| GET | `/api/enrollments` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
-| GET | `/api/enrollments/export` | Sanctum + super-admin, university-admin or faculty-admin (CSV, audited) | Documented |
+| GET | `/api/enrollments` | Sanctum + super-admin, university-admin or department-admin | Documented |
+| GET | `/api/enrollments/export` | Sanctum + super-admin, university-admin or department-admin (CSV, audited) | Documented |
 | POST | `/api/enrollments` | Sanctum + managers (any student) or a student (self) | Documented |
 | GET | `/api/enrollments/{enrollment}` | Sanctum + staff, or the enrolled student | Documented |
 | DELETE | `/api/enrollments/{enrollment}` | Sanctum + managers, or the enrolled student (drop, keeps history) | Documented |
 | POST | `/api/enrollments/{enrollment}/complete` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/students/{student}/enrollments` | Sanctum + staff, or the student themself | Documented |
-| GET | `/api/rooms` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/rooms` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | POST | `/api/rooms` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/rooms/{room}` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/rooms/{room}` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | PUT, PATCH | `/api/rooms/{room}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/rooms/{room}` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/sections/{section}/schedule` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/sections/{section}/schedule` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | POST | `/api/sections/{section}/schedule` | Sanctum + super-admin or university-admin | Documented |
 | PUT, PATCH | `/api/schedule-entries/{entry}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/schedule-entries/{entry}` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/timetable/student/{student}` | Sanctum + staff, or the student themself | Documented |
 | GET | `/api/timetable/lecturer/{lecturer}` | Sanctum + staff, or the lecturer themself | Documented |
-| GET | `/api/sections/{section}/attendance` | Sanctum + managers, Faculty Admin, or a lecturer of the section | Documented |
+| GET | `/api/sections/{section}/attendance` | Sanctum + managers, Department Admin, or a lecturer of the section | Documented |
 | POST | `/api/sections/{section}/attendance` | Sanctum + managers or a lecturer of the section | Documented |
-| GET | `/api/sections/{section}/attendance/summary` | Sanctum + managers, Faculty Admin, or a lecturer of the section | Documented |
+| GET | `/api/sections/{section}/attendance/summary` | Sanctum + managers, Department Admin, or a lecturer of the section | Documented |
 | POST | `/api/attendance-sessions/{session}/cancel` | Sanctum + managers or a lecturer of the section | Documented |
 | GET | `/api/students/{student}/attendance` | Sanctum + staff, or the student themself | Documented |
-| GET | `/api/sections/{section}/assignments` | Sanctum + managers, Faculty Admin, a lecturer of the section, or an enrolled student (published only) | Documented |
+| GET | `/api/sections/{section}/assignments` | Sanctum + managers, Department Admin, a lecturer of the section, or an enrolled student (published only) | Documented |
 | POST | `/api/sections/{section}/assignments` | Sanctum + managers or a lecturer of the section | Documented |
 | GET | `/api/assignments/{assignment}` | Sanctum + staff, a lecturer of the section, or an enrolled student (published only) | Documented |
 | PUT, PATCH | `/api/assignments/{assignment}` | Sanctum + managers or a lecturer of the section | Both documented |
 | DELETE | `/api/assignments/{assignment}` | Sanctum + managers or a lecturer of the section | Documented |
 | POST | `/api/assignments/{assignment}/publish` | Sanctum + managers or a lecturer of the section | Documented |
-| GET | `/api/assignments/{assignment}/submissions` | Sanctum + managers, Faculty Admin, or a lecturer of the section | Documented |
+| GET | `/api/assignments/{assignment}/submissions` | Sanctum + managers, Department Admin, or a lecturer of the section | Documented |
 | POST | `/api/assignments/{assignment}/submissions` | Sanctum + student enrolled in the section (multipart file) | Documented |
 | POST | `/api/submissions/{submission}/grade` | Sanctum + managers or a lecturer of the section | Documented |
 | GET | `/api/submissions/{submission}/file` | Sanctum + staff, a lecturer of the section, or the submitting student | Documented |
@@ -393,7 +385,7 @@ documented operations.
 | PUT, PATCH | `/api/materials/{material}` | Sanctum + the section's lecturers or managers | Both documented |
 | DELETE | `/api/materials/{material}` | Sanctum + the section's lecturers or managers; 204 | Documented |
 | GET | `/api/materials/{material}/file` | Sanctum + anyone who reads the section's materials; 404 for a link | Documented |
-| GET | `/api/sections/{section}/exams` | Sanctum + managers, Faculty Admin, a lecturer of the section, or an enrolled student | Documented |
+| GET | `/api/sections/{section}/exams` | Sanctum + managers, Department Admin, a lecturer of the section, or an enrolled student | Documented |
 | POST | `/api/sections/{section}/exams` | Sanctum + managers or a lecturer of the section | Documented |
 | GET | `/api/exams/{exam}` | Sanctum + staff, a lecturer of the section (roster), or an enrolled student (own released result) | Documented |
 | PUT, PATCH | `/api/exams/{exam}` | Sanctum + managers or a lecturer of the section | Both documented |
@@ -402,7 +394,7 @@ documented operations.
 | POST | `/api/exams/{exam}/results` | Sanctum + managers or a lecturer of the section | Documented |
 | PATCH | `/api/exam-results/{result}` | Sanctum + managers or a lecturer of the section | Documented |
 | GET | `/api/students/{student}/exams` | Sanctum + staff, or the student themself | Documented |
-| GET | `/api/sections/{section}/grades` | Sanctum + staff (Faculty Admin read) or a lecturer of the section | Documented |
+| GET | `/api/sections/{section}/grades` | Sanctum + staff (Department Admin read) or a lecturer of the section | Documented |
 | POST | `/api/sections/{section}/grades` | Sanctum + managers or a lecturer of the section (compute drafts) | Documented |
 | POST | `/api/sections/{section}/grades/submit` | Sanctum + managers or a lecturer of the section | Documented |
 | POST | `/api/sections/{section}/grades/approve` | Sanctum + super-admin or university-admin | Documented |
@@ -415,7 +407,7 @@ documented operations.
 | GET | `/api/document-types` | Sanctum, any role (active types incl. `requires_fee`, `fee_amount`) | Documented |
 | POST | `/api/document-types` | Sanctum + super-admin or university-admin (`DocumentTypePolicy`; report 40) | Documented |
 | GET | `/api/document-types/{documentType}` | Sanctum + any role (`DocumentTypePolicy::view`; report 40) | Documented |
-| PUT/PATCH | `/api/document-types/{documentType}` | Sanctum + super-admin or university-admin (report 40) | Documented |
+| PUT, PATCH | `/api/document-types/{documentType}` | Sanctum + super-admin or university-admin (report 40) | Both documented |
 | DELETE | `/api/document-types/{documentType}` | Sanctum + super-admin or university-admin; 409 if requests exist; 204 on success (report 40) | Documented |
 | GET | `/api/document-requests` | Sanctum + staff (all) or a student (own); rows include `type.fee_amount` and `invoice` summary (report 40) | Documented |
 | POST | `/api/document-requests` | Sanctum + student with a profile (self only) | Documented |
@@ -459,11 +451,11 @@ documented operations.
 | GET | `/api/internships` | Sanctum + staff (all) or a student (own) | Documented |
 | POST | `/api/internships` | Sanctum + student with a profile (self only) | Documented |
 | GET | `/api/internships/{internship}` | Sanctum + staff, or the student | Documented |
-| PUT, PATCH | `/api/internships/{internship}` | Sanctum + the student (draft), or managers / the student's Faculty Admin (until final) | Both documented |
-| POST | `/api/internships/{internship}/{action}` | Sanctum; `submit` / student `cancel`: the student; others: managers or the student's Faculty Admin | Documented |
+| PUT, PATCH | `/api/internships/{internship}` | Sanctum + the student (draft), or managers / the student's Department Admin (until final) | Both documented |
+| POST | `/api/internships/{internship}/{action}` | Sanctum; `submit` / student `cancel`: the student; others: managers or the student's Department Admin | Documented |
 | POST | `/api/internships/{internship}/reports` | Sanctum + the student (multipart) | Documented |
-| POST | `/api/internships/{internship}/evaluations` | Sanctum + super-admin or university-admin, or the student's Faculty Admin | Documented |
-| POST | `/api/internship-reports/{report}/review` | Sanctum + super-admin or university-admin, or the student's Faculty Admin | Documented |
+| POST | `/api/internships/{internship}/evaluations` | Sanctum + super-admin or university-admin, or the student's Department Admin | Documented |
+| POST | `/api/internship-reports/{report}/review` | Sanctum + super-admin or university-admin, or the student's Department Admin | Documented |
 | GET | `/api/internship-reports/{report}/file` | Sanctum + staff, or the student | Documented |
 | GET | `/api/analytics/overview` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
 | GET | `/api/analytics/enrollment` | Sanctum + super-admin or university-admin (`view-analytics`) | Documented |
@@ -473,7 +465,7 @@ documented operations.
 | GET | `/api/analytics/export/pdf` | Sanctum + super-admin or university-admin (`view-analytics`; PDF, audited) | Documented |
 | GET | `/api/grading-scale` | Sanctum, any role | Documented |
 | PUT | `/api/grading-scale` | Sanctum + super-admin or university-admin | Documented |
-| GET | `/api/courses/{course}/grading-config` | Sanctum + super-admin, university-admin or faculty-admin | Documented |
+| GET | `/api/courses/{course}/grading-config` | Sanctum + super-admin, university-admin or department-admin | Documented |
 | PUT | `/api/courses/{course}/grading-config` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/error-logs` | Sanctum + super-admin only | Documented |
 | GET | `/api/error-logs/{errorLog}` | Sanctum + super-admin only | Documented |
@@ -547,6 +539,10 @@ Re-ran Swagger generation and a scripted method/path comparison of
 | Undocumented / extra operations after the 2026-10-05 re-run (A-10 fixed) | 0 / 0 |
 | After course materials (report 44, 6 operations) — re-run 2026-10-06: route definitions / operations / OpenAPI paths / schemas | 208 / 228 / 144 / 162 |
 | Undocumented / extra operations after course materials | 0 / 0 |
+| Profile portal (report 45, 4 operations) — re-run 2026-10-06: undocumented operations found | 4 |
+| After annotating the profile operations: route definitions / operations / OpenAPI paths / schemas | 211 / 232 / 146 / 163 |
+| Undocumented / extra operations after the profile fix | 0 / 0 |
+| Endpoint Inventory rows vs routes (scripted, 2026-10-06): missing / stale before → after | 4 / 11 → 0 / 0 |
 
 - **A-09 — PATCH aliases undocumented.** `PATCH` on `/api/assignments/{assignment}`,
   `/api/exams/{exam}`, `/api/offerings/{offering}`, `/api/rooms/{room}`,
@@ -559,6 +555,16 @@ Re-ran Swagger generation and a scripted method/path comparison of
   OpenAPI response object, so Swagger UI showed them without a body. Added the
   `OA\Patch` operation mirroring the PUT and rewrote the responses with a
   description and a JSON body like every other controller.
+- **A-11 — profile operations unannotated (2026-10-06).** `GET`, `PUT` and
+  `POST /api/profile` and `GET /api/users/{user}/avatar` (report 45) were
+  routed and listed here but had no OpenAPI attributes, so Swagger UI did not
+  show them. Added the operations (PUT as JSON, POST as multipart with the
+  `avatar` file) and a `Profile` schema.
+- **A-12 — Endpoint Inventory drift (2026-10-06).** The inventory still listed
+  the ten `/api/faculties*` operations removed by report 39, named the unit
+  role `faculty-admin`, gave the avatar route without its `/api` prefix and
+  omitted `GET /api/departments/{department}/dashboard`. Rows now match
+  `route:list` one-for-one (checked by script, method and path).
 - **R-01** is resolved (inactive accounts are refused at sign-in).
 - The *Validation Results* section below is the original 2026-09-28 snapshot.
 
@@ -677,3 +683,19 @@ Web: `GET /my-materials` (students), `POST /coursework/sections/{section}/materi
 `PUT|DELETE /materials/{material}`, `GET /materials/{material}/file`. Schema
 `CourseMaterial`; the inbox `kind` gains `material`. See
 `docs/44_Course-Materials-Report.md`.
+
+## Profile portal (2026-10-06)
+
+| Method | URI | Action | Auth | Notes |
+|---|---|---|---|---|
+| GET | `/api/profile` | `ProfileController::show` | Sanctum, any role | Own profile; `Profile` schema |
+| PUT | `/api/profile` | `ProfileController::update` | Sanctum, any role | JSON: contact details, `avatar_url`, `remove_avatar` |
+| POST | `/api/profile` | `ProfileController::update` | Sanctum, any role | Multipart: the same plus an `avatar` image (jpg / png / webp, 2 MB) |
+| GET | `/api/users/{user}/avatar` | `ProfileController::avatar` | Public | Uploaded avatar inline with `nosniff`; 404 when none or external |
+
+Web: `GET /account/profile`, `PUT|POST /account/profile`, `GET /users/{user}/avatar`
+(public), `GET /profile` → 301 to `/account/profile`. The avatar routes used to
+redirect to an external avatar URL, which let any user turn an EduCore link
+into a redirect to a site of their choosing; an external avatar is now handed
+to the browser directly through `avatar_url` and the routes answer 404 for it.
+See `docs/45_Profile-Portal-Report.md` §9.

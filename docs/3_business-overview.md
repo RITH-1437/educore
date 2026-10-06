@@ -316,13 +316,15 @@ academic years, semesters, announcements, document requests, and payment records
 **Permissions:** manage their unit's students, lecturers, courses, sections, schedules, and
 monitor attendance and performance; handle unit-level requests.
 
-**Delivered:** [Implemented] read access limited to the assigned faculty (structure,
+**Delivered:** [Implemented] as the **Department Admin** role (report 39 removed the
+faculty tier): read access limited to the assigned department (structure,
 courses, sections, lecturers, students, enrollments, grades, documents, internships),
 and handling their students' requests: approve / reject / generate document
 requests and review / approve / evaluate internships (revoking documents and
 managing companies stay with University Admin). Their dashboard shows the
-requests and internships waiting for them and the faculty's headline numbers.
+requests and internships waiting for them and the department's headline numbers.
 Creating sections and schedules for their unit is [Future]. See
+[39_Department-Only-Structure-Report.md](39_Department-Only-Structure-Report.md),
 [32_Faculty-Admin-Scoping-Report.md](32_Faculty-Admin-Scoping-Report.md),
 [33_Faculty-Admin-Request-Handling-Report.md](33_Faculty-Admin-Request-Handling-Report.md) and
 [34_Faculty-Admin-Dashboard-Report.md](34_Faculty-Admin-Dashboard-Report.md).
@@ -413,8 +415,8 @@ users, main business activities, and expected outputs.
 - **Delivered:** lecturer profiles linked to Lecturer-role login accounts
   (create a new account or link an existing one), home department, position,
   specialization, employment type, deactivate/reactivate mirrored onto the
-  account, guarded delete, `/api/lecturers`, section assignments, faculty
-  scoping, and the teaching dashboard (`/dashboard` and
+  account, guarded delete, `/api/lecturers`, section assignments, department
+  scoping (reports 32, 39), and the teaching dashboard (`/dashboard` and
   `GET /api/lecturers/{lecturer}/dashboard`). A lecturer can read their own
   profile and teaching dashboard. See [12_Lecturer-Management-Report.md](12_Lecturer-Management-Report.md),
   [14_Class-and-Section-Report.md](14_Class-and-Section-Report.md),
@@ -440,8 +442,8 @@ users, main business activities, and expected outputs.
 - **Expected outputs:** an accurate list of offered programs.
 - **Delivered:** program CRUD under departments (code, name, degree level,
   duration, credits), unique code and per-department unique name, archive vs
-  delete with guards, faculty → department cascade UI, `/api/programs`, seeded
-  degree programs. Faculty Admin is read-only. See
+  delete with guards, a department filter, `/api/programs`, seeded
+  degree programs. Department Admin is read-only. See
   [10_Program-Management-Report.md](10_Program-Management-Report.md).
 - **Curriculum editor:** delivered with 9.7 (program ↔ course membership).
 
@@ -465,7 +467,7 @@ users, main business activities, and expected outputs.
 - **Delivered:** course CRUD with a draft → active → archived lifecycle, unique
   codes, acyclic prerequisites (self/duplicate/archived/cycle rejected), the
   program curriculum editor (course ↔ program with required flag and suggested
-  semester), delete guards, `/api/courses`, seeded catalog. Faculty Admin is
+  semester), delete guards, `/api/courses`, seeded catalog. Department Admin is
   read-only. See [11_Course-Management-Report.md](11_Course-Management-Report.md).
 - **Since delivered:** course offerings and sections (9.8), with lecturers,
   rooms and the timetable (9.3 / 9.10).
@@ -555,7 +557,8 @@ users, main business activities, and expected outputs.
   enrollment), credit-weighted semester and cumulative GPA rebuilt on every
   grade or credit change (retakes replace earlier attempts), grade-based
   prerequisites, and lecturer / staff / student screens. The official
-  transcript document is [Planned] with 9.16; grade-change auditing with 9.24.
+  transcript document shipped with 9.16, grade changes are audited (9.24), and
+  approved grades can be finalized (report 30).
   See [20_Grades-and-GPA-Report.md](20_Grades-and-GPA-Report.md).
 
 ### 9.15 Student Academic Dashboard [Implemented]
@@ -572,7 +575,7 @@ users, main business activities, and expected outputs.
   announcements. All five roles now have dedicated operational dashboards:
   Super Admin ([8_System-Error-Logs-Report.md](8_System-Error-Logs-Report.md)),
   University Admin ([36_University-Admin-Dashboard-Report.md](36_University-Admin-Dashboard-Report.md)),
-  Faculty Admin ([34_Faculty-Admin-Dashboard-Report.md](34_Faculty-Admin-Dashboard-Report.md)),
+  Department Admin ([34_Faculty-Admin-Dashboard-Report.md](34_Faculty-Admin-Dashboard-Report.md), moved to departments in [39_Department-Only-Structure-Report.md](39_Department-Only-Structure-Report.md)),
   Lecturer ([35_Lecturer-Dashboard-Report.md](35_Lecturer-Dashboard-Report.md)),
   and Student ([21_Student-Academic-Dashboard-Report.md](21_Student-Academic-Dashboard-Report.md)).
   See [21_Student-Academic-Dashboard-Report.md](21_Student-Academic-Dashboard-Report.md).
@@ -586,8 +589,8 @@ users, main business activities, and expected outputs.
 - **Delivered:** student requests for an enrollment certificate, student
   certificate, academic transcript, one-semester academic result or
   internship letter; approve / reject (with reason) /
-  generate by University Admin or, for their faculty's students, the Faculty
-  Admin; revoke by University Admin; PDFs rendered only from enrollments,
+  generate by University Admin or, for their department's students, the
+  Department Admin; revoke by University Admin; PDFs rendered only from enrollments,
   approved grades and GPA, stored privately in MinIO and downloaded through an
   authorized route. Document types carry a fee: approving a request for a
   fee-bearing type issues an unpaid invoice (9.18), and the PDF is generated
@@ -636,7 +639,7 @@ users, main business activities, and expected outputs.
 - **Main business activities:** create announcements targeted to all/faculty/department/program/class/course; publish.
 - **Expected outputs:** a structured announcement feed per audience.
 - **Delivered:** drafts → published → archived announcements to everyone, a
-  role group, or one faculty / department / program / section / course;
+  role group, or one department / program / section / course;
   lecturers write to the sections and courses they teach; file attachments via private
   storage; every user has a live feed resolved from their memberships, and the
   student dashboard shows the latest three. Email / Telegram delivery ships with 9.20 / 9.21;
@@ -683,8 +686,8 @@ users, main business activities, and expected outputs.
   under review → approved / rejected → in progress → completed, or cancelled),
   one open application per student, initial / progress / final reports with
   private files, supervisor and faculty evaluations, status notifications and
-  a decision log, and an internship letter document (9.16); a Faculty Admin
-  processes their faculty's students' internships (report 33). Published
+  a decision log, and an internship letter document (9.16); a Department Admin
+  processes their department's students' internships (reports 33, 39). Published
   opportunity postings are [Future]. See [26_Internship-Management-Report.md](26_Internship-Management-Report.md).
 
 ### 9.23 Analytics & Reporting [Implemented]
@@ -698,9 +701,9 @@ users, main business activities, and expected outputs.
   grade and GPA distributions — plus the current workload (documents,
   internships, invoices, finance per currency), all computed live in SQL from
   the domain tables, each table downloadable as CSV, executive PDF report export,
-  and modern interactive Chart.js Pie/Donut charts with view-mode toggles. A Faculty Admin sees
-  their faculty's headline numbers on their dashboard; a
-  faculty-scoped analytics page and trends are [Future].
+  and modern interactive Chart.js Pie/Donut charts with view-mode toggles. A Department Admin sees
+  their department's headline numbers on their dashboard; a
+  department-scoped analytics page and trends are [Future].
   See [27_Analytics-and-Reporting-Report.md](27_Analytics-and-Reporting-Report.md),
   [31_CSV-Exports-Report.md](31_CSV-Exports-Report.md) and
   [34_Faculty-Admin-Dashboard-Report.md](34_Faculty-Admin-Dashboard-Report.md).
@@ -763,7 +766,7 @@ University
    → Transcript / Document / Verification
 ```
 
-In plain language: a university contains faculties, and each faculty has departments. Each
+In plain language: a university contains departments (report 39 removed the faculty tier). Each
 department offers programs (degrees). A program is made of courses. In a given semester, a
 course is offered as one or more sections. Each section is taught by a lecturer and attended
 by enrolled students. Over the semester, students attend classes, complete assignments, and
@@ -868,39 +871,37 @@ These categories are not mixed. A feature appears in exactly one category.
 
 ## 12. In-Scope Features
 
-The initial release will provide:
+The initial release provides:
 
-- **Authentication** — secure login for all roles. [Planned]
-- **RBAC (role-based access control)** — five roles with defined permissions. [Planned]
-- **Student management** — student records and status. [Planned]
-- **Lecturer management** — lecturer records and assignments. [Planned]
-- **Academic structure** — faculties, departments, programs, academic years, semesters. [Planned]
-- **Courses** — course catalog with prerequisites and credits. [Planned]
-- **Sections** — concrete class instances per semester. [Planned]
-- **Enrollment** — validated student registration. [Planned]
-- **Timetable** — schedules with conflict detection. [Planned]
-- **Attendance** — recording and percentages. [Planned]
+- **Authentication** — secure login for all roles. [Implemented]
+- **RBAC (role-based access control)** — five roles with defined permissions. [Implemented]
+- **Student management** — student records and status. [Implemented]
+- **Lecturer management** — lecturer records and assignments. [Implemented]
+- **Academic structure** — university, departments, programs, academic years, semesters. [Implemented]
+- **Courses** — course catalog with prerequisites and credits. [Implemented]
+- **Sections** — concrete class instances per semester. [Implemented]
+- **Enrollment** — validated student registration. [Implemented]
+- **Timetable** — schedules with conflict detection. [Implemented]
+- **Attendance** — recording and percentages. [Implemented]
 - **Assignments** — tasks and submissions. [Implemented]
-- **Exams** — definitions, schedules, and results. [Planned]
-- **Grades** — score-to-letter-grade conversion. [Planned]
-- **GPA** — semester and cumulative calculation. [Planned]
-- **Transcripts** — academic history documents. [Planned]
-- **Documents** — request, approval, and generation workflow. [Planned]
-- **QR verification** — digital authenticity check. [Planned]
-- **Invoices** — invoice creation and status. [Planned]
-- **Payment records** — recording of payments. [Planned]
-- **Announcements** — targeted publishing. [Planned]
-- **Email** — asynchronous email notifications. [Planned]
-- **Telegram** — supplementary notifications. [Planned]
-- **Internship** — applications, reports, and evaluations. [Planned]
-- **Analytics** — dashboards and reports. [Planned]
-- **Audit logs** — record of important actions. [Planned]
+- **Exams** — definitions, schedules, and results. [Implemented]
+- **Grades** — score-to-letter-grade conversion. [Implemented]
+- **GPA** — semester and cumulative calculation. [Implemented]
+- **Transcripts** — academic history documents. [Implemented]
+- **Documents** — request, approval, and generation workflow. [Implemented]
+- **QR verification** — digital authenticity check. [Implemented]
+- **Invoices** — invoice creation and status. [Implemented]
+- **Payment records** — recording of payments. [Implemented]
+- **Announcements** — targeted publishing. [Implemented]
+- **Email** — asynchronous email notifications. [Implemented]
+- **Telegram** — supplementary notifications. [Implemented]
+- **Internship** — applications, reports, and evaluations. [Implemented]
+- **Analytics** — dashboards and reports. [Implemented]
+- **Audit logs** — record of important actions. [Implemented]
 
-> **Implementation status note:** as of the date of this document, the codebase contains the
-> **project foundation**: [Implemented] Laravel backend scaffold with Sanctum authentication,
-> health endpoint, the Vue 3 frontend scaffold with an API client, the Docker development
-> environment, and configured workflows. All module features listed above are **[Planned]** for
-> the initial release; they have not yet been built.
+> **Implementation status note (updated 2026-10-06):** every in-scope feature above is
+> **[Implemented]** and covered by the backend test suite — see §9 for what each delivered
+> and `docs/6_Module-Status-and-Roadmap.md` for the remaining open items.
 
 ---
 

@@ -1,6 +1,6 @@
 # EduCore — Module Status & Build Roadmap Report
 
-- **Date:** 2026-09-26 (updated 2026-10-05)
+- **Date:** 2026-09-26 (updated 2026-10-06)
 - **Source of truth:** `docs/3_business-overview.md` §9 (module list), `docs/5_Build-Steps-Report.md` (build workflow)
 - **Status labels:** `[Implemented]` = shipped and tested · `[Planned]` = next, follows this playbook · `[Future]` = later
 - **Database:** the full 49-table schema already exists as migrations — **every** module below builds on top of already-migrated tables (see `docs/4_Database-Migration-Report.md`).
@@ -428,9 +428,9 @@ A module is not done until its report exists and its tests pass — never label
   `Pagination`. All now read `meta.links`; `tests/Feature/PaginationContractTest.php`
   pins the shape for every paginated index page.
 - `[Done]` 9.19 Announcements. Report: `docs/24_Announcements-Report.md`.
-  `[Done]` Delivery by email / Telegram (9.20 / 9.21). `[Open]` Attachments,
-  read receipts, scheduled publishing, Faculty Admin authoring (needs unit
-  scoping).
+  `[Done]` Delivery by email / Telegram (9.20 / 9.21). `[Done]` File
+  attachments (report 24). `[Open]` Read receipts, scheduled publishing,
+  Department Admin authoring.
 - `[Done]` 9.20 / 9.21 Email & Telegram Notifications. Report:
   `docs/25_Notifications-Report.md`. `[Done]` Password-reset emails (report
   29). `[Done]` In-app inbox (report 42). `[Open]` Class-start reminders,
@@ -449,8 +449,8 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` 9.23 Analytics & Reporting. Report:
   `docs/27_Analytics-and-Reporting-Report.md`. `[Done]` CSV exports. `[Done]` A
   faculty's headline numbers on the Faculty Admin dashboard (report 34).
-  `[Open]` PDF exports, the analytics page for Faculty Admins, trends across
-  semesters; the charts were not inspected in a browser when shipped.
+  `[Done]` Executive PDF export (report 27). `[Open]` The analytics page for
+  Department Admins, trends across semesters.
 - `[Done]` 9.24 Audit Logs & Security. Report:
   `docs/28_Audit-Logs-and-Security-Report.md`. `[Done]` Audit CSV export. `[Open]` Audit retention,
   alerting on repeated notification failures, auditing low-risk
@@ -477,9 +477,9 @@ A module is not done until its report exists and its tests pass — never label
   to the assigned faculty across structure, people, academic activity,
   enrollments, documents and internships; unassigned = no unit data.
   Report: `docs/32_Faculty-Admin-Scoping-Report.md`. `[Done]` Request handling
-  (report 33). `[Done]` Dashboard (report 34). `[Open]` Sections / schedules
-  for their unit, department-level admins, the analytics page for Faculty
-  Admins.
+  (report 33). `[Done]` Dashboard (report 34). `[Done]` Department-level
+  admins (report 39 replaced the faculty tier). `[Open]` Sections / schedules
+  for their unit, the analytics page for Department Admins.
 - `[Done]` Audit fix (2026-10-03): `/enrollments`, `/offerings/{offering}`,
   `/lecturers` and `/students` sent university-wide form options (students,
   open sections, lecturers, unlinked accounts) to a Faculty Admin; they are
@@ -640,6 +640,20 @@ A module is not done until its report exists and its tests pass — never label
   and active teaching section count. The announcements feed resolves student/lecturer
   audiences even when unlinked to a profile row, features category pills, and
   links to the dashboard on empty state. Topbar user menu includes "My profile"
-  with `UserRound`. Report: `docs/45_Profile-Portal-Report.md`.
+  with `UserRound`. Avatars from the device (jpg / png / webp, 2 MB, MinIO) or
+  an external image URL. Report: `docs/45_Profile-Portal-Report.md`.
+- `[Done]` Audit (2026-10-06): the avatar routes redirected to any URL a user
+  saved as their avatar (an open redirect on a public EduCore link) — they now
+  serve uploaded avatars only; uploads kept the client's file extension (now
+  taken from the validated content, served with `nosniff`); a failed save
+  could delete the previous avatar (now removed only after commit); a new
+  upload stayed hidden behind the day-long cache (the URL is now versioned); the four
+  profile operations were missing from OpenAPI (annotated, 232 / 232). The API
+  Endpoint Inventory still listed the removed faculty endpoints and role
+  (rows now match the routes one-for-one); stale `[Open]` items above
+  (announcement attachments, analytics PDF) and the business overview's
+  `[Planned]` in-scope list and faculty wording were corrected.
+  Reports: `docs/45_Profile-Portal-Report.md` §9, `docs/api/api-audit.md`
+  (A-11, A-12).
 
 

@@ -9,6 +9,8 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+use Throwable;
 
 class ProfileService
 {
@@ -127,81 +129,119 @@ class ProfileService
      */
     public function update(User $user, array $input, ?UploadedFile $avatarFile = null): User
     {
-        return DB::transaction(function () use ($user, $input, $avatarFile) {
-            $userBefore = $user->only(['name', 'phone', 'avatar_key']);
+        $uploadedKey = null;
+        if ($avatarFile !== null && empty($input['remove_avatar'])) {
+            // The extension comes from the validated content, never the client's file name.
+            $uploadedKey = "avatars/{$user->id}/".Str::uuid().'.'.($avatarFile->extension() ?: 'jpg');
+            // Upload first; if the database work fails the orphan object is removed.
+            Storage::disk($this->disk())->putFileAs(dirname($uploadedKey), $avatarFile, basename($uploadedKey), ['visibility' => 'public']);
+        }
 
-            $userUpdates = [];
-            if (array_key_exists('name', $input)) {
-                $userUpdates['name'] = $input['name'];
-            }
-            if (array_key_exists('phone', $input)) {
-                $userUpdates['phone'] = $input['phone'];
-            }
-
-            // Avatar handling: remove, upload from device, or set from URL
-            if (! empty($input['remove_avatar'])) {
-                $this->deleteStoredAvatar($user->avatar_key);
-                $userUpdates['avatar_key'] = null;
-            } elseif ($avatarFile !== null) {
-                $this->deleteStoredAvatar($user->avatar_key);
-                $ext = strtolower($avatarFile->getClientOriginalExtension() ?: $avatarFile->extension() ?: 'jpg');
-                $key = "avatars/{$user->id}/".Str::uuid().".{$ext}";
-                Storage::disk($this->disk())->putFileAs(dirname($key), $avatarFile, basename($key), ['visibility' => 'public']);
-                $userUpdates['avatar_key'] = $key;
-            } elseif (array_key_exists('avatar_url', $input) && ! empty($input['avatar_url'])) {
-                $this->deleteStoredAvatar($user->avatar_key);
-                $userUpdates['avatar_key'] = $input['avatar_url'];
+        try {
+            return DB::transaction(fn () => $this->applyUpdate($user, $input, $uploadedKey));
+        } catch (Throwable $e) {
+            if ($uploadedKey !== null) {
+                Storage::disk($this->disk())->delete($uploadedKey);
             }
 
-            if (! empty($userUpdates)) {
-                $user->update($userUpdates);
-            }
-
-            if ($user->isRole(Role::Student->value) && ($student = $user->student) !== null) {
-                $studentData = [];
-                if (array_key_exists('address', $input)) {
-                    $studentData['address'] = $input['address'];
-                }
-                if (array_key_exists('emergency_contact_name', $input)) {
-                    $studentData['emergency_contact_name'] = $input['emergency_contact_name'];
-                }
-                if (array_key_exists('emergency_contact_phone', $input)) {
-                    $studentData['emergency_contact_phone'] = $input['emergency_contact_phone'];
-                }
-
-                if (! empty($studentData)) {
-                    $student->update($studentData);
-                }
-            }
-
-            if ($user->isRole(Role::Lecturer->value) && ($lecturer = $user->lecturer) !== null) {
-                if (array_key_exists('specialization', $input)) {
-                    $lecturer->update(['specialization' => $input['specialization']]);
-                }
-            }
-
-            $this->audit->record(
-                'profile.updated',
-                $user,
-                before: $userBefore,
-                after: $user->only(['name', 'phone', 'avatar_key']),
-                description: 'User profile details updated.',
-                actor: $user,
-            );
-
-            return $user->refresh();
-        });
+            throw $e;
+        }
     }
 
-    public function disk(): string
+    /**
+     * The stored avatar as an inline image. An external (URL) avatar is handed
+     * to the browser directly by User::avatarUrl(), so it is never redirected
+     * to from here — that would make this route an open redirect.
+     */
+    public function avatarResponse(User $user): StreamedResponse
+    {
+        $key = $user->avatar_key;
+        if (empty($key) || $this->isExternal($key) || ! Storage::disk($this->disk())->exists($key)) {
+            abort(404);
+        }
+
+        return Storage::disk($this->disk())->response($key, headers: [
+            'Cache-Control' => 'public, max-age=86400',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $input
+     */
+    private function applyUpdate(User $user, array $input, ?string $uploadedKey): User
+    {
+        $userBefore = $user->only(['name', 'phone', 'avatar_key']);
+
+        $userUpdates = [];
+        if (array_key_exists('name', $input)) {
+            $userUpdates['name'] = $input['name'];
+        }
+        if (array_key_exists('phone', $input)) {
+            $userUpdates['phone'] = $input['phone'];
+        }
+
+        // Avatar: remove, a file from the device, or an image URL — in that order.
+        if (! empty($input['remove_avatar'])) {
+            $userUpdates['avatar_key'] = null;
+        } elseif ($uploadedKey !== null) {
+            $userUpdates['avatar_key'] = $uploadedKey;
+        } elseif (! empty($input['avatar_url'])) {
+            $userUpdates['avatar_key'] = $input['avatar_url'];
+        }
+
+        // The replaced object is removed only once the new key is committed.
+        $replacedKey = $user->avatar_key;
+        if (array_key_exists('avatar_key', $userUpdates) && $replacedKey !== $userUpdates['avatar_key'] && ! empty($replacedKey) && ! $this->isExternal($replacedKey)) {
+            DB::afterCommit(fn () => Storage::disk($this->disk())->delete($replacedKey));
+        }
+
+        if (! empty($userUpdates)) {
+            $user->update($userUpdates);
+        }
+
+        if ($user->isRole(Role::Student->value) && ($student = $user->student) !== null) {
+            $studentData = [];
+            if (array_key_exists('address', $input)) {
+                $studentData['address'] = $input['address'];
+            }
+            if (array_key_exists('emergency_contact_name', $input)) {
+                $studentData['emergency_contact_name'] = $input['emergency_contact_name'];
+            }
+            if (array_key_exists('emergency_contact_phone', $input)) {
+                $studentData['emergency_contact_phone'] = $input['emergency_contact_phone'];
+            }
+
+            if (! empty($studentData)) {
+                $student->update($studentData);
+            }
+        }
+
+        if ($user->isRole(Role::Lecturer->value) && ($lecturer = $user->lecturer) !== null) {
+            if (array_key_exists('specialization', $input)) {
+                $lecturer->update(['specialization' => $input['specialization']]);
+            }
+        }
+
+        $this->audit->record(
+            'profile.updated',
+            $user,
+            before: $userBefore,
+            after: $user->only(['name', 'phone', 'avatar_key']),
+            description: 'User profile details updated.',
+            actor: $user,
+        );
+
+        return $user->refresh();
+    }
+
+    private function disk(): string
     {
         return (string) config('academics.uploads_disk', 's3');
     }
 
-    private function deleteStoredAvatar(?string $key): void
+    private function isExternal(string $key): bool
     {
-        if (! empty($key) && ! str_starts_with($key, 'http://') && ! str_starts_with($key, 'https://')) {
-            Storage::disk($this->disk())->delete($key);
-        }
+        return str_starts_with($key, 'http://') || str_starts_with($key, 'https://');
     }
 }

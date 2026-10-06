@@ -139,6 +139,7 @@ class User extends Authenticatable
             return $this->avatar_key;
         }
 
-        return route('avatar.show', ['user' => $this->getKey()]);
+        // The stream is cached for a day; versioning by the key makes a new upload show at once.
+        return route('avatar.show', ['user' => $this->getKey(), 'v' => substr(sha1($this->avatar_key), 0, 12)]);
     }
 }

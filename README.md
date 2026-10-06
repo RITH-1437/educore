@@ -166,6 +166,7 @@ course-material upload (`backend/config/academics.php`).
 | `/internship-companies`     | Host companies | Super admin, University admin (Department admin read-only) |
 | `/analytics`                | Analytics: enrollment, academic performance, workload; CSV per table | Super admin, University admin |
 | `/audit-logs`               | Audit trail (read-only): sign-ins and sensitive changes; CSV export | Super admin |
+| `/account/profile`          | My profile: affiliation, academic / teaching summary, contact details, avatar (upload or image URL); `/profile` redirects here | Every signed-in user (own only) |
 | `/account/password`         | Change my password (other sessions are signed out) | Every signed-in user |
 | `/forgot-password`          | Request a password reset link by email (rate limited) | Guests |
 | `/rooms`                    | Rooms                      | Super admin, University admin (Department admin read-only, own department) |

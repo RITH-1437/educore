@@ -221,6 +221,44 @@ class ProfileTest extends TestCase
         // Avatar endpoint serves the file
         $response = $this->get("/users/{$user->id}/avatar");
         $response->assertOk();
+        $response->assertHeader('X-Content-Type-Options', 'nosniff');
+    }
+
+    public function test_stored_avatar_extension_follows_content_and_replaced_file_is_deleted(): void
+    {
+        Storage::fake('s3');
+        $user = User::factory()->create(['avatar_key' => 'avatars/old.png']);
+        Storage::disk('s3')->put('avatars/old.png', 'old image');
+
+        $pngBytes = base64_decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+        // A PNG whose client-side name claims HTML. Real uploads are validated on
+        // their content only, so the stored key must not keep the client extension.
+        $file = UploadedFile::fake()->createWithContent('photo.html', $pngBytes)->mimeType('image/png');
+
+        $this->actingAs($user)
+            ->post('/api/profile', ['name' => $user->name, 'avatar' => $file], ['Accept' => 'application/json'])
+            ->assertOk();
+
+        $key = $user->refresh()->avatar_key;
+        $this->assertStringEndsWith('.png', $key);
+        Storage::disk('s3')->assertExists($key);
+        Storage::disk('s3')->assertMissing('avatars/old.png');
+
+        // A new upload gets a new URL, so the day-long browser cache cannot show the old image.
+        $this->assertNotSame(
+            $user->avatarUrl(),
+            (clone $user)->forceFill(['avatar_key' => 'avatars/old.png'])->avatarUrl(),
+        );
+    }
+
+    public function test_external_avatar_is_never_redirected_to(): void
+    {
+        $user = User::factory()->create(['avatar_key' => 'https://images.example.com/a.png']);
+
+        // The browser loads the URL from avatar_url directly; the stream routes
+        // must not bounce visitors to an address a user typed in (open redirect).
+        $this->get("/users/{$user->id}/avatar")->assertNotFound()->assertHeaderMissing('Location');
+        $this->getJson("/api/users/{$user->id}/avatar")->assertNotFound()->assertHeaderMissing('Location');
     }
 
     public function test_user_can_remove_avatar(): void

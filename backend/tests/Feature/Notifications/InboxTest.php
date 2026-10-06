@@ -3,6 +3,7 @@
 namespace Tests\Feature\Notifications;
 
 use App\Models\User;
+use App\Notifications\ClassStartingSoon;
 use App\Notifications\EduCoreNotification;
 use App\Notifications\PasswordChanged;
 use App\Notifications\ResetPasswordLink;
@@ -79,7 +80,9 @@ class InboxTest extends TestCase
         foreach (glob(app_path('Notifications/*.php')) as $file) {
             $class = 'App\\Notifications\\'.basename($file, '.php');
             $reflection = new ReflectionClass($class);
-            if ($reflection->isAbstract() || ! $reflection->isSubclassOf(EduCoreNotification::class) || $class === ResetPasswordLink::class) {
+            // By design without one: a reset link must never be stored, and a
+            // reminder before every class would flood the inbox (Telegram only, report 48).
+            if ($reflection->isAbstract() || ! $reflection->isSubclassOf(EduCoreNotification::class) || in_array($class, [ResetPasswordLink::class, ClassStartingSoon::class], true)) {
                 continue;
             }
 

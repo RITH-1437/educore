@@ -33,6 +33,7 @@ erDiagram
         boolean notify_by_email
         boolean notify_by_telegram
         varchar telegram_chat_id
+        boolean class_reminders
     }
 ```
 

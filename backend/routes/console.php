@@ -7,6 +7,7 @@ use App\Services\ReminderService;
 use App\Services\TuitionInvoiceService;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schedule;
 
 Artisan::command('inspire', function () {
@@ -30,6 +31,41 @@ Artisan::command('notifications:assignment-reminders', function (ReminderService
 })->purpose('Remind students of assignments due within 24 hours');
 
 Schedule::command('notifications:assignment-reminders')->dailyAt('07:00');
+
+// Class reminders (module 9.21, report 48): a Telegram message to a section's
+// students and lecturers about CLASS_REMINDER_MINUTES before each meeting, on
+// the university's clock (ACADEMIC_TIMEZONE). Each meeting is reminded once a day.
+Artisan::command('notifications:class-reminders', function (ReminderService $reminders) {
+    $this->info($reminders->classesStartingSoon().' class reminder(s) queued.');
+})->purpose('Remind students and lecturers of classes starting soon (Telegram)');
+
+Schedule::command('notifications:class-reminders')->everyFiveMinutes()->withoutOverlapping();
+
+// Telegram linking (report 48): point the bot's webhook at this server, with
+// the shared secret Telegram echoes on every call. Needs a public https APP_URL.
+Artisan::command('telegram:webhook {--delete : Remove the webhook instead of setting it}', function () {
+    $token = (string) config('services.telegram.bot_token');
+    $secret = (string) config('services.telegram.webhook_secret');
+    if ($token === '' || ($secret === '' && ! $this->option('delete'))) {
+        $this->error('Set TELEGRAM_BOT_TOKEN and TELEGRAM_WEBHOOK_SECRET first.');
+
+        return 1;
+    }
+
+    $api = rtrim((string) config('services.telegram.api_url'), '/')."/bot{$token}";
+    if ($this->option('delete')) {
+        Http::timeout(10)->asJson()->post("{$api}/deleteWebhook")->throw();
+        $this->info('Telegram webhook removed.');
+
+        return 0;
+    }
+
+    $url = rtrim((string) config('app.url'), '/').'/api/telegram/webhook';
+    Http::timeout(10)->asJson()->post("{$api}/setWebhook", ['url' => $url, 'secret_token' => $secret, 'allowed_updates' => ['message']])->throw();
+    $this->info("Telegram webhook set to {$url}.");
+
+    return 0;
+})->purpose('Register (or remove) the Telegram bot webhook for chat linking');
 
 // In-app inbox (report 42): stored notifications are kept for 180 days.
 Artisan::command('notifications:prune {--days='.InboxService::RETENTION_DAYS.' : Delete notifications older than this many days}', function (InboxService $inbox) {

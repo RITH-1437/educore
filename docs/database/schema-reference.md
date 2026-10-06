@@ -1522,7 +1522,8 @@ Columns:
 | user_id | bigint | no | UQ | FK → users.id |
 | notify_by_email | boolean | no | true | |
 | notify_by_telegram | boolean | no | true | |
-| telegram_chat_id | varchar(100) | yes | | Resolved chat id |
+| telegram_chat_id | varchar(100) | yes | | Resolved chat id (typed in, or linked through the bot — report 48) |
+| class_reminders | boolean | no | true | Telegram reminders before each class (report 48) |
 
 Constraints:
 

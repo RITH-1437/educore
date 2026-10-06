@@ -63,6 +63,10 @@ class AppServiceProvider extends ServiceProvider
         // Test notifications from the preferences page (modules 9.20 / 9.21).
         RateLimiter::for('notification-test', fn (Request $request) => Limit::perMinute(3)->by((string) $request->user()?->getKey()));
 
+        // Telegram linking (report 48): one-time links per user; webhook calls per sender.
+        RateLimiter::for('telegram-link', fn (Request $request) => Limit::perMinute(5)->by((string) $request->user()?->getKey()));
+        RateLimiter::for('telegram-webhook', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
+
         // Public document verification (module 9.17).
         RateLimiter::for('verification', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
 

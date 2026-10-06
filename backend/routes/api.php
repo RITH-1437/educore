@@ -34,6 +34,7 @@ use App\Http\Controllers\Api\SectionController;
 use App\Http\Controllers\Api\SemesterController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\StudentDashboardController;
+use App\Http\Controllers\Api\TelegramWebhookController;
 use App\Http\Controllers\Api\UniversityController;
 use App\Http\Controllers\Api\UniversityDashboardController;
 use App\Http\Controllers\Api\UserController;
@@ -382,6 +383,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/notification-preferences/test', [NotificationPreferenceController::class, 'test'])
         ->middleware('throttle:notification-test')
         ->name('api.notification-preferences.test');
+    Route::post('/notification-preferences/telegram-link', [NotificationPreferenceController::class, 'telegramLink'])
+        ->middleware('throttle:telegram-link')
+        ->name('api.notification-preferences.telegram-link');
+    Route::delete('/notification-preferences/telegram', [NotificationPreferenceController::class, 'unlinkTelegram'])
+        ->name('api.notification-preferences.telegram-unlink');
 });
 
 // In-app inbox (report 42): always the caller's own notifications.
@@ -402,6 +408,11 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::get('/users/{user}/avatar', [ProfileController::class, 'avatar'])->name('api.avatar.show');
+
+// Telegram bot webhook (report 48): public, guarded by the shared secret header.
+Route::post('/telegram/webhook', TelegramWebhookController::class)
+    ->middleware('throttle:telegram-webhook')
+    ->name('api.telegram.webhook');
 
 // Public document verification (module 9.17): minimal data, logged, rate limited.
 Route::get('/verifications/{token}', [DocumentController::class, 'verify'])

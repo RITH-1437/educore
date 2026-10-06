@@ -159,7 +159,7 @@ course-material upload (`backend/config/academics.php`).
 | `/my-invoices`              | My invoices, payments and balance | Student |
 | `/announcements`            | Announcement feed (own audience) | Every signed-in role |
 | `/announcements/manage`     | Write, publish, archive announcements | Super admin, University admin (any audience), Lecturer (own sections / courses) |
-| `/notifications`            | My notification settings (email opt-out, Telegram chat) | Every signed-in user (own only) |
+| `/notifications`            | My notification settings (email opt-out, connect / disconnect Telegram, class reminders) | Every signed-in user (own only) |
 | `/inbox`                    | My in-app notifications (bell in the top bar): open, mark read | Every signed-in user (own only) |
 | `/my-internships`           | Apply for an internship, follow it, submit reports | Student |
 | `/internships`              | Internship queue: review, approve, start, complete, evaluate | Super admin, University admin; Department admin for their department's students |
@@ -353,11 +353,18 @@ The `backend/` folder is a standard Laravel 12 application.
   `php artisan invoices:refresh-statuses` (daily 00:10, marks unpaid past-due
   invoices overdue) and `php artisan notifications:assignment-reminders`
   (daily 07:00) and `php artisan notifications:prune` (daily 01:00, deletes
-  in-app notifications older than 180 days). Queued jobs (notifications) run in the `queue` container;
+  in-app notifications older than 180 days) and `php artisan
+  notifications:class-reminders` (every 5 minutes: a Telegram reminder about
+  `CLASS_REMINDER_MINUTES` (30) before each class, read on the university's
+  clock `ACADEMIC_TIMEZONE`, e.g. `Asia/Phnom_Penh`; UTC when unset). Queued jobs (notifications) run in the `queue` container;
   watch them with `docker compose --project-directory . -f docker/docker-compose.yml logs -f queue`.
 - Notifications: email via `MAIL_MAILER` (`log` in development — messages land
   in `storage/logs/laravel.log`); Telegram via `TELEGRAM_BOT_TOKEN` in `.env`
-  (empty disables the channel; never commit a real token).
+  (empty disables the channel; never commit a real token). One-tap chat
+  linking also needs `TELEGRAM_BOT_USERNAME` and a random
+  `TELEGRAM_WEBHOOK_SECRET`, then `php artisan telegram:webhook` once (needs a
+  public https `APP_URL`; `--delete` removes it). Without them users type their
+  chat id instead (`docs/48_Class-Reminders-and-Telegram-Linking-Report.md`).
 - Tests: PHPUnit (`php artisan test`). Linted and run by CI. The suite runs
   against its own `educore_test` database (`phpunit.xml`; created by
   `docker/postgres/init/01-create-test-database.sh`; host and credentials come

@@ -329,6 +329,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationPreferencesController::class, 'edit'])->name('notifications.edit');
     Route::put('/notifications', [NotificationPreferencesController::class, 'update'])->name('notifications.update');
     Route::post('/notifications/test', [NotificationPreferencesController::class, 'test'])->middleware('throttle:notification-test')->name('notifications.test');
+    // One-tap Telegram linking (report 48).
+    Route::post('/notifications/telegram/link', [NotificationPreferencesController::class, 'telegramLink'])->middleware('throttle:telegram-link')->name('notifications.telegram.link');
+    Route::delete('/notifications/telegram', [NotificationPreferencesController::class, 'unlinkTelegram'])->name('notifications.telegram.unlink');
 });
 
 // In-app inbox (report 42): every signed-in user, own notifications only.

@@ -34,6 +34,10 @@ return [
     'telegram' => [
         'bot_token' => env('TELEGRAM_BOT_TOKEN'),
         'api_url' => env('TELEGRAM_API_URL', 'https://api.telegram.org'),
+        // One-tap chat linking (report 48): the bot's @username for t.me links,
+        // and the secret Telegram sends back on every webhook call.
+        'bot_username' => env('TELEGRAM_BOT_USERNAME'),
+        'webhook_secret' => env('TELEGRAM_WEBHOOK_SECRET'),
     ],
 
     'slack' => [

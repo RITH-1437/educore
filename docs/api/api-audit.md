@@ -256,7 +256,7 @@ were **not changed** during this documentation-only audit.
 Application endpoint counts below exclude the four L5-Swagger/OAuth package
 routes (`api/documentation`, `api/documentation/asset/{asset}`,
 `api/documentation/ui`, `api/oauth2-callback`). Each combined update route
-contributes one PUT and one PATCH operation, so 212 route definitions yield 233
+contributes one PUT and one PATCH operation, so 215 route definitions yield 236
 documented operations.
 
 | Method | Path | Authentication / authorization | Documentation |
@@ -442,6 +442,9 @@ documented operations.
 | GET | `/api/notification-preferences` | Sanctum, any role (own only) | Documented |
 | PUT | `/api/notification-preferences` | Sanctum, any role (own only) | Documented |
 | POST | `/api/notification-preferences/test` | Sanctum, any role; `throttle:notification-test` (3/min) | Documented |
+| POST | `/api/notification-preferences/telegram-link` | `auth:sanctum` (own); `throttle:telegram-link` (5/min); 409 when the bot username / token is not configured (report 48) | Documented |
+| DELETE | `/api/notification-preferences/telegram` | `auth:sanctum` (own chat; audited) (report 48) | Documented |
+| POST | `/api/telegram/webhook` | Public; `X-Telegram-Bot-Api-Secret-Token` must equal `TELEGRAM_WEBHOOK_SECRET` (403), 404 when no secret is set; `throttle:telegram-webhook` (report 48) | Documented |
 | GET | `/api/notifications` | Sanctum, any role (own inbox only; `filters[status]`, `meta.unread_count`) | Documented |
 | POST | `/api/notifications/{notification}/read` | Sanctum, any role (own only; UUID, 404 otherwise) | Documented |
 | POST | `/api/notifications/read-all` | Sanctum, any role (own only) | Documented |
@@ -546,6 +549,8 @@ Re-ran Swagger generation and a scripted method/path comparison of
 | Endpoint Inventory rows vs routes (scripted, 2026-10-06): missing / stale before → after | 4 / 11 → 0 / 0 |
 | After department analytics (report 47, 1 operation added): route definitions / operations / OpenAPI paths / schemas | 212 / 233 / 147 / 165 |
 | Undocumented / extra operations after report 47 | 0 / 0 |
+| After class reminders & Telegram linking (report 48, 3 operations added): route definitions / operations / OpenAPI paths / schemas | 215 / 236 / 150 / 165 |
+| Undocumented / extra operations after report 48 | 0 / 0 |
 
 - **A-09 — PATCH aliases undocumented.** `PATCH` on `/api/assignments/{assignment}`,
   `/api/exams/{exam}`, `/api/offerings/{offering}`, `/api/rooms/{room}`,
@@ -741,3 +746,18 @@ Semester responses gain `department` (`AnalyticsDepartment`); for a department,
 answers `403` to a Department Admin and `422` to a manager who passes
 `department_id`. Export audit entries record `department_id`. See
 `docs/47_Department-Analytics-and-Trends-Report.md`.
+
+## Class reminders and Telegram linking (2026-10-06)
+
+| Method | URI | Action | Auth | Notes |
+|---|---|---|---|---|
+| POST | `/api/notification-preferences/telegram-link` | `NotificationPreferenceController::telegramLink` | Sanctum, any role | `201 {data: {url, expires_at}}` — a one-time `https://t.me/<bot>?start=<token>` link (15 min); `409` without bot username / token |
+| DELETE | `/api/notification-preferences/telegram` | `NotificationPreferenceController::unlinkTelegram` | Sanctum, any role | Forgets the linked chat; audited |
+| POST | `/api/telegram/webhook` | `TelegramWebhookController` | Telegram (secret header) | `/start <token>` links the private chat, `/stop` unlinks; replies as a `sendMessage` method in the response body |
+
+`NotificationPreferences` gains `telegram_linkable`, `class_reminders` and
+`class_reminder_minutes`; the update request accepts `class_reminders`
+(optional — omitted keeps the saved value). Web: `POST
+/notifications/telegram/link` (Inertia redirect to Telegram), `DELETE
+/notifications/telegram`. See
+`docs/48_Class-Reminders-and-Telegram-Linking-Report.md`.

@@ -1016,6 +1016,7 @@ CREATE TABLE notification_preferences (
     notify_by_email    BOOLEAN NOT NULL DEFAULT TRUE,
     notify_by_telegram BOOLEAN NOT NULL DEFAULT TRUE,
     telegram_chat_id   VARCHAR(100),
+    class_reminders    BOOLEAN NOT NULL DEFAULT TRUE, -- report 48
     created_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at         TIMESTAMPTZ NOT NULL DEFAULT now(),
     CONSTRAINT uq_notification_preferences_user UNIQUE (user_id),

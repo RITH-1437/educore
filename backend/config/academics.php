@@ -16,6 +16,23 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Institution time
+    |--------------------------------------------------------------------------
+    |
+    | Class times in the timetable are wall-clock times at the university. This
+    | timezone reads them: "today's classes" and class-start reminders (report
+    | 48). It is not the application timezone — timestamps stay stored in UTC.
+    | Set ACADEMIC_TIMEZONE (for example Asia/Phnom_Penh) in production.
+    |
+    */
+
+    'timezone' => env('ACADEMIC_TIMEZONE', 'UTC'),
+
+    // Minutes before a class starts that its students and lecturers are reminded.
+    'class_reminder_minutes' => (int) env('CLASS_REMINDER_MINUTES', 30),
+
+    /*
+    |--------------------------------------------------------------------------
     | Uploads
     |--------------------------------------------------------------------------
     |

@@ -24,6 +24,7 @@ class NotificationPreferenceRequest extends FormRequest
             'notify_by_email' => ['required', 'boolean'],
             'notify_by_telegram' => ['required', 'boolean'],
             'telegram_chat_id' => ['nullable', 'string', 'regex:/^-?\d{4,20}$/', 'required_if_accepted:notify_by_telegram'],
+            'class_reminders' => ['sometimes', 'boolean'],
         ];
     }
 

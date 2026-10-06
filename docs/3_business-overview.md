@@ -669,8 +669,8 @@ users, main business activities, and expected outputs.
   password-change notices are emailed (report 29). Every notification is also
   kept in an in-app inbox with an unread bell in the top bar (180-day
   retention; report 42). Staff who process document requests and internship
-  applications are told when a new one is submitted (report 43).
-  Class-start reminders are [Future].
+  applications are told when a new one is submitted (report 43). Class-start
+  reminders go by Telegram only (9.21, report 48).
   See [25_Notifications-Report.md](25_Notifications-Report.md) and
   [42_In-App-Notification-Inbox-Report.md](42_In-App-Notification-Inbox-Report.md).
 
@@ -683,7 +683,11 @@ users, main business activities, and expected outputs.
 - **Delivered:** opt-in Telegram delivery of the same notifications (announcement
   alerts, daily assignment reminders, status updates) to a chat id the user
   links in their settings, through the Bot API with the server's bot token.
-  Class reminders and automatic chat linking are [Future].
+  Users connect their chat in one tap — a one-time link opens the bot, and
+  pressing Start links that chat (or `/stop` unlinks it) — and every enrolled
+  student and lecturer of a section gets a Telegram reminder about 30 minutes
+  before each class, with its room, on the university's clock; reminders can
+  be turned off. See [48_Class-Reminders-and-Telegram-Linking-Report.md](48_Class-Reminders-and-Telegram-Linking-Report.md).
   See [25_Notifications-Report.md](25_Notifications-Report.md).
 
 ### 9.22 Internship Management [Implemented]

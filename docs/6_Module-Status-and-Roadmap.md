@@ -39,7 +39,7 @@
 | 9.18 | Invoices & Payment Records | `[Implemented]` (invoice & receipt PDF download in report 23) |
 | 9.19 | Announcements | `[Implemented]` (file attachments in report 24) |
 | 9.20 | Email Notifications | `[Implemented]` (password emails in report 29; in-app inbox in report 42) |
-| 9.21 | Telegram Notifications | `[Implemented]` (class reminders `[Future]`) |
+| 9.21 | Telegram Notifications | `[Implemented]` (class reminders and one-tap chat linking in report 48) |
 | 9.22 | Internship Management | `[Implemented]` (opportunity postings `[Future]`; letter document in report 30) |
 | 9.23 | Analytics & Reporting | `[Implemented]` (CSV & PDF exports, modern Pie/Donut charts in report 27 & 31; department views and semester trends in report 47) |
 | 9.24 | Audit Logs & Security | `[Implemented]` (CSV export in report 31; retention `[Future]`) |
@@ -434,9 +434,9 @@ A module is not done until its report exists and its tests pass — never label
   Department Admin authoring.
 - `[Done]` 9.20 / 9.21 Email & Telegram Notifications. Report:
   `docs/25_Notifications-Report.md`. `[Done]` Password-reset emails (report
-  29). `[Done]` In-app inbox (report 42). `[Open]` Class-start reminders,
-  automatic Telegram chat linking (bot webhook), surfacing repeated delivery
-  failures in the audit log (9.24).
+  29). `[Done]` In-app inbox (report 42). `[Done]` Class-start reminders and
+  automatic Telegram chat linking through the bot webhook (report 48).
+  `[Open]` Surfacing repeated delivery failures in the audit log (9.24).
 - `[Done]` 9.22 Internship Management. Report:
   `docs/26_Internship-Management-Report.md`. `[Open]` Opportunity postings,
   supervisor logins. `[Done]` Internship letter document. `[Done]` Faculty
@@ -677,3 +677,16 @@ A module is not done until its report exists and its tests pass — never label
   semesters* line chart trace enrollments, attendance, pass rate and average
   GPA over the latest six semesters. Report:
   `docs/47_Department-Analytics-and-Trends-Report.md`.
+- `[Done]` Class reminders & Telegram linking (2026-10-06): every five minutes
+  `notifications:class-reminders` sends a section's enrolled students and
+  lecturers a Telegram message about 30 minutes (`CLASS_REMINDER_MINUTES`)
+  before each meeting, with its room — once per meeting and day, only for
+  running sections in a current semester, only to people who linked Telegram
+  and kept the new `class_reminders` preference on (migration
+  `2026_10_06_100000`). Class times are read on the university's clock
+  (`ACADEMIC_TIMEZONE`, `App\Support\AcademicClock`), which the student and
+  lecturer dashboards' "today's classes" now use too (they used UTC). Telegram
+  linking: a one-time t.me link (15 minutes) and the bot webhook
+  `/api/telegram/webhook` (secret header) link the private chat on Start and
+  unlink it on `/stop`; links are audited with a masked chat id. Report:
+  `docs/48_Class-Reminders-and-Telegram-Linking-Report.md`.

@@ -6,7 +6,7 @@ use App\Models\Enrollment;
 use App\Models\Lecturer;
 use App\Models\Section;
 use App\Models\Semester;
-use Illuminate\Support\Carbon;
+use App\Support\AcademicClock;
 use Illuminate\Support\Collection;
 
 /**
@@ -83,7 +83,8 @@ class LecturerDashboardService
      */
     private function today(Lecturer $lecturer, ?Semester $semester): Collection
     {
-        $today = Carbon::today();
+        // The university's calendar day (report 48), not the UTC one.
+        $today = AcademicClock::today();
 
         if ($semester === null || ! $semester->covers($today)) {
             return collect();

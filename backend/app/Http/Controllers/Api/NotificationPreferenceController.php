@@ -7,6 +7,7 @@ use App\Http\Requests\NotificationPreferenceRequest;
 use App\Models\NotificationPreference;
 use App\Models\User;
 use App\Notifications\TestNotification;
+use App\Services\TelegramLinkService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use OpenApi\Attributes as OA;
@@ -74,8 +75,49 @@ class NotificationPreferenceController extends Controller
         return response()->json(['message' => 'Test notification queued.'], 202);
     }
 
+    #[OA\Post(
+        path: '/notification-preferences/telegram-link',
+        summary: 'Get a one-time link that connects my Telegram',
+        description: 'Opening the t.me link and pressing Start in the bot links that private chat to the caller and turns Telegram on (report 48). Single use, valid for 15 minutes. 409 when the server has no bot username / token. Rate limited (5 per minute).',
+        operationId: 'createTelegramLink',
+        tags: ['Notifications'],
+        security: [['sanctum' => []]],
+        responses: [
+            new OA\Response(response: 201, description: 'Link created.', content: new OA\JsonContent(properties: [new OA\Property(property: 'data', properties: [
+                new OA\Property(property: 'url', type: 'string', format: 'uri', example: 'https://t.me/EduCoreBot?start=…'),
+                new OA\Property(property: 'expires_at', type: 'string', format: 'date-time'),
+            ], type: 'object')])),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 409, description: 'Telegram linking is not set up on this server.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 429, description: 'Too many links requested.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+        ]
+    )]
+    public function telegramLink(Request $request, TelegramLinkService $telegram): JsonResponse
+    {
+        return response()->json(['data' => $telegram->linkFor($request->user())], 201);
+    }
+
+    #[OA\Delete(
+        path: '/notification-preferences/telegram',
+        summary: 'Disconnect my Telegram chat',
+        description: 'Forgets the linked chat id (audited). Sending /stop to the bot does the same.',
+        operationId: 'unlinkTelegram',
+        tags: ['Notifications'],
+        security: [['sanctum' => []]],
+        responses: [
+            new OA\Response(response: 200, description: 'Disconnected.', content: new OA\JsonContent(properties: [new OA\Property(property: 'data', ref: '#/components/schemas/NotificationPreferences')])),
+            new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+        ]
+    )]
+    public function unlinkTelegram(Request $request, TelegramLinkService $telegram): JsonResponse
+    {
+        $telegram->unlink($request->user());
+
+        return response()->json(['data' => self::payload($request->user()->refresh())]);
+    }
+
     /**
-     * @param  array{notify_by_email: bool, notify_by_telegram: bool, telegram_chat_id?: string|null}  $data
+     * @param  array{notify_by_email: bool, notify_by_telegram: bool, telegram_chat_id?: string|null, class_reminders?: bool}  $data
      */
     public static function save(User $user, array $data): NotificationPreference
     {
@@ -83,6 +125,8 @@ class NotificationPreferenceController extends Controller
             'notify_by_email' => (bool) $data['notify_by_email'],
             'notify_by_telegram' => (bool) $data['notify_by_telegram'],
             'telegram_chat_id' => $data['telegram_chat_id'] ?? null,
+            // Optional for older clients: an omitted toggle keeps its saved value.
+            'class_reminders' => (bool) ($data['class_reminders'] ?? $user->preferences()->class_reminders),
         ]);
     }
 
@@ -98,6 +142,9 @@ class NotificationPreferenceController extends Controller
             'notify_by_telegram' => $preferences->notify_by_telegram,
             'telegram_chat_id' => $preferences->telegram_chat_id,
             'telegram_enabled' => filled(config('services.telegram.bot_token')),
+            'telegram_linkable' => app(TelegramLinkService::class)->available(),
+            'class_reminders' => $preferences->class_reminders,
+            'class_reminder_minutes' => (int) config('academics.class_reminder_minutes', 30),
             'email' => $user->email,
         ];
     }

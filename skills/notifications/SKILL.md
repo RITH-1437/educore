@@ -28,7 +28,10 @@ Notifications dispatched on the Redis queue.
   A new class must define `toMail()` and a `toInbox()` message
   (`kind`, `title`, `body`, in-app `url`; `toTelegram()` optional). Never put a
   secret (reset token, password) in `toInbox()` — leave the method out and keep
-  the class mail-only, like `ResetPasswordLink`.
+  the class mail-only, like `ResetPasswordLink`. The other exception is
+  `ClassStartingSoon` — Telegram-only, because a reminder before every class
+  would flood email and the inbox (report 48); both are listed in
+  `InboxTest::test_every_notification_has_an_inbox_message`.
 
 ## Dispatch & queueing
 
@@ -59,8 +62,14 @@ Notifications dispatched on the Redis queue.
 
 - Users may opt out of non-critical channels (e.g. Telegram reminders) while
   critical ones (document approval, password reset) remain mandatory.
-- Store preferences (e.g. `telegram_chat_id`, `notify_by_email`, `notify_by_telegram`)
-  on the user profile model — nullable.
+- Store preferences (e.g. `telegram_chat_id`, `notify_by_email`, `notify_by_telegram`,
+  `class_reminders`) on `notification_preferences` (one row per user).
+- Link a chat with the bot, not by hand: `TelegramLinkService` issues a
+  one-time t.me link; the webhook (`/api/telegram/webhook`, secret header)
+  links the private chat on `/start <token>` and unlinks on `/stop`
+  (report 48). Typing a chat id remains the fallback.
+- Wall-clock class times are read with `App\Support\AcademicClock`
+  (`ACADEMIC_TIMEZONE`), never the UTC application clock.
 - Respect preferences in dispatchers; do not send where the user opted out.
 
 ## Telegram integration

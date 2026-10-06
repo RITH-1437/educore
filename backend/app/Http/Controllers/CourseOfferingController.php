@@ -25,7 +25,9 @@ use Inertia\Response;
 
 /**
  * Offerings & sections screens (module 9.8): one list page and one manage page
- * per offering (its sections and their lecturers).
+ * per offering (its sections, their lecturers and weekly class times). Managers
+ * manage every offering, a Department Admin those of their department's courses
+ * (`CourseOfferingPolicy`, report 46).
  */
 class CourseOfferingController extends Controller
 {
@@ -52,12 +54,13 @@ class CourseOfferingController extends Controller
                 ->map(fn (Course $course) => ['id' => $course->id, 'code' => $course->code, 'name' => $course->name])->values(),
             'statuses' => CourseOffering::STATUSES,
             'filters' => $filters,
+            'canManage' => $request->user()->can('createAny', CourseOffering::class),
         ]);
     }
 
     public function store(StoreCourseOfferingRequest $request): RedirectResponse
     {
-        $this->authorize('create', CourseOffering::class);
+        $this->authorize('create', [CourseOffering::class, Course::query()->findOrFail($request->validated('course_id'))]);
 
         $offering = $this->offerings->create($request->validated());
 
@@ -67,8 +70,9 @@ class CourseOfferingController extends Controller
     public function show(Request $request, CourseOffering $offering): Response
     {
         $this->authorize('view', $offering);
-        // Every active lecturer, for assigning to sections: only users who may
-        // change the offering receive the list (not a read-only Department Admin).
+        // Active lecturers for assigning to sections, only for users who may
+        // change the offering: every lecturer for managers, their department's
+        // for a Department Admin (`AssignSectionLecturerRequest` enforces it).
         $canManage = $request->user()->can('update', $offering);
 
         $offering->load([
@@ -85,7 +89,7 @@ class CourseOfferingController extends Controller
 
         return Inertia::render('Offerings/Show', [
             'offering' => (new CourseOfferingResource($offering))->resolve(),
-            'lecturers' => ! $canManage ? [] : Lecturer::query()->where('is_active', true)->with('department:id,code')->orderBy('last_name')->get()
+            'lecturers' => ! $canManage ? [] : Lecturer::query()->visibleTo($request->user())->where('is_active', true)->with('department:id,code')->orderBy('last_name')->get()
                 ->map(fn (Lecturer $lecturer) => [
                     'id' => $lecturer->id,
                     'label' => $lecturer->fullName().' ('.$lecturer->staff_number.', '.$lecturer->department?->code.')',
@@ -96,6 +100,7 @@ class CourseOfferingController extends Controller
             'statuses' => CourseOffering::STATUSES,
             'sectionStatuses' => Section::STATUSES,
             'lecturerRoles' => Section::LECTURER_ROLES,
+            'canManage' => $canManage,
         ]);
     }
 

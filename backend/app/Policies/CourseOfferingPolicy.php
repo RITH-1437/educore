@@ -3,12 +3,18 @@
 namespace App\Policies;
 
 use App\Enums\Role;
+use App\Models\Course;
 use App\Models\CourseOffering;
 use App\Models\User;
 
 /**
- * Offerings and their sections/lecturer assignments share one policy: managing
- * a section is managing its offering.
+ * Offerings and their sections, lecturer assignments and weekly class times
+ * share one policy: managing a section is managing its offering.
+ *
+ * Super Admin and University Admin manage every offering. A Department Admin
+ * manages the offerings of their department's courses
+ * (`docs/46_Department-Admin-Sections-and-Schedules-Report.md`); the abilities
+ * take the record, so another department's offering answers 403.
  */
 class CourseOfferingPolicy
 {
@@ -23,34 +29,44 @@ class CourseOfferingPolicy
         return $this->staff($user) && $offering->isVisibleTo($user);
     }
 
-    public function create(User $user): bool
+    /** Offering a course: managers any course, a Department Admin their department's. */
+    public function create(User $user, Course $course): bool
     {
-        return $this->manage($user);
+        return $this->manager($user) || ($this->departmentAdmin($user) && $course->isVisibleTo($user));
+    }
+
+    /**
+     * Whether to show the "new offering" action at all; the course is checked
+     * by `create` when the offering is saved.
+     */
+    public function createAny(User $user): bool
+    {
+        return $this->manager($user) || ($this->departmentAdmin($user) && $user->departmentScope() > 0);
     }
 
     public function update(User $user, CourseOffering $offering): bool
     {
-        return $this->manage($user);
+        return $this->manager($user) || ($this->departmentAdmin($user) && $offering->isVisibleTo($user));
     }
 
     public function delete(User $user, CourseOffering $offering): bool
     {
-        return $this->manage($user);
+        return $this->update($user, $offering);
     }
 
-    /**
-     * Department Admin reads but does not manage (no unit scope on the user yet).
-     */
     private function staff(User $user): bool
     {
-        return $user->isRole(Role::SuperAdmin->value)
-            || $user->isRole(Role::UniversityAdmin->value)
-            || $user->isRole(Role::DepartmentAdmin->value);
+        return $this->manager($user) || $this->departmentAdmin($user);
     }
 
-    private function manage(User $user): bool
+    private function manager(User $user): bool
     {
         return $user->isRole(Role::SuperAdmin->value)
             || $user->isRole(Role::UniversityAdmin->value);
+    }
+
+    private function departmentAdmin(User $user): bool
+    {
+        return $user->isRole(Role::DepartmentAdmin->value);
     }
 }

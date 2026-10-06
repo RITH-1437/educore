@@ -187,6 +187,8 @@ class DepartmentAdminScopingTest extends TestCase
         // The pages still open for a Department Admin, without the university-wide option lists…
         $this->actingAs($this->departmentAdmin)->get('/enrollments')->assertOk()
             ->assertInertia(fn (Assert $page) => $page->has('students', 0)->has('openSections', 0));
+        // Lecturer options: a Department Admin manages their offerings (report 46) but
+        // is offered only their own department's lecturers — none exist here.
         $this->actingAs($this->departmentAdmin)->get("/offerings/{$offering->id}")->assertOk()
             ->assertInertia(fn (Assert $page) => $page->has('lecturers', 0));
         $this->actingAs($this->departmentAdmin)->get('/lecturers')->assertOk()->assertInertia(fn (Assert $page) => $page->has('unlinkedAccounts', 0));

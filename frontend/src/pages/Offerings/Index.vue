@@ -1,6 +1,6 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { Head, router, useForm, usePage } from '@inertiajs/vue3'
+import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, ref } from 'vue'
 import { useLiveFilters } from '../../composables/useLiveFilters'
 import { Eye, Plus, Settings2 } from '@lucide/vue'
@@ -21,11 +21,10 @@ const props = defineProps({
   courses: { type: Array, default: () => [] },
   statuses: { type: Array, default: () => [] },
   filters: { type: Object, default: () => ({}) },
+  // From `CourseOfferingPolicy`: managers, and a Department Admin for their department's courses.
+  canManage: { type: Boolean, default: false },
 })
 
-const page = usePage()
-// Department Admin reads only; write controls are hidden (backend still enforces).
-const canManage = computed(() => ['super-admin', 'university-admin'].includes(page.props.auth?.user?.role?.slug ?? ''))
 const label = (value) => value.charAt(0).toUpperCase() + value.slice(1)
 
 const search = ref(props.filters.search ?? '')
@@ -60,7 +59,7 @@ const { applyNow, searching } = useLiveFilters(applyFilters, { text: [search], c
 <template>
   <Head title="Offerings & sections - EduCore" />
   <div class="space-y-6">
-    <PageHeader eyebrow="Academics" title="Offerings & sections" description="Courses offered in a semester, split into sections with capacity and assigned lecturers. Rooms and weekly schedules arrive with the timetable.">
+    <PageHeader eyebrow="Academics" title="Offerings & sections" description="Courses offered in a semester, split into sections with capacity, lecturers, rooms and weekly class times.">
       <template v-if="canManage" #actions>
         <IconButton :icon="Plus" size="md" variant="primary" label="New offering" @click="form.reset(); form.clearErrors(); showCreate = true" />
       </template>

@@ -173,7 +173,7 @@ course-material upload (`backend/config/academics.php`).
 | `/timetable`                | My weekly timetable        | Student, Lecturer |
 | `/enrollments`              | Enrollment management; export CSV | Super admin, University admin (Department admin read-only + export, own department) |
 | `/registration`             | Course registration (self-service) | Student |
-| `/offerings`                | Offerings & sections       | Super admin, University admin (Department admin read-only, own department) |
+| `/offerings`                | Offerings & sections: sections, lecturers, weekly class times | Super admin, University admin; Department admin for their department's courses (own-department lecturers) |
 | `/offerings/{id}`           | Manage sections + lecturers | Super admin, University admin |
 | `/students`                 | Student profiles, status, program | Super admin, University admin (Department admin read-only, own department) |
 | `/students/{id}/edit`       | Manage student             | Super admin, University admin |

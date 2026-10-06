@@ -17,6 +17,7 @@
 | — | Branding / design system + admin dashboard | `[Implemented]` |
 | — | Public landing page redesign + clickable table rows (report 37) | `[Implemented]` |
 | — | Bottom-right toast notifications, accounts-by-role pie, academic year page fix (report 38) | `[Implemented]` |
+| — | Department Admin sections & schedules for their department (report 46) | `[Implemented]` |
 | — | API contract & OpenAPI audit | `[Implemented]` |
 | — | System Error Logs (9.25, extra operational diagnostics) | `[Implemented]` |
 | 9.2 | Student Management | `[Implemented]` |
@@ -478,8 +479,8 @@ A module is not done until its report exists and its tests pass — never label
   enrollments, documents and internships; unassigned = no unit data.
   Report: `docs/32_Faculty-Admin-Scoping-Report.md`. `[Done]` Request handling
   (report 33). `[Done]` Dashboard (report 34). `[Done]` Department-level
-  admins (report 39 replaced the faculty tier). `[Open]` Sections / schedules
-  for their unit, the analytics page for Department Admins.
+  admins (report 39 replaced the faculty tier). `[Done]` Sections / schedules
+  for their unit (report 46). `[Open]` The analytics page for Department Admins.
 - `[Done]` Audit fix (2026-10-03): `/enrollments`, `/offerings/{offering}`,
   `/lecturers` and `/students` sent university-wide form options (students,
   open sections, lecturers, unlinked accounts) to a Faculty Admin; they are
@@ -505,8 +506,8 @@ A module is not done until its report exists and its tests pass — never label
   and companies stay with managers; abilities now require the record. Report:
   `docs/33_Faculty-Admin-Request-Handling-Report.md`. `[Done]` Waiting requests
   and internships are counted on their dashboard (report 34). `[Done]` Email /
-  Telegram / inbox notices of new requests (report 43). `[Open]` Department
-  Admin sections and schedules.
+  Telegram / inbox notices of new requests (report 43). `[Done]` Department
+  Admin sections and schedules (report 46).
 - `[Done]` Faculty Admin dashboard (2026-10-03): `/dashboard` shows the
   document requests and internships waiting for them (each count opens the
   queue filtered to that status) and their faculty's headline numbers for the
@@ -655,5 +656,12 @@ A module is not done until its report exists and its tests pass — never label
   `[Planned]` in-scope list and faculty wording were corrected.
   Reports: `docs/45_Profile-Portal-Report.md` §9, `docs/api/api-audit.md`
   (A-11, A-12).
-
-
+- `[Done]` Department Admin sections & schedules (2026-10-06): a Department
+  Admin now creates, edits and deletes the offerings of their department's
+  courses, their sections, lecturer assignments (lecturers of their department
+  only) and weekly class times, on `/offerings` and the same 14 API write
+  operations as managers; another department's records answer 403, the
+  timetable conflict rules are unchanged, rooms stay with managers, and an
+  unassigned Department Admin manages nothing. The offering pages take
+  `canManage` from `CourseOfferingPolicy` instead of a role list. Report:
+  `docs/46_Department-Admin-Sections-and-Schedules-Report.md`.

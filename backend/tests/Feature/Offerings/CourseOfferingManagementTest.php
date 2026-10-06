@@ -66,8 +66,10 @@ class CourseOfferingManagementTest extends TestCase
         $this->actingAs($this->departmentAdmin)->getJson('/api/offerings')->assertOk()->assertJsonCount(1, 'data');
         $this->actingAs($this->departmentAdmin)->get("/offerings/{$offering->id}")->assertOk();
         $this->actingAs($this->departmentAdmin)->getJson("/api/offerings/{$elsewhere->id}")->assertForbidden();
-        $this->actingAs($this->departmentAdmin)->postJson('/api/offerings', $this->offeringPayload())->assertForbidden();
-        $this->actingAs($this->departmentAdmin)->postJson("/api/offerings/{$offering->id}/sections", ['code' => 'A', 'capacity' => 30])->assertForbidden();
+        // Writes follow the same department line (report 46; covered in
+        // DepartmentAdminSectionManagementTest): another department's offering is refused.
+        $this->actingAs($this->departmentAdmin)->postJson('/api/offerings', $this->offeringPayload(['course_id' => $elsewhere->course_id, 'semester_id' => Semester::factory()->create(['status' => 'open'])->id]))->assertForbidden();
+        $this->actingAs($this->departmentAdmin)->postJson("/api/offerings/{$elsewhere->id}/sections", ['code' => 'A', 'capacity' => 30])->assertForbidden();
     }
 
     // ----------------------------------------------------------- offerings ---

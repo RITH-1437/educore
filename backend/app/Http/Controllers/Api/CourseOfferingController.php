@@ -8,6 +8,7 @@ use App\Http\Requests\StoreSectionRequest;
 use App\Http\Requests\UpdateCourseOfferingRequest;
 use App\Http\Resources\CourseOfferingResource;
 use App\Http\Resources\SectionResource;
+use App\Models\Course;
 use App\Models\CourseOffering;
 use App\Services\CourseOfferingService;
 use Illuminate\Http\JsonResponse;
@@ -67,7 +68,7 @@ class CourseOfferingController extends Controller
     #[OA\Post(
         path: '/offerings',
         summary: 'Create a course offering',
-        description: 'One per course per semester. Only active courses; never in a completed semester (409).',
+        description: 'One per course per semester. Only active courses; never in a completed semester (409). A Department Admin offers only courses of their own department (403 otherwise).',
         operationId: 'createOffering',
         tags: ['Academics'],
         security: [['sanctum' => []]],
@@ -75,14 +76,14 @@ class CourseOfferingController extends Controller
         responses: [
             new OA\Response(response: 201, description: 'Offering created.', content: new OA\JsonContent(ref: '#/components/schemas/CourseOfferingResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin, University Admin, or the Department Admin over this course.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Semester completed.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Validation failed (duplicate offering, inactive course).', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
     )]
     public function store(StoreCourseOfferingRequest $request): JsonResponse
     {
-        $this->authorize('create', CourseOffering::class);
+        $this->authorize('create', [CourseOffering::class, Course::query()->findOrFail($request->validated('course_id'))]);
 
         $offering = $this->offerings->create($request->validated());
 
@@ -122,7 +123,7 @@ class CourseOfferingController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'The updated offering.', content: new OA\JsonContent(ref: '#/components/schemas/CourseOfferingResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin, University Admin, or the Department Admin over this course.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 404, description: 'Not found.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
@@ -139,7 +140,7 @@ class CourseOfferingController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'The updated offering.', content: new OA\JsonContent(ref: '#/components/schemas/CourseOfferingResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin, University Admin, or the Department Admin over this course.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 404, description: 'Not found.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
@@ -164,7 +165,7 @@ class CourseOfferingController extends Controller
         responses: [
             new OA\Response(response: 204, description: 'Deleted.'),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin, University Admin, or the Department Admin over this course.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 404, description: 'Not found.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'The offering has sections.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
         ]
@@ -190,7 +191,7 @@ class CourseOfferingController extends Controller
         responses: [
             new OA\Response(response: 201, description: 'Section created.', content: new OA\JsonContent(ref: '#/components/schemas/SectionResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin, University Admin, or the Department Admin over this course.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Semester completed.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Validation failed.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]

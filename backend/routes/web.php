@@ -339,18 +339,19 @@ Route::middleware('auth')->prefix('/inbox')->name('inbox.')->group(function () {
 // Public verification page (module 9.17) — no sign-in.
 Route::get('/verify/{token}', [DocumentsController::class, 'verify'])->middleware('throttle:verification')->name('documents.verify');
 
-// Timetable: rooms (staff read, managers write), section schedules (managers),
+// Timetable: rooms (staff read, managers write), section schedules (managers,
+// and a Department Admin for their department's courses — `CourseOfferingPolicy`),
 // and a personal weekly timetable for students and lecturers.
 Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])->group(function () {
     Route::get('/rooms', [RoomController::class, 'index'])->name('rooms.index');
+    Route::post('/sections/{section}/schedule', [TimetableController::class, 'store'])->name('sections.schedule.store');
+    Route::delete('/schedule-entries/{entry}', [TimetableController::class, 'destroy'])->name('schedule-entries.destroy');
 });
 
 Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function () {
     Route::post('/rooms', [RoomController::class, 'store'])->name('rooms.store');
     Route::put('/rooms/{room}', [RoomController::class, 'update'])->name('rooms.update');
     Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('rooms.destroy');
-    Route::post('/sections/{section}/schedule', [TimetableController::class, 'store'])->name('sections.schedule.store');
-    Route::delete('/schedule-entries/{entry}', [TimetableController::class, 'destroy'])->name('schedule-entries.destroy');
 });
 
 Route::middleware(['auth', 'role:student,lecturer'])->get('/timetable', [TimetableController::class, 'mine'])->name('timetable.mine');
@@ -374,14 +375,11 @@ Route::middleware(['auth', 'role:student'])->group(function () {
     Route::post('/registration/{enrollment}/drop', [RegistrationController::class, 'drop'])->name('registration.drop');
 });
 
-// Offerings & sections: Department Admin reads, Super Admin / University Admin
-// manage (`CourseOfferingPolicy`).
+// Offerings & sections: Super Admin / University Admin manage every offering, a
+// Department Admin those of their department's courses (`CourseOfferingPolicy`).
 Route::middleware(['auth', 'role:super-admin,university-admin,department-admin'])->group(function () {
     Route::get('/offerings', [CourseOfferingController::class, 'index'])->name('offerings.index');
     Route::get('/offerings/{offering}', [CourseOfferingController::class, 'show'])->name('offerings.show');
-});
-
-Route::middleware(['auth', 'role:super-admin,university-admin'])->group(function () {
     Route::post('/offerings', [CourseOfferingController::class, 'store'])->name('offerings.store');
     Route::put('/offerings/{offering}', [CourseOfferingController::class, 'update'])->name('offerings.update');
     Route::delete('/offerings/{offering}', [CourseOfferingController::class, 'destroy'])->name('offerings.destroy');

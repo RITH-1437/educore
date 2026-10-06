@@ -323,7 +323,10 @@ and handling their students' requests: approve / reject / generate document
 requests and review / approve / evaluate internships (revoking documents and
 managing companies stay with University Admin). Their dashboard shows the
 requests and internships waiting for them and the department's headline numbers.
-Creating sections and schedules for their unit is [Future]. See
+They create and run their department's offerings and sections — capacity,
+lecturers of their department, weekly class times in any room, under the usual
+timetable conflict checks; rooms stay with University Admin (report 46). See
+[46_Department-Admin-Sections-and-Schedules-Report.md](46_Department-Admin-Sections-and-Schedules-Report.md),
 [39_Department-Only-Structure-Report.md](39_Department-Only-Structure-Report.md),
 [32_Faculty-Admin-Scoping-Report.md](32_Faculty-Admin-Scoping-Report.md),
 [33_Faculty-Admin-Request-Handling-Report.md](33_Faculty-Admin-Request-Handling-Report.md) and
@@ -483,6 +486,9 @@ users, main business activities, and expected outputs.
   load, guarded deletes, `/api/offerings` and `/api/sections`. See
   [14_Class-and-Section-Report.md](14_Class-and-Section-Report.md).
 - **Rooms and weekly schedules:** delivered with 9.10.
+- **Department Admin:** manages the offerings, sections and lecturer
+  assignments of their department's courses (own-department lecturers). See
+  [46_Department-Admin-Sections-and-Schedules-Report.md](46_Department-Admin-Sections-and-Schedules-Report.md).
 
 ### 9.9 Course Registration / Enrollment [Implemented]
 
@@ -504,7 +510,8 @@ users, main business activities, and expected outputs.
 - **Delivered:** rooms, weekly section schedules, per-semester conflict
   checks (room, section, lecturer, student, room capacity — incl. partial
   overlaps), clash checks at enrollment and lecturer assignment, personal
-  timetables. See [16_Timetable-Report.md](16_Timetable-Report.md).
+  timetables. A Department Admin schedules their department's sections
+  (report 46). See [16_Timetable-Report.md](16_Timetable-Report.md).
 
 ### 9.11 Attendance [Implemented]
 

@@ -234,6 +234,24 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,department
     Route::get('/timetable/lecturer/{lecturer}', [ScheduleController::class, 'lecturer'])->name('api.timetable.lecturer');
 });
 
+// Offerings, sections, lecturer assignments and weekly class times: managers
+// for every offering, a Department Admin for their department's courses
+// (`CourseOfferingPolicy`, report 46).
+Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,department-admin'])->group(function () {
+    Route::post('/sections/{section}/schedule', [ScheduleController::class, 'store'])->name('api.sections.schedule.store');
+    Route::match(['put', 'patch'], '/schedule-entries/{entry}', [ScheduleController::class, 'update'])->name('api.schedule-entries.update');
+    Route::delete('/schedule-entries/{entry}', [ScheduleController::class, 'destroy'])->name('api.schedule-entries.destroy');
+
+    Route::post('/offerings', [CourseOfferingController::class, 'store'])->name('api.offerings.store');
+    Route::match(['put', 'patch'], '/offerings/{offering}', [CourseOfferingController::class, 'update'])->name('api.offerings.update');
+    Route::delete('/offerings/{offering}', [CourseOfferingController::class, 'destroy'])->name('api.offerings.destroy');
+    Route::post('/offerings/{offering}/sections', [CourseOfferingController::class, 'storeSection'])->name('api.offerings.sections.store');
+    Route::match(['put', 'patch'], '/sections/{section}', [SectionController::class, 'update'])->name('api.sections.update');
+    Route::delete('/sections/{section}', [SectionController::class, 'destroy'])->name('api.sections.destroy');
+    Route::post('/sections/{section}/lecturers', [SectionController::class, 'assignLecturer'])->name('api.sections.lecturers.store');
+    Route::delete('/sections/{section}/lecturers/{lecturer}', [SectionController::class, 'removeLecturer'])->name('api.sections.lecturers.destroy');
+});
+
 Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->group(function () {
     Route::get('/university/dashboard', UniversityDashboardController::class)->name('api.university.dashboard');
     Route::post('/universities', [UniversityController::class, 'store'])->name('api.universities.store');
@@ -275,19 +293,6 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin'])->group(
     Route::post('/rooms', [RoomController::class, 'store'])->name('api.rooms.store');
     Route::match(['put', 'patch'], '/rooms/{room}', [RoomController::class, 'update'])->name('api.rooms.update');
     Route::delete('/rooms/{room}', [RoomController::class, 'destroy'])->name('api.rooms.destroy');
-    Route::post('/sections/{section}/schedule', [ScheduleController::class, 'store'])->name('api.sections.schedule.store');
-    Route::match(['put', 'patch'], '/schedule-entries/{entry}', [ScheduleController::class, 'update'])->name('api.schedule-entries.update');
-    Route::delete('/schedule-entries/{entry}', [ScheduleController::class, 'destroy'])->name('api.schedule-entries.destroy');
-
-    Route::post('/offerings', [CourseOfferingController::class, 'store'])->name('api.offerings.store');
-    Route::match(['put', 'patch'], '/offerings/{offering}', [CourseOfferingController::class, 'update'])->name('api.offerings.update');
-    Route::delete('/offerings/{offering}', [CourseOfferingController::class, 'destroy'])->name('api.offerings.destroy');
-    Route::post('/offerings/{offering}/sections', [CourseOfferingController::class, 'storeSection'])->name('api.offerings.sections.store');
-    Route::match(['put', 'patch'], '/sections/{section}', [SectionController::class, 'update'])->name('api.sections.update');
-    Route::delete('/sections/{section}', [SectionController::class, 'destroy'])->name('api.sections.destroy');
-    Route::post('/sections/{section}/lecturers', [SectionController::class, 'assignLecturer'])->name('api.sections.lecturers.store');
-    Route::delete('/sections/{section}/lecturers/{lecturer}', [SectionController::class, 'removeLecturer'])->name('api.sections.lecturers.destroy');
-
     Route::post('/students', [StudentController::class, 'store'])->name('api.students.store');
     Route::match(['put', 'patch'], '/students/{student}', [StudentController::class, 'update'])
         ->name('api.students.update');

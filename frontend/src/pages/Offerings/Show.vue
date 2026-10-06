@@ -1,7 +1,7 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
 import { ArrowLeft, Plus, Trash2 } from '@lucide/vue'
-import { Head, router, useForm, usePage } from '@inertiajs/vue3'
+import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseCard from '../../components/BaseCard.vue'
@@ -21,11 +21,11 @@ const props = defineProps({
   lecturerRoles: { type: Array, default: () => [] },
   rooms: { type: Array, default: () => [] },
   days: { type: Object, default: () => ({}) },
+  // From `CourseOfferingPolicy::update`: managers, and the Department Admin over this course.
+  canManage: { type: Boolean, default: false },
 })
 
-const page = usePage()
 const { confirm } = useConfirm()
-const canManage = computed(() => ['super-admin', 'university-admin'].includes(page.props.auth?.user?.role?.slug ?? ''))
 const locked = computed(() => props.offering.semester?.status === 'completed')
 const label = (value) => value.charAt(0).toUpperCase() + value.slice(1)
 const statusOptions = computed(() => props.statuses.map((value) => ({ value, label: label(value) })))

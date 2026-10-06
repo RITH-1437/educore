@@ -55,7 +55,7 @@ class ScheduleController extends Controller
         responses: [
             new OA\Response(response: 201, description: 'Entry created.', content: new OA\JsonContent(ref: '#/components/schemas/ScheduleEntryResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin, University Admin, or the Department Admin over this course.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 409, description: 'Semester completed.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Invalid slot or conflict.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
@@ -81,7 +81,7 @@ class ScheduleController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Entry updated.', content: new OA\JsonContent(ref: '#/components/schemas/ScheduleEntryResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin, University Admin, or the Department Admin over this course.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Invalid slot or conflict.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
     )]
@@ -97,7 +97,7 @@ class ScheduleController extends Controller
         responses: [
             new OA\Response(response: 200, description: 'Entry updated.', content: new OA\JsonContent(ref: '#/components/schemas/ScheduleEntryResourceResponse')),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin, University Admin, or the Department Admin over this course.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
             new OA\Response(response: 422, description: 'Invalid slot or conflict.', content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')),
         ]
     )]
@@ -118,7 +118,7 @@ class ScheduleController extends Controller
         responses: [
             new OA\Response(response: 204, description: 'Removed.'),
             new OA\Response(response: 401, description: 'Unauthenticated.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
-            new OA\Response(response: 403, description: 'Not a Super Admin or University Admin.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
+            new OA\Response(response: 403, description: 'Not a Super Admin, University Admin, or the Department Admin over this course.', content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')),
         ]
     )]
     public function destroy(ScheduleEntry $entry): JsonResponse

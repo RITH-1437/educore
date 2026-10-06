@@ -335,16 +335,16 @@ documented operations.
 | POST | `/api/students/{student}/status` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/students/{student}/program` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/offerings` | Sanctum + super-admin, university-admin or department-admin | Documented |
-| POST | `/api/offerings` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/offerings` | Sanctum + super-admin or university-admin; department-admin for a course of their department (report 46) | Documented |
 | GET | `/api/offerings/{offering}` | Sanctum + super-admin, university-admin or department-admin | Documented |
-| PUT, PATCH | `/api/offerings/{offering}` | Sanctum + super-admin or university-admin | Both documented |
-| DELETE | `/api/offerings/{offering}` | Sanctum + super-admin or university-admin | Documented |
-| POST | `/api/offerings/{offering}/sections` | Sanctum + super-admin or university-admin | Documented |
+| PUT, PATCH | `/api/offerings/{offering}` | Sanctum + super-admin or university-admin; department-admin for their department's courses (report 46) | Both documented |
+| DELETE | `/api/offerings/{offering}` | Sanctum + super-admin or university-admin; department-admin for their department's courses (report 46) | Documented |
+| POST | `/api/offerings/{offering}/sections` | Sanctum + super-admin or university-admin; department-admin for their department's courses (report 46) | Documented |
 | GET | `/api/sections/{section}` | Sanctum + super-admin, university-admin or department-admin | Documented |
-| PUT, PATCH | `/api/sections/{section}` | Sanctum + super-admin or university-admin | Both documented |
-| DELETE | `/api/sections/{section}` | Sanctum + super-admin or university-admin | Documented |
-| POST | `/api/sections/{section}/lecturers` | Sanctum + super-admin or university-admin | Documented |
-| DELETE | `/api/sections/{section}/lecturers/{lecturer}` | Sanctum + super-admin or university-admin | Documented |
+| PUT, PATCH | `/api/sections/{section}` | Sanctum + super-admin or university-admin; department-admin for their department's courses (report 46) | Both documented |
+| DELETE | `/api/sections/{section}` | Sanctum + super-admin or university-admin; department-admin for their department's courses (report 46) | Documented |
+| POST | `/api/sections/{section}/lecturers` | Sanctum + super-admin or university-admin; department-admin for their department's courses, lecturers of their department only (422 otherwise; report 46) | Documented |
+| DELETE | `/api/sections/{section}/lecturers/{lecturer}` | Sanctum + super-admin or university-admin; department-admin for their department's courses (report 46) | Documented |
 | GET | `/api/lecturers/{lecturer}/sections` | Sanctum + staff, or the lecturer themself | Documented |
 | GET | `/api/lecturers/{lecturer}/dashboard` | Sanctum + staff, or the lecturer themself (report 35) | Documented |
 | GET | `/api/enrollments` | Sanctum + super-admin, university-admin or department-admin | Documented |
@@ -360,9 +360,9 @@ documented operations.
 | PUT, PATCH | `/api/rooms/{room}` | Sanctum + super-admin or university-admin | Both documented |
 | DELETE | `/api/rooms/{room}` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/sections/{section}/schedule` | Sanctum + super-admin, university-admin or department-admin | Documented |
-| POST | `/api/sections/{section}/schedule` | Sanctum + super-admin or university-admin | Documented |
-| PUT, PATCH | `/api/schedule-entries/{entry}` | Sanctum + super-admin or university-admin | Both documented |
-| DELETE | `/api/schedule-entries/{entry}` | Sanctum + super-admin or university-admin | Documented |
+| POST | `/api/sections/{section}/schedule` | Sanctum + super-admin or university-admin; department-admin for their department's courses (report 46) | Documented |
+| PUT, PATCH | `/api/schedule-entries/{entry}` | Sanctum + super-admin or university-admin; department-admin for their department's courses (report 46) | Both documented |
+| DELETE | `/api/schedule-entries/{entry}` | Sanctum + super-admin or university-admin; department-admin for their department's courses (report 46) | Documented |
 | GET | `/api/timetable/student/{student}` | Sanctum + staff, or the student themself | Documented |
 | GET | `/api/timetable/lecturer/{lecturer}` | Sanctum + staff, or the lecturer themself | Documented |
 | GET | `/api/sections/{section}/attendance` | Sanctum + managers, Department Admin, or a lecturer of the section | Documented |
@@ -699,3 +699,22 @@ redirect to an external avatar URL, which let any user turn an EduCore link
 into a redirect to a site of their choosing; an external avatar is now handed
 to the browser directly through `avatar_url` and the routes answer 404 for it.
 See `docs/45_Profile-Portal-Report.md` §9.
+
+## Department Admin sections and schedules (2026-10-06)
+
+No endpoint added or removed; 14 write operations on offerings, sections,
+lecturer assignments and weekly class times now also accept a Department Admin
+for the courses of their department (`CourseOfferingPolicy`, record-level):
+
+| Operations | Department Admin |
+|---|---|
+| `POST /api/offerings` | Their department's course; another department's course `403` |
+| `PUT|PATCH|DELETE /api/offerings/{offering}`, `POST /api/offerings/{offering}/sections` | Their department's offerings; others `403` |
+| `PUT|PATCH|DELETE /api/sections/{section}`, `DELETE /api/sections/{section}/lecturers/{lecturer}` | Sections of those offerings |
+| `POST /api/sections/{section}/lecturers` | Those sections, lecturers of their department only (`422` "Choose a lecturer from your department.") |
+| `POST /api/sections/{section}/schedule`, `PUT|PATCH|DELETE /api/schedule-entries/{entry}` | Those sections; every timetable rule (room / lecturer / section / student overlap, capacity, completed semester) unchanged |
+
+Rooms (`/api/rooms` writes) stay with Super Admin and University Admin. A
+Department Admin with no department manages nothing. The 403 descriptions of
+these operations in the OpenAPI document were updated. See
+`docs/46_Department-Admin-Sections-and-Schedules-Report.md`.

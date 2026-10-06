@@ -63,7 +63,9 @@ conflicts (lecturer, room, student group).
 
 ## 8. Authorization rules
 
-- Univ/Faculty/Dept Admin: create rooms & schedules; publish timetables.
+- Super Admin / University Admin: rooms, and schedules for every section.
+- Department Admin: schedules for the sections of their department's courses
+  (`CourseOfferingPolicy`, report 46); rooms read-only.
 - Lecturer: view own timetable (and sections they teach).
 - Student: view own timetable.
 

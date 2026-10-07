@@ -35,6 +35,10 @@ class HandleInertiaRequests extends Middleware
                 'success' => session('success'),
                 'error' => session('error'),
             ],
+            // The campus map button on every page, guests included (report 49).
+            'campus' => [
+                'map' => config('academics.campus_map'),
+            ],
             'frontend' => [
                 'url' => config('frontend.url'),
                 'api_url' => config('frontend.api_url'),

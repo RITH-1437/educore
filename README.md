@@ -45,6 +45,9 @@ Variables group by responsibility:
 - `VITE_API_URL` — frontend REST API base path (`/api`).
 - `FRONTEND_URL` / `VITE_DEV_SERVER_URL` — front-end connection origins
   (same-origin defaults; share via `config/frontend.php` and Inertia props).
+- `CAMPUS_MAP_NAME` / `CAMPUS_MAP_ADDRESS` / `CAMPUS_MAP_COORDINATES` /
+  `CAMPUS_MAP_URL` — the place the campus map button on every page shows
+  (default: ITC Conference Hall; `config/academics.php`, report 49).
 
 > Note: `APP_KEY` is intentionally omitted. It is auto-generated into
 > `backend/.env` on the first container start and persists thereafter.

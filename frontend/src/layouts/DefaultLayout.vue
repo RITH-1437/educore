@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { Head, router, usePage } from '@inertiajs/vue3'
 import AppSidebar from '../components/layout/AppSidebar.vue'
 import AppTopbar from '../components/layout/AppTopbar.vue'
+import CampusMap from '../components/CampusMap.vue'
 import ConfirmDialog from '../components/ConfirmDialog.vue'
 import ToastRegion from '../components/ToastRegion.vue'
 import { useNavigation } from '../composables/useNavigation'
@@ -175,6 +176,7 @@ onBeforeUnmount(() => {
       </main>
     </div>
 
+    <CampusMap />
     <ConfirmDialog />
     <ToastRegion />
   </div>

@@ -565,6 +565,23 @@ Technology logos are the documented exception to Lucide-only icons (`BRAND-GUIDE
 
 ---
 
+## 16. Campus Map Tab (2026-10-07)
+
+The one fixed control besides toasts: `components/CampusMap.vue`, mounted in all three layouts
+(report 49).
+
+| Rule | Value |
+|---|---|
+| Placement | `fixed right-0 top-1/2 -translate-y-1/2`, flush to the right edge at the vertical middle; `z-30` (under the mobile navigation overlay, dialogs and toasts) |
+| Shape | 40 × 48 px, left corners `rounded-l-lg`, `shadow-md`; `primary` fill with white icon (dark: `dark-primary` with `dark-bg` icon), hover `primary-dark` |
+| Content | `MapPin` 20 px only; the label "Campus map" is the `aria-label` and a left-placed tooltip; `aria-haspopup="dialog"` |
+| Dialog | `BaseModal` `xl`: Google Maps iframe (`h-80`, `sm:h-96`, `border-default`, `radius-md`), then name (`small`, semibold), address (`caption`, muted) and an `ExternalLink` `IconButton` to Google Maps (new tab) |
+| Data | Shared prop `campus.map` from `CAMPUS_MAP_*`; the tab hides when no place is set. The iframe only exists while the dialog is open |
+
+Do not add further edge tabs or floating buttons; bottom-right belongs to toasts (§12).
+
+---
+
 ## Validation Checklist
 
 1. Reuses existing primitives (`BaseButton`, `BaseModal`, …) — no new library.

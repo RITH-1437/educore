@@ -704,3 +704,11 @@ A module is not done until its report exists and its tests pass — never label
   the page "Welcome, <name>" (the landing preview "Welcome back, <role>"). The
   title is now just the person's name, with the semester or department line
   under it as before; the Super Admin "Platform overview" header never greeted.
+- `[Done]` Campus map (2026-10-07): every page — landing, sign-in, document
+  verification and every signed-in page — has a map tab fixed to the middle of
+  the right edge. It opens a Google map pinned on ITC Conference Hall
+  (HVCX+6F6, Russian Federation Blvd (110), Phnom Penh) with a link to the
+  place in Google Maps. The place is set by `CAMPUS_MAP_NAME`,
+  `CAMPUS_MAP_ADDRESS`, `CAMPUS_MAP_COORDINATES` and `CAMPUS_MAP_URL`
+  (shared prop `campus.map`); no API key, and nothing is requested from
+  Google until the map is opened. Report: `docs/49_Campus-Map-Report.md`.

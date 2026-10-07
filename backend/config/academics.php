@@ -33,6 +33,24 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Campus map
+    |--------------------------------------------------------------------------
+    |
+    | The map button on every page (report 49). The embedded Google map
+    | searches `name` at `coordinates` ("lat,lng"), which pin and centre it;
+    | `url` is the place's own Google Maps link, opened in a new tab.
+    |
+    */
+
+    'campus_map' => [
+        'name' => env('CAMPUS_MAP_NAME', 'ITC Conference Hall'),
+        'address' => env('CAMPUS_MAP_ADDRESS', 'HVCX+6F6, Russian Federation Blvd (110), Phnom Penh, Cambodia'),
+        'coordinates' => env('CAMPUS_MAP_COORDINATES', '11.5705439,104.8986445'),
+        'url' => env('CAMPUS_MAP_URL', 'https://www.google.com/maps/place/ITC+Conference+Hall/@11.5703117,104.8990476,18.11z/data=!4m6!3m5!1s0x310951738deaaaab:0x6e806285f01ccb0b!8m2!3d11.5705439!4d104.8986445!16s%2Fg%2F11kj8_wkbd'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Uploads
     |--------------------------------------------------------------------------
     |

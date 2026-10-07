@@ -89,6 +89,16 @@ linked account + program), `Students/Edit` (`StudentLifecycle`: status change
 with confirmation, program transfer, history; profile form; delete). Sidebar
 **Students** under *People*; dashboard tile and `total_students`/`active_students`.
 
+*(Update 2026-10-07: the list shows profiles, not accounts, so a Student-role
+account created in Users management (or the seeded `student@educore.kh`) was
+missing from it with no hint why — Users showed two students, Students one.
+`Students/Index` now shows a notice above the filters, for managers only,
+naming each Student-role account without a profile (the existing
+`unlinkedAccounts` prop); its "Create student profile" action opens the New
+student modal with *Link an existing student account* and that account
+already selected. Shared component: `components/UnlinkedAccountsNotice.vue`.
+No backend change.)*
+
 ## 7. Tests
 
 `backend/tests/Feature/Students/StudentManagementTest.php` — 21 tests covering

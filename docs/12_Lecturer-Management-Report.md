@@ -123,6 +123,11 @@ API (`auth:sanctum`, tag `People`, OpenAPI-annotated, in `docs/api/api-audit.md`
   "New lecturer" modal with **create new account** or **link existing lecturer
   account** (lists Lecturer-role accounts without a profile), deactivate /
   reactivate / delete via the shared confirm dialog, read-only for Faculty Admin.
+  *(Update 2026-10-07: Lecturer-role accounts without a profile, such as the
+  seeded `lecturer@educore.kh`, are no longer invisible here. A notice above
+  the filters, shown to managers only, names each one; its "Create lecturer
+  profile" action opens the modal in link mode with that account selected
+  (`components/UnlinkedAccountsNotice.vue`, shared with `Students/Index`).)*
 - `Lecturers/Edit` — account (email, phone) + profile form
   (`components/lecturers/LecturerForm.vue`, shared with the modal), status
   toggle, and a teaching-assignments placeholder.

@@ -14,6 +14,7 @@ import ErrorAlert from '../../components/ErrorAlert.vue'
 import PageHeader from '../../components/PageHeader.vue'
 import Pagination from '../../components/Pagination.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
+import UnlinkedAccountsNotice from '../../components/UnlinkedAccountsNotice.vue'
 import StudentForm from '../../components/students/StudentForm.vue'
 
 const props = defineProps({
@@ -75,6 +76,12 @@ const openCreate = () => {
   showCreate.value = true
 }
 
+// From the "no profile" notice: the same form with that account already linked.
+const createProfileFor = (account) => {
+  openCreate()
+  createForm.user_id = account.id
+}
+
 // Send only the fields of the chosen account mode.
 const submitCreate = () =>
   createForm
@@ -103,6 +110,8 @@ const { applyNow, searching } = useLiveFilters(applyFilters, { text: [search], c
         <IconButton :icon="Plus" size="md" variant="primary" label="New student" @click="openCreate" />
       </template>
     </PageHeader>
+
+    <UnlinkedAccountsNotice v-if="canManage" :accounts="unlinkedAccounts" role="student" @link="createProfileFor" />
 
     <BaseCard padding="sm">
       <form class="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_2fr_2fr_1fr_auto] lg:items-end" @submit.prevent="applyNow">

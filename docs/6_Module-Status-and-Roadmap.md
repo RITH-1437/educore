@@ -690,3 +690,12 @@ A module is not done until its report exists and its tests pass — never label
   `/api/telegram/webhook` (secret header) link the private chat on Start and
   unlink it on `/stop`; links are audited with a masked chat id. Report:
   `docs/48_Class-Reminders-and-Telegram-Linking-Report.md`.
+- `[Done]` Accounts without a profile shown on Students and Lecturers
+  (2026-10-07): those lists show profiles, not accounts, so a Student- or
+  Lecturer-role account with no profile (made in Users management, or the
+  seeded `student@educore.kh` / `lecturer@educore.kh`) was counted in Users but
+  missing from Students or Lecturers, with no hint why. Both pages now show
+  managers a notice naming those accounts, and a "Create … profile" action
+  that opens the New student / New lecturer modal with the account already
+  linked. Reports: `docs/13_Student-Management-Report.md` §6,
+  `docs/12_Lecturer-Management-Report.md` §6.

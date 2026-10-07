@@ -699,3 +699,8 @@ A module is not done until its report exists and its tests pass — never label
   that opens the New student / New lecturer modal with the account already
   linked. Reports: `docs/13_Student-Management-Report.md` §6,
   `docs/12_Lecturer-Management-Report.md` §6.
+- `[Done]` Dashboard greeting removed (2026-10-07): the University Admin,
+  Department Admin, Lecturer and Student dashboards and the Home page titled
+  the page "Welcome, <name>" (the landing preview "Welcome back, <role>"). The
+  title is now just the person's name, with the semester or department line
+  under it as before; the Super Admin "Platform overview" header never greeted.

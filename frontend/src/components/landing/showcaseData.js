@@ -42,7 +42,7 @@ export const previews = {
       { icon: ShieldCheck, label: 'Audit logs' },
     ],
     eyebrow: 'University dashboard',
-    title: 'Welcome back, Admin',
+    title: 'University Admin',
     description: (stats) => (stats?.semester ? `Current academic period: ${stats.semester.name}` : 'No active semester yet'),
     groups: [
       {
@@ -79,7 +79,7 @@ export const previews = {
       { icon: Megaphone, label: 'Announcements' },
     ],
     eyebrow: 'Lecturer dashboard',
-    title: 'Welcome back, Lecturer',
+    title: 'Lecturer',
     description: 'Your classes, registers and grade sheets',
     personal: true,
     groups: [
@@ -117,7 +117,7 @@ export const previews = {
       { icon: Briefcase, label: 'My internship' },
     ],
     eyebrow: 'Student dashboard',
-    title: 'Welcome back, Student',
+    title: 'Student',
     description: 'Your program, courses and results',
     personal: true,
     groups: [

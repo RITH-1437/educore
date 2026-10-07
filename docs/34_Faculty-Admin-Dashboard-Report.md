@@ -104,7 +104,7 @@ their own faculty; no new ability was needed.
 
 ```mermaid
 flowchart TB
-    H["Header: Welcome, name · faculty · semester"] --> W["Waiting for you: 4 counts, each opens its filtered queue"]
+    H["Header: name · faculty · semester"] --> W["Waiting for you: 4 counts, each opens its filtered queue"]
     W --> F["Your faculty: 4 headline numbers, linked to their lists"]
 ```
 

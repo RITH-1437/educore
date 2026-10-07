@@ -44,7 +44,7 @@ const delay = (step) => ({ animationDelay: `${step * 60}ms` })
   <div class="space-y-8">
     <PageHeader
       eyebrow="Department dashboard"
-      :title="`Welcome, ${userName}`"
+      :title="userName"
       :description="dashboard ? [dashboard.department?.name, dashboard.semester?.name].filter(Boolean).join(' · ') : 'No department assigned'"
     />
 

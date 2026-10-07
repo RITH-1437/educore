@@ -27,7 +27,7 @@ const rateTone = (rate) => (rate === null ? 'text-muted dark:text-dark-muted' : 
   <div class="space-y-6">
     <PageHeader
       eyebrow="Student dashboard"
-      :title="`Welcome, ${d?.student.full_name ?? userName}`"
+      :title="d?.student.full_name ?? userName"
       :description="d ? [d.student.student_number, d.student.program?.name, d.semester?.name].filter(Boolean).join(' · ') : 'No student profile linked'"
     />
 

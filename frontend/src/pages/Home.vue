@@ -15,7 +15,7 @@ const dashboardUrl = computed(() => user.value?.role?.slug === 'super-admin' ? '
   <div class="mx-auto max-w-3xl space-y-6">
     <section>
       <p class="text-caption font-semibold uppercase tracking-widest text-primary">One Platform. Smarter Education.</p>
-      <h2 class="mt-2 text-h1 font-display font-semibold text-ink dark:text-dark-ink">Welcome, {{ user?.name }}</h2>
+      <h2 class="mt-2 text-h1 font-display font-semibold text-ink dark:text-dark-ink">{{ user?.name }}</h2>
       <p class="mt-2 text-body text-muted dark:text-dark-muted">Your EduCore account is ready. Open your role workspace to see the tools prepared for you.</p>
     </section>
     <BaseCard padding="lg">

@@ -43,7 +43,7 @@ const delay = (step) => ({ animationDelay: `${step * 60}ms` })
   <div class="space-y-8">
     <PageHeader
       eyebrow="University dashboard"
-      :title="`Welcome, ${userName}`"
+      :title="userName"
       :description="dashboard.semester ? `Current academic period: ${dashboard.semester.name}` : 'No active semester'"
     />
 

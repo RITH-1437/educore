@@ -49,7 +49,7 @@ const delay = (step) => ({ animationDelay: `${step * 60}ms` })
   <div class="space-y-8">
     <PageHeader
       eyebrow="Lecturer dashboard"
-      :title="`Welcome, ${userName}`"
+      :title="userName"
       :description="d ? [d.semester?.name, `${d.sections.length} ${d.sections.length === 1 ? 'section' : 'sections'}`].filter(Boolean).join(' · ') : 'No lecturer profile linked'"
     />
 

@@ -712,3 +712,12 @@ A module is not done until its report exists and its tests pass — never label
   `CAMPUS_MAP_ADDRESS`, `CAMPUS_MAP_COORDINATES` and `CAMPUS_MAP_URL`
   (shared prop `campus.map`); no API key, and nothing is requested from
   Google until the map is opened. Report: `docs/49_Campus-Map-Report.md`.
+- `[Done]` Semesters easy to find (2026-10-07): adding a semester worked, but
+  only from the year's edit page, reached through an unlabelled pencil icon;
+  nothing in the sidebar or the dashboards said where semesters live. The
+  sidebar item is now **Academic years & semesters** (Super and University
+  Admin), the list's rows open the year and show "None yet" for a year with no
+  semesters, the year page puts *Semesters* and *Add a semester* first below
+  1280 px, the University Admin dashboard links there when no semester exists,
+  and the Super Admin *Needs attention* list adds "No semesters exist yet" →
+  the current year's page. Module 9.6 (`docs/3_business-overview.md`).

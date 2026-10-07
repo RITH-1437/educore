@@ -41,7 +41,7 @@ const navForRole = (role) => {
           { label: 'University', href: '/universities', icon: Building2 },
           { label: 'Departments', href: '/departments', icon: School },
           { label: 'Programs', href: '/programs', icon: BookMarked },
-          { label: 'Academic years', href: '/academic-years', icon: Calendar },
+          { label: 'Academic years & semesters', href: '/academic-years', icon: Calendar },
         ],
       },
       {
@@ -69,7 +69,7 @@ const navForRole = (role) => {
       { label: 'Rooms', href: '/rooms', icon: MapPin },
     ]
     // Academic calendar management is limited to university admins.
-    if (role === 'university-admin') structure.push({ label: 'Academic years', href: '/academic-years', icon: Calendar })
+    if (role === 'university-admin') structure.push({ label: 'Academic years & semesters', href: '/academic-years', icon: Calendar })
 
     return [
       // Analytics: the whole university (or a picked department) for a University

@@ -69,7 +69,7 @@ const { applyNow, searching } = useLiveFilters(applyFilters, { text: [search], c
 <template>
   <Head title="Academic years" />
   <div class="space-y-6">
-    <PageHeader eyebrow="Platform management" title="Academic years" description="The university calendar every course offering hangs from.">
+    <PageHeader eyebrow="Platform management" title="Academic years & semesters" description="Each academic year and its semesters. Open a year to add, open or close its semesters.">
       <template #actions>
         <IconButton :icon="Plus" href="/academic-years/create" size="md" variant="primary" label="New academic year" />
       </template>
@@ -82,10 +82,13 @@ const { applyNow, searching } = useLiveFilters(applyFilters, { text: [search], c
       </form>
     </BaseCard>
 
-    <BaseTable :columns="columns" :rows="academicYears.data" caption="Academic years" empty-title="No academic years found" empty-description="Create an academic year or adjust your filters.">
+    <BaseTable :columns="columns" :rows="academicYears.data" :row-href="(row) => `/academic-years/${row.id}/edit`" caption="Academic years" empty-title="No academic years found" empty-description="Create an academic year or adjust your filters.">
       <template #cell-code="{ row }"><span class="font-medium">{{ row.code }}</span></template>
       <template #cell-span="{ row }"><span class="whitespace-nowrap text-muted dark:text-dark-muted">{{ row.start_date }} → {{ row.end_date }}</span></template>
-      <template #cell-semesters_count="{ row }">{{ row.semesters_count ?? 0 }}</template>
+      <template #cell-semesters_count="{ row }">
+        <span v-if="row.semesters_count">{{ row.semesters_count }}</span>
+        <BaseBadge v-else variant="warning">None yet</BaseBadge>
+      </template>
       <template #cell-status="{ row }"><StatusBadge :status="row.status" :label="row.status_label" /></template>
       <template #cell-is_current="{ row }">
         <BaseBadge v-if="row.is_current" variant="primary">Current</BaseBadge>
@@ -93,7 +96,7 @@ const { applyNow, searching } = useLiveFilters(applyFilters, { text: [search], c
       </template>
       <template #cell-actions="{ row }">
         <div class="flex flex-wrap items-center justify-end gap-1">
-          <IconButton :icon="Pencil" :href="`/academic-years/${row.id}/edit`" :label="`Edit ${row.code}`" />
+          <IconButton :icon="Pencil" :href="`/academic-years/${row.id}/edit`" :label="`Edit ${row.code} and its semesters`" />
           <IconButton v-if="row.status === 'planned'" :icon="CirclePlay" variant="success" :label="`Activate ${row.code}`" @click="changeStatus(row, 'active')" />
           <IconButton v-else-if="row.status === 'active'" :icon="CircleCheckBig" variant="success" :label="`Complete ${row.code}`" @click="changeStatus(row, 'completed')" />
           <IconButton v-if="row.status === 'active' && !row.is_current" :icon="Star" :label="`Make ${row.code} the current year`" @click="makeCurrent(row)" />

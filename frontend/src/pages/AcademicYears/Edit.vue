@@ -90,7 +90,8 @@ const deleteSemester = async (semester) => {
         </form>
       </BaseCard>
 
-      <div class="space-y-6">
+      <!-- First on narrower screens: semesters are what this page is opened for. -->
+      <div class="order-first space-y-6 xl:order-none">
         <BaseCard title="Semesters" padding="lg">
           <template #description>
             Ordered by sequence; every course offering hangs from a semester.

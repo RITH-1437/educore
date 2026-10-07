@@ -75,7 +75,7 @@ module (Super Admin sees at most 3 as "Soon").
 | Group | Items |
 | --- | --- |
 | Overview | Dashboard `[Implemented]` · Analytics (Super / University Admin; Department Admin for their department, report 47) `[Implemented]` |
-| Academic structure | University `[Implemented]` · Faculties & departments `[Implemented]` · Programs `[Implemented]` · Academic years `[Implemented]` |
+| Academic structure | University `[Implemented]` · Faculties & departments `[Implemented]` · Programs `[Implemented]` · Academic years & semesters `[Implemented]` |
 | People | Users & roles `[Implemented]` · Students `[Implemented]` · Lecturers `[Implemented]` |
 | Academics | Courses `[Implemented]` · Offerings & sections `[Implemented]` · Rooms `[Implemented]` · My timetable (student/lecturer) `[Implemented]` · Attendance (lecturer) / My attendance (student) `[Implemented]` · My assignments (student; lecturers reach coursework from their section cards) `[Implemented]` · My exams (student; lecturers reach exams from their section cards) `[Implemented]` · Enrollments `[Implemented]` · Grades `[Implemented]` · Grading scale `[Implemented]` · Grades & GPA (student; lecturers reach grade sheets from their section cards) `[Implemented]` |
 | Operations | Announcements (every role; staff here, others in their workspace) `[Implemented]` · Documents `[Implemented]` · My documents (student) `[Implemented]` · Internships (staff) / My internship (student) `[Implemented]` · Invoices (Super / University Admin only) `[Implemented]` · My invoices (student) `[Implemented]` |
@@ -84,7 +84,7 @@ module (Super Admin sees at most 3 as "Soon").
 ### University Admin
 
 Dashboard · Academic structure (University, Faculties & departments, Programs,
-Academic years) · People (Students, Lecturers) · Academics (Courses, Sections,
+Academic years & semesters) · People (Students, Lecturers) · Academics (Courses, Sections,
 Enrollment) · Operations (Documents, Invoices, Announcements) — each item only
 once its module is `[Implemented]`.
 

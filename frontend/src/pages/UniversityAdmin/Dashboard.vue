@@ -1,5 +1,5 @@
 <script setup>
-import { Head } from '@inertiajs/vue3'
+import { Head, Link } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import PageHeader from '../../components/PageHeader.vue'
 import StatCard from '../../components/StatCard.vue'
@@ -44,8 +44,12 @@ const delay = (step) => ({ animationDelay: `${step * 60}ms` })
     <PageHeader
       eyebrow="University dashboard"
       :title="userName"
-      :description="dashboard.semester ? `Current academic period: ${dashboard.semester.name}` : 'No active semester'"
-    />
+    >
+      <template #description>
+        <template v-if="dashboard.semester">Current academic period: {{ dashboard.semester.name }}</template>
+        <template v-else>No semesters yet. Add them under <Link href="/academic-years" class="font-medium text-primary underline-offset-2 hover:underline dark:text-dark-primary">Academic years &amp; semesters</Link>.</template>
+      </template>
+    </PageHeader>
 
     <section class="space-y-4" aria-labelledby="waiting-heading">
       <div>

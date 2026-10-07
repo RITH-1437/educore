@@ -30,6 +30,7 @@ const attention = computed(() => {
   const items = []
   const inactive = props.stats.total_users - props.stats.active_users
   if (!props.currentAcademicYear) items.push({ text: 'No current academic year is set.', href: '/academic-years', action: 'Set the current academic year' })
+  if (props.currentAcademicYear && props.stats.total_semesters === 0) items.push({ text: 'No semesters exist yet.', href: `/academic-years/${props.currentAcademicYear.id}/edit`, action: 'Add a semester' })
   if (inactive > 0) items.push({ text: `${inactive} ${inactive === 1 ? 'account is' : 'accounts are'} inactive.`, href: '/users', action: 'Review inactive accounts' })
   return items
 })

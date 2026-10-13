@@ -163,6 +163,35 @@ const SECTION_LABELS = {
 
 const ACTION_LABELS = { create: 'New', edit: 'Edit', profile: 'Profile', password: 'Password' }
 
+// Pages a student opens from their own list: the section crumb leads back to that list.
+const STUDENT_SECTIONS = {
+  invoices: { label: 'My invoices', href: '/my-invoices' },
+  internships: { label: 'My internship', href: '/my-internships' },
+  coursework: { label: 'My assignments', href: '/my-assignments' },
+  exams: { label: 'My exams', href: '/my-exams' },
+}
+
+// Lists every role can open, besides its sidebar; staff also reach the companies list.
+const SHARED_SECTIONS = ['announcements', 'notifications', 'inbox']
+const STAFF_SECTIONS = ['internship-companies']
+
+/**
+ * The section crumb links only to a list the role can open. Section-scoped
+ * pages (`/coursework/sections/5`, `/exams/sections/5`, `/attendance/sections/5`
+ * for staff, `/account/profile`) have no list of their own: a link there was a
+ * 404 or 403, so the crumb is plain text instead.
+ */
+const sectionCrumb = (role, section) => {
+  if (role === 'student' && STUDENT_SECTIONS[section]) return STUDENT_SECTIONS[section]
+
+  const href = `/${section}`
+  const reachable = navForRole(role).some((group) => group.items.some((item) => item.href === href))
+    || SHARED_SECTIONS.includes(section)
+    || (['super-admin', 'university-admin', 'department-admin'].includes(role) && STAFF_SECTIONS.includes(section))
+
+  return { label: SECTION_LABELS[section] ?? 'Overview', href: reachable ? href : '' }
+}
+
 export function useNavigation() {
   const page = usePage()
   const role = computed(() => page.props.auth?.user?.role?.slug ?? '')
@@ -179,7 +208,7 @@ export function useNavigation() {
     const trail = [{ label: 'Dashboard', href: homeHref.value }]
     if (!section || section === 'dashboard' || section === 'admin') return trail
 
-    trail.push({ label: SECTION_LABELS[section] ?? 'Overview', href: `/${section}` })
+    trail.push(sectionCrumb(role.value, section))
     if (detail) trail.push({ label: ACTION_LABELS[detail] ?? ACTION_LABELS[action] ?? 'Details', href: '' })
     return trail
   })

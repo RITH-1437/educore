@@ -50,7 +50,13 @@ policies decide what is **allowed**. Never rely on hiding for security
    the backend. No fake or hard-coded numbers; no notification dot without a
    notifications module (`skills/notifications/SKILL.md`).
 9. **Breadcrumbs** are `Dashboard → Section → (New | Edit | Details)`. Add the
-   section label to `SECTION_LABELS` when adding a top-level route.
+   section label to `SECTION_LABELS` when adding a top-level route. The
+   section crumb links only to a list the role can open (an item of its
+   sidebar, Announcements / Notifications / Inbox, staff's Internship
+   companies); otherwise it is plain text, never a 404 / 403 link. A student's
+   pages reached from their own list lead back to it (`STUDENT_SECTIONS`:
+   invoices → My invoices, internships → My internship, coursework → My
+   assignments, exams → My exams).
 10. **Folding groups:** every group heading folds its items (disclosure
     button, remembered per browser, the current page's group re-opens on
     arrival). Group labels must therefore be unique and stable — they are the

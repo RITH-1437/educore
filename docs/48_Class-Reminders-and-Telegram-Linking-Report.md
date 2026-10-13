@@ -155,3 +155,13 @@ reset link). Full suite green.
    confirmed in the same round trip.
 5. **Audit with a masked chat id.** Where messages go is security-relevant;
    the full chat id is not needed in the trail.
+
+---
+
+## Update (2026-10-13): academic dates on the university clock
+
+`AcademicClock::today()` now also decides attendance dates (no future date,
+expected dates, the register's default date), the registration period, the
+exam-day check for results and upcoming exams. These used the UTC day, which
+in Phnom Penh is a different day between 00:00 and 07:00. Report:
+`docs/50_Project-Audit-and-Hardening-Report.md` (F-04).

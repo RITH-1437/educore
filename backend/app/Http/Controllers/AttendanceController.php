@@ -8,9 +8,9 @@ use App\Models\AttendanceRecord;
 use App\Models\AttendanceSession;
 use App\Models\Section;
 use App\Services\AttendanceService;
+use App\Support\AcademicClock;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -57,7 +57,7 @@ class AttendanceController extends Controller
         $date = $request->query('date');
 
         if (! is_string($date) || ! preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
-            $date = $expected->first()['date'] ?? Carbon::today()->toDateString();
+            $date = $expected->first()['date'] ?? AcademicClock::today()->toDateString();
         }
 
         ['session' => $session, 'roster' => $roster] = $this->attendance->roster($section, $date);

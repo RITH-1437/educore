@@ -100,6 +100,22 @@ class AttendanceTest extends TestCase
         $this->assertDatabaseCount('attendance_records', 3);
     }
 
+    public function test_dates_are_the_university_s_calendar_days(): void
+    {
+        // 18:30 UTC on Sunday 8 March is already Monday 9 March, 01:30, in Phnom Penh.
+        config(['academics.timezone' => 'Asia/Phnom_Penh']);
+        Carbon::setTestNow('2026-03-08 18:30:00');
+
+        // Monday's register is today's at the university, not a future date.
+        $this->record('2026-03-09', ['present', 'present', 'present'])->assertOk();
+        $this->record('2026-03-11', ['present', 'present', 'present'])->assertUnprocessable()->assertJsonValidationErrors(['session_date']);
+
+        // The register opens on that local day by default.
+        $this->actingAs($this->lecturer->user)->get("/attendance/sections/{$this->section->id}")
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page->where('date', '2026-03-09'));
+    }
+
     public function test_date_policy(): void
     {
         $this->record('2026-03-09', ['present', 'present', 'present'])->assertUnprocessable()->assertJsonValidationErrors(['session_date']); // future

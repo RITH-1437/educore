@@ -11,6 +11,7 @@ use App\Models\Section;
 use App\Models\Student;
 use App\Models\User;
 use App\Notifications\EnrollmentConfirmed;
+use App\Support\AcademicClock;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -242,7 +243,8 @@ class EnrollmentService
     private function assertRegistrationOpen(Section $section): void
     {
         $semester = $section->offering->semester;
-        $today = now()->startOfDay();
+        // The enrollment period is in the university's calendar days (`academics.timezone`).
+        $today = AcademicClock::today();
 
         if ($semester->status !== SemesterStatus::Open) {
             throw new BusinessRuleException('Registration is closed: the semester is not open.');

@@ -11,6 +11,7 @@ use App\Models\ExamResult;
 use App\Models\Section;
 use App\Models\Student;
 use App\Models\User;
+use App\Support\AcademicClock;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -103,7 +104,7 @@ class ExamService
             $section = $exam->section->loadMissing('offering.semester');
             $this->assertOpenSemester($section);
 
-            if ($exam->scheduled_date !== null && $exam->scheduled_date->isAfter(today())) {
+            if ($exam->scheduled_date !== null && $exam->scheduled_date->isAfter(AcademicClock::today())) {
                 throw ValidationException::withMessages(['results' => 'Results cannot be recorded before the exam date ('.$exam->scheduled_date->toDateString().').']);
             }
 
@@ -221,7 +222,7 @@ class ExamService
     {
         return Exam::query()
             ->whereIn('section_id', $sectionIds)
-            ->where('scheduled_date', '>=', Carbon::today()->toDateString())
+            ->where('scheduled_date', '>=', AcademicClock::today()->toDateString())
             ->with('section.offering.course:id,code,name', 'section.offering.semester:id,name')
             ->orderBy('scheduled_date')
             ->orderBy('start_time')

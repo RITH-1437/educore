@@ -22,6 +22,7 @@ use Database\Seeders\ProgramSeeder;
 use Database\Seeders\StudentSeeder;
 use Database\Seeders\UniversityStructureSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
@@ -76,6 +77,25 @@ class EnrollmentTest extends TestCase
             ->assertCreated()->assertJsonPath('data.student_id', $this->student->id);
 
         $this->assertDatabaseMissing('enrollments', ['student_id' => $other->id]);
+    }
+
+    public function test_the_enrollment_period_follows_the_university_s_calendar(): void
+    {
+        // 18:00 UTC on 30 September is already 1 October, 01:00, in Phnom Penh.
+        config(['academics.timezone' => 'Asia/Phnom_Penh']);
+        Carbon::setTestNow('2026-09-30 18:00:00');
+
+        try {
+            $this->semester->update(['enrollment_start' => '2026-10-01', 'enrollment_end' => '2026-10-15']);
+            $this->actingAs($this->student->user)->postJson('/api/enrollments', ['section_id' => $this->section->id])->assertCreated();
+
+            // And it closes when the last day ends there, not seven hours later.
+            Carbon::setTestNow('2026-10-15 17:30:00'); // 16 October, 00:30, in Phnom Penh
+            $other = Student::factory()->create();
+            $this->actingAs($other->user)->postJson('/api/enrollments', ['section_id' => $this->section->id])->assertStatus(409);
+        } finally {
+            Carbon::setTestNow();
+        }
     }
 
     public function test_scoping_of_reads(): void

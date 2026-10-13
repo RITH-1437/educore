@@ -9,6 +9,7 @@ use App\Http\Resources\ExamResource;
 use App\Models\Exam;
 use App\Models\Section;
 use App\Services\ExamService;
+use App\Support\AcademicClock;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -58,7 +59,7 @@ class ExamsController extends Controller
             'types' => Exam::TYPES,
             'canManage' => $canManage,
             'canReview' => $canReview,
-            'today' => today()->toDateString(),
+            'today' => AcademicClock::today()->toDateString(),
         ]);
     }
 
@@ -117,7 +118,7 @@ class ExamsController extends Controller
 
         return Inertia::render('Exams/Mine', [
             'exams' => $this->exams->forStudent($student)->values(),
-            'today' => today()->toDateString(),
+            'today' => AcademicClock::today()->toDateString(),
         ]);
     }
 }

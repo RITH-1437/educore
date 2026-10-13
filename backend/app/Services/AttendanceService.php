@@ -11,6 +11,7 @@ use App\Models\ScheduleEntry;
 use App\Models\Section;
 use App\Models\Student;
 use App\Models\User;
+use App\Support\AcademicClock;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -195,7 +196,9 @@ class AttendanceService
         }
 
         $sessions = AttendanceSession::query()->where('section_id', $section->getKey())->get()->keyBy(fn ($s) => $s->session_date->toDateString());
-        $end = Carbon::now()->startOfDay()->min($semester->end_date ?? Carbon::now());
+        // Dates are the university's calendar days (`academics.timezone`), not UTC days.
+        $today = AcademicClock::today();
+        $end = $semester->end_date !== null && $semester->end_date->lt($today) ? $semester->end_date->copy() : $today;
         $dates = collect();
 
         for ($day = $semester->start_date->copy(); $day->lte($end); $day->addDay()) {
@@ -247,7 +250,7 @@ class AttendanceService
             throw new BusinessRuleException('The semester is completed; attendance can no longer change.');
         }
 
-        if ($day->gt(Carbon::now()->startOfDay())) {
+        if ($day->gt(AcademicClock::today())) {
             throw ValidationException::withMessages(['session_date' => 'Attendance cannot be recorded for a future date.']);
         }
 

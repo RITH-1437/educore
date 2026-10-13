@@ -63,7 +63,7 @@ class CourseMaterialService
         $key = null;
         if ($isFile) {
             $section->loadMissing('offering');
-            $key = "materials/{$section->offering->course_id}/{$section->getKey()}/".Str::uuid().'.'.strtolower($file->getClientOriginalExtension() ?: $file->extension());
+            $key = "materials/{$section->offering->course_id}/{$section->getKey()}/".Str::uuid().'.'.($file->extension() ?: 'bin');
             // Upload first; if the database work fails the orphan object is removed.
             Storage::disk($this->disk())->putFileAs(dirname($key), $file, basename($key), ['visibility' => 'private']);
         }
@@ -153,7 +153,7 @@ class CourseMaterialService
         $file = $material->file;
         abort_if($file === null, 404, 'This material has no file.');
 
-        return Storage::disk($this->disk())->download($file->storage_key, $file->original_name);
+        return Storage::disk($this->disk())->download($file->storage_key, $file->original_name, ['Content-Type' => $file->mime_type ?: 'application/octet-stream', 'X-Content-Type-Options' => 'nosniff']);
     }
 
     /** @return \Illuminate\Support\Collection<int, User> active users of students with an open enrollment in the section */

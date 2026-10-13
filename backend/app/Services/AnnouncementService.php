@@ -225,7 +225,8 @@ class AnnouncementService
 
         $disk = $this->disk();
         $uuid = (string) Str::uuid();
-        $ext = strtolower($file->getClientOriginalExtension() ?: $file->guessExtension() ?: 'bin');
+        // The extension and type come from the validated content, never the client.
+        $ext = $file->guessExtension() ?: 'bin';
         $storageKey = "announcements/{$announcement->id}/{$uuid}.{$ext}";
 
         Storage::disk($disk)->put($storageKey, (string) file_get_contents($file->getRealPath()));
@@ -238,7 +239,7 @@ class AnnouncementService
             'original_name' => $file->getClientOriginalName(),
             'storage_key' => $storageKey,
             'bucket' => (string) config("filesystems.disks.{$disk}.bucket", 'educore'),
-            'mime_type' => $file->getClientMimeType() ?: $file->getMimeType(),
+            'mime_type' => $file->getMimeType(),
             'size' => $file->getSize(),
             'visibility' => 'public',
             'checksum' => hash_file('sha256', $file->getRealPath()),
@@ -269,7 +270,10 @@ class AnnouncementService
             abort(404, 'Attachment not found.');
         }
 
-        return Storage::disk($this->disk())->download($attachment->storage_key, $attachment->original_name);
+        return Storage::disk($this->disk())->download($attachment->storage_key, $attachment->original_name, [
+            'Content-Type' => $attachment->mime_type ?: 'application/octet-stream',
+            'X-Content-Type-Options' => 'nosniff',
+        ]);
     }
 
     /**

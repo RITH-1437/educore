@@ -175,7 +175,7 @@ class InternshipService
         $key = null;
 
         if ($file !== null) {
-            $key = "internships/{$internship->student_id}/{$internship->getKey()}/".Str::uuid().'.'.strtolower($file->getClientOriginalExtension() ?: $file->extension());
+            $key = "internships/{$internship->student_id}/{$internship->getKey()}/".Str::uuid().'.'.($file->extension() ?: 'bin');
             Storage::disk($this->disk())->putFileAs(dirname($key), $file, basename($key), ['visibility' => 'private']);
         }
 
@@ -226,7 +226,7 @@ class InternshipService
         $file = $report->file;
         abort_if($file === null, 404, 'No file is attached to this report.');
 
-        return Storage::disk($this->disk())->download($file->storage_key, $file->original_name);
+        return Storage::disk($this->disk())->download($file->storage_key, $file->original_name, ['Content-Type' => $file->mime_type ?: 'application/octet-stream', 'X-Content-Type-Options' => 'nosniff']);
     }
 
     // ------------------------------------------------------------ evaluations

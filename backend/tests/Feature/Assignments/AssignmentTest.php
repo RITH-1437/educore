@@ -193,6 +193,25 @@ class AssignmentTest extends TestCase
 
     // ------------------------------------------------------------- download ---
 
+    public function test_the_stored_key_and_download_type_come_from_the_content_not_the_file_name(): void
+    {
+        $assignment = Assignment::factory()->create(['section_id' => $this->section->id]);
+
+        // A PDF whose name claims to be a web page.
+        $this->actingAs($this->student->user)->post("/api/assignments/{$assignment->id}/submissions", ['file' => UploadedFile::fake()->create('work.html', 50)->mimeType('application/pdf')], ['Accept' => 'application/json'])
+            ->assertCreated();
+
+        $stored = StoredFile::query()->firstOrFail();
+        $this->assertStringEndsWith('.pdf', $stored->storage_key);
+        $this->assertSame('work.html', $stored->original_name);
+
+        $submission = AssignmentSubmission::query()->firstOrFail();
+        $this->actingAs($this->lecturer->user)->get("/submissions/{$submission->id}/file")
+            ->assertOk()
+            ->assertHeader('Content-Type', 'application/pdf')
+            ->assertHeader('X-Content-Type-Options', 'nosniff');
+    }
+
     public function test_download_is_authorized(): void
     {
         $submission = $this->submit(Assignment::factory()->create(['section_id' => $this->section->id]));

@@ -118,7 +118,8 @@ class AssignmentService
         }
 
         $course = $assignment->section->offering->course_id;
-        $key = "assignments/{$course}/{$assignment->getKey()}/submissions/{$student->getKey()}/".Str::uuid().'.'.strtolower($file->getClientOriginalExtension() ?: $file->extension());
+        // The extension comes from the validated content, never the client's file name.
+        $key = "assignments/{$course}/{$assignment->getKey()}/submissions/{$student->getKey()}/".Str::uuid().'.'.($file->extension() ?: 'bin');
         $disk = $this->disk();
 
         // Upload first; if the database work fails the orphan object is removed.
@@ -197,7 +198,7 @@ class AssignmentService
         $file = $submission->file;
         abort_if($file === null, 404, 'No file is attached to this submission.');
 
-        return Storage::disk($this->disk())->download($file->storage_key, $file->original_name);
+        return Storage::disk($this->disk())->download($file->storage_key, $file->original_name, ['Content-Type' => $file->mime_type ?: 'application/octet-stream', 'X-Content-Type-Options' => 'nosniff']);
     }
 
     public function disk(): string

@@ -151,3 +151,16 @@ and two real error-log rows were lost. Safeguards:
   `APP_ENV=production`, otherwise clears them.
 - `docker-compose.yml` now passes MinIO credentials and bucket (`AWS_*`) to
   the backend, which uploads require.
+
+## 9. Update (2026-10-13): stored file types
+
+Submissions were stored under the extension of the client's file name, so a
+PDF named `work.html` was kept as `….html` and later served as `text/html`.
+Keys now take the extension of the validated content (`$file->extension()`,
+the same value the `mimes` rule checked), and downloads send the stored,
+content-detected type with `X-Content-Type-Options: nosniff` (still as an
+attachment). The same applies to course materials (report 44), internship
+reports (report 26) and announcement attachments (report 24, which also stored
+the client-claimed type); avatars already worked this way (report 45).
+Test: `AssignmentTest::test_the_stored_key_and_download_type_come_from_the_content_not_the_file_name`.
+Report: `docs/50_Project-Audit-and-Hardening-Report.md` (F-06).

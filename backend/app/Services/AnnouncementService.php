@@ -6,6 +6,7 @@ use App\Enums\Role;
 use App\Exceptions\BusinessRuleException;
 use App\Jobs\SendAnnouncementNotifications;
 use App\Models\Announcement;
+use App\Models\AnnouncementRead;
 use App\Models\Course;
 use App\Models\Department;
 use App\Models\Enrollment;
@@ -13,9 +14,12 @@ use App\Models\Program;
 use App\Models\Section;
 use App\Models\StoredFile;
 use App\Models\User;
+use App\Notifications\AnnouncementScheduleFailed;
+use App\Support\AcademicClock;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -36,9 +40,16 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  * | section    | open (pending / confirmed) enrollment      | assigned to the section           |
  * | course     | open enrollment in any section of it       | teaches a section of it           |
  *
- * Super Admin / University Admin target any audience; an active lecturer only
- * sections they teach or courses they teach a section of. A user joining an
- * audience later sees earlier announcements (the feed is not retroactive-only).
+ * Super Admin / University Admin target any audience; a Department Admin their
+ * own department and its programs, courses and sections; an active lecturer
+ * only sections they teach or courses they teach a section of. A user joining
+ * an audience later sees earlier announcements (the feed is not
+ * retroactive-only). A department audience also reaches the department's
+ * Department Admins.
+ *
+ * A draft can be scheduled; `publishDue()` (every minute) publishes it as its
+ * author once due. Members mark announcements read; authors see how many of
+ * the current audience did (report 51).
  */
 class AnnouncementService
 {
@@ -70,8 +81,58 @@ class AnnouncementService
                 }
             })
             ->with(['author:id,name', 'attachments'])
+            ->withExists(['reads as is_read' => fn ($reads) => $reads->where('user_id', $user->getKey())])
             ->latest('published_at')
             ->latest('id');
+    }
+
+    /** Published announcements in the user's feed they have not marked read. */
+    public function unreadCount(User $user): int
+    {
+        return $this->feedFor($user)->whereDoesntHave('reads', fn ($reads) => $reads->where('user_id', $user->getKey()))->count();
+    }
+
+    /** Record that the user read a published announcement (idempotent). */
+    public function markRead(Announcement $announcement, User $user): void
+    {
+        if ($announcement->publish_state !== Announcement::STATE_PUBLISHED) {
+            throw new BusinessRuleException('Only a published announcement can be marked read.');
+        }
+
+        AnnouncementRead::query()->insertOrIgnore(['announcement_id' => $announcement->getKey(), 'user_id' => $user->getKey(), 'read_at' => now()]);
+    }
+
+    /** Mark every unread announcement in the user's feed read; returns how many. */
+    public function markAllRead(User $user): int
+    {
+        $unread = $this->feedFor($user)
+            ->whereDoesntHave('reads', fn ($reads) => $reads->where('user_id', $user->getKey()))
+            ->toBase()
+            ->reorder()
+            ->select([])
+            ->selectRaw('announcements.id, ?::bigint, ?::timestamptz', [$user->getKey(), now()->toIso8601String()]);
+
+        return DB::table('announcement_reads')->insertOrIgnoreUsing(['announcement_id', 'user_id', 'read_at'], $unread);
+    }
+
+    /**
+     * For each announcement of a page: `audience_size`, the active users it
+     * reaches now, and `read_count`, how many of them marked it read. Both are
+     * live — someone who left the audience no longer counts (one query per row).
+     *
+     * @param  iterable<Announcement>  $announcements
+     */
+    public function attachReach(iterable $announcements): void
+    {
+        foreach ($announcements as $announcement) {
+            $reach = $this->recipients($announcement)->toBase()
+                ->selectRaw('count(*) as audience_size')
+                ->selectRaw('count(*) filter (where exists (select 1 from announcement_reads r where r.announcement_id = ? and r.user_id = users.id)) as read_count', [$announcement->getKey()])
+                ->first();
+
+            $announcement->setAttribute('audience_size', (int) $reach->audience_size);
+            $announcement->setAttribute('read_count', (int) $reach->read_count);
+        }
     }
 
     /**
@@ -101,7 +162,8 @@ class AnnouncementService
             'lecturers' => $roles([Role::Lecturer->value]),
             'staff' => $roles([Role::SuperAdmin->value, Role::UniversityAdmin->value, Role::DepartmentAdmin->value]),
             'program' => $members($inPrograms([$id])),
-            'department' => $members($inPrograms(DB::table('programs')->where('department_id', $id)->select('id')), DB::table('lecturers')->where('department_id', $id)->select('id')),
+            'department' => fn (Builder $q) => $members($inPrograms(DB::table('programs')->where('department_id', $id)->select('id')), DB::table('lecturers')->where('department_id', $id)->select('id'))($q)
+                ->orWhere(fn (Builder $admins) => $admins->where('department_id', $id)->whereHas('role', fn ($r) => $r->where('slug', Role::DepartmentAdmin->value))),
             'section' => $members($openIn([$id]), $teaching([$id])),
             'course' => $members($openIn($courseSections()), $teaching($courseSections())),
             default => fn (Builder $q) => $q->whereRaw('false'),
@@ -121,7 +183,7 @@ class AnnouncementService
             ->when(! $this->manages($user), fn ($q) => $q->where('author_id', $user->getKey()))
             ->when($state, fn ($q) => $q->where('publish_state', $state))
             ->with(['author:id,name', 'attachments'])
-            ->orderByRaw("case publish_state when 'draft' then 0 when 'published' then 1 else 2 end")
+            ->orderByRaw("case publish_state when 'draft' then 0 when 'scheduled' then 1 when 'published' then 2 else 3 end")
             ->latest('updated_at')
             ->latest('id');
     }
@@ -173,19 +235,151 @@ class AnnouncementService
         });
     }
 
+    /** Publish a draft, or a scheduled announcement ahead of (or at) its time. */
     public function publish(Announcement $announcement, User $by): Announcement
     {
         return DB::transaction(function () use ($announcement, $by) {
-            $this->assertDraft($announcement, 'published');
-            // The publisher must still be allowed to reach the audience.
+            // Locked: "publish now" and the scheduler must not both publish it.
+            $announcement = Announcement::query()->lockForUpdate()->findOrFail($announcement->getKey());
+
+            if (! in_array($announcement->publish_state, [Announcement::STATE_DRAFT, Announcement::STATE_SCHEDULED], true)) {
+                throw new BusinessRuleException("A {$announcement->publish_state} announcement cannot be published again; archive it and publish a correction instead.");
+            }
+
+            return $this->markPublished($announcement, $by);
+        });
+    }
+
+    /**
+     * Publish a draft at a later time. A time without an offset is read on the
+     * university's clock (`academics.timezone`). It must be in the future and
+     * within a year; the author must be able to reach the audience now (and is
+     * checked again when it is published).
+     */
+    public function schedule(Announcement $announcement, User $by, string $at): Announcement
+    {
+        $when = Carbon::parse($at, AcademicClock::timezone())->utc();
+
+        if ($when->lte(now())) {
+            throw ValidationException::withMessages(['scheduled_for' => 'Choose a time in the future.']);
+        }
+
+        if ($when->gt(now()->addYear())) {
+            throw ValidationException::withMessages(['scheduled_for' => 'Choose a time within the next year.']);
+        }
+
+        return DB::transaction(function () use ($announcement, $by, $when) {
+            $announcement = Announcement::query()->lockForUpdate()->findOrFail($announcement->getKey());
+            $this->assertDraft($announcement, 'scheduled');
             $this->assertAudience($by, $announcement->audience_type, $announcement->audience_id);
-            $announcement->update(['publish_state' => Announcement::STATE_PUBLISHED, 'published_at' => now()]);
-            $this->audit->record('announcement.published', $announcement, after: $announcement->only(['title', 'audience_type', 'audience_id']));
-            // Delivery to the audience is queued and runs after commit (9.20 / 9.21).
-            SendAnnouncementNotifications::dispatch($announcement);
+
+            $announcement->update(['publish_state' => Announcement::STATE_SCHEDULED, 'scheduled_for' => $when]);
+            $this->audit->record('announcement.scheduled', $announcement, after: $announcement->only(['title', 'audience_type', 'audience_id', 'scheduled_for']));
 
             return $announcement->refresh();
         });
+    }
+
+    /** Take a scheduled announcement back to draft (to edit it, or not publish it). */
+    public function unschedule(Announcement $announcement): Announcement
+    {
+        return DB::transaction(function () use ($announcement) {
+            $announcement = Announcement::query()->lockForUpdate()->findOrFail($announcement->getKey());
+
+            if ($announcement->publish_state !== Announcement::STATE_SCHEDULED) {
+                throw new BusinessRuleException("A {$announcement->publish_state} announcement is not scheduled.");
+            }
+
+            $before = $announcement->only(['publish_state', 'scheduled_for']);
+            $announcement->update(['publish_state' => Announcement::STATE_DRAFT, 'scheduled_for' => null]);
+            $this->audit->record('announcement.unscheduled', $announcement, $before, $announcement->only(['publish_state', 'scheduled_for']));
+
+            return $announcement->refresh();
+        });
+    }
+
+    /**
+     * Publish every scheduled announcement that is due, as its author
+     * (`announcements:publish-scheduled`, every minute). One whose author can
+     * no longer publish it (account inactive, no longer teaching the section,
+     * moved department…) goes back to draft and the author is told why.
+     * Returns the number published.
+     */
+    public function publishDue(): int
+    {
+        // A fixed list: publishing changes the state the query filters on.
+        $due = Announcement::query()
+            ->where('publish_state', Announcement::STATE_SCHEDULED)
+            ->where('scheduled_for', '<=', now())
+            ->orderBy('scheduled_for')
+            ->orderBy('id')
+            ->pluck('id');
+
+        return $due->filter(fn (int $id) => $this->publishScheduled($id))->count();
+    }
+
+    /**
+     * Publish one due announcement as its author, under a row lock that also
+     * re-checks it is still scheduled and due (the author may have taken it
+     * back to draft meanwhile). On refusal it goes back to draft, audited, and
+     * the author is told (in-app, optional email).
+     */
+    private function publishScheduled(int $id): bool
+    {
+        return DB::transaction(function () use ($id) {
+            $announcement = Announcement::query()->with('author')->lockForUpdate()->find($id);
+
+            if ($announcement === null || $announcement->publish_state !== Announcement::STATE_SCHEDULED || $announcement->scheduled_for?->isFuture()) {
+                return false;
+            }
+
+            $author = $announcement->author;
+
+            try {
+                if ($author === null || ! $author->is_active || ! $this->canWrite($author)) {
+                    throw new BusinessRuleException('Its author can no longer publish announcements.');
+                }
+
+                $this->markPublished($announcement, $author);
+
+                return true;
+            } catch (BusinessRuleException|ValidationException $e) {
+                $reason = $e instanceof ValidationException ? (string) collect($e->errors())->flatten()->first() : $e->getMessage();
+                $before = $announcement->only(['publish_state', 'scheduled_for']);
+                $announcement->update(['publish_state' => Announcement::STATE_DRAFT, 'scheduled_for' => null]);
+                $this->audit->record('announcement.schedule_failed', $announcement, $before, $announcement->only(['publish_state', 'scheduled_for']), $reason);
+                $author?->notify(new AnnouncementScheduleFailed($announcement, $reason));
+
+                return false;
+            }
+        });
+    }
+
+    /** The publish step itself, on a locked draft or scheduled row. */
+    private function markPublished(Announcement $announcement, User $by): Announcement
+    {
+        // The publisher must still be allowed to reach the audience.
+        $this->assertAudience($by, $announcement->audience_type, $announcement->audience_id);
+        $announcement->update(['publish_state' => Announcement::STATE_PUBLISHED, 'published_at' => now()]);
+        $this->audit->record('announcement.published', $announcement, after: $announcement->only(['title', 'audience_type', 'audience_id', 'scheduled_for']));
+        // Delivery to the audience is queued and runs after commit (9.20 / 9.21).
+        SendAnnouncementNotifications::dispatch($announcement);
+
+        return $announcement->refresh();
+    }
+
+    /** Whether the user may write announcements at all (`AnnouncementPolicy::manageAny`). */
+    public function canWrite(User $user): bool
+    {
+        return $this->manages($user)
+            || ($user->isRole(Role::Lecturer->value) && $user->lecturer?->is_active === true)
+            || $this->departmentOf($user) !== null;
+    }
+
+    /** The department a Department Admin writes for, or null (other roles, or none assigned). */
+    public function departmentOf(User $user): ?int
+    {
+        return $user->isRole(Role::DepartmentAdmin->value) && $user->department_id !== null ? (int) $user->department_id : null;
     }
 
     public function archive(Announcement $announcement): Announcement
@@ -300,6 +494,18 @@ class AnnouncementService
             ];
         }
 
+        // A Department Admin: their department and its programs, courses and sections.
+        if ($this->departmentOf($user) !== null) {
+            $sections = Section::query()->visibleTo($user)->whereIn('status', ['open', 'active'])->with('offering.course:id,code', 'offering.semester:id,name')->get();
+
+            return [
+                'department' => Department::query()->visibleTo($user)->get()->map(fn ($m) => ['id' => $m->id, 'label' => $label('department', $m)])->all(),
+                'program' => Program::query()->visibleTo($user)->orderBy('name')->get()->map(fn ($m) => ['id' => $m->id, 'label' => $label('program', $m)])->all(),
+                'section' => $sections->map(fn ($m) => ['id' => $m->id, 'label' => $label('section', $m)])->sortBy('label')->values()->all(),
+                'course' => Course::query()->visibleTo($user)->where('status', Course::STATUS_ACTIVE)->orderBy('code')->get()->map(fn ($m) => ['id' => $m->id, 'label' => $label('course', $m)])->all(),
+            ];
+        }
+
         $sections = $user->lecturer?->sections()->with('offering.course:id,code,name', 'offering.semester:id,name')->get() ?? collect();
 
         return [
@@ -365,9 +571,13 @@ class AnnouncementService
      */
     private function assertAudience(User $user, string $type, mixed $id): array
     {
+        $refusal = $this->departmentOf($user) !== null
+            ? 'Department Admins can announce only to their department and its programs, courses and sections.'
+            : 'Lecturers can announce only to sections or courses they teach.';
+
         if (in_array($type, Announcement::GROUP_AUDIENCES, true)) {
             if (! $this->manages($user)) {
-                throw ValidationException::withMessages(['audience_type' => 'Lecturers can announce only to sections or courses they teach.']);
+                throw ValidationException::withMessages(['audience_type' => $refusal]);
             }
 
             return ['audience_type' => $type, 'audience_id' => null];
@@ -383,8 +593,13 @@ class AnnouncementService
             throw ValidationException::withMessages(['audience_id' => "Choose the {$type} to announce to."]);
         }
 
-        if (! $this->manages($user)) {
-            $lecturer = $user->lecturer;
+        if ($this->departmentOf($user) !== null) {
+            // Department, program, course or section of their own department (`BelongsToDepartment`).
+            if (! $class::query()->findOrFail($id)->isVisibleTo($user)) {
+                throw ValidationException::withMessages(['audience_id' => $refusal]);
+            }
+        } elseif (! $this->manages($user)) {
+            $lecturer = $user->isRole(Role::Lecturer->value) ? $user->lecturer : null;
             $teaches = $lecturer !== null && $lecturer->is_active && match ($type) {
                 'section' => $lecturer->sections()->whereKey($id)->exists(),
                 'course' => $lecturer->sections()->whereHas('offering', fn ($q) => $q->where('course_id', $id))->exists(),
@@ -392,7 +607,7 @@ class AnnouncementService
             };
 
             if (! $teaches) {
-                throw ValidationException::withMessages(['audience_id' => 'Lecturers can announce only to sections or courses they teach.']);
+                throw ValidationException::withMessages(['audience_id' => $refusal]);
             }
         }
 
@@ -450,6 +665,10 @@ class AnnouncementService
             }
         } elseif ($user->isRole(Role::SuperAdmin->value) || $user->isRole(Role::UniversityAdmin->value) || $user->isRole(Role::DepartmentAdmin->value)) {
             $m['staff'] = true;
+            // A Department Admin also belongs to their department's audience (report 51).
+            if (($department = $this->departmentOf($user)) !== null) {
+                $m['department'] = [$department];
+            }
         }
 
         return $m;

@@ -5,6 +5,8 @@ Announcements and the polymorphic notification inbox.
 ```mermaid
 erDiagram
     USERS ||--o{ ANNOUNCEMENTS : "author"
+    ANNOUNCEMENTS ||--o{ ANNOUNCEMENT_READS : "read receipts"
+    USERS ||--o{ ANNOUNCEMENT_READS : "reads"
     USERS ||--o{ NOTIFICATIONS : "receives"
     USERS ||--o| NOTIFICATION_PREFERENCES : "config"
 
@@ -18,6 +20,13 @@ erDiagram
         bigint audience_id
         varchar publish_state
         timestamptz published_at
+        timestamptz scheduled_for
+    }
+    ANNOUNCEMENT_READS {
+        bigint id PK
+        bigint announcement_id FK
+        bigint user_id FK
+        timestamptz read_at
     }
     NOTIFICATIONS {
         uuid id PK
@@ -50,6 +59,9 @@ Notes:
 - `announcements.audience_type` is a `varchar` + `CHECK`:
   `all|students|lecturers|staff|department|program|section|course` (`faculty` dropped from the CHECK by `2026_10_05_170000`, report 39 §7);
   `announcement_type` is `general|academic|administrative|event`;
-  `publish_state` is `draft|published|archived`.
+  `publish_state` is `draft|scheduled|published|archived` (`scheduled`
+  with `scheduled_for`, report 51).
+- `announcement_reads` holds one read receipt per user and announcement
+  (unique pair, cascades with either side; report 51).
 - Announcement attachments are `files` rows with `fileable` pointing at the
   announcement.

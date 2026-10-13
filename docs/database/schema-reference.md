@@ -1459,23 +1459,56 @@ Columns:
 | announcement_type | varchar(30) | yes | `general` | general/academic/administrative/event |
 | audience_type | varchar(30) | no | `all` | all/students/lecturers/staff/department/program/section/course (`faculty` removed in report 39) |
 | audience_id | bigint | yes | | Target entity id |
-| publish_state | varchar(20) | no | `draft` | draft/published/archived |
-| published_at | timestamptz | yes | | |
+| publish_state | varchar(20) | no | `draft` | draft/scheduled/published/archived (`scheduled`: report 51) |
+| published_at | timestamptz | yes | | When it was actually published |
+| scheduled_for | timestamptz | yes | | Planned publication time; required while `scheduled`, kept after publishing (report 51) |
 
 Relationships:
 
 - belongs to `users` (author)
 - targets `departments`/`programs`/`sections`/`courses` via `audience_type`+`audience_id`
 - may have `files`
+- has many `announcement_reads`
 
 Constraints:
 
-- CHECK `announcement_type`, `audience_type`, `publish_state`
+- CHECK `announcement_type`, `audience_type`, `publish_state`;
+  `ck_announcements_scheduled` (`publish_state <> 'scheduled' OR scheduled_for IS NOT NULL`)
 - FK `author_id` → `users.id` RESTRICT
 
 Indexes:
 
-- PK `id`; IDX `(audience_type, audience_id)`; IDX `(publish_state, published_at)`
+- PK `id`; IDX `(audience_type, audience_id)`; IDX `(publish_state, published_at)`;
+  IDX `idx_announcements_scheduled (publish_state, scheduled_for)`
+
+---
+
+### Table: announcement_reads
+
+Purpose: read receipts — a user marked a published announcement read
+(report 51).
+
+Columns:
+
+| Column | Type | Nullable | Default | Description |
+|---|---|---|---|---|
+| id | bigint | no | PK | |
+| announcement_id | bigint | no | | FK → announcements.id |
+| user_id | bigint | no | | FK → users.id |
+| read_at | timestamptz | no | now() | |
+
+Relationships:
+
+- belongs to `announcements`, `users`
+
+Constraints:
+
+- UNIQUE `uq_announcement_reads (announcement_id, user_id)`
+- FK `announcement_id` → `announcements.id` CASCADE; FK `user_id` → `users.id` CASCADE
+
+Indexes:
+
+- PK `id`; IDX `idx_announcement_reads_user (user_id)`
 
 ---
 

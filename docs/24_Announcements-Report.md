@@ -131,3 +131,19 @@ dashboard card; file attachments workflow (upload, list with URLs and sizes,
 authorized streaming download, remove attachment, and deletion cleanup). Full
 suite: **356 passed**. `AnnouncementSeeder` adds four published notices and a
 draft.
+
+## 9. Update (2026-10-13): authoring, scheduling and read receipts
+
+The three items listed as not built in §1 are delivered (report 51):
+
+- **Department Admin authoring:** a Department Admin with a department writes
+  to it and its programs, courses and sections (the Faculty Admin row of §5
+  now reads: own announcements, their department's audiences). Department
+  audiences also reach the department's Department Admins.
+- **Scheduled publishing:** `draft → scheduled → published`, published by
+  `announcements:publish-scheduled` (every minute) as the author, who is
+  re-checked at that moment and told if it cannot go out.
+- **Read receipts:** `announcement_reads`; the feed marks new items and
+  offers *Mark as read* / *Mark all as read*; authors see "read by X of N".
+
+Report: `docs/51_Announcement-Authoring-Scheduling-and-Read-Receipts-Report.md`.

@@ -17,8 +17,9 @@ use Inertia\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
- * Announcement screens (module 9.19): every user's feed, and the compose /
- * manage page for managers and lecturers.
+ * Announcement screens (module 9.19): every user's feed with read state, and
+ * the compose / manage page for managers, Department Admins and lecturers
+ * (scheduling and read counts, report 51).
  */
 class AnnouncementsController extends Controller
 {
@@ -30,6 +31,7 @@ class AnnouncementsController extends Controller
     {
         return Inertia::render('Announcements/Feed', [
             'announcements' => AnnouncementResource::collection($this->page($this->announcements->feedFor($request->user()))),
+            'unreadCount' => $this->announcements->unreadCount($request->user()),
             'canManage' => $request->user()->can('manageAny', Announcement::class),
         ]);
     }
@@ -39,8 +41,11 @@ class AnnouncementsController extends Controller
         $this->authorize('manageAny', Announcement::class);
         $state = ApiAnnouncementController::stateFilter($request);
 
+        $page = $this->page($this->announcements->managedBy($request->user(), $state));
+        $this->announcements->attachReach($page->getCollection());
+
         return Inertia::render('Announcements/Manage', [
-            'announcements' => AnnouncementResource::collection($this->page($this->announcements->managedBy($request->user(), $state))),
+            'announcements' => AnnouncementResource::collection($page),
             'filters' => ['publish_state' => $state],
             'targets' => $this->announcements->targetOptions($request->user()),
             'canTargetGroups' => $this->announcements->manages($request->user()),
@@ -63,6 +68,10 @@ class AnnouncementsController extends Controller
 
         if ($publish) {
             $this->announcements->publish($announcement, $request->user());
+        } elseif ($request->filled('scheduled_for')) {
+            $this->announcements->schedule($announcement, $request->user(), (string) $request->validated('scheduled_for'));
+
+            return back()->with('success', 'Announcement scheduled.');
         }
 
         return back()->with('success', $publish ? 'Announcement published.' : 'Draft saved.');
@@ -106,6 +115,41 @@ class AnnouncementsController extends Controller
         $this->announcements->publish($announcement, $request->user());
 
         return back()->with('success', 'Announcement published.');
+    }
+
+    public function schedule(Request $request, Announcement $announcement): RedirectResponse
+    {
+        $this->authorize('update', $announcement);
+        $at = $request->validate(['scheduled_for' => ['required', 'date']])['scheduled_for'];
+
+        $this->announcements->schedule($announcement, $request->user(), (string) $at);
+
+        return back()->with('success', 'Announcement scheduled.');
+    }
+
+    public function unschedule(Announcement $announcement): RedirectResponse
+    {
+        $this->authorize('update', $announcement);
+
+        $this->announcements->unschedule($announcement);
+
+        return back()->with('success', 'Back to drafts.');
+    }
+
+    public function read(Request $request, Announcement $announcement): RedirectResponse
+    {
+        $this->authorize('read', $announcement);
+
+        $this->announcements->markRead($announcement, $request->user());
+
+        return back();
+    }
+
+    public function readAll(Request $request): RedirectResponse
+    {
+        $marked = $this->announcements->markAllRead($request->user());
+
+        return back()->with('success', $marked === 1 ? '1 announcement marked read.' : "{$marked} announcements marked read.");
     }
 
     public function archive(Announcement $announcement): RedirectResponse

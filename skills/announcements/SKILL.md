@@ -28,11 +28,19 @@ tracking visibility/read state.
 
 ## 4. Business rules
 
-- Audience scopes: `all`, `faculty`, `department`, `program`, `section`.
+- Audience scopes: `all`, `students`, `lecturers`, `staff`, `department`,
+  `program`, `section`, `course` (the faculty level was removed, report 39).
+  A department audience also reaches the department's Department Admins.
 - A published announcement triggers queued notifications to the audience
   members (email; Telegram for subscribers).
-- Draft → publish workflow; scheduled publish optional.
-- Only authorized roles publish (admins; lecturers within their course/section).
+- `draft → published → archived`, or `draft → scheduled → published`:
+  `announcements:publish-scheduled` (every minute) publishes a due
+  announcement as its author, re-checking the author's rights then; refused →
+  back to draft, audited, `AnnouncementScheduleFailed` to the author
+  (report 51). Scheduled ones are not editable; return them to draft first.
+- Only authorized roles publish: managers (any audience), Department Admins
+  with a department (their department and its programs, courses, sections),
+  active lecturers (sections / courses they teach).
 - Past/published announcements are append-only (edits create history or add an
   update, do not silently rewrite).
 
@@ -40,8 +48,11 @@ tracking visibility/read state.
 
 - `GET /api/announcements` (own audience feed, paginated).
 - `GET/POST/PATCH/DELETE /api/announcements` (staff publish; drafts draft-only).
-- `POST /api/announcements/{id}/publish`.
-- `POST /api/announcements/{id}/read` (optional read receipt).
+- `POST /api/announcements/{id}/publish` (a draft or a scheduled one),
+  `/schedule` (`scheduled_for`), `/unschedule`.
+- `POST /api/announcements/{id}/read` (read receipt, `announcement_reads`),
+  `POST /api/announcements/read-all`; the feed returns `is_read` and
+  `meta.unread`, the managed list `audience_size` / `read_count` (report 51).
 
 ## 6. Backend responsibilities
 
@@ -58,10 +69,11 @@ tracking visibility/read state.
 
 ## 8. Authorization rules
 
-- Univ Admin: all announcements.
-- Faculty/Dept Admin + Lecturers: publish within their scope (department/
-  section).
-- Students: view their audience feed only.
+- Super / University Admin: all announcements.
+- Department Admin (with a department) + active lecturers: write and manage
+  their own, within their scope (department and its units / taught sections
+  and courses); a Department Admin without a department writes nothing.
+- Students: view their audience feed only; mark its announcements read.
 
 ## 9. Validation rules
 

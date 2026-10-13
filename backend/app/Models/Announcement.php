@@ -4,15 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Carbon;
 
 /**
  * A targeted announcement (`skills/announcements`).
  *
- * `draft → published → archived`. Only drafts can be edited or deleted; a
- * published announcement is never silently rewritten — archive it and publish
- * a correction. The audience is resolved when a feed is read
+ * `draft → published → archived`, or `draft → scheduled → published` when a
+ * publication time is set (`announcements:publish-scheduled`, report 51); a
+ * scheduled one returns to draft to be edited. Only drafts can be edited or
+ * deleted; a published announcement is never silently rewritten — archive it
+ * and publish a correction. The audience is resolved when a feed is read
  * (`AnnouncementService::feedFor`), so no recipient rows are stored.
  *
  * @property int $id
@@ -24,17 +27,20 @@ use Illuminate\Support\Carbon;
  * @property int|null $audience_id
  * @property string $publish_state
  * @property Carbon|null $published_at
+ * @property Carbon|null $scheduled_for
  * @property-read User $author
  */
 class Announcement extends Model
 {
     public const STATE_DRAFT = 'draft';
 
+    public const STATE_SCHEDULED = 'scheduled';
+
     public const STATE_PUBLISHED = 'published';
 
     public const STATE_ARCHIVED = 'archived';
 
-    public const STATES = [self::STATE_DRAFT, self::STATE_PUBLISHED, self::STATE_ARCHIVED];
+    public const STATES = [self::STATE_DRAFT, self::STATE_SCHEDULED, self::STATE_PUBLISHED, self::STATE_ARCHIVED];
 
     public const TYPES = ['general', 'academic', 'administrative', 'event'];
 
@@ -49,7 +55,7 @@ class Announcement extends Model
         'course' => Course::class,
     ];
 
-    protected $fillable = ['author_id', 'title', 'body', 'announcement_type', 'audience_type', 'audience_id', 'publish_state', 'published_at'];
+    protected $fillable = ['author_id', 'title', 'body', 'announcement_type', 'audience_type', 'audience_id', 'publish_state', 'published_at', 'scheduled_for'];
 
     /**
      * @var array<string, mixed>
@@ -58,12 +64,18 @@ class Announcement extends Model
 
     protected function casts(): array
     {
-        return ['published_at' => 'datetime', 'audience_id' => 'integer'];
+        return ['published_at' => 'datetime', 'scheduled_for' => 'datetime', 'audience_id' => 'integer'];
     }
 
     public function author(): BelongsTo
     {
         return $this->belongsTo(User::class, 'author_id');
+    }
+
+    /** Read receipts (report 51). */
+    public function reads(): HasMany
+    {
+        return $this->hasMany(AnnouncementRead::class);
     }
 
     /** Attachments linked to this announcement. */

@@ -144,7 +144,7 @@ class AnnouncementTest extends TestCase
         $this->actingAs($this->admin)->getJson('/api/announcements')->assertJsonCount(3, 'data');
     }
 
-    public function test_students_and_department_admin_cannot_write(): void
+    public function test_students_and_an_unassigned_department_admin_cannot_write(): void
     {
         $departmentAdmin = User::factory()->create(['role_id' => RoleModel::factory()->withSlug(Role::DepartmentAdmin->value)->create()->id]);
 

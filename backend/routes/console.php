@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Semester;
+use App\Services\AnnouncementService;
 use App\Services\ErrorLogService;
 use App\Services\InboxService;
 use App\Services\InvoiceService;
@@ -80,6 +81,12 @@ Artisan::command('error-logs:prune {--days='.ErrorLogService::RETENTION_DAYS.' :
 })->purpose('Delete system error log rows past the retention period');
 
 Schedule::command('error-logs:prune')->dailyAt('01:10');
+
+Artisan::command('announcements:publish-scheduled', function (AnnouncementService $announcements) {
+    $this->info($announcements->publishDue().' scheduled announcement(s) published.');
+})->purpose('Publish scheduled announcements that are due (report 51)');
+
+Schedule::command('announcements:publish-scheduled')->everyMinute()->withoutOverlapping();
 
 // Tuition (module 9.18): generate semester tuition invoices from course enrollments.
 Artisan::command('tuition:generate {semester : ID or code of the semester} {--due-date= : Due date for generated invoices (YYYY-MM-DD)} {--rate= : Override rate per credit} {--department= : Filter by department ID} {--program= : Filter by program ID} {--dry-run : Run in preview mode without creating invoices}', function (TuitionInvoiceService $service) {

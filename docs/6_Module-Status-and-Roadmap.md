@@ -38,7 +38,7 @@
 | 9.16 | Document Management | `[Implemented]` (student certificate and internship letter in report 30) |
 | 9.17 | Digital Document Verification | `[Implemented]` |
 | 9.18 | Invoices & Payment Records | `[Implemented]` (invoice & receipt PDF download in report 23) |
-| 9.19 | Announcements | `[Implemented]` (file attachments in report 24) |
+| 9.19 | Announcements | `[Implemented]` (file attachments in report 24; Department Admin authoring, scheduled publishing and read receipts in report 51) |
 | 9.20 | Email Notifications | `[Implemented]` (password emails in report 29; in-app inbox in report 42) |
 | 9.21 | Telegram Notifications | `[Implemented]` (class reminders and one-tap chat linking in report 48) |
 | 9.22 | Internship Management | `[Implemented]` (opportunity postings `[Future]`; letter document in report 30) |
@@ -431,8 +431,8 @@ A module is not done until its report exists and its tests pass — never label
   pins the shape for every paginated index page.
 - `[Done]` 9.19 Announcements. Report: `docs/24_Announcements-Report.md`.
   `[Done]` Delivery by email / Telegram (9.20 / 9.21). `[Done]` File
-  attachments (report 24). `[Open]` Read receipts, scheduled publishing,
-  Department Admin authoring.
+  attachments (report 24). `[Done]` Read receipts, scheduled publishing,
+  Department Admin authoring (report 51).
 - `[Done]` 9.20 / 9.21 Email & Telegram Notifications. Report:
   `docs/25_Notifications-Report.md`. `[Done]` Password-reset emails (report
   29). `[Done]` In-app inbox (report 42). `[Done]` Class-start reminders and
@@ -737,3 +737,13 @@ A module is not done until its report exists and its tests pass — never label
   breadcrumb section links led to 404 / 403 pages; `source-map-js` advisory.
   Added: error-log retention (`error-logs:prune`, daily, 90 days). Report:
   `docs/50_Project-Audit-and-Hardening-Report.md`.
+- `[Done]` Announcement authoring, scheduling and read receipts (2026-10-13):
+  a Department Admin with a department writes to it and its programs, courses
+  and sections (department audiences now also reach its Department Admins);
+  drafts can be scheduled (`scheduled` state, `scheduled_for`) and
+  `announcements:publish-scheduled` publishes them every minute as their
+  author — re-checked then, otherwise back to draft with an audit entry and a
+  notice to the author; readers mark announcements read (`announcement_reads`,
+  feed *New* markers, *Mark all as read*) and authors see "read by X of N".
+  Migration `2026_10_13_100000`; 4 API operations (240 / 240 documented).
+  Report: `docs/51_Announcement-Authoring-Scheduling-and-Read-Receipts-Report.md`.

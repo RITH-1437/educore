@@ -91,6 +91,7 @@ Icon vocabulary — reuse, do not invent per page:
 | Activate / start · complete | `CirclePlay` / `Play` · `CircleCheckBig` | Close (semester) | `CircleStop` |
 | Approve · reject | `Check` · `X` | Submit / send · publish | `Send` |
 | Publish / release (visibility) · hide | `Eye` · `EyeOff` | Return to draft · withdraw · reverse | `Undo2` |
+| Schedule (publish later) | `Clock` | Mark read · mark all read | `Check` · `CheckCheck` |
 | Finalize · reopen | `Lock` · `LockOpen` | Revoke · cancel record | `Ban` |
 | ~~Apply filters / search~~ — removed 2026-10-05: filter bars apply live (§4) | — | Clear filters | `FunnelX` |
 | Download / export CSV | `Download` | Make current | `Star` |
@@ -255,6 +256,7 @@ Statuses map to **semantic colors** — never invent a per-status color.
 | Approved | `success` |
 | Rejected | `error` |
 | Draft | `muted` |
+| Scheduled | `info` (`primary` badge) |
 | Published | `success` |
 | Completed | `success` |
 | Cancelled | `muted` |

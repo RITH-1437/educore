@@ -161,7 +161,7 @@ course-material upload (`backend/config/academics.php`).
 | `/invoices`                 | Invoices: create, edit, record / reverse payments, cancel, export CSV | Super admin, University admin |
 | `/my-invoices`              | My invoices, payments and balance | Student |
 | `/announcements`            | Announcement feed (own audience) | Every signed-in role |
-| `/announcements/manage`     | Write, publish, archive announcements | Super admin, University admin (any audience), Lecturer (own sections / courses) |
+| `/announcements/manage`     | Write, schedule, publish, archive announcements | Super admin, University admin (any audience), Department admin (own department), Lecturer (own sections / courses) |
 | `/notifications`            | My notification settings (email opt-out, connect / disconnect Telegram, class reminders) | Every signed-in user (own only) |
 | `/inbox`                    | My in-app notifications (bell in the top bar): open, mark read | Every signed-in user (own only) |
 | `/my-internships`           | Apply for an internship, follow it, submit reports | Student |
@@ -358,6 +358,8 @@ The `backend/` folder is a standard Laravel 12 application.
   (daily 07:00) and `php artisan notifications:prune` (daily 01:00, deletes
   in-app notifications older than 180 days) and `php artisan error-logs:prune`
   (daily 01:10, deletes system error log rows older than 90 days) and `php artisan
+  announcements:publish-scheduled` (every minute, publishes scheduled
+  announcements that are due) and `php artisan
   notifications:class-reminders` (every 5 minutes: a Telegram reminder about
   `CLASS_REMINDER_MINUTES` (30) before each class, read on the university's
   clock `ACADEMIC_TIMEZONE`, e.g. `Asia/Phnom_Penh`; UTC when unset). Queued jobs (notifications) run in the `queue` container;

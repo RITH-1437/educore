@@ -27,6 +27,11 @@ class AnnouncementResource extends JsonResource
             'audience' => app(AnnouncementService::class)->audienceLabel($this->resource),
             'publish_state' => $this->publish_state,
             'published_at' => $this->published_at?->toIso8601String(),
+            'scheduled_for' => $this->scheduled_for?->toIso8601String(),
+            // Feed: the caller's read state; managed list: live reach (report 51).
+            'is_read' => $this->whenHas('is_read', fn () => (bool) $this->is_read),
+            'audience_size' => $this->whenHas('audience_size'),
+            'read_count' => $this->whenHas('read_count'),
             'updated_at' => $this->updated_at?->toIso8601String(),
             'author' => $this->whenLoaded('author', fn () => ['id' => $this->author->id, 'name' => $this->author->name]),
             'attachments' => $this->relationLoaded('attachments')

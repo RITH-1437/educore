@@ -116,6 +116,8 @@ GPA = Σ(grade_points × credits) / Σ(credits)
 | `users` | 1 → N | `announcements` | Author |
 | `announcements` | → | `departments`/`programs`/`sections`/`courses` | Target via `audience_type` + `audience_id` |
 | `announcements` | → | `files` | Attachments |
+| `announcements` | 1 → N | `announcement_reads` | Read receipts (report 51) |
+| `users` | 1 → N | `announcement_reads` | Announcements the user marked read |
 | `users` | 1 → N | `notifications` | Laravel `notifiable` morph |
 | `users` | 1 → 1 | `notification_preferences` | Channel preferences |
 

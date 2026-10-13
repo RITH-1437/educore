@@ -430,13 +430,17 @@ documented operations.
 | POST | `/api/invoices/{invoice}/payments` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/payments/{payment}/reverse` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/students/{student}/invoices` | Sanctum + managers, or the student themself | Documented |
-| GET | `/api/announcements/feed` | Sanctum, any role (own audience only) | Documented |
-| GET | `/api/announcements` | Sanctum + managers (all) or an active lecturer (own) | Documented |
-| POST | `/api/announcements` | Sanctum + managers or an active lecturer (own sections / courses; multipart attachments) | Documented |
+| GET | `/api/announcements/feed` | Sanctum, any role (own audience only); `is_read` per item, `meta.unread` (report 51) | Documented |
+| POST | `/api/announcements/read-all` | Sanctum, any role (marks the caller's whole feed read; report 51) | Documented |
+| POST | `/api/announcements/{announcement}/read` | Sanctum, a member of the audience of a published announcement (read receipt, 204; report 51) | Documented |
+| GET | `/api/announcements` | Sanctum + managers (all), a Department Admin with a department or an active lecturer (own); `audience_size`, `read_count` (report 51) | Documented |
+| POST | `/api/announcements` | Sanctum + managers, a Department Admin (own department's audiences) or an active lecturer (own sections / courses; multipart attachments; optional `scheduled_for`) | Documented |
 | GET | `/api/announcements/{announcement}` | Sanctum + author, managers, or a member of the audience | Documented |
 | PUT, PATCH | `/api/announcements/{announcement}` | Sanctum + author or managers (drafts only) | Both documented |
 | DELETE | `/api/announcements/{announcement}` | Sanctum + author or managers (drafts only) | Documented |
-| POST | `/api/announcements/{announcement}/publish` | Sanctum + author or managers | Documented |
+| POST | `/api/announcements/{announcement}/publish` | Sanctum + author or managers (a draft or a scheduled one) | Documented |
+| POST | `/api/announcements/{announcement}/schedule` | Sanctum + author or managers (draft → scheduled; report 51) | Documented |
+| POST | `/api/announcements/{announcement}/unschedule` | Sanctum + author or managers (scheduled → draft; report 51) | Documented |
 | POST | `/api/announcements/{announcement}/archive` | Sanctum + author or managers | Documented |
 | GET | `/api/announcements/{announcement}/attachments/{file}/download` | Sanctum, user with announcement access (download attachment) | Documented |
 | GET | `/api/notification-preferences` | Sanctum, any role (own only) | Documented |
@@ -776,3 +780,18 @@ No route was added or removed; four behaviors changed
 
 The OpenAPI annotations of `UserController::update` (PUT and PATCH) and
 `::destroy` document the new `409`.
+
+## Announcement authoring, scheduling and read receipts (2026-10-13)
+
+| Method | URI | Action | Auth | Notes |
+|---|---|---|---|---|
+| POST | `/api/announcements/{announcement}/schedule` | `AnnouncementController::schedule` | Sanctum, author or manager | `scheduled_for` (future, ≤ 1 year; no offset = university timezone); `409` not a draft |
+| POST | `/api/announcements/{announcement}/unschedule` | `AnnouncementController::unschedule` | Sanctum, author or manager | `409` not scheduled |
+| POST | `/api/announcements/{announcement}/read` | `AnnouncementController::read` | Sanctum, audience member | `204`; `403` when not published or not in the caller's feed |
+| POST | `/api/announcements/read-all` | `AnnouncementController::readAll` | Sanctum, any role | `{data: {marked}}` |
+
+Changed: create accepts `scheduled_for` (not with `publish`); publish accepts a
+scheduled announcement; the managed list admits Department Admins and filters
+`scheduled`; resources gain `scheduled_for`, `is_read` (feed),
+`audience_size` / `read_count` (managed list). Web: the same four routes under
+`/announcements`. OpenAPI 240 / 240. See `docs/51_Announcement-Authoring-Scheduling-and-Read-Receipts-Report.md`.

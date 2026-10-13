@@ -91,6 +91,8 @@ Notifications dispatched on the Redis queue.
 - Payment recorded / invoice due
 - New document request / internship application → the staff who can process
   it (`StaffNotifier`, `docs/43_Staff-Request-Notices-Report.md`)
+- Scheduled announcement could not be published → its author
+  (`AnnouncementScheduleFailed`, report 51)
 
 ## Prohibitions
 

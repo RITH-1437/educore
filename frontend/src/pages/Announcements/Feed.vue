@@ -1,8 +1,8 @@
 <script setup>
 import { computed, ref } from 'vue'
 import IconButton from '../../components/IconButton.vue'
-import { Paperclip, SquarePen } from '@lucide/vue'
-import { Head, usePage } from '@inertiajs/vue3'
+import { Check, CheckCheck, Paperclip, SquarePen } from '@lucide/vue'
+import { Head, router, usePage } from '@inertiajs/vue3'
 import BaseBadge from '../../components/BaseBadge.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import EmptyState from '../../components/EmptyState.vue'
@@ -12,7 +12,22 @@ import { typeLabel, typeVariant, when } from '../../utils/announcements'
 
 const props = defineProps({
   announcements: { type: Object, required: true },
+  unreadCount: { type: Number, default: 0 },
   canManage: { type: Boolean, default: false },
+})
+
+// Read receipts (report 51): same pattern as the inbox (report 42).
+const marking = ref(null)
+const markRead = (item) => router.post(`/announcements/${item.id}/read`, {}, {
+  preserveScroll: true,
+  onStart: () => { marking.value = item.id },
+  onFinish: () => { marking.value = null },
+})
+const markingAll = ref(false)
+const markAllRead = () => router.post('/announcements/read-all', {}, {
+  preserveScroll: true,
+  onStart: () => { markingAll.value = true },
+  onFinish: () => { markingAll.value = false },
 })
 
 const page = usePage()
@@ -39,10 +54,11 @@ const filtered = computed(() => {
     <PageHeader
       :eyebrow="isStudent ? 'Overview' : 'Communication'"
       title="Announcements"
-      description="News addressed to you, your program, department, classes and courses."
+      :description="unreadCount ? `News addressed to you, your program, department, classes and courses · ${unreadCount} unread.` : 'News addressed to you, your program, department, classes and courses.'"
     >
-      <template v-if="canManage" #actions>
-        <IconButton :icon="SquarePen" href="/announcements/manage" size="md" variant="primary" label="Write an announcement" />
+      <template #actions>
+        <IconButton :icon="CheckCheck" size="md" label="Mark all as read" :disabled="unreadCount === 0" :loading="markingAll" @click="markAllRead" />
+        <IconButton v-if="canManage" :icon="SquarePen" href="/announcements/manage" size="md" variant="primary" label="Write an announcement" />
       </template>
     </PageHeader>
 
@@ -74,12 +90,18 @@ const filtered = computed(() => {
     </BaseCard>
 
     <article v-for="item in filtered" :key="item.id">
-      <BaseCard padding="lg">
-        <div class="flex flex-wrap items-center gap-2">
-          <BaseBadge :variant="typeVariant(item.announcement_type)" size="sm">{{ typeLabel(item.announcement_type) }}</BaseBadge>
-          <span class="text-caption text-muted dark:text-dark-muted">{{ item.audience }} · {{ when(item.published_at) }}</span>
+      <BaseCard padding="lg" :class="item.is_read === false ? 'ring-1 ring-primary/30 dark:ring-dark-primary/40' : ''">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex flex-wrap items-center gap-2">
+            <span v-if="item.is_read === false" class="inline-flex items-center gap-1.5 text-caption font-semibold text-primary dark:text-dark-primary">
+              <span class="h-2 w-2 rounded-pill bg-primary dark:bg-dark-primary" aria-hidden="true" />New
+            </span>
+            <BaseBadge :variant="typeVariant(item.announcement_type)" size="sm">{{ typeLabel(item.announcement_type) }}</BaseBadge>
+            <span class="text-caption text-muted dark:text-dark-muted">{{ item.audience }} · {{ when(item.published_at) }}</span>
+          </div>
+          <IconButton v-if="item.is_read === false" :icon="Check" variant="success" label="Mark as read" :loading="marking === item.id" @click="markRead(item)" />
         </div>
-        <h2 class="mt-3 text-h4 font-semibold text-ink dark:text-dark-ink">{{ item.title }}</h2>
+        <h2 class="mt-3 text-h4 text-ink dark:text-dark-ink" :class="item.is_read === false ? 'font-bold' : 'font-semibold'">{{ item.title }}</h2>
         <p class="mt-2 whitespace-pre-line text-body text-ink dark:text-dark-ink">{{ item.body }}</p>
         <div v-if="item.attachments?.length" class="mt-3 flex flex-wrap gap-2 pt-2 border-t border-border-default dark:border-dark-border">
           <a

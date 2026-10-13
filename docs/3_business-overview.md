@@ -645,16 +645,19 @@ users, main business activities, and expected outputs.
 ### 9.19 Announcements [Implemented]
 
 - **Purpose:** publish and target announcements.
-- **Primary users:** Administrators, authorized Lecturers, Student (receive).
+- **Primary users:** Administrators, Department Admins (own department), authorized Lecturers, Student (receive).
 - **Main business activities:** create announcements targeted to all/faculty/department/program/class/course; publish.
 - **Expected outputs:** a structured announcement feed per audience.
 - **Delivered:** drafts → published → archived announcements to everyone, a
   role group, or one department / program / section / course;
-  lecturers write to the sections and courses they teach; file attachments via private
+  lecturers write to the sections and courses they teach, Department Admins to
+  their department and its programs, courses and sections; file attachments via private
   storage; every user has a live feed resolved from their memberships, and the
-  student dashboard shows the latest three. Email / Telegram delivery ships with 9.20 / 9.21;
-  read receipts are [Future].
-  See [24_Announcements-Report.md](24_Announcements-Report.md).
+  student dashboard shows the latest three. Email / Telegram delivery ships with 9.20 / 9.21.
+  Drafts can be scheduled and are published automatically at their time; readers
+  mark announcements read and authors see how many of the audience did.
+  See [24_Announcements-Report.md](24_Announcements-Report.md) and
+  [51_Announcement-Authoring-Scheduling-and-Read-Receipts-Report.md](51_Announcement-Authoring-Scheduling-and-Read-Receipts-Report.md).
 
 ### 9.20 Email Notifications [Implemented]
 

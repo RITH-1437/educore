@@ -16,8 +16,12 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'audience_type', type: 'string', enum: ['all', 'students', 'lecturers', 'staff', 'department', 'program', 'section', 'course']),
         new OA\Property(property: 'audience_id', type: 'integer', format: 'int64', nullable: true),
         new OA\Property(property: 'audience', type: 'string', example: 'Section: CS101 · Section A'),
-        new OA\Property(property: 'publish_state', type: 'string', enum: ['draft', 'published', 'archived']),
+        new OA\Property(property: 'publish_state', type: 'string', enum: ['draft', 'scheduled', 'published', 'archived']),
         new OA\Property(property: 'published_at', type: 'string', format: 'date-time', nullable: true),
+        new OA\Property(property: 'scheduled_for', type: 'string', format: 'date-time', nullable: true, description: 'When a scheduled announcement is published (kept after publishing).'),
+        new OA\Property(property: 'is_read', type: 'boolean', description: 'Feed only: whether the caller marked it read.'),
+        new OA\Property(property: 'audience_size', type: 'integer', description: 'Managed list only: active users it reaches now.'),
+        new OA\Property(property: 'read_count', type: 'integer', description: 'Managed list only: how many of them marked it read.'),
         new OA\Property(property: 'updated_at', type: 'string', format: 'date-time'),
         new OA\Property(property: 'author', type: 'object', properties: [
             new OA\Property(property: 'id', type: 'integer', format: 'int64'),
@@ -50,6 +54,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'audience_type', type: 'string', enum: ['all', 'students', 'lecturers', 'staff', 'department', 'program', 'section', 'course']),
         new OA\Property(property: 'audience_id', type: 'integer', format: 'int64', nullable: true, description: 'Required for department / program / section / course.'),
         new OA\Property(property: 'publish', type: 'boolean', description: 'Create only: publish immediately.'),
+        new OA\Property(property: 'scheduled_for', type: 'string', format: 'date-time', nullable: true, description: 'Create only: schedule publication instead (future, within a year; without an offset read in the university timezone). Not with `publish`.'),
     ]
 )]
 class Announcement {}

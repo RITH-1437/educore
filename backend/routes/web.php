@@ -276,15 +276,22 @@ Route::middleware(['auth', 'role:super-admin,university-admin,student'])->group(
     Route::get('/invoices/{invoice}/download', [InvoicesController::class, 'download'])->name('invoices.download');
 });
 
-// Announcements: every signed-in role reads its feed; managers and lecturers
-// compose (`AnnouncementPolicy` + audience rules in `AnnouncementService`).
-Route::middleware('auth')->get('/announcements', [AnnouncementsController::class, 'feed'])->name('announcements.feed');
-Route::middleware(['auth', 'role:super-admin,university-admin,lecturer'])->group(function () {
+// Announcements: every signed-in role reads its feed and marks it read;
+// managers, Department Admins and lecturers compose (`AnnouncementPolicy` +
+// audience rules in `AnnouncementService`, report 51).
+Route::middleware('auth')->group(function () {
+    Route::get('/announcements', [AnnouncementsController::class, 'feed'])->name('announcements.feed');
+    Route::post('/announcements/read-all', [AnnouncementsController::class, 'readAll'])->name('announcements.read-all');
+    Route::post('/announcements/{announcement}/read', [AnnouncementsController::class, 'read'])->name('announcements.read');
+});
+Route::middleware(['auth', 'role:super-admin,university-admin,department-admin,lecturer'])->group(function () {
     Route::get('/announcements/manage', [AnnouncementsController::class, 'manage'])->name('announcements.manage');
     Route::post('/announcements', [AnnouncementsController::class, 'store'])->name('announcements.store');
     Route::put('/announcements/{announcement}', [AnnouncementsController::class, 'update'])->name('announcements.update');
     Route::delete('/announcements/{announcement}', [AnnouncementsController::class, 'destroy'])->name('announcements.destroy');
     Route::post('/announcements/{announcement}/publish', [AnnouncementsController::class, 'publish'])->name('announcements.publish');
+    Route::post('/announcements/{announcement}/schedule', [AnnouncementsController::class, 'schedule'])->name('announcements.schedule');
+    Route::post('/announcements/{announcement}/unschedule', [AnnouncementsController::class, 'unschedule'])->name('announcements.unschedule');
     Route::post('/announcements/{announcement}/archive', [AnnouncementsController::class, 'archive'])->name('announcements.archive');
 });
 Route::middleware('auth')->get('/announcements/{announcement}/attachments/{file}/download', [AnnouncementsController::class, 'downloadAttachment'])->name('announcements.attachments.download');

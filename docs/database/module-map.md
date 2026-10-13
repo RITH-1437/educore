@@ -108,6 +108,7 @@ Finance
 ```
 Communication
 ├── announcements
+├── announcement_reads         (read receipts, report 51)
 ├── notifications              (in-app, polymorphic notifiable)
 └── notification_preferences
 ```

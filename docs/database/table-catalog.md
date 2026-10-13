@@ -1,7 +1,7 @@
 # EduCore Table Catalog
 
 Every table in the EduCore schema, its purpose, module, primary entity, and its
-most important relationships. 50 business tables + 8 framework tables.
+most important relationships. 51 business tables + 8 framework tables.
 
 ## Domain tables
 
@@ -50,6 +50,7 @@ most important relationships. 50 business tables + 8 framework tables.
 | 40 | `invoice_items` | Line items on an invoice | Finance | Invoice Item | → `invoices` |
 | 41 | `payments` | Records of received payments | Finance | Payment | → `invoices`, → `received_by` (users) |
 | 42 | `announcements` | Published messages with audience targeting | Communication | Announcement | → `author_id` (users), target via `audience_type`/`audience_id`, attachments via `files` |
+| 42a | `announcement_reads` | Read receipts: a user marked a published announcement read (report 51) | Communication | AnnouncementRead | → `announcements`, → `users` |
 | 43 | `notifications` | In-app inbox: stored notifications, UUID key (report 42) | Communication | Notification | `notifiable` polymorphic → users |
 | 44 | `notification_preferences` | Per-user channel/target preferences | Communication | Preference | → `users` (1–1) |
 | 45 | `internship_companies` | Lean company records | Internship | Company | ← `internships` (1–N) |
@@ -78,9 +79,10 @@ most important relationships. 50 business tables + 8 framework tables.
 
 ## Counts
 
-- Business tables: **50** (49 original + `error_logs`, module 9.25)
-- Framework tables: **8**
-- Total physical tables: **58**
+- Business tables: **51** (49 original − `faculties` (report 39) + `error_logs`
+  (9.25), `course_materials` (report 44), `announcement_reads` (report 51))
+- Framework tables: **8** (plus Laravel's `migrations` log)
+- Total physical tables: **59** (60 with `migrations`; counted 2026-10-13)
 - Pivot tables: 4 (`permission_role`, `course_programs`, `course_prerequisites`,
   `section_lecturers`)
 - Polymorphic tables: 3 (`files`, `notifications`, `audit_logs`)

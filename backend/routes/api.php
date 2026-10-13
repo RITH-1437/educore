@@ -193,15 +193,20 @@ Route::middleware(['auth:sanctum', 'role:super-admin,university-admin,department
     Route::post('/payments/{payment}/reverse', [InvoiceController::class, 'reverse'])->name('api.payments.reverse');
     Route::get('/students/{student}/invoices', [InvoiceController::class, 'student'])->name('api.students.invoices');
 
-    // Announcements: every role reads its feed; `AnnouncementPolicy` limits
-    // writing to managers and active lecturers (own sections / courses).
+    // Announcements: every role reads its feed and marks it read;
+    // `AnnouncementPolicy` limits writing to managers, Department Admins (own
+    // department) and active lecturers (own sections / courses), report 51.
     Route::get('/announcements/feed', [AnnouncementController::class, 'feed'])->name('api.announcements.feed');
+    Route::post('/announcements/read-all', [AnnouncementController::class, 'readAll'])->name('api.announcements.read-all');
+    Route::post('/announcements/{announcement}/read', [AnnouncementController::class, 'read'])->name('api.announcements.read');
     Route::get('/announcements', [AnnouncementController::class, 'index'])->name('api.announcements.index');
     Route::post('/announcements', [AnnouncementController::class, 'store'])->name('api.announcements.store');
     Route::get('/announcements/{announcement}', [AnnouncementController::class, 'show'])->name('api.announcements.show');
     Route::match(['put', 'patch'], '/announcements/{announcement}', [AnnouncementController::class, 'update'])->name('api.announcements.update');
     Route::delete('/announcements/{announcement}', [AnnouncementController::class, 'destroy'])->name('api.announcements.destroy');
     Route::post('/announcements/{announcement}/publish', [AnnouncementController::class, 'publish'])->name('api.announcements.publish');
+    Route::post('/announcements/{announcement}/schedule', [AnnouncementController::class, 'schedule'])->name('api.announcements.schedule');
+    Route::post('/announcements/{announcement}/unschedule', [AnnouncementController::class, 'unschedule'])->name('api.announcements.unschedule');
     Route::post('/announcements/{announcement}/archive', [AnnouncementController::class, 'archive'])->name('api.announcements.archive');
     Route::get('/announcements/{announcement}/attachments/{file}/download', [AnnouncementController::class, 'downloadAttachment'])->name('api.announcements.attachments.download');
 

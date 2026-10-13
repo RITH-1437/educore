@@ -19,6 +19,7 @@ const statusMap = {
   inactive: { variant: 'muted', label: 'Inactive' },
   archived: { variant: 'warning', label: 'Archived' },
   draft: { variant: 'muted', label: 'Draft' },
+  scheduled: { variant: 'primary', label: 'Scheduled' },
   approved: { variant: 'success', label: 'Approved' },
   finalized: { variant: 'primary', label: 'Finalized' },
   published: { variant: 'success', label: 'Published' },

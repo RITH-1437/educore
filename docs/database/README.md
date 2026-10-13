@@ -52,9 +52,9 @@ running database yet — see
 
 | Category | Count |
 |---|---|
-| **Business (domain) tables** | **49** |
+| **Business (domain) tables** | **49** at design time; **51** today (`table-catalog.md`) |
 | Laravel/Sanctum framework tables (already migrated) | 8 |
-| **Total physical tables** | **57** |
+| **Total physical tables** | **57** at design time; **59** today |
 
 The count is the natural result of the normalized design, not a goal.
 

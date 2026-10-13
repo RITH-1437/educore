@@ -1,5 +1,5 @@
 <script setup>
-import { Archive, Megaphone, Paperclip, Pencil, Plus, Send, Trash2 } from '@lucide/vue'
+import { Archive, Clock, Megaphone, Paperclip, Pencil, Plus, Send, Trash2, Undo2 } from '@lucide/vue'
 import IconButton from '../../components/IconButton.vue'
 import { Head, router, useForm } from '@inertiajs/vue3'
 import { computed, ref, watch } from 'vue'
@@ -15,7 +15,7 @@ import PageHeader from '../../components/PageHeader.vue'
 import Pagination from '../../components/Pagination.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
 import { useConfirm } from '../../composables/useConfirm'
-import { AUDIENCES, stateBadge, typeLabel, typeVariant, when } from '../../utils/announcements'
+import { AUDIENCES, localInputValue, reach, stateBadge, toInstant, typeLabel, typeVariant, when } from '../../utils/announcements'
 
 const props = defineProps({
   announcements: { type: Object, required: true },
@@ -27,7 +27,16 @@ const props = defineProps({
 
 const { confirm } = useConfirm()
 const state = ref(props.filters.publish_state ?? '')
-const stateOptions = [{ value: '', label: 'All' }, { value: 'draft', label: 'Drafts' }, { value: 'published', label: 'Published' }, { value: 'archived', label: 'Archived' }]
+const stateOptions = [{ value: '', label: 'All' }, { value: 'draft', label: 'Drafts' }, { value: 'scheduled', label: 'Scheduled' }, { value: 'published', label: 'Published' }, { value: 'archived', label: 'Archived' }]
+
+// Department Admins write to their department (report 51); lecturers to what they teach.
+const description = computed(() => {
+  if (props.canTargetGroups) return 'Write to everyone, a role group or one department, program, section or course.'
+  if ((props.targets.department ?? []).length) return 'Write to your department and its programs, courses and sections.'
+  return 'Write to the sections and courses you teach.'
+})
+// The earliest time a schedule picker offers: the next minute, on the reader's clock.
+const minSchedule = () => localInputValue(new Date(Date.now() + 60000))
 const applyFilter = () => router.get('/announcements/manage', { filters: state.value ? { publish_state: state.value } : undefined }, { preserveState: true, replace: true })
 
 // Lecturers only see the audiences they may use (sections / courses they teach).
@@ -39,7 +48,7 @@ const showForm = ref(false)
 const fileInput = ref(null)
 const existingAttachments = ref([])
 const removeAttachmentIds = ref([])
-const blank = () => ({ title: '', body: '', announcement_type: 'general', audience_type: audienceOptions.value[0]?.value ?? 'section', audience_id: '', publish: false, attachments: [] })
+const blank = () => ({ title: '', body: '', announcement_type: 'general', audience_type: audienceOptions.value[0]?.value ?? 'section', audience_id: '', publish: false, scheduled_for: '', attachments: [] })
 const form = useForm(blank())
 const targetOptions = computed(() => (props.targets[form.audience_type] ?? []).map((t) => ({ value: t.id, label: t.label })))
 const needsTarget = computed(() => !AUDIENCES.find((a) => a.value === form.audience_type)?.group)
@@ -59,7 +68,7 @@ const openEdit = (item) => {
   existingAttachments.value = [...(item.attachments ?? [])]
   removeAttachmentIds.value = []
   if (fileInput.value) fileInput.value.value = ''
-  form.defaults({ title: item.title, body: item.body, announcement_type: item.announcement_type ?? 'general', audience_type: item.audience_type, audience_id: item.audience_id ?? '', publish: false, attachments: [] }).reset()
+  form.defaults({ title: item.title, body: item.body, announcement_type: item.announcement_type ?? 'general', audience_type: item.audience_type, audience_id: item.audience_id ?? '', publish: false, scheduled_for: '', attachments: [] }).reset()
   form.clearErrors()
   showForm.value = true
 }
@@ -67,8 +76,11 @@ const removeExistingAttachment = (id) => {
   removeAttachmentIds.value.push(id)
   existingAttachments.value = existingAttachments.value.filter((a) => a.id !== id)
 }
-const save = (publish) => {
-  form.publish = publish
+// mode: 'draft' (save), 'publish' (now) or 'schedule' (at the picked time).
+const saving = ref('draft')
+const save = (mode) => {
+  saving.value = mode
+  form.publish = mode === 'publish'
   const options = {
     forceFormData: true,
     preserveScroll: true,
@@ -82,12 +94,28 @@ const save = (publish) => {
       remove_attachment_ids: removeAttachmentIds.value,
     })).post(`/announcements/${editing.value.id}`, options)
   } else {
+    // The picked time is sent only by the Schedule button.
     form.transform((data) => ({
       ...data,
       audience_id: needsTarget.value ? data.audience_id || null : null,
+      scheduled_for: mode === 'schedule' ? toInstant(data.scheduled_for) : null,
     })).post('/announcements', options)
   }
 }
+
+// Schedule an existing draft.
+const scheduling = ref(null)
+const scheduleForm = useForm({ scheduled_for: '' })
+const showSchedule = computed({ get: () => scheduling.value !== null, set: (open) => { if (!open) scheduling.value = null } })
+const openSchedule = (item) => {
+  scheduling.value = item
+  scheduleForm.reset()
+  scheduleForm.clearErrors()
+}
+const schedule = () => scheduleForm
+  .transform((data) => ({ scheduled_for: toInstant(data.scheduled_for) }))
+  .post(`/announcements/${scheduling.value.id}/schedule`, { preserveScroll: true, onSuccess: () => (scheduling.value = null) })
+const unschedule = (item) => router.post(`/announcements/${item.id}/unschedule`, {}, { preserveScroll: true })
 
 const publish = async (item) => {
   if (await confirm({ title: 'Publish announcement?', message: `“${item.title}” will appear in the feed of: ${item.audience}. Published announcements cannot be edited.`, confirmLabel: 'Publish' })) {
@@ -109,7 +137,7 @@ const remove = async (item) => {
 <template>
   <Head title="Manage announcements - EduCore" />
   <div class="space-y-6">
-    <PageHeader eyebrow="Communication" title="Manage announcements" :description="canTargetGroups ? 'Write to everyone, a role group or one department, program, section or course.' : 'Write to the sections and courses you teach.'">
+    <PageHeader eyebrow="Communication" title="Manage announcements" :description="description">
       <template #actions>
         <IconButton :icon="Megaphone" href="/announcements" size="md" label="View feed" />
         <IconButton :icon="Plus" size="md" variant="primary" label="New announcement" :disabled="!audienceOptions.length" @click="openCreate" />
@@ -135,7 +163,9 @@ const remove = async (item) => {
               </div>
               <p class="mt-2 text-h4 font-semibold text-ink dark:text-dark-ink">{{ item.title }}</p>
               <p class="text-caption text-muted dark:text-dark-muted">
-                {{ item.audience }} · {{ item.author?.name }} · {{ item.publish_state === 'draft' ? `edited ${when(item.updated_at)}` : `published ${when(item.published_at)}` }}
+                {{ item.audience }} · {{ item.author?.name }} ·
+                {{ item.publish_state === 'draft' ? `edited ${when(item.updated_at)}` : item.publish_state === 'scheduled' ? `publishes ${when(item.scheduled_for)}` : `published ${when(item.published_at)}` }}
+                <template v-if="reach(item)"> · {{ reach(item) }}</template>
               </p>
               <p class="mt-2 line-clamp-2 text-small text-muted dark:text-dark-muted">{{ item.body }}</p>
               <div v-if="item.attachments?.length" class="mt-2 flex flex-wrap gap-1.5">
@@ -153,8 +183,13 @@ const remove = async (item) => {
             <div class="flex flex-wrap gap-1">
               <template v-if="item.publish_state === 'draft'">
                 <IconButton :icon="Send" variant="success" label="Publish announcement" @click="publish(item)" />
+                <IconButton :icon="Clock" label="Schedule announcement" @click="openSchedule(item)" />
                 <IconButton :icon="Pencil" label="Edit draft" @click="openEdit(item)" />
                 <IconButton :icon="Trash2" variant="danger" label="Delete draft" @click="remove(item)" />
+              </template>
+              <template v-else-if="item.publish_state === 'scheduled'">
+                <IconButton :icon="Send" variant="success" label="Publish now" @click="publish(item)" />
+                <IconButton :icon="Undo2" label="Return to draft" @click="unschedule(item)" />
               </template>
               <IconButton v-else-if="item.publish_state === 'published'" :icon="Archive" label="Archive announcement" @click="archive(item)" />
             </div>
@@ -166,7 +201,7 @@ const remove = async (item) => {
     <Pagination :links="announcements.meta?.links ?? []" />
 
     <BaseModal v-model="showForm" :title="editing ? 'Edit draft' : 'New announcement'" size="lg">
-      <form id="announcement-form" class="space-y-4" @submit.prevent="save(false)">
+      <form id="announcement-form" class="space-y-4" @submit.prevent="save('draft')">
         <BaseInput v-model="form.title" name="title" label="Title" required :error="form.errors.title" />
         <BaseTextarea v-model="form.body" name="body" label="Message" required :rows="6" :error="form.errors.body" />
         <div class="grid gap-4 sm:grid-cols-3">
@@ -194,12 +229,38 @@ const remove = async (item) => {
           <p class="text-caption text-muted dark:text-dark-muted">PDF, PNG, JPG, DOCX, XLSX, ZIP · max 10 MB per file</p>
           <p v-if="form.errors.attachments" class="text-small text-error" role="alert">{{ form.errors.attachments }}</p>
         </div>
+        <BaseInput
+          v-if="!editing"
+          v-model="form.scheduled_for"
+          name="scheduled_for"
+          type="datetime-local"
+          label="Publish later (optional)"
+          :min="minSchedule()"
+          hint="Pick a time to schedule it; leave empty to save a draft or publish now. Your local time."
+          :error="form.errors.scheduled_for"
+        />
       </form>
       <template #footer>
         <div class="flex flex-wrap justify-end gap-2">
           <BaseButton variant="ghost" @click="showForm = false">Cancel</BaseButton>
-          <BaseButton type="submit" form="announcement-form" variant="secondary" :loading="form.processing && !form.publish">Save draft</BaseButton>
-          <BaseButton v-if="!editing" :loading="form.processing && form.publish" @click="save(true)">Publish now</BaseButton>
+          <BaseButton type="submit" form="announcement-form" variant="secondary" :loading="form.processing && saving === 'draft'">Save draft</BaseButton>
+          <BaseButton v-if="!editing && form.scheduled_for" type="button" :loading="form.processing && saving === 'schedule'" @click="save('schedule')">Schedule</BaseButton>
+          <BaseButton v-else-if="!editing" :loading="form.processing && saving === 'publish'" @click="save('publish')">Publish now</BaseButton>
+        </div>
+      </template>
+    </BaseModal>
+
+    <BaseModal v-model="showSchedule" title="Schedule announcement">
+      <form id="schedule-form" class="space-y-4" @submit.prevent="schedule">
+        <p class="text-small text-muted dark:text-dark-muted">
+          “{{ scheduling?.title }}” is published automatically at this time to: {{ scheduling?.audience }}. Until then you can publish it now or return it to draft.
+        </p>
+        <BaseInput v-model="scheduleForm.scheduled_for" name="scheduled_for" type="datetime-local" label="Publish at" :min="minSchedule()" hint="Your local time." required :error="scheduleForm.errors.scheduled_for" />
+      </form>
+      <template #footer>
+        <div class="flex justify-end gap-2">
+          <BaseButton variant="ghost" @click="showSchedule = false">Cancel</BaseButton>
+          <BaseButton type="submit" form="schedule-form" :loading="scheduleForm.processing">Schedule</BaseButton>
         </div>
       </template>
     </BaseModal>

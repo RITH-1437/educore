@@ -31,6 +31,9 @@ Columns:
 | avatar_key | varchar(255) | yes | | MinIO key |
 | is_active | boolean | no | true | Account usable |
 | last_login_at | timestamptz | yes | | |
+| two_factor_secret | text | yes | | TOTP secret, encrypted with the app key; hidden (report 52) |
+| two_factor_recovery_codes | text | yes | | Encrypted JSON of SHA-256 hashes of unused recovery codes; hidden (report 52) |
+| two_factor_confirmed_at | timestamptz | yes | | Two-factor on since (report 52) |
 | deleted_at | timestamptz | yes | | Soft delete for accounts |
 
 Relationships:

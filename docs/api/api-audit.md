@@ -261,8 +261,14 @@ documented operations.
 
 | Method | Path | Authentication / authorization | Documentation |
 |---|---|---|---|
-| POST | `/api/login` | Public; `throttle:login` | Documented |
+| POST | `/api/login` | Public; `throttle:login`; with two-factor on, `two_factor_code` or `recovery_code` in the same request (report 52) | Documented |
 | POST | `/api/logout` | `auth:sanctum` | Documented |
+| GET | `/api/two-factor` | `auth:sanctum`, own (status, pending setup; report 52) | Documented |
+| POST | `/api/two-factor` | `auth:sanctum`, own (start setup: secret, `otpauth://` URI, QR SVG) | Documented |
+| POST | `/api/two-factor/confirm` | `auth:sanctum`, own (code → on, recovery codes once) | Documented |
+| POST | `/api/two-factor/recovery-codes` | `auth:sanctum`, own; current password | Documented |
+| DELETE | `/api/two-factor` | `auth:sanctum`, own; current password | Documented |
+| DELETE | `/api/users/{user}/two-factor` | Sanctum + super-admin, not own account (reset) | Documented |
 | PUT | `/api/password` | `auth:sanctum` (own password; current password required) | Documented |
 | POST | `/api/forgot-password` | Public; `throttle:password-reset` (5/min per email + IP); generic 202 | Documented |
 | POST | `/api/reset-password` | Public; `throttle:password-reset` | Documented |
@@ -795,3 +801,22 @@ scheduled announcement; the managed list admits Department Admins and filters
 `scheduled`; resources gain `scheduled_for`, `is_read` (feed),
 `audience_size` / `read_count` (managed list). Web: the same four routes under
 `/announcements`. OpenAPI 240 / 240. See `docs/51_Announcement-Authoring-Scheduling-and-Read-Receipts-Report.md`.
+
+## Two-factor sign-in (2026-10-13)
+
+| Method | URI | Action | Auth | Notes |
+|---|---|---|---|---|
+| GET | `/api/two-factor` | `TwoFactorController::show` | Sanctum, own | `{enabled, confirmed_at, recovery_codes_left, setup}` |
+| POST | `/api/two-factor` | `TwoFactorController::store` | Sanctum, own | New secret; `setup.secret`, `otpauth_url`, `qr_svg`; `409` when on |
+| POST | `/api/two-factor/confirm` | `TwoFactorController::confirm` | Sanctum, own | `code` → on; `data.recovery_codes` (8, shown once); `422` wrong / reused |
+| POST | `/api/two-factor/recovery-codes` | `TwoFactorController::regenerate` | Sanctum, own | `current_password`; old codes stop working |
+| DELETE | `/api/two-factor` | `TwoFactorController::destroy` | Sanctum, own | `current_password`; `204` |
+| DELETE | `/api/users/{user}/two-factor` | `TwoFactorController::reset` | Sanctum, Super Admin | Not own account (`403`); `409` when off |
+
+Changed: `POST /api/login` — with two-factor on, `two_factor_code` or
+`recovery_code` is required in the same request (`422` on `two_factor_code`
+without it; a wrong one counts toward the sign-in limit). `User` gains
+`two_factor_enabled`. All two-factor routes use `throttle:two-factor`
+(10 / minute per account). Web: `/account/two-factor` (GET / POST / DELETE,
+`/confirm`, `/recovery-codes`), `/two-factor-challenge` (GET / POST, guest),
+`DELETE /users/{user}/two-factor`. OpenAPI 246 / 246. See `docs/52_Two-Factor-Sign-In-Report.md`.

@@ -396,8 +396,10 @@ users, main business activities, and expected outputs.
   roles enforced server-side, inactive accounts refused and their sessions /
   tokens revoked, password change and emailed password reset
   ([29_Password-Change-and-Reset-Report.md](29_Password-Change-and-Reset-Report.md)),
-  sign-in activity audited. Editable permission sets and two-factor sign-in
-  are [Future].
+  sign-in activity audited, and optional two-factor sign-in with an
+  authenticator app and recovery codes
+  ([52_Two-Factor-Sign-In-Report.md](52_Two-Factor-Sign-In-Report.md)).
+  Editable permission sets are [Future].
 
 ### 9.2 Student Management [Implemented]
 

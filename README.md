@@ -171,6 +171,8 @@ course-material upload (`backend/config/academics.php`).
 | `/audit-logs`               | Audit trail (read-only): sign-ins and sensitive changes; CSV export | Super admin |
 | `/account/profile`          | My profile: affiliation, academic / teaching summary, contact details, avatar (upload or image URL); `/profile` redirects here | Every signed-in user (own only) |
 | `/account/password`         | Change my password (other sessions are signed out) | Every signed-in user |
+| `/account/two-factor`       | Two-factor sign-in: set up with an authenticator app, recovery codes, turn off | Every signed-in user (own only) |
+| `/two-factor-challenge`     | Second sign-in step when two-factor is on (code or recovery code) | Guest with a correct password (5 minutes) |
 | `/forgot-password`          | Request a password reset link by email (rate limited) | Guests |
 | `/rooms`                    | Rooms                      | Super admin, University admin (Department admin read-only, own department) |
 | `/timetable`                | My weekly timetable        | Student, Lecturer |

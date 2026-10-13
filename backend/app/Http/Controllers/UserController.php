@@ -11,6 +11,7 @@ use App\Http\Resources\UserResource;
 use App\Models\Department;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\TwoFactorService;
 use App\Services\UserService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -84,6 +85,16 @@ class UserController extends Controller
         $this->users->update($user, UpdateUserData::fromValidated($request->validated()), $request->user());
 
         return redirect()->back()->with('success', 'User updated.');
+    }
+
+    /** A user lost their phone and recovery codes: turn their two-factor off (report 52). */
+    public function resetTwoFactor(Request $request, User $user, TwoFactorService $twoFactor): RedirectResponse
+    {
+        $this->authorize('resetTwoFactor', $user);
+
+        $twoFactor->reset($user, $request->user());
+
+        return back()->with('success', 'Two-factor sign-in reset. The user was emailed and can set it up again.');
     }
 
     public function destroy(User $user): RedirectResponse

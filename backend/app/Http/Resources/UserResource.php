@@ -28,6 +28,8 @@ class UserResource extends JsonResource
             'created_at' => $user->createdAt,
             'department_id' => $user->departmentId,
             'department' => $user->departmentName,
+            // Status only; secrets never leave the server (report 52).
+            'two_factor_enabled' => $user->twoFactorEnabled,
             'role' => $this->when($user->hasRole(), fn () => [
                 'id' => $user->role->id,
                 'name' => $user->role->name,

@@ -161,7 +161,7 @@ const SECTION_LABELS = {
   'audit-logs': 'Audit logs',
 }
 
-const ACTION_LABELS = { create: 'New', edit: 'Edit', manage: 'Manage', profile: 'Profile', password: 'Password' }
+const ACTION_LABELS = { create: 'New', edit: 'Edit', manage: 'Manage', profile: 'Profile', password: 'Password', 'two-factor': 'Two-factor sign-in' }
 
 // Pages a student opens from their own list: the section crumb leads back to that list.
 const STUDENT_SECTIONS = {

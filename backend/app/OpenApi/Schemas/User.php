@@ -33,6 +33,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'role', ref: '#/components/schemas/Role', nullable: true),
         new OA\Property(property: 'department_id', type: 'integer', format: 'int64', nullable: true, description: 'Department Admin only: the department they administer.'),
         new OA\Property(property: 'department', type: 'string', nullable: true, description: 'That department\'s name, when loaded.'),
+        new OA\Property(property: 'two_factor_enabled', type: 'boolean', description: 'Whether two-factor sign-in is on (report 52).'),
     ]
 )]
 class User {}

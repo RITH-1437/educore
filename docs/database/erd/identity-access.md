@@ -18,6 +18,9 @@ erDiagram
         varchar phone
         boolean is_active
         timestamptz last_login_at
+        text two_factor_secret "encrypted (report 52)"
+        text two_factor_recovery_codes "encrypted hashes"
+        timestamptz two_factor_confirmed_at
         timestamptz deleted_at
     }
     ROLES {

@@ -11,7 +11,7 @@
 
 | # | Module (business-overview §9) | Status |
 | --- | --- | --- |
-| 9.1 | Authentication & Authorization | `[Implemented]` |
+| 9.1 | Authentication & Authorization | `[Implemented]` (two-factor sign-in in report 52) |
 | — | Users management (extra, part of 9.1 scope) | `[Implemented]` |
 | — | Database schema (49 domain tables) | `[Implemented]` |
 | — | Branding / design system + admin dashboard | `[Implemented]` |
@@ -456,7 +456,7 @@ A module is not done until its report exists and its tests pass — never label
 - `[Done]` 9.24 Audit Logs & Security. Report:
   `docs/28_Audit-Logs-and-Security-Report.md`. `[Done]` Audit CSV export. `[Open]` Audit retention,
   alerting on repeated notification failures, auditing low-risk
-  structure CRUD, two-factor sign-in.
+  structure CRUD. `[Done]` Two-factor sign-in (report 52).
 - `[Done]` Password change and emailed password reset (web + API; other
   sessions / tokens end; audited; rate limited). Report:
   `docs/29_Password-Change-and-Reset-Report.md`.
@@ -747,3 +747,13 @@ A module is not done until its report exists and its tests pass — never label
   feed *New* markers, *Mark all as read*) and authors see "read by X of N".
   Migration `2026_10_13_100000`; 4 API operations (240 / 240 documented).
   Report: `docs/51_Announcement-Authoring-Scheduling-and-Read-Receipts-Report.md`.
+- `[Done]` Two-factor sign-in (2026-10-13): optional for every role —
+  authenticator-app codes (TOTP, RFC 6238, in-house `App\Support\Totp` held to
+  the RFC vectors) plus eight single-use recovery codes; web sign-in asks for
+  the code on `/two-factor-challenge` before any session exists, API sign-in
+  takes `two_factor_code` / `recovery_code` with the credentials; each code
+  works once; secrets encrypted, recovery codes stored as hashes and shown
+  once; turning off or new codes need the password; a Super Admin resets
+  another account's two-factor; every change audited and emailed. Migration
+  `2026_10_13_110000` (3 columns on `users`); 6 API operations
+  (246 / 246 documented). Report: `docs/52_Two-Factor-Sign-In-Report.md`.

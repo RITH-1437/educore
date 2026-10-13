@@ -47,6 +47,10 @@ class AppServiceProvider extends ServiceProvider
         // Password reset requests (guest): per email + IP.
         RateLimiter::for('password-reset', fn (Request $request) => Limit::perMinute(5)->by(strtolower((string) $request->input('email')).'|'.$request->ip()));
 
+        // Two-factor codes and settings (report 52): per account when signed in,
+        // per session and address on the sign-in code page.
+        RateLimiter::for('two-factor', fn (Request $request) => Limit::perMinute(10)->by($request->user()?->getKey() ?? ($request->ip().'|'.($request->hasSession() ? $request->session()->getId() : ''))));
+
         // Audit trail of sign-in activity (module 9.24): who signed in or out,
         // failed attempts (the email tried, never the password) and lockouts.
         Event::listen(Login::class, fn (Login $e) => app(AuditLogger::class)->record('auth.login', $e->user, description: "Guard: {$e->guard}", actor: $e->user));

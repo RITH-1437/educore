@@ -41,6 +41,15 @@ class UserPolicy
         return $user->getKey() !== $subject->getKey();
     }
 
+    /**
+     * Turn off another account's two-factor sign-in (lost phone and recovery
+     * codes, report 52). Your own goes through your account, with your password.
+     */
+    public function resetTwoFactor(User $user, User $subject): bool
+    {
+        return $this->manageUsers($user) && $user->getKey() !== $subject->getKey();
+    }
+
     private function manageUsers(User $user): bool
     {
         return $user->isRole(Role::SuperAdmin->value);

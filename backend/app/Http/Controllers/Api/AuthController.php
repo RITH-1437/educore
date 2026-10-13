@@ -19,7 +19,7 @@ class AuthController extends Controller
     #[OA\Post(
         path: '/login',
         summary: 'Authenticate and receive an API token',
-        description: 'Verifies credentials, stamps `last_login_at`, and returns a new Sanctum personal access token. Invalid credentials produce HTTP 422 with a field error. Throttled to 5 attempts per minute per e-mail address and IP address.',
+        description: 'Verifies credentials, stamps `last_login_at`, and returns a new Sanctum personal access token. Invalid credentials produce HTTP 422 with a field error. When two-factor sign-in is on, the same request must carry `two_factor_code` (or `recovery_code`): without it the answer is 422 on `two_factor_code`; a wrong code counts as a failed attempt (report 52). Throttled to 5 attempts per minute per e-mail address and IP address.',
         operationId: 'login',
         tags: ['Auth'],
         security: [],

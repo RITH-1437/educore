@@ -15,10 +15,7 @@ use App\Models\Student;
 use App\Models\University;
 use App\Models\User;
 use App\Notifications\DocumentRequestUpdated;
-use BaconQrCode\Renderer\Image\SvgImageBackEnd;
-use BaconQrCode\Renderer\ImageRenderer;
-use BaconQrCode\Renderer\RendererStyle\RendererStyle;
-use BaconQrCode\Writer;
+use App\Support\QrCode;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -310,13 +307,7 @@ class DocumentService
      */
     public function qrCodeSvg(string $url): string
     {
-        $renderer = new ImageRenderer(
-            new RendererStyle(120, 1),
-            new SvgImageBackEnd
-        );
-        $writer = new Writer($renderer);
-
-        return $writer->writeString($url);
+        return QrCode::svg($url);
     }
 
     /**
@@ -324,7 +315,7 @@ class DocumentService
      */
     public function qrCodeDataUri(string $url): string
     {
-        return 'data:image/svg+xml;base64,'.base64_encode($this->qrCodeSvg($url));
+        return QrCode::dataUri($url);
     }
 
     // ---------------------------------------------------------------- render

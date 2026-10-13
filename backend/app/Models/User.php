@@ -42,6 +42,9 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        // Two-factor secrets never leave the server (report 52).
+        'two_factor_secret',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -56,7 +59,17 @@ class User extends Authenticatable
             'password' => 'hashed',
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
+            // Encrypted with the app key; recovery codes hold SHA-256 hashes only.
+            'two_factor_secret' => 'encrypted',
+            'two_factor_recovery_codes' => 'encrypted:array',
+            'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    /** Two-factor sign-in is on once a secret has been confirmed with a code (report 52). */
+    public function hasTwoFactorEnabled(): bool
+    {
+        return $this->two_factor_confirmed_at !== null && filled($this->two_factor_secret);
     }
 
     public function role()

@@ -10,6 +10,7 @@ use App\Http\Controllers\AuditLogsController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetController;
+use App\Http\Controllers\Auth\TwoFactorController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseMaterialsController;
 use App\Http\Controllers\CourseOfferingController;
@@ -59,6 +60,10 @@ Route::middleware('guest')->group(function () {
     Route::post('/forgot-password', [PasswordResetController::class, 'store'])->middleware('throttle:password-reset')->name('password.email');
     Route::get('/reset-password/{token}', [PasswordResetController::class, 'edit'])->name('password.reset');
     Route::post('/reset-password', [PasswordResetController::class, 'update'])->middleware('throttle:password-reset')->name('password.update');
+
+    // Second step of sign-in when two-factor is on (report 52).
+    Route::get('/two-factor-challenge', [AuthenticatedSessionController::class, 'challenge'])->name('two-factor.challenge');
+    Route::post('/two-factor-challenge', [AuthenticatedSessionController::class, 'verifyChallenge'])->middleware('throttle:two-factor')->name('two-factor.verify');
 });
 
 // User profile portal and password change (every signed-in role).
@@ -68,6 +73,13 @@ Route::middleware('auth')->group(function () {
     Route::permanentRedirect('/profile', '/account/profile');
     Route::get('/account/password', [PasswordController::class, 'edit'])->name('account.password');
     Route::put('/account/password', [PasswordController::class, 'update'])->name('account.password.update');
+
+    // Two-factor sign-in settings (report 52).
+    Route::get('/account/two-factor', [TwoFactorController::class, 'edit'])->name('account.two-factor');
+    Route::post('/account/two-factor', [TwoFactorController::class, 'store'])->name('account.two-factor.store');
+    Route::post('/account/two-factor/confirm', [TwoFactorController::class, 'confirm'])->middleware('throttle:two-factor')->name('account.two-factor.confirm');
+    Route::post('/account/two-factor/recovery-codes', [TwoFactorController::class, 'regenerate'])->middleware('throttle:two-factor')->name('account.two-factor.recovery-codes');
+    Route::delete('/account/two-factor', [TwoFactorController::class, 'destroy'])->middleware('throttle:two-factor')->name('account.two-factor.destroy');
 });
 
 Route::get('/users/{user}/avatar', [ProfileController::class, 'avatar'])->name('avatar.show');
@@ -84,6 +96,7 @@ Route::middleware(['auth', 'role:super-admin'])->group(function () {
     Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
     Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    Route::delete('/users/{user}/two-factor', [UserController::class, 'resetTwoFactor'])->name('users.two-factor.reset');
 });
 
 Route::middleware(['auth', 'role:university-admin,department-admin,lecturer,student'])

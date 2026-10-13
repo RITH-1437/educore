@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
-import { Bell, CalendarDays, ChevronRight, KeyRound, LogOut, Menu, Moon, Sun, UserRound } from '@lucide/vue'
+import { Bell, CalendarDays, ChevronRight, KeyRound, LogOut, Menu, Moon, Smartphone, Sun, UserRound } from '@lucide/vue'
 import BaseDropdown from '../BaseDropdown.vue'
 import BaseTooltip from '../BaseTooltip.vue'
 import { useNavigation } from '../../composables/useNavigation'
@@ -84,6 +84,9 @@ const logout = () => router.post('/logout')
             </Link>
             <Link href="/account/password" class="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-small text-ink hover:bg-surface focus-visible:outline-2 focus-visible:outline-primary dark:text-dark-ink dark:hover:bg-dark-surface-2" role="menuitem">
               <KeyRound class="h-4 w-4" aria-hidden="true" /> Change password
+            </Link>
+            <Link href="/account/two-factor" class="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-small text-ink hover:bg-surface focus-visible:outline-2 focus-visible:outline-primary dark:text-dark-ink dark:hover:bg-dark-surface-2" role="menuitem">
+              <Smartphone class="h-4 w-4" aria-hidden="true" /> Two-factor sign-in
             </Link>
             <button type="button" class="flex min-h-11 w-full items-center gap-2 rounded-md px-3 text-small text-error hover:bg-error/5 focus-visible:outline-2 focus-visible:outline-error dark:text-red-300 dark:hover:bg-error/10" role="menuitem" @click="logout">
               <LogOut class="h-4 w-4" aria-hidden="true" /> Sign out

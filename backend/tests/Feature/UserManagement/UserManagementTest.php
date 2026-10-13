@@ -202,7 +202,7 @@ class UserManagementTest extends TestCase
 
         $this->student->createToken('api');
 
-        $this->deleteJson("/api/users/{$this->student->id}", ['Authorization' => "Bearer {$adminToken}"])
+        $this->deleteJson("/api/users/{$this->student->id}", [], ['Authorization' => "Bearer {$adminToken}"])
             ->assertNoContent();
 
         $this->assertSoftDeleted('users', ['id' => $this->student->id]);

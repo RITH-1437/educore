@@ -35,6 +35,7 @@ use App\Http\Controllers\Api\SemesterController;
 use App\Http\Controllers\Api\StudentController;
 use App\Http\Controllers\Api\StudentDashboardController;
 use App\Http\Controllers\Api\TelegramWebhookController;
+use App\Http\Controllers\Api\TwoFactorController;
 use App\Http\Controllers\Api\UniversityController;
 use App\Http\Controllers\Api\UniversityDashboardController;
 use App\Http\Controllers\Api\UserController;
@@ -58,6 +59,16 @@ Route::post('/logout', [AuthController::class, 'logout'])
 
 Route::middleware(['auth:sanctum', 'role:super-admin'])->group(function () {
     Route::apiResource('users', UserController::class, ['names' => 'api.users']);
+    Route::delete('/users/{user}/two-factor', [TwoFactorController::class, 'reset'])->name('api.users.two-factor.reset');
+});
+
+// Two-factor sign-in settings, always the caller's own (report 52).
+Route::middleware(['auth:sanctum', 'throttle:two-factor'])->prefix('/two-factor')->name('api.two-factor.')->group(function () {
+    Route::get('/', [TwoFactorController::class, 'show'])->name('show');
+    Route::post('/', [TwoFactorController::class, 'store'])->name('store');
+    Route::post('/confirm', [TwoFactorController::class, 'confirm'])->name('confirm');
+    Route::post('/recovery-codes', [TwoFactorController::class, 'regenerate'])->name('recovery-codes');
+    Route::delete('/', [TwoFactorController::class, 'destroy'])->name('destroy');
 });
 
 // Read routes also allow Department Admin; write routes are university-wide data

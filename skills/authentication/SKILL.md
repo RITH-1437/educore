@@ -71,6 +71,23 @@ can do) is separate — see `skills/authorization/SKILL.md`.
   (`AuthenticateWebSession`) and API tokens, are audited and email the owner.
 - Rule: `Password::defaults()` = ≥ 8 characters with letters and numbers.
 
+## Two-factor sign-in (implemented)
+
+- Optional for every role (report 52): authenticator-app codes (TOTP,
+  `App\Support\Totp`, RFC 6238 — keep `tests/Unit/TotpTest.php` green) and
+  eight single-use recovery codes; `TwoFactorService` owns every rule.
+- Never sign in before the second factor: `LoginRequest::validateCredentials()`
+  checks the password only; web parks the account in the session for five
+  minutes (`/two-factor-challenge`), API takes `two_factor_code` /
+  `recovery_code` with the credentials.
+- Each code works once (time step recorded per account); recovery codes are
+  spent on use; secrets are `encrypted` casts in `User::$hidden`, recovery
+  codes are stored as SHA-256 hashes and shown only once.
+- Turning off and new recovery codes need the current password; a Super
+  Admin may reset another account (never their own). Every change is audited
+  (`auth.two_factor_*`, `auth.recovery_code_used`) and emailed
+  (`TwoFactorChanged`, critical).
+
 ## Rate limiting
 
 - `throttle` middleware on `/api/login` and password-reset endpoints

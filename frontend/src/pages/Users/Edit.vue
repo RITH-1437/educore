@@ -1,13 +1,14 @@
 <script setup>
 import IconButton from '../../components/IconButton.vue'
-import { ArrowLeft } from '@lucide/vue'
-import { Head, Link, useForm, usePage } from '@inertiajs/vue3'
+import { ArrowLeft, ShieldOff } from '@lucide/vue'
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import BaseButton from '../../components/BaseButton.vue'
 import BaseInput from '../../components/BaseInput.vue'
 import BaseSelect from '../../components/BaseSelect.vue'
 import BaseCard from '../../components/BaseCard.vue'
 import StatusBadge from '../../components/StatusBadge.vue'
+import { useConfirm } from '../../composables/useConfirm'
 
 const props = defineProps({
   user: { type: Object, required: true },
@@ -30,6 +31,15 @@ const form = useForm({
 // server refuses it too), so the last Super Admin can never lock everyone out.
 const page = usePage()
 const isSelf = computed(() => page.props.auth?.user?.id === props.user.id)
+
+// Someone who lost their phone and recovery codes (report 52). Your own is
+// turned off from your account, with your password.
+const { confirm } = useConfirm()
+const resetTwoFactor = async () => {
+  if (await confirm({ title: 'Reset two-factor sign-in?', message: `${props.user.name} will sign in with their password only until they set it up again. They will be emailed about this.`, confirmLabel: 'Reset', destructive: true })) {
+    router.delete(`/users/${props.user.id}/two-factor`, { preserveScroll: true })
+  }
+}
 
 const isDepartmentAdmin = computed(() => props.roles.find((role) => role.id === form.role_id)?.slug === 'department-admin')
 // The department is only sent for a Department Admin; other roles never keep one.
@@ -74,6 +84,14 @@ const submit = () => form.transform((data) => ({ ...data, department_id: isDepar
         <span>Active (can sign in)</span>
         <StatusBadge :status="form.is_active ? 'active' : 'inactive'" />
       </label>
+
+      <div class="flex min-h-11 items-center justify-between gap-3 border-t border-border-default pt-4 dark:border-dark-border">
+        <div class="flex items-center gap-3 text-small text-ink dark:text-dark-ink">
+          <span>Two-factor sign-in</span>
+          <StatusBadge :status="user.two_factor_enabled ? 'active' : 'inactive'" :label="user.two_factor_enabled ? 'On' : 'Off'" />
+        </div>
+        <IconButton v-if="user.two_factor_enabled && !isSelf" :icon="ShieldOff" variant="danger" label="Reset two-factor sign-in" @click="resetTwoFactor" />
+      </div>
 
       <div class="flex items-center gap-3">
         <BaseButton type="submit" :loading="form.processing">Save changes</BaseButton>

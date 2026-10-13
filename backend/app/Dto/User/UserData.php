@@ -23,6 +23,7 @@ final readonly class UserData
         public ?RoleData $role = null,
         public ?int $departmentId = null,
         public ?string $departmentName = null,
+        public bool $twoFactorEnabled = false,
     ) {}
 
     public static function fromModel(User $user, bool $withRole = false): self
@@ -38,6 +39,7 @@ final readonly class UserData
             role: $withRole && $user->role !== null ? RoleData::fromModel($user->role) : null,
             departmentId: $user->department_id === null ? null : (int) $user->department_id,
             departmentName: $user->department_id !== null && $user->relationLoaded('department') ? $user->department?->name : null,
+            twoFactorEnabled: $user->hasTwoFactorEnabled(),
         );
     }
 

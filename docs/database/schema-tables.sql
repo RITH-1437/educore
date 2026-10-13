@@ -97,6 +97,9 @@ CREATE TABLE users (
     avatar_key        VARCHAR(255),
     is_active         BOOLEAN      NOT NULL DEFAULT TRUE,
     last_login_at     TIMESTAMPTZ,
+    two_factor_secret         TEXT,         -- report 52: encrypted TOTP secret
+    two_factor_recovery_codes TEXT,         -- report 52: encrypted SHA-256 hashes
+    two_factor_confirmed_at   TIMESTAMPTZ,  -- report 52: on since
     created_at        TIMESTAMPTZ  NOT NULL DEFAULT now(),
     updated_at        TIMESTAMPTZ  NOT NULL DEFAULT now(),
     deleted_at        TIMESTAMPTZ,

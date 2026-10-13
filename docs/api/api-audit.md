@@ -761,3 +761,18 @@ answers `403` to a Department Admin and `422` to a manager who passes
 /notifications/telegram/link` (Inertia redirect to Telegram), `DELETE
 /notifications/telegram`. See
 `docs/48_Class-Reminders-and-Telegram-Linking-Report.md`.
+
+## Project audit (2026-10-13)
+
+No route was added or removed; four behaviors changed
+(`docs/50_Project-Audit-and-Hardening-Report.md` §4):
+
+| Method | URI | Change |
+|---|---|---|
+| PUT, PATCH | `/api/users/{user}` | `409`: last active Super Admin; your own role or activation; role of an account holding a student / lecturer profile |
+| DELETE | `/api/users/{user}` | `409`: last active Super Admin; account holding a profile |
+| POST | `/api/document-requests/{documentRequest}/approve` | No invoice for a fee waived while pending |
+| GET | `/api/submissions/{submission}/file`, `/api/materials/{material}/file`, `/api/internship-reports/{report}/file`, `/api/announcements/{announcement}/attachments/{file}/download` | `Content-Type` is the type detected at upload; `X-Content-Type-Options: nosniff` |
+
+The OpenAPI annotations of `UserController::update` (PUT and PATCH) and
+`::destroy` document the new `409`.

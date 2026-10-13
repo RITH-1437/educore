@@ -1,6 +1,6 @@
 # EduCore — Module Status & Build Roadmap Report
 
-- **Date:** 2026-09-26 (updated 2026-10-06)
+- **Date:** 2026-09-26 (updated 2026-10-13)
 - **Source of truth:** `docs/3_business-overview.md` §9 (module list), `docs/5_Build-Steps-Report.md` (build workflow)
 - **Status labels:** `[Implemented]` = shipped and tested · `[Planned]` = next, follows this playbook · `[Future]` = later
 - **Database:** the full 49-table schema already exists as migrations — **every** module below builds on top of already-migrated tables (see `docs/4_Database-Migration-Report.md`).
@@ -20,6 +20,7 @@
 | — | Department Admin sections & schedules for their department (report 46) | `[Implemented]` |
 | — | API contract & OpenAPI audit | `[Implemented]` |
 | — | System Error Logs (9.25, extra operational diagnostics; 90-day retention in report 50) | `[Implemented]` |
+| — | Project audit and hardening (report 50) | `[Implemented]` |
 | 9.2 | Student Management | `[Implemented]` |
 | 9.3 | Lecturer Management | `[Implemented]` (section assignment `[Planned]` with 9.8) |
 | 9.4 | Faculty & Department Management | `[Implemented]` |
@@ -722,3 +723,17 @@ A module is not done until its report exists and its tests pass — never label
   1280 px, the University Admin dashboard links there when no semester exists,
   and the Super Admin *Needs attention* list adds "No semesters exist yet" →
   the current year's page. Module 9.6 (`docs/3_business-overview.md`).
+- `[Done]` Project audit (2026-10-13): routes, policies, services, frontend
+  calls, logs and dependencies reviewed. Fixed: a Super Admin could remove
+  their own access, and nothing kept one active Super Admin (now 409, rows
+  locked; the edit page disables the fields); an account holding a student /
+  lecturer profile could change role or be deleted, orphaning the profile
+  (invoice PDF 500); a fee waived while pending was still billed at approval;
+  attendance, registration-period and exam-day rules used the UTC day instead
+  of `ACADEMIC_TIMEZONE`; the offering-wide seat cap was not locked;
+  uploads in four modules kept the client's file extension (now content-based,
+  downloads send the stored type with `nosniff`); `/documents` read the fee
+  from the wrong level, so the fee badge and the Waive action never showed;
+  breadcrumb section links led to 404 / 403 pages; `source-map-js` advisory.
+  Added: error-log retention (`error-logs:prune`, daily, 90 days). Report:
+  `docs/50_Project-Audit-and-Hardening-Report.md`.

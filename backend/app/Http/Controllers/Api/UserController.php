@@ -214,6 +214,11 @@ class UserController extends Controller
                 content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
             ),
             new OA\Response(
+                response: 409,
+                description: 'Refused: it would leave no active Super Admin, a Super Admin may not remove their own role or deactivate themselves, or the account holds a student / lecturer profile and its role cannot change.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
                 response: 422,
                 description: 'Validation failed.',
                 content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')
@@ -223,7 +228,7 @@ class UserController extends Controller
     #[OA\Patch(
         path: '/users/{user}',
         summary: 'Update a user (PATCH)',
-        description: 'Uses the same validation as PUT: `name`, `email`, and `role_id` remain required; password is optional.',
+        description: 'Uses the same validation as PUT: `name`, `email`, and `role_id` remain required; password is optional. The same 409 guards apply.',
         operationId: 'patchUser',
         tags: ['Users'],
         security: [['sanctum' => []]],
@@ -262,6 +267,11 @@ class UserController extends Controller
                 content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
             ),
             new OA\Response(
+                response: 409,
+                description: 'Refused: it would leave no active Super Admin, a Super Admin may not remove their own role or deactivate themselves, or the account holds a student / lecturer profile and its role cannot change.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
                 response: 422,
                 description: 'Validation failed.',
                 content: new OA\JsonContent(ref: '#/components/schemas/ValidationErrorResponse')
@@ -272,7 +282,7 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
-        $user = $this->users->update($user, UpdateUserData::fromValidated($request->validated()));
+        $user = $this->users->update($user, UpdateUserData::fromValidated($request->validated()), $request->user());
 
         return new UserResource($user);
     }
@@ -280,7 +290,7 @@ class UserController extends Controller
     #[OA\Delete(
         path: '/users/{user}',
         summary: 'Delete a user',
-        description: 'Soft deletes the user and revokes every API token issued to that account.',
+        description: 'Soft deletes the user and revokes every API token issued to that account. Refused (409) for the last active Super Admin and for an account holding a student or lecturer profile.',
         operationId: 'deleteUser',
         tags: ['Users'],
         security: [['sanctum' => []]],
@@ -308,6 +318,11 @@ class UserController extends Controller
             new OA\Response(
                 response: 404,
                 description: 'User not found.',
+                content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
+            ),
+            new OA\Response(
+                response: 409,
+                description: 'Refused: the last active Super Admin, or an account holding a student / lecturer profile (delete the profile instead).',
                 content: new OA\JsonContent(ref: '#/components/schemas/ErrorResponse')
             ),
         ]

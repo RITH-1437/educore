@@ -81,7 +81,7 @@ class UserController extends Controller
     {
         $this->authorize('update', $user);
 
-        $this->users->update($user, UpdateUserData::fromValidated($request->validated()));
+        $this->users->update($user, UpdateUserData::fromValidated($request->validated()), $request->user());
 
         return redirect()->back()->with('success', 'User updated.');
     }

@@ -274,8 +274,8 @@ documented operations.
 | GET | `/api/users` | Sanctum + super-admin (responses include `department_id`, `department`) | Documented |
 | POST | `/api/users` | Sanctum + super-admin (optional `department_id`, Department Admin role only) | Documented |
 | GET | `/api/users/{user}` | Sanctum + super-admin | Documented |
-| PUT, PATCH | `/api/users/{user}` | Sanctum + super-admin | Both documented |
-| DELETE | `/api/users/{user}` | Sanctum + super-admin | Documented |
+| PUT, PATCH | `/api/users/{user}` | Sanctum + super-admin; `409` for the last active Super Admin, your own role / activation, or the role of an account holding a profile (report 50) | Both documented |
+| DELETE | `/api/users/{user}` | Sanctum + super-admin; `409` for the last active Super Admin or an account holding a profile (report 50) | Documented |
 | GET | `/api/academic-years` | Sanctum + super-admin or university-admin | Documented |
 | POST | `/api/academic-years` | Sanctum + super-admin or university-admin | Documented |
 | GET | `/api/academic-years/{academicYear}` | Sanctum + super-admin or university-admin | Documented |

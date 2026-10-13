@@ -6,6 +6,8 @@ use App\Enums\Role;
 use App\Models\ErrorLog;
 use App\Models\Role as RoleModel;
 use App\Models\User;
+use App\Services\ErrorLogService;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Route;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -397,5 +399,27 @@ class ErrorLogManagementTest extends TestCase
         $this->artisan('db:seed', ['--class' => 'ErrorLogSeeder']);
 
         $this->assertEquals($countBefore, ErrorLog::query()->count());
+    }
+
+    // -------------------------------------------------------------------------
+    // Retention
+    // -------------------------------------------------------------------------
+
+    public function test_rows_past_the_retention_period_are_pruned_daily(): void
+    {
+        ErrorLog::query()->delete();
+        $old = ErrorLog::factory()->notFound()->create(['created_at' => now()->subDays(ErrorLogService::RETENTION_DAYS + 1)]);
+        $kept = ErrorLog::factory()->serverError()->create(['created_at' => now()->subDays(ErrorLogService::RETENTION_DAYS - 1)]);
+
+        $this->artisan('error-logs:prune')->expectsOutputToContain('1 error log row(s) deleted')->assertSuccessful();
+
+        $this->assertModelMissing($old);
+        $this->assertModelExists($kept);
+
+        // A shorter period on demand; at least one day.
+        $this->artisan('error-logs:prune', ['--days' => 0])->expectsOutputToContain('1 error log row(s) deleted')->assertSuccessful();
+        $this->assertSame(0, ErrorLog::query()->count());
+
+        $this->assertTrue(collect(app(Schedule::class)->events())->contains(fn ($event) => str_contains((string) $event->command, 'error-logs:prune')));
     }
 }

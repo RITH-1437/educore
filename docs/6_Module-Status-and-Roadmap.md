@@ -19,7 +19,7 @@
 | — | Bottom-right toast notifications, accounts-by-role pie, academic year page fix (report 38) | `[Implemented]` |
 | — | Department Admin sections & schedules for their department (report 46) | `[Implemented]` |
 | — | API contract & OpenAPI audit | `[Implemented]` |
-| — | System Error Logs (9.25, extra operational diagnostics) | `[Implemented]` |
+| — | System Error Logs (9.25, extra operational diagnostics; 90-day retention in report 50) | `[Implemented]` |
 | 9.2 | Student Management | `[Implemented]` |
 | 9.3 | Lecturer Management | `[Implemented]` (section assignment `[Planned]` with 9.8) |
 | 9.4 | Faculty & Department Management | `[Implemented]` |
@@ -583,7 +583,8 @@ A module is not done until its report exists and its tests pass — never label
   one 500 from a stale autoload classmap during the report 39 refactor. Client
   probe 404s are no longer recorded, `/faculties/*` redirects to
   `/departments`, and the classmap was regenerated. Report:
-  `docs/8_System-Error-Logs-Report.md` §11. `[Open]` Error-log retention.
+  `docs/8_System-Error-Logs-Report.md` §11. `[Done]` Error-log retention
+  (90 days, `error-logs:prune`, report 50).
 - `[Done]` Static sample dashboard removed (2026-10-05): a student account not
   yet linked to a profile (e.g. the seeded `student@educore.kh`) landed on
   `RoleDashboard`, a fake "Sample dashboard" with placeholder cards and a

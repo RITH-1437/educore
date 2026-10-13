@@ -752,7 +752,8 @@ users, main business activities, and expected outputs.
 - **Expected outputs:** an append-only, read-only error log distinct from the
   audit trail in 9.24 — this records failed *requests*, not business changes.
   No create/update/delete endpoint exists. Reached directly at `/error-logs`;
-  not on the sidebar.
+  not on the sidebar. Rows older than 90 days are deleted daily
+  (`error-logs:prune`, report 50).
 
 ---
 

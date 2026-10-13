@@ -356,7 +356,8 @@ The `backend/` folder is a standard Laravel 12 application.
   `php artisan invoices:refresh-statuses` (daily 00:10, marks unpaid past-due
   invoices overdue) and `php artisan notifications:assignment-reminders`
   (daily 07:00) and `php artisan notifications:prune` (daily 01:00, deletes
-  in-app notifications older than 180 days) and `php artisan
+  in-app notifications older than 180 days) and `php artisan error-logs:prune`
+  (daily 01:10, deletes system error log rows older than 90 days) and `php artisan
   notifications:class-reminders` (every 5 minutes: a Telegram reminder about
   `CLASS_REMINDER_MINUTES` (30) before each class, read on the university's
   clock `ACADEMIC_TIMEZONE`, e.g. `Asia/Phnom_Penh`; UTC when unset). Queued jobs (notifications) run in the `queue` container;

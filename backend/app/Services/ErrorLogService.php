@@ -10,12 +10,18 @@ use Illuminate\Database\Eloquent\Builder;
 /**
  * Read-only queries over `error_logs`.
  *
- * There is deliberately no create/update/delete method: rows are produced by
- * `ErrorLogRecorder` and are append-only, exactly like `audit_logs`
- * (`skills/audit-logging/SKILL.md` §4).
+ * There is deliberately no create/update method and no delete path over HTTP:
+ * rows are produced by `ErrorLogRecorder` and never edited
+ * (`skills/audit-logging/SKILL.md` §4). Unlike `audit_logs` (immutable,
+ * append-only trigger), error logs are short-lived diagnostics: rows past the
+ * retention period are removed by the scheduled `error-logs:prune` command, so
+ * public 404 traffic cannot grow the table without bound.
  */
 class ErrorLogService
 {
+    /** Rows older than this are deleted daily (`error-logs:prune`). */
+    public const RETENTION_DAYS = 90;
+
     public function paginate(ErrorLogListFilters $filters): LengthAwarePaginator
     {
         return $this->query($filters)
@@ -47,6 +53,12 @@ class ErrorLogService
             'not_found' => ErrorLog::query()->where('status_code', 404)->count(),
             'total' => ErrorLog::query()->count(),
         ];
+    }
+
+    /** Delete rows recorded more than `$days` days ago; returns how many. */
+    public function prune(int $days = self::RETENTION_DAYS): int
+    {
+        return ErrorLog::query()->where('created_at', '<', now()->subDays($days))->delete();
     }
 
     private function query(ErrorLogListFilters $filters): Builder

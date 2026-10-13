@@ -277,7 +277,7 @@ assertions**. Full suite: **150 tests / 577 assertions**.
   (`skills/audit-logging/SKILL.md`) already documents how the two tables stay
   distinct.
 - No automatic retention/pruning policy exists yet — the table will grow
-  unbounded in a long-running deployment.
+  unbounded in a long-running deployment. `[Done]` 90-day retention (§12).
 
 ---
 
@@ -306,3 +306,19 @@ skipped only when no EduCore page could ever have linked to it. Tests:
 
 Existing rows are not deleted by this change — the table has no delete path
 (§9); retention is still an open follow-up (§10).
+
+---
+
+## 12. Update (2026-10-13): retention
+
+Every public 404 is recorded, so a deployment facing scanners grows the table
+steadily. Rows past the retention period are now deleted:
+
+- `ErrorLogService::prune(int $days)`; `ErrorLogService::RETENTION_DAYS` = 90.
+- `php artisan error-logs:prune [--days=90]` (at least one day), scheduled
+  daily at 01:10 in the `scheduler` container.
+- Still no delete path over HTTP and no write endpoint; audit logs (9.24) stay
+  immutable and are not pruned.
+
+Test: `ErrorLogManagementTest::test_rows_past_the_retention_period_are_pruned_daily`.
+Report: `docs/50_Project-Audit-and-Hardening-Report.md` §3.

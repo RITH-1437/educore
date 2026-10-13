@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Semester;
+use App\Services\ErrorLogService;
 use App\Services\InboxService;
 use App\Services\InvoiceService;
 use App\Services\ReminderService;
@@ -73,6 +74,12 @@ Artisan::command('notifications:prune {--days='.InboxService::RETENTION_DAYS.' :
 })->purpose('Delete in-app notifications past the retention period');
 
 Schedule::command('notifications:prune')->dailyAt('01:00');
+
+Artisan::command('error-logs:prune {--days='.ErrorLogService::RETENTION_DAYS.' : Delete error log rows older than this many days}', function (ErrorLogService $errorLogs) {
+    $this->info($errorLogs->prune(max(1, (int) $this->option('days'))).' error log row(s) deleted.');
+})->purpose('Delete system error log rows past the retention period');
+
+Schedule::command('error-logs:prune')->dailyAt('01:10');
 
 // Tuition (module 9.18): generate semester tuition invoices from course enrollments.
 Artisan::command('tuition:generate {semester : ID or code of the semester} {--due-date= : Due date for generated invoices (YYYY-MM-DD)} {--rate= : Override rate per credit} {--department= : Filter by department ID} {--program= : Filter by program ID} {--dry-run : Run in preview mode without creating invoices}', function (TuitionInvoiceService $service) {

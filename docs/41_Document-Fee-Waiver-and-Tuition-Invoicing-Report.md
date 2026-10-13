@@ -168,3 +168,15 @@ flowchart TD
 - **Laravel Pint**: 582 files passed cleanly with zero style issues (`vendor/bin/pint --test`).
 - **Frontend Vite Build**: Built cleanly in 3.96s (`npm run build`).
 - **OpenAPI Validation**: Generated cleanly with `php artisan l5-swagger:generate`.
+
+---
+
+## Update (2026-10-13): waiving before approval
+
+The API always accepted a waiver on a `pending` request, but approval ignored
+it and still issued an unpaid invoice. Approval now issues no invoice when the
+fee is waived. The staff page offers the waive action on pending and approved
+fee-bearing requests whose invoice is not paid. Before this, it read the fee
+from the wrong level of the row, so the action and the fee badge never showed.
+Test: `DocumentFeeAndTypeTest::test_a_fee_waived_before_approval_is_never_billed`.
+Report: `docs/50_Project-Audit-and-Hardening-Report.md` (F-03, F-07).

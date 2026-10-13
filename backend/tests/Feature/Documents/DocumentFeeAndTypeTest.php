@@ -355,6 +355,38 @@ class DocumentFeeAndTypeTest extends TestCase
             ->assertJsonPath('data.document.status', 'valid');
     }
 
+    public function test_a_fee_waived_before_approval_is_never_billed(): void
+    {
+        $transcriptType = DocumentType::query()->where('code', DocumentType::TRANSCRIPT)->firstOrFail();
+        $this->assertTrue($transcriptType->requires_fee);
+
+        $requestId = $this->actingAs($this->student->user)
+            ->postJson('/api/document-requests', ['document_type_id' => $transcriptType->id])
+            ->assertCreated()
+            ->json('data.id');
+
+        // Waived while still pending: there is no invoice to cancel yet.
+        $this->actingAs($this->univAdmin)
+            ->postJson("/api/document-requests/{$requestId}/waive-fee", ['reason' => 'Scholarship'])
+            ->assertOk()
+            ->assertJsonPath('data.status', 'pending')
+            ->assertJsonPath('data.is_fee_waived', true);
+
+        // Approving it then issues no invoice, and the PDF can be generated at once.
+        $this->actingAs($this->deptAdmin)
+            ->postJson("/api/document-requests/{$requestId}/approve")
+            ->assertOk()
+            ->assertJsonPath('data.invoice', null);
+
+        $this->assertNull(DocumentRequest::query()->find($requestId)->invoice_id);
+        $this->assertSame(0, Invoice::query()->where('student_id', $this->student->id)->count());
+
+        $this->actingAs($this->deptAdmin)
+            ->postJson("/api/document-requests/{$requestId}/generate")
+            ->assertCreated()
+            ->assertJsonPath('data.status', 'generated');
+    }
+
     public function test_fee_waiver_fails_if_invoice_already_paid(): void
     {
         $transcriptType = DocumentType::query()->where('code', DocumentType::TRANSCRIPT)->firstOrFail();

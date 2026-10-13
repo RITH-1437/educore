@@ -37,6 +37,10 @@ const revoke = async (row) => {
   }
 }
 
+// The fee lives on the request's type (`DocumentRequestResource`).
+const hasFee = (row) => Boolean(row.type?.requires_fee && row.type?.fee_amount > 0)
+// A fee can be waived before approval (it is then never billed) or while its invoice is unpaid.
+const canBeWaived = (row) => ['pending', 'approved'].includes(row.status) && hasFee(row) && !row.is_fee_waived && row.invoice?.status !== 'paid'
 const isInvoiceUnpaid = (row) => !row.is_fee_waived && Boolean(row.invoice && row.invoice.status !== 'paid')
 
 const rejecting = ref(null)
@@ -94,10 +98,10 @@ const columns = [
             Fee waived
           </span>
           <span
-            v-else-if="row.requires_fee && row.fee_amount > 0"
+            v-else-if="hasFee(row)"
             class="inline-flex items-center rounded-full bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
           >
-            ${{ Number(row.fee_amount).toFixed(2) }}
+            ${{ Number(row.type.fee_amount).toFixed(2) }}
           </span>
           <span
             v-else
@@ -140,7 +144,7 @@ const columns = [
             <IconButton v-if="row.status === 'pending'" :icon="Check" variant="success" label="Approve request" @click="approve(row)" />
             <IconButton v-if="row.status === 'pending'" :icon="X" variant="danger" label="Reject request" @click="openReject(row)" />
             <IconButton
-              v-if="canWaive && row.status === 'approved' && row.requires_fee && !row.is_fee_waived"
+              v-if="canWaive && canBeWaived(row)"
               :icon="BadgePercent"
               variant="default"
               label="Waive document fee"

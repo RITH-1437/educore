@@ -412,10 +412,10 @@ documented operations.
 | GET | `/api/document-requests` | Sanctum + staff (all) or a student (own); rows include `type.fee_amount` and `invoice` summary (report 40) | Documented |
 | POST | `/api/document-requests` | Sanctum + student with a profile (self only) | Documented |
 | GET | `/api/document-requests/{documentRequest}` | Sanctum + staff, or the requesting student | Documented |
-| POST | `/api/document-requests/{documentRequest}/approve` | Sanctum + super-admin or university-admin, or the student's Department Admin; issues an unpaid invoice for fee-bearing types (report 40) | Documented |
+| POST | `/api/document-requests/{documentRequest}/approve` | Sanctum + super-admin or university-admin, or the student's Department Admin; issues an unpaid invoice for fee-bearing types (report 40), none when the fee was waived while pending (report 50) | Documented |
 | POST | `/api/document-requests/{documentRequest}/reject` | Sanctum + super-admin or university-admin, or the student's Department Admin | Documented |
 | POST | `/api/document-requests/{documentRequest}/generate` | Sanctum + super-admin or university-admin, or the student's Department Admin; 409 while the linked invoice is not `paid` unless fee is waived (reports 40 & 41) | Documented |
-| POST | `/api/document-requests/{documentRequest}/waive-fee` | Sanctum + super-admin or university-admin; cancels pending invoice and unlocks generation (report 41) | Documented |
+| POST | `/api/document-requests/{documentRequest}/waive-fee` | Sanctum + super-admin or university-admin; pending or approved request; cancels an unpaid invoice and unlocks generation (report 41) | Documented |
 | POST | `/api/documents/{document}/revoke` | Sanctum + super-admin or university-admin (`revoke`, not delegated) | Documented |
 | GET | `/api/documents/{document}/download` | Sanctum + staff, or the requesting student (PDF stream) | Documented |
 | GET | `/api/verifications/{token}` | Public; `throttle:verification` (30/min/IP) | Documented |

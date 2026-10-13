@@ -106,7 +106,8 @@ class DocumentService
             $request->loadMissing('type', 'student');
             $invoiceId = $request->invoice_id;
 
-            if ($request->type->requires_fee && (float) $request->type->fee_amount > 0 && ! $invoiceId) {
+            // A fee waived while the request was pending is never billed.
+            if ($request->type->requires_fee && (float) $request->type->fee_amount > 0 && ! $invoiceId && ! $request->is_fee_waived) {
                 $invoice = $this->invoices->create([
                     'student_id' => $request->student_id,
                     'title' => "Document Fee: {$request->type->name}",

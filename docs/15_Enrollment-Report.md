@@ -15,7 +15,7 @@ manual "complete" action (until grading exists), and student/staff screens.
 
 ```mermaid
 flowchart TD
-  A[enroll student, section] --> L[lock section row]
+  A[enroll student, section] --> L[lock offering row, then section row]
   L --> B{student active?}
   B -- no --> X1[409]
   B -- yes --> C{semester open, inside period,<br/>offering open, section open/active?}
@@ -37,7 +37,11 @@ flowchart TD
 - **Credit limit** = `config('academics.max_semester_credits')`, env
   `MAX_SEMESTER_CREDITS`, default 24; counts pending + confirmed enrollments.
 - **Race safety:** the whole check-and-insert runs in one transaction holding
-  `lockForUpdate` on the section, so two requests cannot take the last seat.
+  `lockForUpdate` on the offering and then the section, so two requests cannot
+  take the last seat — of the section, or of the offering's `max_enrollments`
+  across its sections (the offering lock was added in report 50; before it,
+  two students entering different sections at once could both pass the
+  offering maximum).
 - **Drop** keeps the row: `dropped`, or `withdrawn` when attendance or a grade
   exists. A student who *withdrew* cannot re-enroll in the same section; a
   *dropped* row is revived (unique `(student_id, section_id)`).

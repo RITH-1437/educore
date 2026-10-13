@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Enums\SemesterStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Course;
+use App\Models\CourseOffering;
 use App\Models\Enrollment;
 use App\Models\Grade;
 use App\Models\Section;
@@ -73,7 +74,9 @@ class EnrollmentService
     public function enroll(Student $student, Section $section): Enrollment
     {
         return DB::transaction(function () use ($student, $section) {
-            // Serialize concurrent registrations for this section.
+            // Serialize concurrent registrations for the whole offering (its
+            // `max_enrollments` spans every section), then for this section.
+            CourseOffering::query()->whereKey($section->course_offering_id)->lockForUpdate()->firstOrFail();
             $section = Section::query()->whereKey($section->getKey())->lockForUpdate()->firstOrFail();
             $section->load('offering.course.prerequisites', 'offering.semester', 'scheduleEntries');
             $offering = $section->offering;

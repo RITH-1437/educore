@@ -144,13 +144,23 @@ class EnrollmentService
 
     /**
      * Drop an enrollment, keeping the record. Once attendance or a grade
-     * exists the drop is recorded as a withdrawal.
+     * exists the drop is recorded as a withdrawal. Not once the grade has been
+     * submitted for approval: a withdrawn enrollment leaves the grade sheet, so
+     * that grade could never be approved (audit BL-01). A manager returns the
+     * grades to draft first.
      */
     public function drop(Enrollment $enrollment): Enrollment
     {
         return DB::transaction(function () use ($enrollment) {
             if (! $enrollment->isOpen()) {
                 throw new BusinessRuleException("A {$enrollment->status} enrollment cannot be dropped.");
+            }
+
+            // Locked: grade submission locks the same rows (GradingService::submit).
+            $grade = Grade::query()->where('enrollment_id', $enrollment->getKey())->lockForUpdate()->first();
+
+            if ($grade !== null && $grade->status !== Grade::STATUS_DRAFT) {
+                throw new BusinessRuleException("The grade for this course has been submitted for approval ({$grade->status}), so the enrollment can no longer be dropped. A manager can return the section's grades to draft first.");
             }
 
             $hasRecords = DB::table('attendance_records')->where('enrollment_id', $enrollment->getKey())->exists()

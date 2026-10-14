@@ -72,10 +72,15 @@ class Department extends Model
         return $this->hasMany(Program::class);
     }
 
+    /** The department's courses (`courses.department_id`), e.g. for the public catalog (report 53). */
+    public function courses(): HasMany
+    {
+        return $this->hasMany(Course::class);
+    }
+
     /*
-     * `courses` and `lecturers` hang off this table in the schema but have no
-     * models yet (9.7 / 9.3). The delete guards in `DepartmentService` count
-     * child rows with the query builder, so no unbuilt module is depended upon.
+     * The delete guards in `DepartmentService` count child rows (courses,
+     * lecturers) with the query builder, so they do not depend on relations.
      */
 
     public function scopeActive(Builder $query): Builder

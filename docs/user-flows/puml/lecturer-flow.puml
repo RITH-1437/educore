@@ -1,0 +1,54 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Lecturer Teaching & Assessment Workflows
+
+actor "Lecturer" as Lecturer
+participant "Vue 3 SPA\n(Inertia.js)" as UI
+participant "Lecturer Controller\n& Section Policy" as Backend
+database "PostgreSQL DB" as DB
+storage "MinIO Storage" as MinIO
+
+== Workspace & Schedule ==
+Lecturer -> UI : Sign in
+UI -> Backend : Authenticate session
+Backend --> UI : Return role 'lecturer'
+UI -> UI : Redirect to /dashboard
+UI -> Backend : GET /dashboard
+Backend -> DB : Fetch assigned sections & today's timetable slots
+Backend --> UI : Display teaching dashboard & schedule
+
+== Attendance Session Recording ==
+Lecturer -> UI : Select Section & open Attendance
+UI -> Backend : GET /attendance/sections/{id}
+Backend --> UI : Return enrolled student roster
+Lecturer -> UI : Mark status for students (Present / Absent / Late / Excused)
+Lecturer -> UI : Click 'Save Attendance'
+UI -> Backend : POST /attendance/sections/{id}
+Backend -> DB : Upsert records in attendance_records
+Backend --> UI : Confirm attendance recorded toast
+
+== Material Upload & Assignment Publishing ==
+Lecturer -> UI : Open Coursework & click 'Upload Material'
+Lecturer -> UI : Attach syllabus/slides & submit
+UI -> Backend : POST /coursework/sections/{id}/materials
+Backend -> MinIO : Upload file to S3 bucket
+Backend -> DB : Insert course_materials record
+Backend --> UI : Material published
+
+== Grade Calculation & Submission ==
+Lecturer -> UI : Open /grades/sections/{id}
+Lecturer -> UI : Enter Midterm, Final, & Coursework marks
+Lecturer -> UI : Click 'Compute Final Grades'
+UI -> Backend : POST /grades/sections/{id} (Compute)
+Backend -> Backend : Calculate weighted totals & map to letter grades
+Backend --> UI : Return computed grade summary table
+Lecturer -> UI : Click 'Submit for Approval'
+UI -> Backend : POST /grades/sections/{id}/submit
+Backend -> DB : Update status to 'submitted' (locks lecturer editing)
+Backend --> UI : Display 'Grades submitted for department review'
+
+@enduml

@@ -1,0 +1,40 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Multi-Channel Announcement & Notification Pipeline
+
+actor "Author (Admin/Lecturer)" as Author
+actor "Recipient (Student/Faculty)" as Recipient
+participant "EduCore Backend" as App
+database "PostgreSQL DB" as DB
+queue "Redis Queue" as Queue
+cloud "Mail Server" as Mail
+cloud "Telegram Bot API" as Telegram
+
+== Announcement Authoring ==
+Author -> App : Compose announcement (Audience: Students, Scheduled: Now)
+App -> DB : Insert announcements record (status: published)
+App -> Queue : Dispatch BroadcastAnnouncementJob
+
+== Multi-Channel Fanout ==
+Queue -> App : Process Job
+App -> DB : Insert in-app notifications rows (unread)
+
+alt User has Email Notifications enabled
+  App -> Mail : Dispatch HTML announcement email
+  Mail -> Recipient : Delivers to user inbox
+end
+
+alt User has linked Telegram account
+  App -> Telegram : Dispatch Telegram bot alert message
+  Telegram -> Recipient : Push notification on phone
+end
+
+== Read Receipt ==
+Recipient -> App : Opens /announcements & reads post
+App -> DB : Insert announcement_reads record (user_id, announcement_id, read_at)
+
+@enduml

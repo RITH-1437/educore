@@ -15,3 +15,5 @@ Thumbs.db
 
 # Logs
 *.log
+# Temporary local recovery codes
+educore-recovery-codes.txt

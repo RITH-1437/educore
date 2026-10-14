@@ -82,6 +82,9 @@ Artisan::command('error-logs:prune {--days='.ErrorLogService::RETENTION_DAYS.' :
 
 Schedule::command('error-logs:prune')->dailyAt('01:10');
 
+// API tokens past `sanctum.expiration` no longer authenticate; remove their rows a day later (audit SEC-01).
+Schedule::command('sanctum:prune-expired --hours=24')->dailyAt('01:20');
+
 Artisan::command('announcements:publish-scheduled', function (AnnouncementService $announcements) {
     $this->info($announcements->publishDue().' scheduled announcement(s) published.');
 })->purpose('Publish scheduled announcements that are due (report 51)');

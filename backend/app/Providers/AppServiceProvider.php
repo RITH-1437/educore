@@ -71,6 +71,9 @@ class AppServiceProvider extends ServiceProvider
         RateLimiter::for('telegram-link', fn (Request $request) => Limit::perMinute(5)->by((string) $request->user()?->getKey()));
         RateLimiter::for('telegram-webhook', fn (Request $request) => Limit::perMinute(120)->by($request->ip()));
 
+        // Public course catalog (report 53): pages and API, per address.
+        RateLimiter::for('catalog', fn (Request $request) => Limit::perMinute(60)->by($request->ip()));
+
         // Public document verification (module 9.17).
         RateLimiter::for('verification', fn (Request $request) => Limit::perMinute(30)->by($request->ip()));
 

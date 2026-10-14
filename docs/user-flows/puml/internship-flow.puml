@@ -1,0 +1,34 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Student Internship Lifecycle
+
+actor "Student" as Student
+actor "Department Admin" as Admin
+actor "Academic Supervisor" as Supervisor
+participant "EduCore Web App" as App
+database "PostgreSQL DB" as DB
+
+== Proposal & Approval ==
+Student -> App : Submit Internship Proposal (Company, Position, Start/End Date)
+App -> DB : Insert internships record (status: submitted)
+Admin -> App : Review internship details & approve
+App -> DB : Update status to 'approved'
+App -> Student : Notification 'Internship proposal approved'
+
+== Weekly Reporting ==
+Student -> App : Upload weekly progress report (PDF)
+App -> DB : Insert internship_reports record
+App -> Supervisor : Notify supervisor of weekly submission
+
+== Final Evaluation & Completion ==
+Student -> App : Submit final internship report
+Supervisor -> App : Submit academic supervisor evaluation rubric
+Admin -> App : Review completed evaluations & click 'Complete Internship'
+App -> DB : Set status to 'completed' & award academic credits
+App -> Student : Notification 'Internship successfully completed'
+
+@enduml

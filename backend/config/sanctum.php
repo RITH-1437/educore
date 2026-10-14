@@ -50,7 +50,10 @@ return [
     |
     */
 
-    'expiration' => null,
+    // API tokens (POST /api/login) expire 7 days after they are issued
+    // (audit SEC-01); 0 turns expiry off. Web sign-in uses the session and
+    // SESSION_LIFETIME instead. Expired tokens are pruned daily (routes/console.php).
+    'expiration' => (int) env('SANCTUM_EXPIRATION', 10080) ?: null,
 
     /*
     |--------------------------------------------------------------------------

@@ -236,6 +236,30 @@ class EnrollmentTest extends TestCase
         $this->actingAs($this->student->user)->deleteJson("/api/enrollments/{$graded->id}")->assertForbidden();
     }
 
+    /**
+     * Audit BL-01 (`docs/audits/business-logic-findings.md`): a student could
+     * withdraw while their grade waited for approval. The withdrawn enrollment
+     * left the grade sheet, so the submitted grade was never approved and the
+     * course result disappeared.
+     */
+    public function test_an_enrollment_whose_grade_is_awaiting_approval_cannot_be_dropped(): void
+    {
+        $enrollment = $this->enroll($this->student);
+        DB::table('grades')->insert(['enrollment_id' => $enrollment->id, 'status' => 'submitted', 'total_score' => 41, 'letter_grade' => 'F', 'grade_point' => 0]);
+
+        $this->actingAs($this->student->user)->deleteJson("/api/enrollments/{$enrollment->id}")
+            ->assertStatus(409)->assertJsonPath('message', fn (string $message) => str_contains($message, 'submitted for approval'));
+        $this->actingAs($this->admin)->deleteJson("/api/enrollments/{$enrollment->id}")->assertStatus(409);
+        $this->actingAs($this->student->user)->from('/registration')->post("/registration/{$enrollment->id}/drop")
+            ->assertRedirect('/registration')->assertSessionHas('error');
+        $this->assertSame('confirmed', $enrollment->fresh()->status);
+
+        // Returned to draft by a manager, the withdrawal is possible again.
+        DB::table('grades')->where('enrollment_id', $enrollment->id)->update(['status' => 'draft']);
+        $this->actingAs($this->student->user)->deleteJson("/api/enrollments/{$enrollment->id}")
+            ->assertOk()->assertJsonPath('data.status', 'withdrawn');
+    }
+
     public function test_complete_is_admin_only_and_requires_confirmed(): void
     {
         $enrollment = $this->enroll($this->student);

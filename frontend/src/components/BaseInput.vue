@@ -55,10 +55,11 @@ const labelClass = computed(() =>
     : 'mb-2 block text-label font-medium text-ink dark:text-dark-ink'
 )
 
+// z-10: the field's backdrop blur makes its own layer, which would paint over the icon.
 const leadingIcon = computed(() =>
   isGlass.value
-    ? 'pointer-events-none absolute inset-y-0 left-3 flex items-center text-white/75 transition-colors duration-150 group-focus-within:text-dark-primary'
-    : 'pointer-events-none absolute inset-y-0 left-3 flex items-center text-muted transition-colors duration-150 group-focus-within:text-primary dark:text-dark-muted dark:group-focus-within:text-dark-primary'
+    ? 'pointer-events-none absolute inset-y-0 left-3 z-10 flex items-center text-white/75 transition-colors duration-150 group-focus-within:text-dark-primary'
+    : 'pointer-events-none absolute inset-y-0 left-3 z-10 flex items-center text-muted transition-colors duration-150 group-focus-within:text-primary dark:text-dark-muted dark:group-focus-within:text-dark-primary'
 )
 
 const message = computed(() =>

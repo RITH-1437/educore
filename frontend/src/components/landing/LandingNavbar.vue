@@ -1,5 +1,6 @@
 <script setup>
-import { Menu, Moon, Sun, X } from '@lucide/vue'
+import { Link } from '@inertiajs/vue3'
+import { ArrowRight, Menu, Moon, Sun, X } from '@lucide/vue'
 import { nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import BaseButton from '../BaseButton.vue'
 import { useTheme } from '../../composables/useTheme'
@@ -10,9 +11,11 @@ const symbolMark = '/assets/logo/educore-symbol-mark.jpg'
 // Same light/dark preference as the dashboard (educore_theme, falls back to the system).
 const { theme, toggle: toggleTheme } = useTheme()
 
+// In page order, so the active link always moves forward while scrolling down.
 const links = [
   { id: 'top', label: 'Home' },
   { id: 'platform', label: 'Platform' },
+  { id: 'how-it-works', label: 'How It Works' },
   { id: 'modules', label: 'Modules' },
   { id: 'technology', label: 'Technology' },
   { id: 'about', label: 'About' },
@@ -24,11 +27,11 @@ const activeId = ref('top')
 const menuButton = ref(null)
 const mobileMenu = ref(null)
 let frame = 0
+let desktop = null
 
 // The active link is the last linked section whose top has passed a line 30%
-// down the viewport. Sections between two links (Ecosystem, Journey, ...)
-// therefore keep the previous link lit, so the highlight always matches the
-// part of the page being read: Home → Platform → Modules → Technology → About.
+// down the viewport, so sections between two links (Problem → Solution, the
+// student journey, the feature sections) keep the link of the part they belong to.
 const update = () => {
   frame = 0
   scrolled.value = window.scrollY > 12
@@ -45,43 +48,56 @@ const onScroll = () => {
   if (!frame) frame = requestAnimationFrame(update)
 }
 
+const close = ({ restoreFocus = false } = {}) => {
+  open.value = false
+  if (restoreFocus) menuButton.value?.focus()
+}
+
 const onKeydown = (event) => {
-  if (event.key === 'Escape' && open.value) {
-    open.value = false
-    menuButton.value?.focus()
-  }
+  if (event.key === 'Escape' && open.value) close({ restoreFocus: true })
 }
 
 const go = (id) => {
-  open.value = false
-  scrollToId(id, id === 'top' ? 0 : 88)
+  close()
+  scrollToId(id, id === 'top' ? 0 : 80)
 }
 
-// Lock page scroll while the mobile menu is open; focus the first item.
+// While the mobile menu is open the page behind it is locked and inert, so
+// Tab stays inside the menu; the first item takes focus.
+const background = () => [document.getElementById('main-content'), document.getElementById('site-footer')]
 watch(open, async (isOpen) => {
   document.body.style.overflow = isOpen ? 'hidden' : ''
+  background().forEach((el) => el?.toggleAttribute('inert', isOpen))
   if (isOpen) {
     await nextTick()
     mobileMenu.value?.querySelector('a, button')?.focus()
   }
 })
 
+const onDesktop = (event) => {
+  if (event.matches) close()
+}
+
 onMounted(() => {
   update()
   window.addEventListener('scroll', onScroll, { passive: true })
   window.addEventListener('resize', onScroll, { passive: true })
   window.addEventListener('keydown', onKeydown)
+  desktop = window.matchMedia('(min-width: 1280px)')
+  desktop.addEventListener('change', onDesktop)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('scroll', onScroll)
   window.removeEventListener('resize', onScroll)
   window.removeEventListener('keydown', onKeydown)
+  desktop?.removeEventListener('change', onDesktop)
   cancelAnimationFrame(frame)
   document.body.style.overflow = ''
+  background().forEach((el) => el?.removeAttribute('inert'))
 })
 
-const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
+const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary dark:focus-visible:outline-dark-primary'
 </script>
 
 <template>
@@ -89,10 +105,10 @@ const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-
     class="fixed inset-x-0 top-0 z-50 border-b transition-[background-color,border-color,box-shadow] duration-300 ease-out"
     :class="scrolled || open ? 'border-border-default bg-surface shadow-sm dark:border-dark-border dark:bg-dark-surface' : 'border-transparent bg-transparent'"
   >
-    <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8" aria-label="Primary">
+    <nav class="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8" aria-label="Primary">
       <a
         href="#top"
-        class="flex items-center gap-2 rounded-md"
+        class="flex shrink-0 items-center gap-2 rounded-md"
         :class="focusRing"
         aria-label="EduCore — back to top"
         @click.prevent="go('top')"
@@ -102,11 +118,11 @@ const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-
         <span class="font-display text-h4 font-bold"><span class="text-primary-dark dark:text-dark-ink">Edu</span><span class="text-primary dark:text-dark-primary">Core</span></span>
       </a>
 
-      <ul class="hidden items-center gap-1 lg:flex">
+      <ul class="hidden items-center gap-1 xl:flex">
         <li v-for="link in links" :key="link.id">
           <a
             :href="`#${link.id}`"
-            class="relative inline-flex min-h-10 items-center rounded-md px-3 text-label transition-colors duration-150"
+            class="relative inline-flex min-h-10 items-center rounded-md px-3 text-label whitespace-nowrap transition-colors duration-150"
             :class="[focusRing, activeId === link.id ? 'text-primary dark:text-dark-primary' : 'text-ink hover:text-primary dark:text-dark-ink dark:hover:text-dark-primary']"
             :aria-current="activeId === link.id ? 'location' : undefined"
             @click.prevent="go(link.id)"
@@ -118,6 +134,10 @@ const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-
               aria-hidden="true"
             />
           </a>
+        </li>
+        <!-- The public course catalog is its own page (report 53). -->
+        <li>
+          <Link href="/catalog" class="inline-flex min-h-10 items-center rounded-md px-3 text-label text-ink transition-colors duration-150 hover:text-primary dark:text-dark-ink dark:hover:text-dark-primary" :class="focusRing">Courses</Link>
         </li>
       </ul>
 
@@ -132,15 +152,15 @@ const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-
           <Sun v-if="theme === 'dark'" class="h-5 w-5" aria-hidden="true" />
           <Moon v-else class="h-5 w-5" aria-hidden="true" />
         </button>
-        <div class="hidden items-center gap-2 lg:flex">
+        <div class="hidden items-center gap-2 md:flex">
           <BaseButton href="/login" variant="ghost">Sign In</BaseButton>
-          <BaseButton @click="go('platform')">Explore Platform</BaseButton>
+          <BaseButton @click="go('showcase')">Explore Platform</BaseButton>
         </div>
 
         <button
           ref="menuButton"
           type="button"
-          class="inline-flex h-11 w-11 items-center justify-center rounded-md text-ink hover:bg-background lg:hidden dark:text-dark-ink dark:hover:bg-dark-surface-2"
+          class="inline-flex h-11 w-11 items-center justify-center rounded-md text-ink hover:bg-background xl:hidden dark:text-dark-ink dark:hover:bg-dark-surface-2"
           :class="focusRing"
           :aria-expanded="open"
           aria-controls="landing-mobile-menu"
@@ -165,7 +185,7 @@ const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-
         v-if="open"
         id="landing-mobile-menu"
         ref="mobileMenu"
-        class="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-border-default bg-surface lg:hidden dark:border-dark-border dark:bg-dark-surface"
+        class="max-h-[calc(100dvh-4rem)] overflow-y-auto border-t border-border-default bg-surface xl:hidden dark:border-dark-border dark:bg-dark-surface"
       >
         <ul class="mx-auto max-w-7xl space-y-1 px-4 pt-3 sm:px-6">
           <li v-for="link in links" :key="link.id">
@@ -179,10 +199,16 @@ const focusRing = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-
               {{ link.label }}
             </a>
           </li>
+          <li>
+            <Link href="/catalog" class="flex min-h-11 items-center rounded-md px-3 text-label text-ink hover:bg-background hover:text-primary dark:text-dark-ink dark:hover:bg-dark-surface-2 dark:hover:text-dark-primary" :class="focusRing">Courses</Link>
+          </li>
         </ul>
-        <div class="mx-auto grid max-w-7xl grid-cols-2 gap-3 px-4 py-4 sm:px-6">
+        <div class="mx-auto grid max-w-7xl grid-cols-1 gap-3 px-4 py-4 sm:grid-cols-2 sm:px-6">
+          <BaseButton size="lg" @click="go('showcase')">
+            Explore Platform
+            <ArrowRight class="h-4 w-4" aria-hidden="true" />
+          </BaseButton>
           <BaseButton href="/login" variant="secondary" size="lg">Sign In</BaseButton>
-          <BaseButton size="lg" @click="go('platform')">Explore Platform</BaseButton>
         </div>
       </div>
     </Transition>

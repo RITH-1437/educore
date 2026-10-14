@@ -1,0 +1,46 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Cross-Role Collaborative Workflows
+
+box "University Administration" #F8F9FA
+actor "University Admin" as UniAdmin
+actor "Department Admin" as DeptAdmin
+end box
+
+box "Instruction & Students" #F1F5F9
+actor "Lecturer" as Lecturer
+actor "Student" as Student
+end box
+
+actor "Public Verifier" as Verifier
+
+== Academic Offering & Course Registration ==
+UniAdmin -> DeptAdmin : Opens Semester for enrollment
+DeptAdmin -> Lecturer : Creates section & assigns Lecturer
+DeptAdmin -> DeptAdmin : Schedules room & time slot (0 conflicts)
+Student -> Student : Discovers section on /registration
+Student -> Student : Registers (passes prerequisites & capacity)
+
+== Instruction, Attendance & Submissions ==
+Lecturer -> Student : Takes daily attendance (records Present/Absent)
+Lecturer -> Student : Posts course materials & coursework assignments
+Student -> Lecturer : Uploads assignment submission before deadline
+Lecturer -> Student : Grades submission and enters feedback
+
+== Grading, Approval & GPA ==
+Lecturer -> DeptAdmin : Computes weighted grades & submits grade sheet
+DeptAdmin -> UniAdmin : Reviews & approves department grades
+UniAdmin -> UniAdmin : Finalizes grades (permanently locks sheet)
+UniAdmin -> Student : Triggers GPA recalculation & publishes transcript
+
+== Document Request & Public Verification ==
+Student -> DeptAdmin : Requests official Study Certificate
+DeptAdmin -> Student : Approves request & generates PDF with QR Code
+Student -> Verifier : Presents certificate to employer
+Verifier -> Verifier : Scans QR code (/verify/{token}) & views verified university badge
+
+@enduml

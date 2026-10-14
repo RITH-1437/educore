@@ -1,0 +1,66 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Student Academic Portal & Registration Flow
+
+actor "Student" as Student
+participant "Vue 3 SPA\n(Inertia.js)" as UI
+participant "Student Controller\n& RegistrationService" as Backend
+database "PostgreSQL DB" as DB
+storage "MinIO Storage" as MinIO
+
+== Student Portal Sign In ==
+Student -> UI : Sign in
+UI -> Backend : Authenticate session
+Backend --> UI : Return role 'student' & student profile
+UI -> UI : Redirect to /dashboard
+UI -> Backend : GET /dashboard
+Backend -> DB : Query student GPA, enrolled courses, attendance rate, invoice balance
+Backend --> UI : Render personalized student academic overview
+
+== Course Self-Registration ==
+Student -> UI : Navigate to /registration
+UI -> Backend : GET /registration
+Backend -> DB : Query active semester & open offerings
+Backend --> UI : Display available course sections
+
+Student -> UI : Click 'Register' on Section (e.g. CS102-A)
+UI -> Backend : POST /registration (section_id)
+Backend -> Backend : Validate Registration Window is open
+Backend -> Backend : Validate Course Prerequisites
+Backend -> Backend : Check Section Capacity (enrolled < max)
+Backend -> Backend : Detect Schedule Overlap with other enrolled sections
+alt Validation Failure
+  Backend --> UI : 422 Unprocessable Entity (Specific rule failure)
+  UI --> Student : Display error banner (e.g. Prerequisite CS101 required)
+else Validation Passes
+  Backend -> DB : Insert enrollments record (status: enrolled)
+  Backend -> DB : Increment section enrolled_count
+  Backend --> UI : 200 OK (Registration confirmed toast)
+end
+
+== Assignment Submission ==
+Student -> UI : Open /my-assignments & select task
+Student -> UI : Upload PDF file & click 'Submit'
+UI -> Backend : POST /assignments/{id}/submissions
+Backend -> MinIO : Upload student submission file
+Backend -> DB : Insert/update assignment_submissions record (track is_late)
+Backend --> UI : Confirm submission recorded toast
+
+== Document Request & QR Verification ==
+Student -> UI : Request 'Certificate of Study'
+UI -> Backend : POST /my-documents
+Backend -> DB : Create document request record
+Backend --> UI : Request submitted toast
+... Admin Approves and Generates Document ...
+Student -> UI : Download issued PDF
+actor "Third-Party Verifier" as Verifier
+Verifier -> UI : Scans QR code on PDF (/verify/{token})
+UI -> Backend : GET /verify/{token}
+Backend -> DB : Verify token & document status
+Backend --> UI : Display verified official credential badge
+
+@enduml

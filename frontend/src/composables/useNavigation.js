@@ -92,6 +92,7 @@ const navForRole = (role) => {
       ] },
       { label: 'Learning', items: [
         { label: 'Course registration', href: '/registration', icon: ListChecks },
+        { label: 'Course catalog', href: '/catalog', icon: Library },
         { label: 'My timetable', href: '/timetable', icon: CalendarClock },
         { label: 'Course materials', href: '/my-materials', icon: FolderOpen },
         { label: 'My assignments', href: '/my-assignments', icon: ClipboardList },
@@ -112,6 +113,7 @@ const navForRole = (role) => {
       { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
       { label: 'My timetable', href: '/timetable', icon: CalendarClock },
       { label: 'Attendance', href: '/attendance', icon: UserCheck },
+      { label: 'Course catalog', href: '/catalog', icon: Library },
       { label: 'Grading scale', href: '/grading-scale', icon: Scale },
       { label: 'Announcements', href: '/announcements', icon: Megaphone },
     ] }]
@@ -138,6 +140,7 @@ const SECTION_LABELS = {
   'my-attendance': 'My attendance',
   'my-assignments': 'My assignments',
   'my-materials': 'Course materials',
+  catalog: 'Course catalog',
   coursework: 'Coursework',
   'my-exams': 'My exams',
   exams: 'Examinations',

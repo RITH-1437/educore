@@ -1,0 +1,39 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Digital Document Issuance & Verification
+
+actor "Student" as Student
+actor "Department Admin" as Admin
+actor "Third-Party Verifier" as Verifier
+participant "EduCore Web App" as App
+database "PostgreSQL DB" as DB
+storage "MinIO Storage" as MinIO
+
+== Request & Approval ==
+Student -> App : Submit request for Academic Document (e.g. Study Certificate)
+App -> DB : Insert documents record (status: pending_review)
+Admin -> App : Review pending document requests
+Admin -> App : Click 'Approve & Issue'
+
+== Cryptographic Generation & QR Embedding ==
+App -> DB : Generate unique verification_token & record in document_verifications
+App -> App : Generate QR Code pointing to /verify/{token}
+App -> App : Compile PDF certificate with embedded QR Code & registrar seal
+App -> MinIO : Store compiled PDF in storage
+App -> DB : Update documents status to 'issued'
+App -> Student : Send notification 'Document ready for download'
+
+== Public Verification ==
+Verifier -> App : Scan QR Code -> GET /verify/{token}
+App -> DB : Look up document_verifications where token = {token}
+alt Token Valid & Active
+  App --> Verifier : Display Verified Official Credential (Student Name, Program, Issue Date)
+else Token Invalid or Revoked
+  App --> Verifier : Display Warning (Document Invalid or Revoked)
+end
+
+@enduml

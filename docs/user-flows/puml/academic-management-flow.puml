@@ -1,0 +1,85 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Academic Structure Hierarchy & Relationships
+
+entity "University" as Uni {
+  * id : bigint
+  --
+  name : varchar
+  code : varchar
+  is_current : boolean
+}
+
+entity "Department" as Dept {
+  * id : bigint
+  --
+  university_id : bigint <<FK>>
+  name : varchar
+  code : varchar
+}
+
+entity "Program" as Prog {
+  * id : bigint
+  --
+  department_id : bigint <<FK>>
+  name : varchar
+  degree_level : varchar
+  total_credits : integer
+}
+
+entity "Course" as Course {
+  * id : bigint
+  --
+  department_id : bigint <<FK>>
+  code : varchar
+  title : varchar
+  credits : integer
+}
+
+entity "AcademicYear" as Year {
+  * id : bigint
+  --
+  name : varchar
+  start_date : date
+  end_date : date
+  is_current : boolean
+  status : varchar
+}
+
+entity "Semester" as Sem {
+  * id : bigint
+  --
+  academic_year_id : bigint <<FK>>
+  name : varchar
+  status : varchar
+}
+
+entity "CourseOffering" as Offering {
+  * id : bigint
+  --
+  course_id : bigint <<FK>>
+  semester_id : bigint <<FK>>
+}
+
+entity "Section" as Sec {
+  * id : bigint
+  --
+  course_offering_id : bigint <<FK>>
+  section_code : varchar
+  capacity : integer
+  enrolled_count : integer
+}
+
+Uni ||--o{ Dept : contains
+Dept ||--o{ Prog : offers
+Dept ||--o{ Course : owns
+Year ||--o{ Sem : includes
+Course ||--o{ Offering : scheduled_as
+Sem ||--o{ Offering : holds
+Offering ||--o{ Sec : divides_into
+
+@enduml

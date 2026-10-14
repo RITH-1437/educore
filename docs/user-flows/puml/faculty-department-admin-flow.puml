@@ -1,0 +1,52 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Department Admin Workflows & Scoping
+
+actor "Department Admin" as DeptAdmin
+participant "Vue 3 SPA\n(Inertia.js)" as UI
+participant "Department Controller\n& Scoped Policies" as Backend
+database "PostgreSQL DB" as DB
+
+== Scoped Dashboard Access ==
+DeptAdmin -> UI : Sign in
+UI -> Backend : Authenticate session
+Backend --> UI : Return role 'department-admin' & department_id
+UI -> UI : Redirect to /dashboard
+UI -> Backend : GET /dashboard
+Backend -> DB : Query data WHERE department_id = user.department_id
+Backend --> UI : Render scoped metrics (students, faculty, programs)
+
+== Section Scheduling & Conflict Detection ==
+DeptAdmin -> UI : Select Section & Click 'Add Schedule'
+DeptAdmin -> UI : Input Day, Start/End Time, Room
+UI -> Backend : POST /sections/{id}/schedule
+Backend -> DB : Check if Room is booked at that day/time
+Backend -> DB : Check if assigned Lecturer is teaching another section
+alt Conflict Detected
+  Backend --> UI : Return 422 Unprocessable Entity (Conflict details)
+  UI --> DeptAdmin : Display conflict notification & highlight conflicting slot
+else No Conflict
+  Backend -> DB : Insert schedule_entries row
+  Backend --> UI : Return updated timetable schedule
+end
+
+== Grade Review & Approval ==
+DeptAdmin -> UI : Open /grades & filter submitted sections
+DeptAdmin -> UI : View section grade breakdown
+alt Grades Approved
+  DeptAdmin -> UI : Click 'Approve Grades'
+  UI -> Backend : POST /grades/sections/{id}/approve
+  Backend -> DB : Set grade_status = 'approved'
+  Backend --> UI : Confirm approval toast
+else Needs Revision
+  DeptAdmin -> UI : Click 'Return to Draft' with explanation
+  UI -> Backend : POST /grades/sections/{id}/return
+  Backend -> DB : Set grade_status = 'draft'
+  Backend --> UI : Confirm return to draft toast
+end
+
+@enduml

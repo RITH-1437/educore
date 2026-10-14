@@ -5,34 +5,35 @@ import Reveal from './Reveal.vue'
 const story = [
   {
     icon: Target,
-    title: 'What EduCore is',
-    text: 'A university digital administration platform: academic structure, student services, administration, documents and communication in one secure web application.',
+    title: 'Why EduCore exists',
+    text: 'Much of a university’s daily work — registering students, recording grades, issuing documents — still moves through paper forms, spreadsheets and chat groups. EduCore brings that work into one platform with one set of records.',
   },
   {
     icon: Lightbulb,
-    title: 'Why we built it',
-    text: 'Many universities still depend on paper forms, spreadsheets and disconnected tools. Students queue at offices for documents, and staff re-type the same records. We wanted to show that one well-structured platform can replace that.',
+    title: 'Designed around the university',
+    text: 'It is modelled on how universities actually run: departments, programs, semesters and sections, and the different people who work with them every day.',
   },
   {
     icon: Compass,
-    title: 'Cambodian university focus',
-    text: 'EduCore is designed around how Cambodian universities are organised and run day to day, from faculties and programs to semesters, invoices and official documents.',
+    title: 'Made for Cambodian university workflows',
+    text: 'Invoices in US dollars or Khmer riel, official documents that are often requested in person, and Telegram notices for students and staff who already use it.',
   },
 ]
 
+// 192 px crops of the original portraits (public/assets/images/people/), shown at 96 px.
 const team = [
-  { name: 'Rin Nairith', photo: '/assets/images/people/nairith.jpg' },
-  { name: 'Yong Lyhor', photo: '/assets/images/people/lyhor.png' },
+  { name: 'Rin Nairith', photo: '/assets/images/people/nairith-192.jpg' },
+  { name: 'Yong Lyhor', photo: '/assets/images/people/lyhor-192.jpg' },
 ]
 </script>
 
 <template>
-  <section id="about" class="scroll-mt-24 bg-background py-20 sm:py-24 dark:bg-dark-bg" aria-labelledby="about-title">
+  <section id="about" class="scroll-mt-20 bg-background py-20 sm:py-24 dark:bg-dark-bg" aria-labelledby="about-title">
     <div class="mx-auto grid max-w-7xl gap-12 px-4 sm:px-6 lg:grid-cols-[3fr_2fr] lg:gap-16 lg:px-8">
       <Reveal>
-        <p class="text-caption font-semibold tracking-widest text-primary uppercase dark:text-dark-primary">Project story</p>
+        <p class="text-caption font-semibold tracking-widest text-primary uppercase dark:text-dark-primary">About the project</p>
         <h2 id="about-title" class="font-display mt-3 text-h2 text-balance text-primary-dark dark:text-dark-ink">
-          Built for the future of university administration.
+          Building a Better Digital Experience for University Administration
         </h2>
 
         <div class="mt-8 space-y-6">
@@ -59,14 +60,16 @@ const team = [
               height="96"
               loading="lazy"
               decoding="async"
-              class="h-24 w-24 rounded-pill object-cover object-top ring-4 ring-primary/10 dark:ring-dark-primary/20"
+              class="h-24 w-24 rounded-pill object-cover ring-4 ring-primary/10 dark:ring-dark-primary/20"
             />
             <p class="mt-3 text-small font-semibold text-primary-dark dark:text-dark-ink">{{ member.name }}</p>
             <p class="text-caption text-muted dark:text-dark-muted">Developer</p>
           </li>
         </ul>
-        <p class="mt-4 text-small text-muted dark:text-dark-muted">EduCore is our thesis and portfolio project.</p>
-
+        <p class="mt-6 border-t border-border-default pt-4 text-small text-muted dark:border-dark-border dark:text-dark-muted">
+          EduCore is our thesis and portfolio project: a working platform, built and documented module by module and
+          checked by an automated test suite.
+        </p>
       </Reveal>
     </div>
   </section>

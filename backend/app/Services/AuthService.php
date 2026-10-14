@@ -7,6 +7,7 @@ use App\Dto\User\UserData;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Repositories\UserRepository;
 use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -55,10 +56,17 @@ class AuthService
     }
 
     /**
-     * Revoke the token that authenticated the current request.
+     * Revoke the token that authenticated the current request. Token deletion
+     * fires no Logout event of its own, so it is dispatched here like the
+     * Login event above, which audits it as `auth.logout` (audit SEC-02).
      */
     public function logout(Request $request): void
     {
-        $request->user()?->currentAccessToken()?->delete();
+        $user = $request->user();
+        $user?->currentAccessToken()?->delete();
+
+        if ($user !== null) {
+            event(new Logout('sanctum', $user));
+        }
     }
 }

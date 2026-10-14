@@ -1,0 +1,56 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — University Admin Workflows
+
+actor "University Admin" as UniAdmin
+participant "Vue 3 SPA\n(Inertia.js)" as UI
+participant "University Admin Controller" as Backend
+database "PostgreSQL DB" as DB
+participant "Queue Worker" as Worker
+
+== Dashboard & KPI Overview ==
+UniAdmin -> UI : Sign in
+UI -> Backend : Authenticate session
+Backend --> UI : Return role 'university-admin'
+UI -> UI : Redirect to /dashboard
+UI -> Backend : GET /dashboard
+Backend -> DB : Aggregate university statistics (students, courses, invoices)
+Backend --> UI : Display institutional KPI overview
+
+== Academic Year & Semester Lifecycle ==
+UniAdmin -> UI : Open /academic-years
+UI -> Backend : GET /academic-years
+Backend --> UI : Return academic years list
+
+UniAdmin -> UI : Click 'Add Semester' (e.g. Fall 2026)
+UI -> Backend : POST /academic-years/{id}/semesters
+Backend -> Backend : Validate date range within parent year
+Backend -> DB : Insert semester (status: planned)
+Backend --> UI : Confirm semester created
+
+UniAdmin -> UI : Transition semester to 'open' (for registration)
+UI -> Backend : POST /academic-years/{year}/semesters/{sem}/status
+Backend -> DB : Update status to 'open'
+Backend --> UI : Update status indicator
+
+== Bulk Tuition Invoice Generation ==
+UniAdmin -> UI : Open /invoices & click 'Generate Tuition'
+UniAdmin -> UI : Select Academic Year & Semester, credit cost
+UI -> Backend : POST /invoices/generate-tuition
+Backend -> DB : Retrieve enrolled students and credit sums
+Backend -> DB : Insert batch invoices (status: unpaid)
+Backend -> Worker : Dispatch student invoice notifications
+Backend --> UI : Return total invoices created count
+
+== Manual Payment Recording ==
+UniAdmin -> UI : Select invoice & click 'Record Payment'
+UniAdmin -> UI : Enter cash/bank reference & amount
+UI -> Backend : POST /invoices/{id}/payments
+Backend -> DB : Record payment row & update invoice status (paid/partially_paid)
+Backend --> UI : Return updated invoice with printable receipt
+
+@enduml

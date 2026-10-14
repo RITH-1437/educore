@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AssignmentController;
 use App\Http\Controllers\Api\AttendanceController;
 use App\Http\Controllers\Api\AuditLogController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CatalogController;
 use App\Http\Controllers\Api\CourseController;
 use App\Http\Controllers\Api\CourseMaterialController;
 use App\Http\Controllers\Api\CourseOfferingController;
@@ -429,6 +430,13 @@ Route::get('/users/{user}/avatar', [ProfileController::class, 'avatar'])->name('
 Route::post('/telegram/webhook', TelegramWebhookController::class)
     ->middleware('throttle:telegram-webhook')
     ->name('api.telegram.webhook');
+
+// Public course catalog (report 53): public data only, rate limited.
+Route::middleware('throttle:catalog')->prefix('/catalog')->name('api.catalog.')->group(function () {
+    Route::get('/departments', [CatalogController::class, 'departments'])->name('departments');
+    Route::get('/courses', [CatalogController::class, 'courses'])->name('courses');
+    Route::get('/courses/{course}', [CatalogController::class, 'show'])->whereNumber('course')->name('courses.show');
+});
 
 // Public document verification (module 9.17): minimal data, logged, rate limited.
 Route::get('/verifications/{token}', [DocumentController::class, 'verify'])

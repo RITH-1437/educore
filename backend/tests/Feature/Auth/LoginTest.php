@@ -176,6 +176,44 @@ class LoginTest extends TestCase
             ->assertRedirect(route('admin.dashboard'));
     }
 
+    /**
+     * Audit SEC-01 (`docs/audits/security-findings.md`): API tokens never
+     * expired, so a leaked token kept working until someone signed out.
+     */
+    public function test_api_tokens_expire_after_the_configured_lifetime(): void
+    {
+        User::factory()->create(['email' => 'token@test.test']);
+        $token = $this->postJson('/api/login', ['email' => 'token@test.test', 'password' => 'password'])->assertOk()->json('data.token');
+
+        $this->assertSame(10080, config('sanctum.expiration'));
+        $this->withToken($token)->getJson('/api/user')->assertOk();
+
+        $this->travel(10079)->minutes();
+        $this->app['auth']->forgetGuards();
+        $this->withToken($token)->getJson('/api/user')->assertOk();
+
+        $this->travel(2)->minutes();
+        $this->app['auth']->forgetGuards();
+        $this->withToken($token)->getJson('/api/user')->assertUnauthorized();
+    }
+
+    /**
+     * Audit SEC-02: signing out of the API revoked the token but left no
+     * audit entry (only the web sign-out fired the Logout event).
+     */
+    public function test_api_logout_revokes_the_token_and_is_audited(): void
+    {
+        $user = User::factory()->create(['email' => 'api-out@test.test']);
+        $token = $this->postJson('/api/login', ['email' => 'api-out@test.test', 'password' => 'password'])->assertOk()->json('data.token');
+
+        $this->withToken($token)->postJson('/api/logout')->assertOk();
+
+        $this->assertDatabaseCount('personal_access_tokens', 0);
+        $this->assertDatabaseHas('audit_logs', ['action' => 'auth.logout', 'actor_id' => $user->id]);
+        $this->app['auth']->forgetGuards();
+        $this->withToken($token)->getJson('/api/user')->assertUnauthorized();
+    }
+
     public function test_user_can_logout(): void
     {
         $user = User::factory()->superAdmin()->create();

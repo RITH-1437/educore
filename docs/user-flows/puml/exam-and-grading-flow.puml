@@ -1,0 +1,45 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Exam & Final Grade Approval Pipeline
+
+actor "Lecturer" as Lecturer
+actor "Department Admin" as DeptAdmin
+actor "University Admin" as UniAdmin
+participant "EduCore Backend" as App
+database "PostgreSQL DB" as DB
+
+== Mark Entry & Computation ==
+Lecturer -> App : Open section grading sheet
+Lecturer -> App : Enter coursework, midterm, and final exam marks
+Lecturer -> App : Trigger 'Compute Final Grades'
+App -> App : Calculate weighted sum (0-100) and map to letter grade & points
+App -> DB : Store computed grades (status: draft)
+
+== Grade Submission ==
+Lecturer -> App : Click 'Submit for Approval'
+App -> DB : Update status to 'submitted' (locks lecturer editing)
+App -> DeptAdmin : Send grade approval pending notification
+
+== Administrative Review ==
+DeptAdmin -> App : Review submitted grade breakdown
+alt Needs Corrections
+  DeptAdmin -> App : Click 'Return to Draft' with remarks
+  App -> DB : Revert status to 'draft'
+  App -> Lecturer : Notify to revise marks
+else Approved
+  DeptAdmin -> App : Click 'Approve Grades'
+  App -> DB : Update status to 'approved'
+end
+
+== Finalization & GPA Recalculation ==
+UniAdmin -> App : Finalize approved section grades
+App -> DB : Set status to 'finalized' (Permanent Lock)
+App -> App : Recalculate Semester GPA & Cumulative GPA for enrolled students
+App -> DB : Update student_profiles (cumulative_gpa)
+App --> App : Unlock grades on Student Portal & Transcript
+
+@enduml

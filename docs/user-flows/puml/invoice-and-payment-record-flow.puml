@@ -1,0 +1,32 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Invoice Issuance & Cashier Payment Flow
+
+actor "University Admin" as Admin
+actor "Student" as Student
+participant "EduCore Web App" as App
+database "PostgreSQL DB" as DB
+
+== Tuition Invoicing ==
+Admin -> App : Select semester & click 'Generate Tuition Invoices'
+App -> DB : Query active student credit hours
+App -> DB : Insert batch invoices (status: unpaid)
+App -> Student : Send invoice alert (email & in-app)
+
+== Offline Payment ==
+Student -> App : Open /my-invoices & download invoice PDF
+Student -> Student : Completes bank transfer or visits cashier desk
+Student -> Admin : Presents payment slip / bank reference
+
+== Cashier Payment Recording ==
+Admin -> App : Open /invoices/{id} & click 'Record Payment'
+Admin -> App : Input amount, method (Cash/Bank), and reference code
+App -> DB : Insert payment row & update invoice status (paid / partially_paid)
+App -> App : Generate printable PDF payment receipt
+App -> Student : Notify student that payment has been credited
+
+@enduml

@@ -9,6 +9,9 @@
   passes a new `stats` Inertia prop (`docs/api/api-audit.md`)
 - **Design system:** `docs/branding/UI-COMPONENTS.md` §1, §2, §4, §15 and `BRAND-GUIDELINES.md` §10
   updated first
+- **Superseded in part (2026-10-14):** the landing page's structure, sections and motion are now
+  described by `docs/54_Landing-Page-Product-Showcase-Report.md`; the live figures (§3), clickable
+  table rows (§7) and seeding (§8) below still hold
 
 ## 1. Goal
 

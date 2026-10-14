@@ -5,7 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="theme-color" content="#0F172A">
-    <meta name="description" content="EduCore is a modern university digital administration platform connecting academic management, student services, administration, communication, documents, and institutional workflows.">
+    {{-- Pages render without SSR, so crawlers and link previews only see these tags; data-inertia keys let a page's <Head> replace them instead of duplicating them. --}}
+    <meta name="description" content="EduCore is a university digital administration platform connecting academic management, student services, administration, communication, and institutional workflows." data-inertia="description">
+    <meta property="og:type" content="website" data-inertia="og:type">
+    <meta property="og:site_name" content="EduCore" data-inertia="og:site_name">
+    <meta property="og:title" content="EduCore — One Platform. Smarter Education." data-inertia="og:title">
+    <meta property="og:description" content="EduCore is a university digital administration platform connecting academic management, student services, administration, communication, and institutional workflows." data-inertia="og:description">
+    <meta property="og:image" content="{{ url('/assets/logo/educore-primary.png') }}" data-inertia="og:image">
+    <meta name="twitter:card" content="summary_large_image" data-inertia="twitter:card">
     <link rel="icon" type="image/svg+xml" href="/assets/logo/educore-favicon.svg">
     <link rel="alternate icon" type="image/png" href="/assets/logo/educore-app-icon.png">
     <link rel="apple-touch-icon" href="/assets/logo/educore-app-icon.png">

@@ -1,6 +1,6 @@
 # EduCore — Module Status & Build Roadmap Report
 
-- **Date:** 2026-09-26 (updated 2026-10-13)
+- **Date:** 2026-09-26 (updated 2026-10-14)
 - **Source of truth:** `docs/3_business-overview.md` §9 (module list), `docs/5_Build-Steps-Report.md` (build workflow)
 - **Status labels:** `[Implemented]` = shipped and tested · `[Planned]` = next, follows this playbook · `[Future]` = later
 - **Database:** the full 49-table schema already exists as migrations — **every** module below builds on top of already-migrated tables (see `docs/4_Database-Migration-Report.md`).
@@ -16,6 +16,7 @@
 | — | Database schema (49 domain tables) | `[Implemented]` |
 | — | Branding / design system + admin dashboard | `[Implemented]` |
 | — | Public landing page redesign + clickable table rows (report 37) | `[Implemented]` |
+| — | Landing page product showcase refresh (report 54) | `[Implemented]` |
 | — | Bottom-right toast notifications, accounts-by-role pie, academic year page fix (report 38) | `[Implemented]` |
 | — | Department Admin sections & schedules for their department (report 46) | `[Implemented]` |
 | — | API contract & OpenAPI audit | `[Implemented]` |
@@ -757,3 +758,18 @@ A module is not done until its report exists and its tests pass — never label
   another account's two-factor; every change audited and emailed. Migration
   `2026_10_13_110000` (3 columns on `users`); 6 API operations
   (246 / 246 documented). Report: `docs/52_Two-Factor-Sign-In-Report.md`.
+- `[Done]` Landing page product showcase (2026-10-14): the public page was
+  rebuilt around a product story and checked against the code. Fixed stale
+  claims — the faculty level (removed in report 39) in the structure, modules,
+  roles and sample texts; the in-app inbox (report 42), trends (report 47) and
+  two-factor sign-in (report 52) were missing; a hard-coded test count; Pinia
+  listed though no store exists. New: a student-dashboard hero preview, a roles
+  hub, a department-first structure diagram, a phased student journey, a
+  module explorer that also lists what is not part of EduCore yet, demo-data
+  Lecturer / Student previews, the real document workflow (fee step
+  included), a channel fan-out, an analytics panel that falls back to
+  labelled sample figures on an empty installation, a full footer, and
+  crawler-visible Open Graph tags in `app.blade.php`. Removed: the hero
+  terminal, the technology marquee and the ASCII footer (no infinite
+  animation remains). No API, schema or dashboard change. Report:
+  `docs/54_Landing-Page-Product-Showcase-Report.md`.

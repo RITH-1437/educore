@@ -11,6 +11,7 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetController;
 use App\Http\Controllers\Auth\TwoFactorController;
+use App\Http\Controllers\CatalogController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseMaterialsController;
 use App\Http\Controllers\CourseOfferingController;
@@ -360,6 +361,12 @@ Route::middleware('auth')->prefix('/inbox')->name('inbox.')->group(function () {
     Route::post('/read-all', [InboxController::class, 'readAll'])->name('read-all');
     Route::post('/{notification}/open', [InboxController::class, 'open'])->whereUuid('notification')->name('open');
     Route::post('/{notification}/read', [InboxController::class, 'read'])->whereUuid('notification')->name('read');
+});
+
+// Public course catalog (report 53) — no sign-in, like a Moodle front page.
+Route::middleware('throttle:catalog')->group(function () {
+    Route::get('/catalog', [CatalogController::class, 'index'])->name('catalog.index');
+    Route::get('/catalog/courses/{course}', [CatalogController::class, 'show'])->whereNumber('course')->name('catalog.show');
 });
 
 // Public verification page (module 9.17) — no sign-in.

@@ -35,6 +35,9 @@ and never committed. The template is `docker/.env.docker.example`.
 Variables group by responsibility:
 
 - `APP_*` — Laravel application settings.
+- `SANCTUM_EXPIRATION` — minutes until an API token from `POST /api/login`
+  expires (default `10080`, 7 days; `0` = never). Web sign-in uses the session
+  instead. Expired tokens are pruned daily (`sanctum:prune-expired`).
 - `POSTGRES_*` / `PGADMIN_*` — database service credentials and host ports.
 - `REDIS_*` — Redis host ports.
 - `MINIO_*` / `AWS_*` — object storage credentials, bucket name, API/console ports.
@@ -109,8 +112,9 @@ five roles, **one account per role** — `admin@educore.kh` / `admin@123`
 `student@educore.kh` / `student@123` (development only — change them) — plus
 the default grading scale and the requestable document types. No demo people or records are seeded: universities, departments,
 programs, courses, students, lecturers and everything else are entered through
-the application, and every screen (including the public landing page's figures)
-shows what is in the database. See
+the application, and every screen shows what is in the database. The public
+landing page's live figures do too; where its previews would otherwise be empty
+it shows clearly labelled demo or sample data instead (report 54). See
 [`docs/database/seed-strategy.md`](docs/database/seed-strategy.md).
 
 Optional: `MAX_SEMESTER_CREDITS` (default `24`) sets the per-semester credit

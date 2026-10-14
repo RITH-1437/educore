@@ -277,8 +277,8 @@ const formatDate = (dateStr) => {
         />
       </div>
 
-      <BaseCard title="Faculty & Position Details" padding="lg">
-        <template #description>Faculty appointment and employment records.</template>
+      <BaseCard title="Appointment & Position Details" padding="lg">
+        <template #description>Department appointment and employment records.</template>
         <dl class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <div>
             <dt class="text-caption font-medium text-muted dark:text-dark-muted">Academic Title</dt>
@@ -286,7 +286,7 @@ const formatDate = (dateStr) => {
           </div>
           <div>
             <dt class="text-caption font-medium text-muted dark:text-dark-muted">Position</dt>
-            <dd class="mt-1 text-small font-semibold text-ink dark:text-dark-ink">{{ lecturer.position ?? 'Faculty Member' }}</dd>
+            <dd class="mt-1 text-small font-semibold text-ink dark:text-dark-ink">{{ lecturer.position ?? 'Lecturer' }}</dd>
           </div>
           <div>
             <dt class="text-caption font-medium text-muted dark:text-dark-muted">Department</dt>
@@ -301,10 +301,10 @@ const formatDate = (dateStr) => {
             <dd class="mt-1 text-small text-ink dark:text-dark-ink">{{ lecturer.specialization ?? '—' }}</dd>
           </div>
           <div>
-            <dt class="text-caption font-medium text-muted dark:text-dark-muted">Faculty Status</dt>
+            <dt class="text-caption font-medium text-muted dark:text-dark-muted">Employment Status</dt>
             <dd class="mt-1 text-small text-ink dark:text-dark-ink">
               <BaseBadge :variant="lecturer.is_active ? 'success' : 'muted'" size="sm">
-                {{ lecturer.is_active ? 'Active Faculty' : 'Inactive' }}
+                {{ lecturer.is_active ? 'Active' : 'Inactive' }}
               </BaseBadge>
             </dd>
           </div>

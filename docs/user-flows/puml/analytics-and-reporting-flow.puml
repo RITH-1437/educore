@@ -1,0 +1,32 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Analytics Data Pipeline & Export
+
+actor "Admin (Uni / Dept)" as Admin
+participant "EduCore Web App" as App
+participant "AnalyticsService" as Analytics
+database "PostgreSQL DB" as DB
+
+== Dynamic Dashboard Query ==
+Admin -> App : Open /analytics (with department/semester filter)
+App -> Analytics : Fetch metrics (enrolment, GPA distribution, tuition)
+Analytics -> DB : Execute optimized aggregate queries (GROUP BY, SUM, AVG)
+Analytics --> App : Return structured JSON metrics
+App --> Admin : Render charts (Pie, Bar, Trendlines)
+
+== CSV & PDF Export ==
+alt CSV Export
+  Admin -> App : Click 'Export CSV' -> GET /analytics/export
+  App -> DB : Query raw tabular metrics
+  App --> Admin : Stream download 'analytics_report.csv'
+else PDF Executive Report
+  Admin -> App : Click 'Export PDF' -> GET /analytics/export/pdf
+  App -> App : Render Blade print template & compile PDF
+  App --> Admin : Stream download 'analytics_summary.pdf'
+end
+
+@enduml

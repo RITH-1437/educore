@@ -51,6 +51,21 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Public course catalog
+    |--------------------------------------------------------------------------
+    |
+    | `/catalog` (report 53) lists active courses to everyone, signed in or
+    | not. With `show_lecturers` on, each course also shows who teaches it
+    | this semester (title and name only, as a printed course guide would).
+    |
+    */
+
+    'catalog' => [
+        'show_lecturers' => (bool) env('CATALOG_SHOW_LECTURERS', true),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Uploads
     |--------------------------------------------------------------------------
     |

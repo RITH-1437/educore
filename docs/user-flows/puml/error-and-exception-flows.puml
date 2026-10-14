@@ -1,0 +1,49 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Exception Handling & Error Diagnostics
+
+start
+:Incoming User Request;
+
+partition "Execution & Exception Interception" {
+  if (Input validation fails?) then (yes)
+    :Throw ValidationException;
+    :Return HTTP 422 with field error map;
+    stop
+  endif
+
+  if (User session invalid?) then (yes)
+    :Throw AuthenticationException;
+    :Return HTTP 401 / Redirect /login;
+    stop
+  endif
+
+  if (Policy authorization denies access?) then (yes)
+    :Throw AuthorizationException;
+    :Log Security Event to audit_logs;
+    :Return HTTP 403 Forbidden;
+    stop
+  endif
+
+  if (Business rule violated [e.g. invalid status progression]?) then (yes)
+    :Throw BusinessRuleException;
+    :Return HTTP 409 Conflict with explanation banner;
+    stop
+  endif
+
+  if (Unexpected 500 Server Error?) then (yes)
+    :Catch in Global Exception Handler;
+    :Insert error context & stack trace into error_logs;
+    :Return clean HTTP 500 page (redacted secrets);
+    stop
+  endif
+}
+
+:Return HTTP 200/201 Success;
+stop
+
+@enduml

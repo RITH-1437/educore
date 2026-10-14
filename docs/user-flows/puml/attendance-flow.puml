@@ -1,0 +1,31 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Attendance Recording & Status Lifecycle
+
+start
+:Lecturer opens section attendance;
+:Select session date & lesson topic;
+
+if (Session already exists?) then (no)
+  :Create new attendance_sessions record (status: active);
+endif
+
+:Display enrolled students roster;
+:Lecturer marks each student (Present, Absent, Late, Excused);
+
+if (Are all enrolled students marked?) then (no)
+  :Highlight missing rows;
+  stop
+else (yes)
+  :Submit attendance records;
+  :DB upsert into attendance_records;
+  :Recalculate student attendance percentage;
+  :Return 200 OK (Attendance Recorded);
+  stop
+endif
+
+@enduml

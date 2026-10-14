@@ -1,0 +1,85 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Multi-Layer RBAC and Policy Enforcement Pipeline
+
+start
+:Client triggers HTTP Request;
+
+partition "Frontend Layer (UX only)" {
+  if (Link visible in useNavigation?) then (no)
+    :User typed URL manually in address bar;
+  else (yes)
+    :User clicked authorized link;
+  endif
+}
+
+partition "HTTP Middleware Pipeline" {
+  if (auth middleware passes?) then (no)
+    :Abort 401 Unauthorized / Redirect to /login;
+    stop
+  else (yes)
+    if (Route has 'role:...' middleware?) then (yes)
+      if (User has specified role?) then (no)
+        :Log Audit Event: authz.role_denied;
+        :Abort 403 Forbidden;
+        stop
+      else (yes)
+      endif
+    endif
+  endif
+}
+
+partition "Controller & Policy Layer" {
+  :Controller calls $this->authorize('action', $model);
+  
+  if (User is Super Admin?) then (yes)
+    :Grant Access;
+  elseif (User is University Admin?) then (yes)
+    if (Action is Super Admin exclusive [e.g. system logs]?) then (yes)
+      :Abort 403 Forbidden;
+      stop
+    else (no)
+      :Grant Access;
+    endif
+  elseif (User is Department Admin?) then (yes)
+    if (Resource department matches user.department_id?) then (yes)
+      if (Action is university-wide exclusive [e.g. billing, document types]?) then (yes)
+        :Abort 403 Forbidden;
+        stop
+      else (no)
+        :Grant Access;
+      endif
+    else (no)
+      :Log Audit Event: authz.cross_dept_violation;
+      :Abort 403 Forbidden;
+      stop
+    endif
+  elseif (User is Lecturer?) then (yes)
+    if (Lecturer teaches this specific section/course?) then (yes)
+      :Grant Access;
+    else (no)
+      :Abort 403 Forbidden;
+      stop
+    endif
+  elseif (User is Student?) then (yes)
+    if (Resource belongs directly to authenticated student?) then (yes)
+      :Grant Access;
+    else (no)
+      :Abort 403 Forbidden;
+      stop
+    endif
+  else
+    :Abort 403 Forbidden;
+    stop
+  endif
+}
+
+:Execute Business Logic & DB Transactions;
+:Return HTTP 200/201 Response;
+stop
+
+@enduml

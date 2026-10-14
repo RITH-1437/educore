@@ -14,9 +14,12 @@ use App\Models\Semester;
 use App\Models\Student;
 use App\Models\StudentProgram;
 use App\Models\User;
+use App\Services\InvoiceService;
+use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class TuitionInvoiceTest extends TestCase
@@ -219,6 +222,39 @@ class TuitionInvoiceTest extends TestCase
         $this->assertSame(0, $res['generated_count']);
         $this->assertSame(2, $res['skipped_count']);
         $this->assertSame(2, Invoice::query()->where('semester_id', $this->semester->id)->count());
+    }
+
+    /**
+     * Audit FIN-01 (`docs/audits/data-integrity-findings.md`): two runs at once
+     * could both pass the "already invoiced" check and bill a student twice.
+     * The check is repeated under a lock on the student's row; here the other
+     * run's invoice appears just as the lock is taken.
+     */
+    public function test_a_tuition_invoice_created_meanwhile_is_not_billed_twice(): void
+    {
+        $competing = false;
+        DB::listen(function (QueryExecuted $query) use (&$competing) {
+            if (! $competing && str_contains($query->sql, 'from "students"') && str_contains($query->sql, 'for update')) {
+                $competing = true;
+                app(InvoiceService::class)->create([
+                    'student_id' => $query->bindings[0], 'semester_id' => $this->semester->id, 'title' => 'Tuition (other run)', 'currency' => 'USD',
+                    'issued_date' => '2026-10-05', 'due_date' => '2026-11-01', 'discount' => 0,
+                    'items' => [['description' => 'Tuition', 'quantity' => 1, 'unit_price' => 60, 'fee_category' => 'tuition']],
+                ]);
+            }
+        });
+
+        $res = $this->actingAs($this->superAdmin)
+            ->postJson('/api/invoices/generate-tuition', ['semester_id' => $this->semester->id])
+            ->assertOk()
+            ->json('data');
+
+        $this->assertSame(1, $res['generated_count']);
+        $this->assertSame(1, $res['skipped_count']);
+        $this->assertSame('A tuition invoice for this semester was created meanwhile.', $res['skipped'][0]['reason']);
+        foreach ([$this->studentA, $this->studentB] as $student) {
+            $this->assertSame(1, Invoice::query()->where('student_id', $student->id)->where('semester_id', $this->semester->id)->count());
+        }
     }
 
     public function test_rate_override_takes_precedence_over_program_rate(): void

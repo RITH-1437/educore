@@ -1,0 +1,53 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Super Admin Administrative Workflows
+
+actor "Super Admin" as Admin
+participant "Vue 3 SPA\n(Inertia.js)" as UI
+participant "Super Admin Controller\n& Policies" as Backend
+database "PostgreSQL DB" as DB
+database "Redis & Logs" as Logs
+
+== Dashboard & Navigation ==
+Admin -> UI : Sign in with credentials & TOTP
+UI -> Backend : Authenticate session
+Backend --> UI : Return role 'super-admin'
+UI -> UI : Redirect to /admin/dashboard
+UI -> Backend : GET /admin/dashboard
+Backend -> DB : Query system metrics (users, active terms, errors)
+Backend --> UI : Render admin dashboard cards
+
+== User Provisioning & 2FA Emergency Reset ==
+Admin -> UI : Navigate to /users & click 'New User'
+Admin -> UI : Submit form (Name, Email, Role, Department)
+UI -> Backend : POST /users
+Backend -> Backend : Validate email uniqueness & password policy
+Backend -> DB : Insert user & assign role in model_has_roles
+Backend -> Logs : Record Audit Event (users.created)
+Backend --> UI : Return success toast
+
+alt Emergency Two-Factor Reset
+  Admin -> UI : Click 'Reset Two-Factor' on locked user
+  UI -> Backend : DELETE /users/{id}/two-factor
+  Backend -> DB : Nullify two_factor_secret, recovery codes, confirmed_at
+  Backend -> Logs : Record Audit Event (users.2fa_reset)
+  Backend --> UI : Confirm 2FA reset toast
+end
+
+== Academic Structure & Global System Audit ==
+Admin -> UI : Navigate to /academic-years
+Admin -> UI : Create Academic Year & Semesters
+UI -> Backend : POST /academic-years
+Backend -> DB : Persist Academic Year & Semesters
+Backend --> UI : Render updated academic calendar
+
+Admin -> UI : Navigate to /audit-logs
+UI -> Backend : GET /audit-logs (with filter query params)
+Backend -> DB : Fetch paginated audit trail
+Backend --> UI : Display audit logs with diff viewer & CSV export
+
+@enduml

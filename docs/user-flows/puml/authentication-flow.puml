@@ -1,0 +1,67 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Authentication & Two-Factor Verification Lifecycle
+
+start
+:User navigates to /login;
+:Enter identifier (email/username) and password;
+:Submit POST /login;
+
+if (Rate limit exceeded?) then (yes)
+  :Return HTTP 429 Too Many Requests;
+  :Display lockout timer to user;
+  stop
+else (no)
+  if (Form inputs valid?) then (no)
+    :Display HTTP 422 Validation Errors;
+    stop
+  else (yes)
+    if (Credentials match database?) then (no)
+      :Increment throttle attempt counter;
+      :Show 'These credentials do not match our records';
+      stop
+    else (yes)
+      if (User account active? [users.is_active]) then (no)
+        :Reject authentication;
+        :Display 'Your account has been deactivated';
+        stop
+      else (yes)
+        if (User has Two-Factor enabled?) then (yes)
+          :Store pending_user_id in session;
+          :Redirect to /two-factor-challenge;
+          :User inputs 6-digit TOTP code or recovery code;
+          if (Code valid?) then (no)
+            :Display 'Invalid two-factor authentication code';
+            stop
+          else (yes)
+            :Clear pending state;
+          endif
+        endif
+        :Establish authenticated session;
+        :Regenerate session ID & CSRF token;
+        :Log Audit Event: auth.login;
+        
+        switch (User Primary Role)
+        case ( super-admin )
+          :Redirect to /admin/dashboard;
+        case ( university-admin )
+          :Redirect to /dashboard (University scope);
+        case ( department-admin )
+          :Redirect to /dashboard (Department scope);
+        case ( lecturer )
+          :Redirect to /dashboard (Lecturer workspace);
+        case ( student )
+          :Redirect to /dashboard (Student portal);
+        endswitch
+        :Load role layout and navigation;
+        stop
+      endif
+    endif
+  endif
+endif
+
+@enduml

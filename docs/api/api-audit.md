@@ -653,6 +653,11 @@ emails, student numbers or other personal records (asserted by
 `LandingStatsTest`), per-course results only from five approved grades, and no
 writes on the request. See `docs/37_Landing-Page-Redesign-Report.md`.
 
+**2026-10-14 (report 54):** no route, prop or response change. The landing page
+no longer displays `stats.courses` (per-course results); the service still
+returns it. The root Blade view now carries Open Graph / Twitter meta tags
+keyed with `data-inertia`, so the page's `<Head>` replaces them.
+
 ## Department-Only Structure (2026-10-05)
 
 Removed the faculty level. Faculty REST endpoints (`/api/faculties`, `/api/faculties/{faculty}`,

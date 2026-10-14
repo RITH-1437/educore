@@ -1,0 +1,34 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Assignment Lifecycle & Submission Flow
+
+actor "Lecturer" as Lecturer
+actor "Student" as Student
+participant "EduCore Web App" as App
+database "PostgreSQL DB" as DB
+storage "MinIO Storage" as MinIO
+
+== Assignment Publishing ==
+Lecturer -> App : Create Assignment (Title, Due Date, Max Points)
+App -> DB : Insert assignments row
+App -> Student : Send new assignment notification
+
+== Student Submission ==
+Student -> App : Open /my-assignments & select task
+Student -> App : Upload solution file (PDF/ZIP)
+App -> App : Check deadline (set is_late if past due)
+App -> MinIO : Store submission file in S3
+App -> DB : Insert assignment_submissions record
+App --> Student : Confirm submission receipt
+
+== Grading & Feedback ==
+Lecturer -> App : Download student submissions
+Lecturer -> App : Enter numeric score & qualitative feedback
+App -> DB : Update assignment_submissions (score, feedback, graded_at)
+App -> Student : Notify student of grade availability
+
+@enduml

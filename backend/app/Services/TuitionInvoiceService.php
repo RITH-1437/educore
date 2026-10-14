@@ -8,6 +8,7 @@ use App\Models\Semester;
 use App\Models\Student;
 use App\Models\User;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Generates semester tuition invoices based on enrolled course credits.
@@ -99,11 +100,7 @@ class TuitionInvoiceService
             $student = $studentEnrollments->first()->student;
 
             // Check if active tuition invoice already exists for this semester
-            $existingInvoice = Invoice::query()
-                ->where('student_id', $student->id)
-                ->where('semester_id', $semester->id)
-                ->where('status', '!=', Invoice::STATUS_CANCELLED)
-                ->first();
+            $existingInvoice = $this->activeTuitionInvoice($student->id, $semester->id);
 
             if ($existingInvoice) {
                 $skipped[] = [
@@ -158,10 +155,11 @@ class TuitionInvoiceService
             }
 
             $invoiceTotal = array_sum(array_column($items, 'amount'));
-            $totalAmount += $invoiceTotal;
-            $totalCreditsOverall += $studentCredits;
 
             if ($dryRun) {
+                $totalAmount += $invoiceTotal;
+                $totalCreditsOverall += $studentCredits;
+
                 $generatedInvoices[] = [
                     'student_id' => $student->id,
                     'student_number' => $student->student_number,
@@ -174,18 +172,42 @@ class TuitionInvoiceService
                     'item_count' => count($items),
                 ];
             } else {
-                $invoice = $this->invoiceService->create([
-                    'student_id' => $student->id,
-                    'semester_id' => $semester->id,
-                    'title' => "Tuition - {$semester->name}",
-                    'description' => "Tuition billing for {$semester->name} ({$studentCredits} credits enrolled)",
-                    'currency' => 'USD',
-                    'issued_date' => today()->toDateString(),
-                    'due_date' => $dueDateString,
-                    'discount' => 0,
-                    'notes' => 'Automatically generated tuition invoice from semester enrollments.',
-                    'items' => $items,
-                ]);
+                // Two runs at once (a double submit) could both pass the check
+                // above: lock the student's row and check again (audit FIN-01).
+                $invoice = DB::transaction(function () use ($student, $semester, $studentCredits, $dueDateString, $items) {
+                    Student::query()->whereKey($student->id)->lockForUpdate()->first();
+
+                    if ($this->activeTuitionInvoice($student->id, $semester->id) !== null) {
+                        return null;
+                    }
+
+                    return $this->invoiceService->create([
+                        'student_id' => $student->id,
+                        'semester_id' => $semester->id,
+                        'title' => "Tuition - {$semester->name}",
+                        'description' => "Tuition billing for {$semester->name} ({$studentCredits} credits enrolled)",
+                        'currency' => 'USD',
+                        'issued_date' => today()->toDateString(),
+                        'due_date' => $dueDateString,
+                        'discount' => 0,
+                        'notes' => 'Automatically generated tuition invoice from semester enrollments.',
+                        'items' => $items,
+                    ]);
+                });
+
+                if ($invoice === null) {
+                    $skipped[] = [
+                        'student_id' => $student->id,
+                        'student_number' => $student->student_number,
+                        'student_name' => $student->fullName(),
+                        'reason' => 'A tuition invoice for this semester was created meanwhile.',
+                    ];
+
+                    continue;
+                }
+
+                $totalAmount += $invoiceTotal;
+                $totalCreditsOverall += $studentCredits;
 
                 if ($actor) {
                     $this->audit->record('invoice.tuition_generated', $invoice, after: [
@@ -227,5 +249,15 @@ class TuitionInvoiceService
             'invoices' => $generatedInvoices,
             'skipped' => $skipped,
         ];
+    }
+
+    /** The student's tuition invoice for the semester that is not cancelled, if any. */
+    private function activeTuitionInvoice(int $studentId, int $semesterId): ?Invoice
+    {
+        return Invoice::query()
+            ->where('student_id', $studentId)
+            ->where('semester_id', $semesterId)
+            ->where('status', '!=', Invoice::STATUS_CANCELLED)
+            ->first();
     }
 }

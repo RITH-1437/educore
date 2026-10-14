@@ -1,0 +1,48 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — System Architecture & Container Topology
+
+package "Public Network" {
+  actor "User (Browser)" as User
+  actor "Public Document Verifier" as Verifier
+}
+
+package "EduCore Host Infrastructure (Docker Network)" {
+  node "Nginx Reverse Proxy (:80 / :443)" as Nginx
+  
+  package "Application Tier" {
+    component "Laravel 12 App (PHP-FPM)" as App
+    component "Queue Worker (Async Jobs)" as Worker
+    component "Task Scheduler" as Cron
+  }
+  
+  package "Data & Storage Services" {
+    database "PostgreSQL 16\n(49 Relational Tables)" as DB
+    database "Redis 7\n(Sessions, Cache & Queue)" as Redis
+    storage "MinIO Object Storage\n(Documents, Avatars, Files)" as MinIO
+  }
+}
+
+package "External Gateways" {
+  cloud "SMTP Mail Server" as Mail
+  cloud "Telegram Bot API" as Telegram
+}
+
+User --> Nginx : HTTP / Inertia.js
+Verifier --> Nginx : HTTPS QR Verification Token
+Nginx --> App : FastCGI
+App --> DB : SQL Queries (Eloquent)
+App --> Redis : Cache / Job Dispatch
+App --> MinIO : S3 API (File Storage)
+
+Worker --> Redis : Pop Jobs
+Worker --> DB : Update Record Status
+Worker --> Mail : Send Notification Emails
+Worker --> Telegram : Dispatch Bot Alerts
+Cron --> App : Trigger Scheduled Tasks
+
+@enduml

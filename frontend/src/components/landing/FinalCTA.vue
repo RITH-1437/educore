@@ -10,17 +10,17 @@ const base = 'inline-flex min-h-12 w-full items-center justify-center gap-2 roun
 </script>
 
 <template>
-  <section id="cta" class="relative scroll-mt-24 overflow-hidden bg-primary-dark py-24 dark:border-t dark:border-dark-border" aria-labelledby="cta-title">
+  <section id="cta" class="relative scroll-mt-20 overflow-hidden bg-primary-dark py-24 dark:border-t dark:border-dark-border" aria-labelledby="cta-title">
     <div class="landing-glow pointer-events-none absolute inset-0" aria-hidden="true" />
 
     <Reveal class="relative mx-auto max-w-3xl px-4 text-center sm:px-6">
-      <h2 id="cta-title" class="font-display text-h1 text-balance text-dark-ink sm:text-display">Ready to explore EduCore?</h2>
+      <h2 id="cta-title" class="font-display text-h1 text-balance text-dark-ink sm:text-display">Discover a More Connected University Experience</h2>
       <p class="mx-auto mt-4 max-w-xl text-body text-dark-muted">
-        See how academic management, student services, administration and communication work together on one platform.
+        Explore how EduCore brings academic management, student services, and administrative workflows into one connected platform.
       </p>
       <div class="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-        <button type="button" :class="[base, 'bg-dark-primary text-dark-bg hover:bg-dark-ink']" @click="scrollToId('platform')">
-          Explore Platform
+        <button type="button" :class="[base, 'bg-dark-primary text-dark-bg hover:bg-dark-ink']" @click="scrollToId('showcase')">
+          Explore EduCore
           <ArrowRight class="h-4 w-4" aria-hidden="true" />
         </button>
         <Link href="/login" :class="[base, 'border border-dark-border text-dark-ink hover:bg-dark-surface-2']">Sign In</Link>

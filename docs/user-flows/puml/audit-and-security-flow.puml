@@ -1,0 +1,29 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Audit Log Capture & Review Pipeline
+
+actor "User / Admin" as Actor
+participant "EduCore Controller" as App
+participant "AuditService" as Audit
+database "PostgreSQL DB" as DB
+actor "Super Admin" as SuperAdmin
+
+== Automated Event Capture ==
+Actor -> App : Performs privileged mutation (e.g. Update Grade, Delete User)
+App -> DB : Perform DB mutation
+App -> Audit : Log auditable event
+Audit -> DB : Insert audit_logs row (event, old_values, new_values, ip, user_agent)
+App --> Actor : Confirm mutation
+
+== Audit Log Review ==
+SuperAdmin -> App : Open /audit-logs with filters
+App -> DB : Fetch filtered audit records
+App --> SuperAdmin : Render paginated table with JSON payload inspector
+SuperAdmin -> App : Click 'Export CSV'
+App --> SuperAdmin : Stream audit_logs.csv
+
+@enduml

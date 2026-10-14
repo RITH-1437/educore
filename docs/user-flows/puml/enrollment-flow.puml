@@ -1,0 +1,51 @@
+@startuml
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontName sans-serif
+skinparam roundCorner 10
+
+title EduCore — Course Registration & Enrollment Decision Pipeline
+
+start
+:Initiate Enrollment Request (Student or Admin);
+
+if (Is student self-registering AND registration closed?) then (yes)
+  :Abort 422 Unprocessable Entity (Registration window closed);
+  stop
+endif
+
+if (Student already enrolled in this course for semester?) then (yes)
+  :Abort 422 (Duplicate course enrollment);
+  stop
+endif
+
+if (Has student passed all required prerequisites?) then (no)
+  :Abort 422 (Missing prerequisite course);
+  stop
+endif
+
+if (Section enrolled_count >= capacity?) then (yes)
+  :Abort 422 (Section is full);
+  stop
+endif
+
+if (Section weekly schedule clashes with already enrolled section?) then (yes)
+  :Abort 422 (Schedule overlap detected);
+  stop
+endif
+
+if (Total semester credits exceed program maximum?) then (yes)
+  :Abort 422 (Exceeds maximum credit overload);
+  stop
+endif
+
+partition "Database Transaction" {
+  :Insert record into enrollments (status: 'enrolled');
+  :Increment section enrolled_count;
+  :Record Audit Event (enrollment.created);
+}
+
+:Return HTTP 200 OK (Registration Confirmed);
+stop
+
+@enduml

@@ -533,36 +533,40 @@ Rules:
 
 ---
 
-## 15. Landing Page (2026-10-05)
+## 15. Landing Page (2026-10-05, revised 2026-10-14)
 
 The public page at `/` (`pages/Landing.vue`, components in `components/landing/`). Light **and**
 dark: the navbar's Sun/Moon toggle uses `useTheme` (the dashboard's `educore_theme` preference, falling
-back to the system); report: `docs/37_Landing-Page-Redesign-Report.md`.
+back to the system); reports: `docs/37_Landing-Page-Redesign-Report.md`,
+`docs/54_Landing-Page-Product-Showcase-Report.md` (current structure).
 
 | Rule | Value |
 |---|---|
-| Section order | Hero · What is EduCore? · Problem → Solution · Modules · Academic ecosystem · Student journey · See EduCore in action · Documents · Communication · Analytics · Security · Technology · Project story · Final CTA · Footer (the ASCII "EDUCORE" wordmark only) |
+| Section order | Hero · Platform (principles + roles) · Problem → Solution · How it works: academic structure · Student journey · Modules · See EduCore in action · Documents & verification · Communication · Analytics · Security & access · Technology · About the project · Final CTA · Footer |
 | Surfaces | Alternate `surface` / `background` (dark: `dark-surface` / `dark-bg`); `primary-dark` (navy) for "See EduCore in action", the final CTA and the footer, with a `dark-border` edge in dark mode. The sample QR mark stays dark-on-light in both themes |
-| Type | Section titles `font-display` + `h2`; hero and final CTA `h1` → `display` from `sm` |
-| Navbar | Transparent over the hero, solid `surface` + `border-default` + `shadow-sm` once scrolled (glass greyed over navy sections); live-text wordmark (navy "Edu", primary "Core"); links Home · Platform · Modules · Technology · About; the active link is the last linked section above 30% of the viewport, so sections between links keep the previous link lit |
-| Buttons | `BaseButton` on light sections; on navy, the dark-mode button tokens (`dark-primary` fill, `dark-bg` text) so the hover never matches the background |
-| Tabs | `LandingTabs` — underline tabs (§8) with arrow / Home / End keys |
-| Live data | Figures come from the `stats` prop (`LandingStatsService`): aggregates only — no names or personal records; per-course results only from five approved grades. An empty database shows dashes and `EmptyState`s, never invented numbers. The Admin preview uses the live University Admin figures; Lecturer / Student previews show placeholders (personal dashboards). Illustrative content that is not data (sample transcript, example notifications) is captioned as such |
+| Type | Section titles `font-display` + `h2` (block titles `h3`, never skipping a level); hero `h1` → `display` from `sm` (back to `h1` between `lg` and `xl`, where the hero is two columns); final CTA `h2` styled `h1` → `display` |
+| Navbar | Transparent over the hero, solid `surface` + `border-default` + `shadow-sm` once scrolled; live-text wordmark (navy "Edu", primary "Core"); links Home · Platform · How It Works · Modules · Technology · About (page order) plus the catalog page link, shown from `xl`; below `xl` a menu button opens a panel (Esc closes and returns focus, page scroll locked, `main` and the footer `inert`). Sign In + Explore Platform from `md`. The active link is the last linked section above 30% of the viewport |
+| Buttons | `BaseButton` on light sections; on navy, the dark-mode button tokens (`dark-primary` fill, `dark-bg` text) so the hover never matches the background. Hero CTAs stack full-width on phones |
+| Tabs | `LandingTabs` — underline tabs (§8) with arrow / Home / End keys and an optional `short` label for phones; `vertical` (module explorer): a side list with a `primary` left indicator and a `hint` line from `lg` (Up / Down keys, `aria-orientation="vertical"`), a 2 × 2 grid of bordered buttons below `lg`, so no tab is scrolled out of sight |
+| Data | Three kinds, always labelled where shown. **Live** — the `stats` prop (`LandingStatsService`), aggregates only: the Admin preview and the analytics panel, badged `Live data` (success). **Demo** — fixed, fictional content in the hero preview and the Lecturer / Student previews, badged `Demo data` (warning) and captioned "not a real student's record". **Sample** — the analytics panel switches *as a whole* to fixed sample figures when the installation has nothing to chart, badged `Sample data` (warning) with a sentence saying they do not describe a real university; live and sample numbers are never mixed. Illustrations (sample transcript for "Example University" with a SAMPLE watermark, sample announcement) are captioned. No personal names on sample records |
+| Accuracy | Every module described is `[Implemented]` (docs/3 §9); what is not part of EduCore yet is listed in the module explorer with a `muted` badge (`Future`, `Not yet`, `Out of scope`). Security copy describes controls, never certification |
+| Images | Team portraits are 192 px JPEG crops shown at 96 px (`loading="lazy"`); logos via `/assets/logo/` |
 
 Motion (all in `style.css`, deceleration easing, covered by the global reduced-motion rule):
 
 | Utility / component | Use |
 |---|---|
 | `Reveal` + `useInView` | Scroll reveal, once per element; content shows at once under reduced motion |
-| `.edu-fade-up` (staggered delays) · `.edu-slide-in` | Hero copy and CTAs · hero terminal |
-| `HeroTerminal` · `.edu-blink` | Types the repository's real Makefile commands once (`make up`, `make migrate && make seed`, `make test`, `open`), then the cursor blinks 6 times and rests; full transcript at once under reduced motion; `sr-only` summary |
-| `.edu-drift` | Hero `.app-ambient` backdrop, 18s × 2 cycles, then rests |
-| Scroll-linked line | Academic ecosystem: the line fills with scroll and each level lights when reached |
-| Problem → Solution morph | Chips move from scattered to aligned and swap problem → solution text; a Before / With EduCore toggle replays it |
-| `.edu-travel` · `.edu-scan` | Communication signal dot (3 runs) · QR scan line (3 runs), started when in view |
-| `.edu-marquee` | Technology rows. The **only infinite animation** in the product: it pauses on hover / keyboard focus and with a visible Pause button (WCAG 2.2.2), and becomes a static wrapped list under reduced motion |
+| `.edu-fade-up` (staggered delays) · `.edu-slide-in` | Hero copy and CTAs · hero product preview |
+| `.edu-pop` | The hero preview's two notice cards, once, 0.5 s, after the preview lands |
+| `.landing-grid-fade` | Mask that fades the hero grid towards the bottom |
+| Structure diagram | Nodes and connectors appear level by level (220 ms steps) when the diagram enters the view; the static diagram reads the same without it |
+| Timeline / roles hub / channel fan-out | The journey line grows once, the role connectors grow once, the three channel cards arrive in turn (250 ms steps) — each when first in view |
+| `.edu-scan` | QR scan line (3 runs), then the sample verification result answers |
 | `.landing-glow` | One low-alpha `primary` radial glow on navy sections; the only decorative gradient besides `.app-ambient` |
-| `.landing-banner` | Footer ASCII wordmark: monospace, `clamp(0.375rem, 2.4vw, 1.5rem)`, line-height 1, solid `primary` (no opacity — overlapping glyphs would show seams); `aria-hidden` with an `sr-only` text |
+
+No infinite animation remains on the landing page (the technology marquee, the hero terminal, the
+drifting backdrop and the ASCII footer banner were removed in report 54).
 
 Technology logos are the documented exception to Lucide-only icons (`BRAND-GUIDELINES.md` §10).
 

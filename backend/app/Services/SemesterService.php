@@ -95,6 +95,7 @@ class SemesterService
             'end_date' => [$semester->end_date, $academicYear->start_date, $academicYear->end_date],
             'enrollment_start' => [$semester->enrollment_start, $academicYear->start_date, $academicYear->end_date],
             'enrollment_end' => [$semester->enrollment_end, $academicYear->start_date, $academicYear->end_date],
+            'withdrawal_deadline' => [$semester->withdrawal_deadline, $academicYear->start_date, $academicYear->end_date],
             'exam_start' => [$semester->exam_start, $academicYear->start_date, $academicYear->end_date],
             'exam_end' => [$semester->exam_end, $academicYear->start_date, $academicYear->end_date],
         ];

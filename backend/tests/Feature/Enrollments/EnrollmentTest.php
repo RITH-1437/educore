@@ -260,6 +260,45 @@ class EnrollmentTest extends TestCase
             ->assertOk()->assertJsonPath('data.status', 'withdrawn');
     }
 
+    /**
+     * BD-01: Drop/withdrawal window rules.
+     * Dropping after enrollment_end becomes a withdrawal (W).
+     * Dropping past the effective withdrawal deadline or in a completed semester is refused (409).
+     */
+    public function test_course_drop_rules_with_withdrawal_deadline_and_semester_completion(): void
+    {
+        Carbon::setTestNow('2026-03-10');
+
+        $enrollment = $this->enroll($this->student);
+        $semester = $enrollment->semester;
+
+        // 1. Semester completed: cannot drop
+        $semester->update(['status' => 'completed']);
+        $this->actingAs($this->student->user)->deleteJson("/api/enrollments/{$enrollment->id}")
+            ->assertStatus(409)
+            ->assertJsonPath('message', fn (string $msg) => str_contains($msg, 'The semester is completed'));
+
+        // Reset to open
+        $semester->update(['status' => 'open']);
+
+        // 2. Past withdrawal deadline: refused (409)
+        $semester->update(['withdrawal_deadline' => '2026-03-05']);
+        $this->actingAs($this->student->user)->deleteJson("/api/enrollments/{$enrollment->id}")
+            ->assertStatus(409)
+            ->assertJsonPath('message', fn (string $msg) => str_contains($msg, 'withdrawal deadline'));
+
+        // 3. Before withdrawal deadline, but past enrollment_end: recorded as withdrawn (W) even without attendance/grades
+        $semester->update([
+            'enrollment_end' => '2026-03-01',
+            'withdrawal_deadline' => '2026-03-20',
+        ]);
+        $this->actingAs($this->student->user)->deleteJson("/api/enrollments/{$enrollment->id}")
+            ->assertOk()
+            ->assertJsonPath('data.status', 'withdrawn');
+
+        Carbon::setTestNow();
+    }
+
     public function test_complete_is_admin_only_and_requires_confirmed(): void
     {
         $enrollment = $this->enroll($this->student);

@@ -25,6 +25,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $enrollment_end
  * @property Carbon|null $exam_start
  * @property Carbon|null $exam_end
+ * @property Carbon|null $withdrawal_deadline
  * @property SemesterStatus $status
  */
 class Semester extends Model
@@ -41,6 +42,7 @@ class Semester extends Model
         'end_date',
         'enrollment_start',
         'enrollment_end',
+        'withdrawal_deadline',
         'exam_start',
         'exam_end',
         'status',
@@ -64,6 +66,7 @@ class Semester extends Model
             'end_date' => 'date',
             'enrollment_start' => 'date',
             'enrollment_end' => 'date',
+            'withdrawal_deadline' => 'date',
             'exam_start' => 'date',
             'exam_end' => 'date',
             'status' => SemesterStatus::class,
@@ -85,5 +88,13 @@ class Semester extends Model
     {
         return ($this->start_date === null || $day->gte($this->start_date))
             && ($this->end_date === null || $day->lte($this->end_date));
+    }
+
+    /**
+     * Effective withdrawal deadline: explicit `withdrawal_deadline`, or fallback to `end_date`.
+     */
+    public function effectiveWithdrawalDeadline(): ?Carbon
+    {
+        return $this->withdrawal_deadline ?? $this->end_date;
     }
 }

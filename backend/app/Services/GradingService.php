@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\SemesterStatus;
 use App\Exceptions\BusinessRuleException;
 use App\Models\Assignment;
 use App\Models\AttendanceSession;
@@ -279,6 +280,11 @@ class GradingService
     public function compute(Section $section, User $by, array $remarks = []): int
     {
         return DB::transaction(function () use ($section, $by, $remarks) {
+            $section->loadMissing('offering.semester');
+            if ($section->offering->semester->status === SemesterStatus::Completed) {
+                throw new BusinessRuleException('The semester is completed; draft grades can no longer be computed.');
+            }
+
             $saved = 0;
 
             foreach ($this->sheet($section)['rows'] as $row) {
@@ -308,6 +314,11 @@ class GradingService
     public function submit(Section $section, User $by): int
     {
         return DB::transaction(function () use ($section, $by) {
+            $section->loadMissing('offering.semester');
+            if ($section->offering->semester->status === SemesterStatus::Completed) {
+                throw new BusinessRuleException('The semester is completed; grades can no longer be submitted for approval.');
+            }
+
             $grades = $this->gradesOf($section)->lockForUpdate()->get();
             $students = $section->enrollments()->whereIn('status', self::GRADED_STATUSES)->count();
             $drafts = $grades->where('status', Grade::STATUS_DRAFT);
@@ -378,7 +389,12 @@ class GradingService
             $before = $grades->mapWithKeys(fn (Grade $grade) => [$grade->id => $grade->status])->all();
 
             foreach ($grades as $grade) {
+                $wasApproved = $grade->status === Grade::STATUS_APPROVED;
                 $grade->update(['status' => Grade::STATUS_DRAFT, 'submitted_at' => null, 'approved_at' => null]);
+
+                if ($wasApproved && $grade->enrollment && $grade->enrollment->status === Enrollment::STATUS_COMPLETED) {
+                    $grade->enrollment->update(['status' => Enrollment::STATUS_CONFIRMED]);
+                }
             }
 
             $this->audit->record('grades.returned', $section, ['statuses' => $before], ['grades' => $this->gradeSnapshot($grades)]);

@@ -16,6 +16,7 @@ use App\Models\StudentProgram;
 use App\Models\User;
 use App\Services\InvoiceService;
 use Illuminate\Database\Events\QueryExecuted;
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Artisan;
@@ -318,6 +319,43 @@ class TuitionInvoiceTest extends TestCase
             ->assertSessionHas('success');
 
         $this->assertSame(2, Invoice::query()->where('semester_id', $this->semester->id)->count());
+    }
+
+    /**
+     * Verifies that the partial unique index `uq_invoices_student_semester_active`
+     * prevents duplicate active tuition invoices at the database level.
+     */
+    public function test_database_unique_index_prevents_duplicate_active_tuition_invoices(): void
+    {
+        // First invoice created successfully
+        app(InvoiceService::class)->create([
+            'student_id' => $this->studentA->id,
+            'semester_id' => $this->semester->id,
+            'title' => 'Tuition First Run',
+            'currency' => 'USD',
+            'issued_date' => '2026-10-05',
+            'due_date' => '2026-11-01',
+            'discount' => 0,
+            'items' => [['description' => 'Tuition', 'quantity' => 1, 'unit_price' => 60, 'fee_category' => 'tuition']],
+        ]);
+
+        // Attempting direct raw DB insert of a second active invoice for same student & semester violates uq_invoices_student_semester_active
+        $this->expectException(QueryException::class);
+        DB::table('invoices')->insert([
+            'student_id' => $this->studentA->id,
+            'semester_id' => $this->semester->id,
+            'invoice_number' => 'INV-COLLISION-001',
+            'title' => 'Tuition Duplicate Direct Insert',
+            'currency' => 'USD',
+            'subtotal' => 60.00,
+            'discount' => 0.00,
+            'total' => 60.00,
+            'amount_paid' => 0.00,
+            'status' => 'pending',
+            'due_date' => '2026-11-01',
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     private function userWithRole(string $slug): User

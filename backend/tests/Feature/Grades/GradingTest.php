@@ -166,8 +166,9 @@ class GradingTest extends TestCase
         $this->assertEquals(4.0, GpaRecord::query()->where('student_id', $this->alice->id)->where('cumulative', true)->value('gpa_value'));
         $this->assertEquals(0, GpaRecord::query()->where('student_id', $this->bob->id)->where('cumulative', false)->value('earned_credits'));
 
-        // Return to draft: GPA rows disappear (no approved grades left).
+        // Return to draft: GPA rows disappear (no approved grades left) and enrollments demote to confirmed.
         $this->actingAs($this->admin)->postJson("{$base}/return")->assertOk()->assertJsonPath('counts.draft', 2);
+        $this->assertSame(Enrollment::STATUS_CONFIRMED, $this->aliceEnrollment->refresh()->status);
         $this->assertSame(0, GpaRecord::query()->where('student_id', $this->alice->id)->count());
         $this->actingAs($this->admin)->postJson("{$base}/return")->assertStatus(409);
     }
@@ -387,6 +388,27 @@ class GradingTest extends TestCase
         ])->assertRedirect()->assertSessionHas('success');
         $this->actingAs($this->admin)->get("/courses/{$this->section->offering->course_id}/edit")->assertOk()
             ->assertInertia(fn (Assert $page) => $page->where('gradingConfig.assignment_weight', 30)->where('gradingConfig.is_default', false));
+    }
+
+    /**
+     * BD-02: Grading in completed semesters is frozen.
+     * Lecturers cannot compute drafts or submit grades once the semester status is 'completed'.
+     */
+    public function test_grading_is_frozen_in_completed_semester(): void
+    {
+        $base = "/api/sections/{$this->section->id}/grades";
+        $semester = $this->section->offering->semester;
+        $semester->update(['status' => 'completed']);
+
+        // Computing drafts is refused with 409
+        $this->actingAs($this->lecturer->user)->postJson($base)
+            ->assertStatus(409)
+            ->assertJsonPath('message', fn (string $msg) => str_contains($msg, 'The semester is completed'));
+
+        // Submitting grades is refused with 409
+        $this->actingAs($this->lecturer->user)->postJson("{$base}/submit")
+            ->assertStatus(409)
+            ->assertJsonPath('message', fn (string $msg) => str_contains($msg, 'The semester is completed'));
     }
 
     // ------------------------------------------------------------- helpers ---

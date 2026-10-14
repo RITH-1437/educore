@@ -156,6 +156,20 @@ class EnrollmentService
                 throw new BusinessRuleException("A {$enrollment->status} enrollment cannot be dropped.");
             }
 
+            $semester = $enrollment->semester ?? $enrollment->section->offering->semester;
+            $today = AcademicClock::today();
+
+            if ($semester !== null) {
+                if ($semester->status === SemesterStatus::Completed) {
+                    throw new BusinessRuleException('The semester is completed; courses can no longer be dropped.');
+                }
+
+                $deadline = $semester->effectiveWithdrawalDeadline();
+                if ($deadline !== null && $today->gt($deadline)) {
+                    throw new BusinessRuleException("The withdrawal deadline for {$semester->name} has passed ({$deadline->toDateString()}).");
+                }
+            }
+
             // Locked: grade submission locks the same rows (GradingService::submit).
             $grade = Grade::query()->where('enrollment_id', $enrollment->getKey())->lockForUpdate()->first();
 
@@ -166,9 +180,12 @@ class EnrollmentService
             $hasRecords = DB::table('attendance_records')->where('enrollment_id', $enrollment->getKey())->exists()
                 || DB::table('grades')->where('enrollment_id', $enrollment->getKey())->exists();
 
+            // Dropping after the regular enrollment/registration window closes counts as a course withdrawal
+            $pastRegistrationPeriod = $semester?->enrollment_end !== null && $today->gt($semester->enrollment_end);
+
             $before = $enrollment->getAttributes();
             $enrollment->update([
-                'status' => $hasRecords ? Enrollment::STATUS_WITHDRAWN : Enrollment::STATUS_DROPPED,
+                'status' => ($hasRecords || $pastRegistrationPeriod) ? Enrollment::STATUS_WITHDRAWN : Enrollment::STATUS_DROPPED,
                 'dropped_at' => now(),
             ]);
             $this->audit->changes("enrollment.{$enrollment->status}", $enrollment, $before);

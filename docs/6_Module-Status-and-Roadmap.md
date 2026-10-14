@@ -22,6 +22,8 @@
 | — | API contract & OpenAPI audit | `[Implemented]` |
 | — | System Error Logs (9.25, extra operational diagnostics; 90-day retention in report 50) | `[Implemented]` |
 | — | Project audit and hardening (report 50) | `[Implemented]` |
+| — | Post-login workflow, RBAC and integrity audit (report 55) | `[Implemented]` |
+| — | Academic business rules & database integrity hardening (report 56) | `[Implemented]` |
 | 9.2 | Student Management | `[Implemented]` |
 | 9.3 | Lecturer Management | `[Implemented]` (section assignment `[Planned]` with 9.8) |
 | 9.4 | Faculty & Department Management | `[Implemented]` |

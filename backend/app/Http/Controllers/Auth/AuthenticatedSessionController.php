@@ -31,9 +31,18 @@ class AuthenticatedSessionController extends Controller
 
     public function create(): Response
     {
+        $demoPersonas = app()->environment(['local', 'testing']) ? [
+            ['role' => 'Super Admin', 'email' => 'admin@educore.kh', 'password' => 'admin@123', 'desc' => 'System administrator'],
+            ['role' => 'University Admin', 'email' => 'university@educore.kh', 'password' => 'university@123', 'desc' => 'Registrar & Academic Affairs'],
+            ['role' => 'Department Admin', 'email' => 'department@educore.kh', 'password' => 'department@123', 'desc' => 'CSE Department Head'],
+            ['role' => 'Lecturer', 'email' => 'lecturer@educore.kh', 'password' => 'lecturer@123', 'desc' => 'Dr. Sophea Chan (CSE)'],
+            ['role' => 'Student', 'email' => 'student@educore.kh', 'password' => 'student@123', 'desc' => 'Sokha Meng (BSCS)'],
+        ] : [];
+
         return Inertia::render('Auth/Login', [
             'canResetPassword' => true,
             'status' => session('status'),
+            'demoPersonas' => $demoPersonas,
         ]);
     }
 

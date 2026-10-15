@@ -129,3 +129,22 @@ Artisan::command('tuition:generate {semester : ID or code of the semester} {--du
 
     return 0;
 })->purpose('Generate automatic tuition invoices for enrolled students in a semester');
+
+// Demo personas (report 57): seed interconnected demonstration data across all 5 roles.
+Artisan::command('demo:seed', function () {
+    $this->info('Seeding realistic demo personas and interconnected academic records...');
+    $this->call('db:seed', ['--class' => 'Database\Seeders\DemoPersonaSeeder']);
+    $this->info('Demo persona seeding complete. Seeded personas:');
+    $this->table(
+        ['Role', 'Email', 'Password', 'Profile / Department'],
+        [
+            ['Super Admin', 'admin@educore.kh', 'admin@123', 'System Super Admin'],
+            ['University Admin', 'university@educore.kh', 'university@123', 'Academic Affairs Registrar'],
+            ['Department Admin', 'department@educore.kh', 'department@123', 'Dr. Dara Lim (CSE Head)'],
+            ['Lecturer', 'lecturer@educore.kh', 'lecturer@123', 'Dr. Sophea Chan (CSE) - 2 active sections'],
+            ['Student', 'student@educore.kh', 'student@123', 'Sokha Meng (BSCS Year 1) - enrolled & invoiced'],
+        ]
+    );
+
+    return 0;
+})->purpose('Seed interconnected demo personas and records for all 5 roles');

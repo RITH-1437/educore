@@ -45,6 +45,9 @@ migrate-fresh: ## Drop all tables and re-migrate
 seed: ## Seed the database
 	$(EXEC_BACKEND) php artisan db:seed
 
+demo-seed: ## Seed realistic demo personas and interconnected records
+	$(EXEC_BACKEND) php artisan demo:seed
+
 shell: ## Open a shell in the backend container
 	$(EXEC_BACKEND) bash
 

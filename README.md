@@ -110,12 +110,13 @@ five roles, **one account per role** — `admin@educore.kh` / `admin@123`
 (Super Admin), `university@educore.kh` / `university@123`, `department@educore.kh`
 / `department@123` (Department Admin), `lecturer@educore.kh` / `lecturer@123` and
 `student@educore.kh` / `student@123` (development only — change them) — plus
-the default grading scale and the requestable document types. No demo people or records are seeded: universities, departments,
-programs, courses, students, lecturers and everything else are entered through
-the application, and every screen shows what is in the database. The public
-landing page's live figures do too; where its previews would otherwise be empty
-it shows clearly labelled demo or sample data instead (report 54). See
-[`docs/database/seed-strategy.md`](docs/database/seed-strategy.md).
+the default grading scale and the requestable document types.
+
+To populate a complete, realistic multi-role demonstration environment with ITC, CSE, degree programs, active sections, enrollments, grades, attendance, invoices, document requests, and internships across all 5 roles:
+```sh
+make demo-seed    # or: php artisan demo:seed
+```
+This enables the interactive 1-click Quick Login role switcher on the login page in local development environments. See [`docs/57_Demo-Persona-Seeding-and-Quick-Login-Report.md`](docs/57_Demo-Persona-Seeding-and-Quick-Login-Report.md).
 
 Optional: `MAX_SEMESTER_CREDITS` (default `24`) sets the per-semester credit
 limit used by enrollment, and `MATERIAL_MAX_KB` (default `20480`) the largest

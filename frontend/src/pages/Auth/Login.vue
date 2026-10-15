@@ -5,13 +5,19 @@ import { CircleAlert, CircleCheck, Eye, EyeOff, Lock, Mail, ShieldCheck } from '
 import BaseButton from '../../components/BaseButton.vue'
 import BaseInput from '../../components/BaseInput.vue'
 
-defineProps({
+const props = defineProps({
   canResetPassword: { type: Boolean, default: false },
   status: { type: String, default: null },
+  demoPersonas: { type: Array, default: () => [] },
 })
 
 const form = useForm({ email: '', password: '', remember: false })
 const showPassword = ref(false)
+
+const selectPersona = (persona) => {
+  form.email = persona.email
+  form.password = persona.password
+}
 
 const itcLogoUrl = '/assets/images/schools/itc-logo-card.png'
 const backgroundUrl = '/assets/images/schools/itc-win2-bg.jpg'
@@ -121,6 +127,23 @@ export default { layout: GuestLayout }
             <span>Protected with CSRF tokens and login rate limiting.</span>
           </p>
         </form>
+
+        <!-- Quick Demo Login Personas (Available in Local Development) -->
+        <div v-if="demoPersonas && demoPersonas.length > 0" class="mt-6 border-t border-white/10 pt-5">
+          <p class="text-center text-xs font-semibold uppercase tracking-wider text-white/60">Demo Quick Login</p>
+          <div class="mt-3 grid grid-cols-1 gap-1.5 sm:grid-cols-2">
+            <button
+              v-for="persona in demoPersonas"
+              :key="persona.role"
+              type="button"
+              class="group flex flex-col items-start rounded-lg border border-white/10 bg-white/5 p-2 text-left transition-all hover:border-primary/50 hover:bg-white/10"
+              @click="selectPersona(persona)"
+            >
+              <span class="text-xs font-medium text-white group-hover:text-dark-primary">{{ persona.role }}</span>
+              <span class="truncate text-[11px] text-white/60">{{ persona.desc }}</span>
+            </button>
+          </div>
+        </div>
       </div>
 
       <p class="mt-6 flex items-center justify-center gap-1 text-center text-small text-white/80">

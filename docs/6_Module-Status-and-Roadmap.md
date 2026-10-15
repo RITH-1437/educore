@@ -775,3 +775,24 @@ A module is not done until its report exists and its tests pass — never label
   terminal, the technology marquee and the ASCII footer (no infinite
   animation remains). No API, schema or dashboard change. Report:
   `docs/54_Landing-Page-Product-Showcase-Report.md`.
+- `[Done]` Post-login workflow, business logic & RBAC audit (2026-10-15): comprehensive
+  inspection across all 5 roles from authentication through dashboard rendering,
+  navigation, and scoped operations. Addressed empty department admin scoping bug
+  by linking accounts to active departments, resolved missing relationships,
+  and audited post-login destination routing. Report:
+  `docs/55_Post-Login-Workflow-and-RBAC-Audit-Report.md`.
+- `[Done]` Academic business rules & database integrity hardening (2026-10-15):
+  enforced institutional withdrawal deadline windows (`withdrawal_deadline` on
+  `semesters`), frozen grading submissions in completed semesters, automatic
+  status demotion from `completed` to `confirmed` on grade return-to-draft, and
+  added database-level partial unique index `uq_invoices_student_semester_active`
+  to guarantee invoice uniqueness. Report:
+  `docs/56_Academic-Business-Rules-and-Database-Integrity-Hardening-Report.md`.
+- `[Done]` Demo persona seeding & quick-login role switcher (2026-10-15):
+  repeatable, idempotent multi-role demo persona seeder (`DemoPersonaSeeder`,
+  `php artisan demo:seed`) populating complete Cambodian academic data for ITC,
+  CSE, and EEE across all 5 roles. Added 1-click Quick Login persona buttons on
+  `/login` for local and testing environments to streamline role switching and
+  manual evaluation. Report:
+  `docs/57_Demo-Persona-Seeding-and-Quick-Login-Report.md`.
+

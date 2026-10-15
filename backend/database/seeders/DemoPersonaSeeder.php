@@ -53,6 +53,11 @@ class DemoPersonaSeeder extends Seeder
 {
     public function run(): void
     {
+        $this->call([
+            GradingScaleSeeder::class,
+            DocumentTypeSeeder::class,
+        ]);
+
         $roles = RoleModel::query()->pluck('id', 'slug');
 
         // 1. Institution

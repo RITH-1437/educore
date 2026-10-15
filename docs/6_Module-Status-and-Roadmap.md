@@ -795,4 +795,11 @@ A module is not done until its report exists and its tests pass — never label
   `/login` for local and testing environments to streamline role switching and
   manual evaluation. Report:
   `docs/57_Demo-Persona-Seeding-and-Quick-Login-Report.md`.
+- `[Done]` End-to-end persona navigation & submodule audit (2026-10-15):
+  exhaustive post-login verification of all 5 roles across 86 route endpoints;
+  pinned server-side policy denials (`403 Forbidden`) on unauthorized destinations;
+  audited multi-step submodules: timetable room conflict blocking, MinIO PDF
+  generation with public QR verification token, partial-to-paid invoice payment
+  transitions, attendance recording, and coursework/grading pipelines.
+  Report: `docs/58_End-to-End-Persona-Navigation-and-Submodule-Audit-Report.md`.
 
